@@ -10,12 +10,13 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export var JUMP: String = "jump"
 @export var CROUCH: String = "crouch"
 @export var SPRINT: String = "sprint"
-@export var PAUSE: String = "pause"
 
 @export_group("Customizable player stats")
 @export var walk_back_speed: float = 1.5
 @export var walk_speed: float = 2.5
 @export var sprint_speed: float = 5.0
+#Is Crouch a hold or toggle input?
+@export var crouch_toggle: bool = true
 @export var crouch_speed: float = 1.5
 @export var jump_height: float = 1.0
 @export var acceleration: float = 10.0
@@ -65,7 +66,7 @@ var movement_strength: float
 
 # Player state values that are set by applying state
 var climb_speed: float = fast_climb_speed
-var is_crouched: bool = false
+var is_crouching: bool = false
 var can_climb: bool
 var can_climb_timer: Timer
 var is_affected_by_gravity: bool = true
@@ -76,71 +77,23 @@ var can_move: bool = true
 var can_jump: bool = true
 var can_crouch: bool = true
 var can_sprint: bool = true
-var can_pause: bool = true
 
 
 func _ready() -> void:
 	default_view_bobbing_amount = view_bobbing_amount
-	check_controls()
-	if can_pause:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-func check_controls() -> void:
-	if !InputMap.has_action(MOVE_FORWARD):
-		push_error("No control mapped for 'move_forward', using default...")
-		_add_input_map_event(MOVE_FORWARD, KEY_W)
-	if !InputMap.has_action(MOVE_BACK):
-		push_error("No control mapped for 'move_back', using default...")
-		_add_input_map_event(MOVE_BACK, KEY_S)
-	if !InputMap.has_action(MOVE_LEFT):
-		push_error("No control mapped for 'move_left', using default...")
-		_add_input_map_event(MOVE_LEFT, KEY_A)
-	if !InputMap.has_action(MOVE_RIGHT):
-		push_error("No control mapped for 'move_right', using default...")
-		_add_input_map_event(MOVE_RIGHT, KEY_D)
-	if !InputMap.has_action(JUMP):
-		push_error("No control mapped for 'jump', using default...")
-		_add_input_map_event(JUMP, KEY_SPACE)
-	if !InputMap.has_action(CROUCH):
-		push_error("No control mapped for 'crouch', using default...")
-		_add_input_map_event(CROUCH, KEY_C)
-	if !InputMap.has_action(SPRINT):
-		push_error("No control mapped for 'sprint', using default...")
-		_add_input_map_event(SPRINT, KEY_SHIFT)
-	if !InputMap.has_action(PAUSE):
-		push_error("No control mapped for 'pause', using default...")
-		_add_input_map_event(PAUSE, KEY_ESCAPE)
-	
-	# Checking if controller inputs are mapped
-	if InputMap.action_get_events(CROUCH).any(func(event): return event is InputEventJoypadButton) == false:
-		_add_joy_button_event(CROUCH, JOY_BUTTON_B)
-	if InputMap.action_get_events(JUMP).any(func(event): return event is InputEventJoypadButton) == false:
-		_add_joy_button_event(JUMP, JOY_BUTTON_A)
-	if InputMap.action_get_events(SPRINT).any(func(event): return event is InputEventJoypadButton) == false:
-		_add_joy_button_event(SPRINT, JOY_BUTTON_LEFT_STICK)
-	if InputMap.action_get_events(PAUSE).any(func(event): return event is InputEventJoypadButton) == false:
-		_add_joy_button_event(PAUSE, JOY_BUTTON_START)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		mouse_motion = -event.relative * 0.001
-	
-	if can_pause:
-		if event.is_action_pressed(PAUSE):
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 
 
 func _physics_process(delta: float) -> void:
 	if can_move:
 		if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_FORWARD, MOVE_BACK):
 			input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_FORWARD, MOVE_BACK)
-		elif Input.get_connected_joypads().size() != 0:
-			input_direction = Vector2(Input.get_joy_axis(0, JOY_AXIS_LEFT_X), Input.get_joy_axis(0, JOY_AXIS_LEFT_Y))
-			var x = Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
-			var y = Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
-			movement_strength = Vector2(x, y).length()
 		else:
 			input_direction = Vector2.ZERO
 	
@@ -161,9 +114,6 @@ func _process(_delta: float):
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
-	
-	if Input.get_connected_joypads().size() != 0:
-		_handle_joy_camera_motion()
 
 
 func _handle_camera_motion() -> void:
@@ -247,9 +197,9 @@ func set_climb_speed(is_small_ledge) -> void:
 
 
 func toggle_crouch() -> void:
-	is_crouched = !is_crouched
+	is_crouching = !is_crouching
 	
-	if is_crouched:
+	if is_crouching:
 		animation_player.play("crouch")
 	else:
 		animation_player.play_backwards("crouch")
@@ -285,16 +235,3 @@ func _on_state_machine_transitioned(state: PlayerState) -> void:
 		view_bobbing_player.play("view_bobbing", .5, view_bobbing_amount, false)
 	else:
 		view_bobbing_player.play("RESET", .5)
-
-
-func _add_input_map_event(action_name: String, keycode: int) -> void:
-	var event = InputEventKey.new()
-	event.keycode = keycode
-	InputMap.add_action(action_name)
-	InputMap.action_add_event(action_name, event)
-
-
-func _add_joy_button_event(action_name: String, joy_button: JoyButton = 100) -> void:
-	var joy_button_event = InputEventJoypadButton.new()
-	joy_button_event.button_index = joy_button
-	InputMap.action_add_event(action_name, joy_button_event)

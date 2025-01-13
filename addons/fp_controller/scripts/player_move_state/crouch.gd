@@ -5,16 +5,24 @@ var move_speed: float
 
 
 func enter(_msg := {}) -> void:
-	if !player.is_crouched:
+	if !player.is_crouching:
 		player.toggle_crouch()
 
 
 func handle_input(event: InputEvent) -> void:
 	
-	if event.is_action_pressed(player.CROUCH) && player.is_on_floor() && player.allow_crouch:
+	if event.is_action_pressed(player.CROUCH):
+		if(player.is_on_floor() && player.allow_crouch):	
+			player.toggle_crouch()
+			state_machine.transition_to(state_machine.movement_state[state_machine.IDLE])
+
+	#only move us out of crouching if it's on a toggle
+	if(event.is_action_released(player.CROUCH) && player.crouch_toggle && player.is_crouching):
 		player.toggle_crouch()
 		state_machine.transition_to(state_machine.movement_state[state_machine.IDLE])
-	
+
+
+
 	if event.is_action_pressed(player.SPRINT) && player.allow_sprint:
 		player.toggle_crouch()
 		state_machine.transition_to(state_machine.movement_state[state_machine.SPRINT])
