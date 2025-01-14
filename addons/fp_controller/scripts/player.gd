@@ -14,6 +14,8 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export_group("Customizable player stats")
 @export var walk_back_speed: float = 1.5
 @export var walk_speed: float = 2.5
+#Is Sprint a hold or toggle input?
+@export var sprint_toggle: bool = true
 @export var sprint_speed: float = 5.0
 #Is Crouch a hold or toggle input?
 @export var crouch_toggle: bool = true

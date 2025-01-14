@@ -17,7 +17,7 @@ func handle_input(event: InputEvent) -> void:
 			state_machine.transition_to(state_machine.movement_state[state_machine.IDLE])
 
 	#only move us out of crouching if it's on a toggle
-	if(event.is_action_released(player.CROUCH) && player.crouch_toggle && player.is_crouching):
+	elif(event.is_action_released(player.CROUCH) && player.crouch_toggle && player.is_crouching):
 		player.toggle_crouch()
 		state_machine.transition_to(state_machine.movement_state[state_machine.IDLE])
 

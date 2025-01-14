@@ -5,7 +5,7 @@ var move_speed: float
 
 
 func enter(_msg := {}) -> void:
-	if player.is_crouched:
+	if player.is_crouching:
 		player.toggle_crouch()
 	
 	player.view_bobbing_amount *= 1.3
@@ -27,6 +27,8 @@ func handle_input(event: InputEvent) -> void:
 		state_machine.transition_to(state_machine.movement_state[state_machine.SLIDE])
 	
 	if Input.is_action_just_pressed(player.SPRINT):
+		state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
+	elif event.is_action_released(player.SPRINT) && !player.sprint_toggle:
 		state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
 
 
