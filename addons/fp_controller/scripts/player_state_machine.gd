@@ -39,7 +39,6 @@ func _ready() -> void:
 		child.state_machine = self
 		state.enter()
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	state.handle_input(event)
 
@@ -63,4 +62,5 @@ func transition_to(target_state_name: String, msg: Dictionary = {}) -> void:
 	state.exit()
 	state = get_node(target_state_name)
 	state.enter(msg)
+	Logging.info("Player state transitioned to %s" % target_state_name)
 	emit_signal("transitioned", state)

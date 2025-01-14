@@ -15,6 +15,10 @@ run/main_scene="res://example_scene/sandbox.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Logging="*res://Scripts/Tools/Logging.gd"
+
 [dotnet]
 
 project/assembly_name="Barrel"
