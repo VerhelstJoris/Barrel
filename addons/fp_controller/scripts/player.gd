@@ -36,6 +36,9 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export var allow_sprint: bool = true
 @export var allow_climb: bool = true
 
+@export_group("Components")
+@onready var sub_viewport: SubViewport = %SubViewport
+
 # Player 'character' components
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var state_machine: PlayerStateMachine = %StateMachine
@@ -84,6 +87,7 @@ var can_sprint: bool = true
 func _ready() -> void:
 	default_view_bobbing_amount = view_bobbing_amount
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	sub_viewport.size = DisplayServer.window_get_size()
 
 
 func _unhandled_input(event: InputEvent) -> void:

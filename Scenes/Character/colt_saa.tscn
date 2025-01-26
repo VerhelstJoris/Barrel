@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqwe2x4syjh78"]
+
+[ext_resource type="PackedScene" uid="uid://dh36ac4q24lfq" path="res://Meshes/Weapons/Colt_SAA.glb" id="1_s4d01"]
+
+[node name="Colt_SAA" instance=ExtResource("1_s4d01")]
+
+[node name="GunFrame" parent="Colt_Saa" index="0"]
+layers = 2
+
+[node name="Barrel" parent="Colt_Saa/Skeleton3D" index="0"]
+layers = 2
+
+[node name="Base Pin" parent="Colt_Saa/Skeleton3D" index="1"]
+layers = 2
+
+[node name="Cylinder" parent="Colt_Saa/Skeleton3D" index="2"]
+layers = 2
+
+[node name="Ejector_Rod" parent="Colt_Saa/Skeleton3D" index="3"]
+layers = 2
+
+[node name="Hammer" parent="Colt_Saa/Skeleton3D" index="4"]
+layers = 2
+
+[node name="Handles" parent="Colt_Saa/Skeleton3D" index="5"]
+layers = 2
+
+[node name="Hatch" parent="Colt_Saa/Skeleton3D" index="6"]
+layers = 2
+
+[node name="Spring" parent="Colt_Saa/Skeleton3D" index="7"]
+layers = 2
+
+[node name="Trigger" parent="Colt_Saa/Skeleton3D" index="8"]
+layers = 2

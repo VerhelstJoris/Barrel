@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
+[ext_resource type="PackedScene" uid="uid://cuv0njnxhja2u" path="res://Scenes/Character/Character_Arms.tscn" id="3_k2j5p"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/idle.gd" id="3_xe000"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/jump.gd" id="4_1lr3q"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/walk.gd" id="5_bwgwe"]
@@ -12,7 +13,6 @@
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/climb.gd" id="10_o7gmx"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/grab.gd" id="11_gkc45"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/slide.gd" id="12_bqyfq"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_ui.gd" id="12_d7xi0"]
 
 [sub_resource type="Animation" id="Animation_5udu4"]
 length = 0.001
@@ -315,9 +315,26 @@ unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.5, 2.08165e-12)
 
 [node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
+cull_mask = 1048573
 script = ExtResource("2_1py82")
 
-[node name="ReflectionProbe" type="ReflectionProbe" parent="CameraPivot/SmoothCamera"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="view_model_camera" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_k2j5p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.49659, 0)
 
 [node name="StateMachine" type="Node" parent="."]
 unique_name_in_owner = true
@@ -351,31 +368,4 @@ script = ExtResource("11_gkc45")
 [node name="Slide" type="Node" parent="StateMachine"]
 script = ExtResource("12_bqyfq")
 
-[node name="UserInterface" type="Control" parent="."]
-top_level = true
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(576, 324)
-mouse_filter = 2
-script = ExtResource("12_d7xi0")
-
-[node name="CrosshairContainer" type="CenterContainer" parent="UserInterface"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Crosshair" type="Control" parent="UserInterface/CrosshairContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-
 [connection signal="transitioned" from="StateMachine" to="." method="_on_state_machine_transitioned"]
-[connection signal="draw" from="UserInterface/CrosshairContainer/Crosshair" to="UserInterface" method="_on_crosshair_draw"]
