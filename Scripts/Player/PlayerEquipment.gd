@@ -11,8 +11,9 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @export_group("Equipment Input Details")
 @export var USE_EQUIPMENT: String = "equipment_main_use"
 
+@onready var anim_tree : AnimationTree = %AnimationTree
 
-func _physics_process(delta: float):
+func _physics_process(_delta: float):
 	if Input.is_action_just_pressed(USE_EQUIPMENT):
 		_try_use_equipment()
 

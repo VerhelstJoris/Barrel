@@ -22,6 +22,6 @@ static func error(message):
 static func _format_time():
 	return Time.get_time_string_from_system()
 
-static func _log(level, message, flush = false):
+static func _log(level, message, _flush = false):
 	var log_message = FORMAT % [_format_time(), level, message]
 	print(log_message)

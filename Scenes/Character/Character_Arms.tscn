@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cuv0njnxhja2u"]
+[gd_scene load_steps=2 format=3 uid="uid://cuv0njnxhja2u"]
 
 [ext_resource type="PackedScene" uid="uid://cqwe2x4syjh78" path="res://Scenes/Character/colt_saa.tscn" id="1_12ea1"]
-[ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_vm2fr"]
 
 [node name="view_model_camera" type="Camera3D"]
 cull_mask = 2
@@ -12,8 +11,7 @@ fov = 30.0
 [node name="M_Arms" type="MeshInstance3D" parent="Arms_Rig"]
 layers = 2
 
-[node name="Revolver" type="Node3D" parent="Arms_Rig"]
-script = ExtResource("1_vm2fr")
+[node name="Revolver_Pivot" type="Node3D" parent="Arms_Rig"]
+transform = Transform3D(0.990821, 0, 0.13518, 0, 1, 0, -0.13518, 0, 0.990821, 1.06427, -0.810424, -3.03019)
 
-[node name="Colt_SAA2" parent="Arms_Rig/Revolver" instance=ExtResource("1_12ea1")]
-transform = Transform3D(0.997077, -0.0117834, 0.0754908, 0.0156943, 0.998554, -0.0514235, -0.0747756, 0.052458, 0.99582, 1.43829, -1.03269, -4.00687)
+[node name="Colt_SAA" parent="Arms_Rig/Revolver_Pivot" instance=ExtResource("1_12ea1")]

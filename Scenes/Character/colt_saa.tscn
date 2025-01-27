@@ -1,11 +1,120 @@
-[gd_scene load_steps=2 format=3 uid="uid://cqwe2x4syjh78"]
+[gd_scene load_steps=13 format=3 uid="uid://cqwe2x4syjh78"]
 
-[ext_resource type="PackedScene" uid="uid://dh36ac4q24lfq" path="res://Meshes/Weapons/Colt_SAA.glb" id="1_s4d01"]
+[ext_resource type="PackedScene" uid="uid://lq60dbypv64v" path="res://Meshes/Weapons/Colt_SAA.glb" id="1_s4d01"]
+[ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_uhjk8"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bu6i5"]
+animation = &"Colt_SAA_Fire"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xk8ep"]
+animation = &"Colt_SAA_PrepHammer"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_cfo2b"]
+advance_mode = 2
+advance_condition = &"try_fire"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_plvcr"]
+switch_mode = 2
+advance_mode = 2
+advance_condition = &"try_pull_hammer"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_lr3fg"]
+switch_mode = 2
+advance_mode = 2
+advance_condition = &"try_fire"
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_oatjf"]
+states/Colt_SAA_Fire/node = SubResource("AnimationNodeAnimation_bu6i5")
+states/Colt_SAA_Fire/position = Vector2(400, 93)
+states/Colt_SAA_PrepHammer/node = SubResource("AnimationNodeAnimation_xk8ep")
+states/Colt_SAA_PrepHammer/position = Vector2(631, 93)
+states/Start/position = Vector2(102, 96)
+transitions = ["Start", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_cfo2b"), "Colt_SAA_Fire", "Colt_SAA_PrepHammer", SubResource("AnimationNodeStateMachineTransition_plvcr"), "Colt_SAA_PrepHammer", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_lr3fg")]
+graph_offset = Vector2(-154, -64)
+
+[sub_resource type="Animation" id="Animation_67aut"]
+resource_name = "Colt_SAA_Fire"
+length = 0.24
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Colt_Saa/Skeleton3D/Hammer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0.1, 1, -0.156, 0, 0, 0.988, 0.166667, 1, 0, 0, 0, 1)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Colt_Saa/Skeleton3D/Trigger")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.1, 1, 0.259, 0, 0, 0.966, 0.233333, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_wt6d4"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Colt_Saa/Skeleton3D/Hammer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Colt_Saa/Skeleton3D/Trigger")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Colt_Saa/Skeleton3D/Cylinder:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 1.04722, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_g56bw"]
+resource_name = "Colt_SAA_PrepHammer"
+length = 0.3
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Colt_Saa/Skeleton3D/Hammer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.3, 1, -0.156, 0, 0, 0.988)
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Colt_Saa/Skeleton3D/Cylinder:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 1.04722, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4esm2"]
+_data = {
+"Colt_SAA_Fire": SubResource("Animation_67aut"),
+"Colt_SAA_PrepHammer": SubResource("Animation_g56bw"),
+"RESET": SubResource("Animation_wt6d4")
+}
 
 [node name="Colt_SAA" instance=ExtResource("1_s4d01")]
+script = ExtResource("2_uhjk8")
 
 [node name="GunFrame" parent="Colt_Saa" index="0"]
 layers = 2
+skeleton = NodePath("../Skeleton3D")
 
 [node name="Barrel" parent="Colt_Saa/Skeleton3D" index="0"]
 layers = 2
@@ -14,6 +123,7 @@ layers = 2
 layers = 2
 
 [node name="Cylinder" parent="Colt_Saa/Skeleton3D" index="2"]
+transform = Transform3D(0.499978, 0, 0.866038, 0, 1, 0, -0.866038, 0, 0.499978, 0, 0, 0)
 layers = 2
 
 [node name="Ejector_Rod" parent="Colt_Saa/Skeleton3D" index="3"]
@@ -32,4 +142,18 @@ layers = 2
 layers = 2
 
 [node name="Trigger" parent="Colt_Saa/Skeleton3D" index="8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="1"]
+unique_name_in_owner = true
+root_node = NodePath("%AnimationTree/..")
+tree_root = SubResource("AnimationNodeStateMachine_oatjf")
+anim_player = NodePath("../AnimationPlayer")
+parameters/conditions/try_fire = false
+parameters/conditions/try_pull_hammer = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="2"]
+libraries = {
+"": SubResource("AnimationLibrary_4esm2")
+}
