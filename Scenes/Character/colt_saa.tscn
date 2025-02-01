@@ -1,47 +1,227 @@
-[gd_scene load_steps=9 format=3 uid="uid://cqwe2x4syjh78"]
+[gd_scene load_steps=38 format=3 uid="uid://cqwe2x4syjh78"]
 
 [ext_resource type="PackedScene" uid="uid://lq60dbypv64v" path="res://Meshes/Weapons/Colt_SAA.glb" id="1_s4d01"]
 [ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_uhjk8"]
+[ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="3_mrnln"]
+[ext_resource type="Animation" uid="uid://r0v03ykb6b4x" path="res://Animations/Player/Colt_SAA/Colt_SAA_Eject_Shell.res" id="3_ox6y1"]
+[ext_resource type="Animation" uid="uid://blg8mrxonxjxu" path="res://Animations/Player/Colt_SAA/Colt_SAA_Rotate_Cylinder.res" id="5_a84ex"]
+[ext_resource type="Animation" uid="uid://gxuv1l6y751q" path="res://Animations/Player/Colt_SAA/Colt_SAA_Fire.res" id="6_eqgwj"]
+[ext_resource type="Animation" uid="uid://bud16lla5dso8" path="res://Animations/Player/Colt_SAA/Colt_SAA_Cock_Hammer.res" id="7_us2rg"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ftoll"]
+animation = &"Open_Hatch"
+play_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_46xuu"]
+animation = &"Cock Hammer"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bu6i5"]
 animation = &"Fire"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xk8ep"]
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_hvsdc"]
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_cfo2b"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6npbq"]
+animation = &"Ejector Shell"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j1yw4"]
+animation = &"Open_Hatch"
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_d718a"]
+
+[sub_resource type="AnimationNodeTimeSeek" id="AnimationNodeTimeSeek_kkjig"]
+
+[sub_resource type="GDScript" id="GDScript_pnxvl"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_3rwtx"]
+graph_offset = Vector2(-6.10352e-05, -3.05176e-05)
+nodes/Add2/node = SubResource("AnimationNodeAdd2_hvsdc")
+nodes/Add2/position = Vector2(960, 320)
+"nodes/Eject Shell/node" = SubResource("AnimationNodeAnimation_6npbq")
+"nodes/Eject Shell/position" = Vector2(580, 420)
+nodes/Hold_Open_Pose/node = SubResource("AnimationNodeAnimation_j1yw4")
+nodes/Hold_Open_Pose/position = Vector2(60, 180)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_d718a")
+nodes/TimeScale/position = Vector2(280, 180)
+nodes/TimeSeek/node = SubResource("AnimationNodeTimeSeek_kkjig")
+nodes/TimeSeek/position = Vector2(520, 160)
+nodes/output/position = Vector2(1160, 240)
+node_connections = [&"Add2", 0, &"TimeSeek", &"Add2", 1, &"Eject Shell", &"TimeScale", 0, &"Hold_Open_Pose", &"TimeSeek", 0, &"TimeScale", &"output", 0, &"Add2"]
+script = SubResource("GDScript_pnxvl")
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uo2s1"]
+animation = &"Ejector Shell"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_iawmt"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_peyc1"]
+animation = &"Open_Hatch"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0shln"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6kob1"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_kd25l"]
+advance_mode = 2
+advance_condition = &"exit_reload"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_in5im"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wnc3p"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dnfrm"]
+advance_mode = 2
+advance_condition = &"enter_reload"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wvpd8"]
 advance_mode = 2
 advance_condition = &"try_fire"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_plvcr"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_5x86p"]
 switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_uaclk"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_j3djk"]
+advance_mode = 0
+advance_condition = &"eject_shell"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wxx6f"]
+advance_mode = 2
+advance_condition = &"eject_shell"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_xqbm3"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_tigyd"]
 advance_mode = 2
 advance_condition = &"try_pull_hammer"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_lr3fg"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_srb26"]
 switch_mode = 2
 advance_mode = 2
-advance_condition = &"try_fire"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_oatjf"]
+states/Close_Hatch/node = SubResource("AnimationNodeAnimation_ftoll")
+states/Close_Hatch/position = Vector2(628, 223)
+"states/Cock Hammer/node" = SubResource("AnimationNodeAnimation_46xuu")
+"states/Cock Hammer/position" = Vector2(716, -7)
 states/Colt_SAA_Fire/node = SubResource("AnimationNodeAnimation_bu6i5")
-states/Colt_SAA_Fire/position = Vector2(400, 93)
-states/Colt_SAA_PrepHammer/node = SubResource("AnimationNodeAnimation_xk8ep")
-states/Colt_SAA_PrepHammer/position = Vector2(631, 93)
-states/Start/position = Vector2(102, 96)
-transitions = ["Start", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_cfo2b"), "Colt_SAA_Fire", "Colt_SAA_PrepHammer", SubResource("AnimationNodeStateMachineTransition_plvcr"), "Colt_SAA_PrepHammer", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_lr3fg")]
-graph_offset = Vector2(-154, -64)
+states/Colt_SAA_Fire/position = Vector2(398, -27)
+states/Eject_treetest/node = SubResource("AnimationNodeBlendTree_3rwtx")
+states/Eject_treetest/position = Vector2(918, 415)
+"states/Ejector Shell/node" = SubResource("AnimationNodeAnimation_uo2s1")
+"states/Ejector Shell/position" = Vector2(658, 423)
+states/Idle/node = SubResource("AnimationNodeAnimation_iawmt")
+states/Idle/position = Vector2(267, 154)
+states/Open_Hatch/node = SubResource("AnimationNodeAnimation_peyc1")
+states/Open_Hatch/position = Vector2(398, 324)
+states/Reloading_Idle/node = SubResource("AnimationNodeAnimation_0shln")
+states/Reloading_Idle/position = Vector2(658, 324)
+states/Start/position = Vector2(76, 154)
+transitions = ["Open_Hatch", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_6kob1"), "Reloading_Idle", "Close_Hatch", SubResource("AnimationNodeStateMachineTransition_kd25l"), "Ejector Shell", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_in5im"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_wnc3p"), "Idle", "Open_Hatch", SubResource("AnimationNodeStateMachineTransition_dnfrm"), "Idle", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_wvpd8"), "Colt_SAA_Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_5x86p"), "Close_Hatch", "Idle", SubResource("AnimationNodeStateMachineTransition_uaclk"), "Reloading_Idle", "Ejector Shell", SubResource("AnimationNodeStateMachineTransition_j3djk"), "Reloading_Idle", "Eject_treetest", SubResource("AnimationNodeStateMachineTransition_wxx6f"), "Eject_treetest", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_xqbm3"), "Idle", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_tigyd"), "Cock Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_srb26")]
+graph_offset = Vector2(-55, -125)
+
+[sub_resource type="Animation" id="Animation_2jm8p"]
+resource_name = "Open_Hatch"
+length = 1.875
+tracks/0/type = "rotation_3d"
+tracks/0/imported = true
+tracks/0/enabled = true
+tracks/0/path = NodePath("Colt_Saa/Skeleton3D:Root")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.00176421, -0.0114451, 0.00352348, 0.999927, 0.133333, 1, -0.0015842, -0.0102772, 0.00431216, 0.999937, 0.166667, 1, -0.00144018, -0.00934295, 0.00494311, 0.999943, 0.2, 1, -0.00123855, -0.00803492, 0.00582641, 0.99995, 0.233333, 1, -0.000993717, -0.00644659, 0.00689897, 0.999955, 0.266667, 1, -0.000705677, -0.00457797, 0.00816075, 0.999956, 0.3, 1, -0.000374435, -0.00242909, 0.0096117, 0.999951, 0.333333, 1, 0, 0, 0.0112518, 0.999937, 0.366667, 1, -2.70826e-06, -0.000852975, 0.0131462, 0.999913, 0.4, 1, -9.48302e-06, -0.00298671, 0.0152338, 0.99988, 0.433333, 1, -2.03325e-05, -0.00640377, 0.0175157, 0.999826, 0.466667, 1, -3.52669e-05, -0.0111074, 0.0199932, 0.999738, 0.5, 1, -5.42987e-05, -0.0171015, 0.0226672, 0.999597, 0.533333, 1, -7.88265e-05, -0.0248266, 0.0256059, 0.999364, 0.566667, 1, -0.000107502, -0.033858, 0.0287442, 0.999013, 0.6, 1, -0.000140339, -0.0442002, 0.0320823, 0.998507, 0.633333, 1, -0.00017735, -0.0558568, 0.0356198, 0.997803, 0.666667, 1, -0.00021854, -0.0688299, 0.0393559, 0.996852, 0.7, 1, -0.000265324, -0.0835647, 0.0433572, 0.995559, 0.733333, 1, -0.000316277, -0.0996126, 0.047552, 0.993889, 0.766667, 1, -0.000371364, -0.116962, 0.0519355, 0.991777, 0.8, 1, -0.000430532, -0.135597, 0.0565017, 0.989152, 0.833333, 1, -0.000493708, -0.155495, 0.0612431, 0.985936, 0.866667, 1, -0.000562144, -0.177049, 0.066212, 0.981972, 0.9, 1, -0.000634291, -0.199772, 0.0713295, 0.977243, 0.933333, 1, -0.000709967, -0.223606, 0.0765804, 0.971666, 0.966667, 1, -0.000788958, -0.248485, 0.0819478, 0.965163, 1, 1, -0.000871023, -0.274332, 0.0874128, 0.957654, 1.03333, 1, -0.000956917, -0.301384, 0.0929951, 0.948957, 1.06667, 1, -0.000978268, -0.308109, 0.0943786, 0.946658, 1.875, 1, -0.000978268, -0.308109, 0.0943786, 0.946658)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = true
+tracks/1/enabled = true
+tracks/1/path = NodePath("Colt_Saa/Skeleton3D:Cylinder_2")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, -0.0020106, 3.53093e-08, 3.3679e-08, 0.999998)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = true
+tracks/2/enabled = true
+tracks/2/path = NodePath("Colt_Saa/Skeleton3D:Trigger_2")
+tracks/2/interp = 0
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.573195, 0.00388156, 0.00349593, 0.819402)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = true
+tracks/3/enabled = true
+tracks/3/path = NodePath("Colt_Saa/Skeleton3D:Hammer_2")
+tracks/3/interp = 0
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, -0.699175, 1.24227e-07, -4.44438e-08, 0.71495)
+tracks/4/type = "rotation_3d"
+tracks/4/imported = true
+tracks/4/enabled = true
+tracks/4/path = NodePath("Colt_Saa/Skeleton3D:Hatch_2")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = PackedFloat32Array(0, 1, -0.707105, 0.00151341, -0.00151341, 0.707105, 1.53333, 1, -0.707105, 0.00151343, -0.00151338, 0.707105, 1.56667, 1, -0.706337, 0.0329905, 0.0299667, 0.706472, 1.6, 1, -0.701539, 0.0885625, 0.0855588, 0.701911, 1.63333, 1, -0.689365, 0.157404, 0.154451, 0.690033, 1.66667, 1, -0.670132, 0.225663, 0.222792, 0.671091, 1.7, 1, -0.644734, 0.290375, 0.287613, 0.645971, 1.73333, 1, -0.63129, 0.318548, 0.315843, 0.632648, 1.76667, 1, -0.627082, 0.326753, 0.324066, 0.628475, 1.875, 1, -0.627082, 0.326753, 0.324066, 0.628475)
+tracks/5/type = "position_3d"
+tracks/5/imported = true
+tracks/5/enabled = true
+tracks/5/path = NodePath("Colt_Saa/Skeleton3D:Ejector Rod")
+tracks/5/interp = 0
+tracks/5/loop_wrap = true
+tracks/5/keys = PackedFloat32Array(0, 1, -0.141107, 2.09127, -0.735879)
+tracks/6/type = "rotation_3d"
+tracks/6/imported = true
+tracks/6/enabled = true
+tracks/6/path = NodePath("Colt_Saa/Skeleton3D:Spring_Start")
+tracks/6/interp = 0
+tracks/6/loop_wrap = true
+tracks/6/keys = PackedFloat32Array(0, 1, 0.266893, -0.266989, 0.654667, 0.654902)
+tracks/7/type = "scale_3d"
+tracks/7/imported = true
+tracks/7/enabled = true
+tracks/7/path = NodePath("Colt_Saa/Skeleton3D:Spring_Start")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = PackedFloat32Array(0, 1, 1, 0.999999, 1)
+tracks/8/type = "rotation_3d"
+tracks/8/imported = true
+tracks/8/enabled = true
+tracks/8/path = NodePath("Colt_Saa/Skeleton3D:Spring End")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = PackedFloat32Array(0, 1, 0.00934031, 0.00684547, 0.704563, 0.709547, 0.133333, 1, 0.00838723, 0.00614698, 0.704013, 0.710111, 0.166667, 1, 0.00762475, 0.00558817, 0.703571, 0.710562, 0.2, 1, 0.00655727, 0.00480583, 0.702952, 0.711191, 0.233333, 1, 0.00526102, 0.00385583, 0.702197, 0.711953, 0.266667, 1, 0.00373604, 0.0027382, 0.701305, 0.712846, 0.3, 1, 0.00198232, 0.00145293, 0.700276, 0.713869, 0.333333, 1, -6.80605e-08, 6.96096e-08, 0.699106, 0.715018, 0.366667, 1, 0.000604991, 0.000601299, 0.69775, 0.716341, 0.4, 1, 0.00211856, 0.00210529, 0.69625, 0.717794, 0.433333, 1, 0.00454246, 0.00451384, 0.694598, 0.719369, 0.466667, 1, 0.007879, 0.00782926, 0.692784, 0.721059, 0.5, 1, 0.0121309, 0.0120543, 0.690794, 0.72285, 0.533333, 1, 0.0176108, 0.0174994, 0.688551, 0.724763, 0.566667, 1, 0.0240171, 0.0238653, 0.686084, 0.726734, 0.6, 1, 0.0313534, 0.0311551, 0.683366, 0.728737, 0.633333, 1, 0.0396221, 0.0393714, 0.680366, 0.73074, 0.666667, 1, 0.0488246, 0.0485157, 0.677052, 0.73271, 0.7, 1, 0.0592767, 0.0589016, 0.673308, 0.734624, 0.733333, 1, 0.0706603, 0.0702132, 0.669162, 0.73641, 0.766667, 1, 0.0829673, 0.0824423, 0.664569, 0.738016, 0.8, 1, 0.096186, 0.0955773, 0.659483, 0.739389, 0.833333, 1, 0.110301, 0.109603, 0.653857, 0.740468, 0.866667, 1, 0.12559, 0.124795, 0.64754, 0.741178, 0.9, 1, 0.141708, 0.140812, 0.640577, 0.741452, 0.933333, 1, 0.158615, 0.157611, 0.632921, 0.741222, 0.966667, 1, 0.176263, 0.175148, 0.624527, 0.740419, 1, 1, 0.194598, 0.193366, 0.615353, 0.738974, 1.03333, 1, 0.213787, 0.212434, 0.605256, 0.736771, 1.06667, 1, 0.218557, 0.217174, 0.602652, 0.736124, 1.875, 1, 0.218557, 0.217174, 0.602652, 0.736124)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2rj7n"]
+_data = {
+"Cock Hammer": ExtResource("7_us2rg"),
+"Ejector Shell": ExtResource("3_ox6y1"),
+"Fire": ExtResource("6_eqgwj"),
+"Open_Hatch": SubResource("Animation_2jm8p"),
+"Rotate_Cylinder": ExtResource("5_a84ex")
+}
 
 [node name="Revolver_Root" instance=ExtResource("1_s4d01")]
 script = ExtResource("2_uhjk8")
 
 [node name="Skeleton3D" parent="Colt_Saa" index="0"]
+bones/0/rotation = Quaternion(0, 0, 0, 1)
 bones/1/rotation = Quaternion(-0.0020106, 3.39146e-08, 3.39147e-08, 0.999998)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/rotation = Quaternion(0.573195, 0.00388156, 0.00349593, 0.819402)
 bones/2/scale = Vector3(1, 1, 1)
+bones/3/rotation = Quaternion(-0.699175, 1.23763e-07, -4.48143e-08, 0.71495)
 bones/4/rotation = Quaternion(-0.707105, 0.00151341, -0.00151341, 0.707105)
 bones/4/scale = Vector3(1, 1, 1)
-bones/6/scale = Vector3(1, 1, 1)
+bones/5/position = Vector3(-0.141107, 2.09127, -0.735879)
+bones/6/rotation = Quaternion(0.266893, -0.266989, 0.654667, 0.654902)
+bones/6/scale = Vector3(1, 0.999999, 1)
+bones/7/rotation = Quaternion(-6.88394e-08, 6.88394e-08, 0.707107, 0.707107)
 
 [node name="Barrel" parent="Colt_Saa/Skeleton3D" index="0"]
 layers = 2
@@ -50,7 +230,6 @@ layers = 2
 layers = 2
 
 [node name="Cylinder" parent="Colt_Saa/Skeleton3D" index="2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
 
 [node name="Ejector_Rod" parent="Colt_Saa/Skeleton3D" index="3"]
@@ -60,7 +239,6 @@ layers = 2
 layers = 2
 
 [node name="Hammer" parent="Colt_Saa/Skeleton3D" index="5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
 
 [node name="Handles" parent="Colt_Saa/Skeleton3D" index="6"]
@@ -75,10 +253,42 @@ layers = 2
 [node name="Trigger" parent="Colt_Saa/Skeleton3D" index="9"]
 layers = 2
 
+[node name="SkeletonRevolverCylinderModifier" type="SkeletonModifier3D" parent="Colt_Saa/Skeleton3D" index="10"]
+_import_path = NodePath("")
+unique_name_in_owner = true
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+active = true
+influence = 1.0
+script = ExtResource("3_mrnln")
+cylinder_bone = "Cylinder_2"
+
 [node name="AnimationTree" type="AnimationTree" parent="." index="1"]
 unique_name_in_owner = true
 root_node = NodePath("%AnimationTree/..")
 tree_root = SubResource("AnimationNodeStateMachine_oatjf")
 anim_player = NodePath("../AnimationPlayer")
+parameters/conditions/eject_shell = false
+parameters/conditions/enter_reload = false
+parameters/conditions/exit_reload = false
 parameters/conditions/try_fire = false
 parameters/conditions/try_pull_hammer = false
+parameters/Eject_treetest/Add2/add_amount = 1.0
+parameters/Eject_treetest/TimeScale/scale = 0.0
+parameters/Eject_treetest/TimeSeek/seek_request = 1.8
+
+[node name="AnimationPlayer" parent="." index="2"]
+libraries = {
+"": SubResource("AnimationLibrary_2rj7n")
+}
