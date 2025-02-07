@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dfqxuka7iftmi"]
+
+[ext_resource type="ArrayMesh" uid="uid://y3xxvm1v4ym4" path="res://Meshes/Weapons/Colt_Bullet_Bullet.res" id="1_vo7lw"]
+[ext_resource type="ArrayMesh" uid="uid://biv5yw4io2pog" path="res://Meshes/Weapons/Colt_Bullet_Case.res" id="2_lwhkf"]
+
+[node name="ColtBullet" type="Node3D"]
+
+[node name="Bullet" type="MeshInstance3D" parent="."]
+layers = 2
+mesh = ExtResource("1_vo7lw")
+
+[node name="Case" type="MeshInstance3D" parent="Bullet"]
+layers = 2
+mesh = ExtResource("2_lwhkf")
