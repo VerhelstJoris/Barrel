@@ -113,21 +113,35 @@ func _spawn_bullet_for_chamber() -> void:
 		current_bullets[current_chamber] = new_bullet
 		ChamberStates[current_chamber] = E_chamber_state.Ready
 		
+func _reparent_current_bullet_to_cylinder_or_ejector(reparent_to_cylinder: bool) -> void:
+	var from_transform : Node3D
+	var to_transform: Node3D
+	if(reparent_to_cylinder):
+		from_transform = bullet_attachment_point
+		to_transform = cylinder_attachment
+	else:
+		from_transform = cylinder_attachment
+		to_transform = bullet_attachment_point
 	
-func _reparent_new_bullet_to_cylinder() -> void:
 	var old_transform: Transform3D = current_bullets[current_chamber].global_transform
-	bullet_attachment_point.remove_child(current_bullets[current_chamber])
-	cylinder_attachment.add_child(current_bullets[current_chamber])
+	from_transform.remove_child(current_bullets[current_chamber])
+	to_transform.add_child(current_bullets[current_chamber])
 	current_bullets[current_chamber].global_transform = old_transform
 	pass
-	
+
+func _delete_bullet_from_chamber()-> void:
+	current_bullets[current_chamber].queue_free()
+	current_bullets[current_chamber] = null
+	ChamberStates[current_chamber] = E_chamber_state.Empty
+	pass
+
 func _rotate_cylinder_over_time(_chamber_amount : int, time:float, curve: Curve)->void:
 	cylinder_bone_modifier._rotate_over_time(_chamber_amount * 60, time, curve)
 	cylinder_is_rotating=true
 
 func _cylinder_finished_rotating(_rotated: float) -> void:
 	cylinder_is_rotating = false
-	var chambers_rotated: int = _rotated / 60
+	var chambers_rotated: int = (int)(_rotated / 60)
 	current_chamber = (current_chamber + chambers_rotated) % chamber_amount
 	_log_chamber_states()
 
@@ -140,7 +154,7 @@ func _can_insert_round() -> bool:
 
 func _can_try_eject() -> bool:
 	print("Try ejecting shell")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state()
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber] != E_chamber_state.Empty
 
 func _can_enter_reload() -> bool:
 	print("Try enter reload")

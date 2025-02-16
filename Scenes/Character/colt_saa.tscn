@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://cqwe2x4syjh78"]
+[gd_scene load_steps=45 format=3 uid="uid://cqwe2x4syjh78"]
 
 [ext_resource type="PackedScene" uid="uid://lq60dbypv64v" path="res://Meshes/Weapons/Colt_SAA.glb" id="1_s4d01"]
 [ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_uhjk8"]
@@ -46,10 +46,6 @@ advance_mode = 2
 advance_mode = 2
 advance_condition = &"exit_reload"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_in5im"]
-switch_mode = 2
-advance_mode = 2
-
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wnc3p"]
 advance_mode = 2
 
@@ -94,7 +90,8 @@ advance_mode = 2
 advance_condition = &"insert_round"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8kvvh"]
-advance_mode = 0
+switch_mode = 2
+advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wkvfo"]
 switch_mode = 2
@@ -124,7 +121,7 @@ states/Reloading_Idle/position = Vector2(658, 324)
 "states/Rotate Cylinder/node" = SubResource("AnimationNodeAnimation_3ypdx")
 "states/Rotate Cylinder/position" = Vector2(942, 324)
 states/Start/position = Vector2(76, 154)
-transitions = ["Open_Hatch", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_6kob1"), "Reloading_Idle", "Close_Hatch", SubResource("AnimationNodeStateMachineTransition_kd25l"), "Eject Shell", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_in5im"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_wnc3p"), "Idle", "Open_Hatch", SubResource("AnimationNodeStateMachineTransition_dnfrm"), "Idle", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_wvpd8"), "Colt_SAA_Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_5x86p"), "Close_Hatch", "Idle", SubResource("AnimationNodeStateMachineTransition_uaclk"), "Reloading_Idle", "Eject Shell", SubResource("AnimationNodeStateMachineTransition_j3djk"), "Idle", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_tigyd"), "Cock Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_srb26"), "Colt_SAA_Fire", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_o37g7"), "Cock Hammer", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_4i1iy"), "Reloading_Idle", "Insert_Round", SubResource("AnimationNodeStateMachineTransition_n0drd"), "Eject Shell", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_8kvvh"), "Insert_Round", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_wkvfo"), "Rotate Cylinder", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_y452g")]
+transitions = ["Open_Hatch", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_6kob1"), "Reloading_Idle", "Close_Hatch", SubResource("AnimationNodeStateMachineTransition_kd25l"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_wnc3p"), "Idle", "Open_Hatch", SubResource("AnimationNodeStateMachineTransition_dnfrm"), "Idle", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_wvpd8"), "Colt_SAA_Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_5x86p"), "Close_Hatch", "Idle", SubResource("AnimationNodeStateMachineTransition_uaclk"), "Reloading_Idle", "Eject Shell", SubResource("AnimationNodeStateMachineTransition_j3djk"), "Idle", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_tigyd"), "Cock Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_srb26"), "Colt_SAA_Fire", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_o37g7"), "Cock Hammer", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_4i1iy"), "Reloading_Idle", "Insert_Round", SubResource("AnimationNodeStateMachineTransition_n0drd"), "Eject Shell", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_8kvvh"), "Insert_Round", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_wkvfo"), "Rotate Cylinder", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_y452g")]
 graph_offset = Vector2(110, 108)
 
 [sub_resource type="Animation" id="Animation_vrke4"]
