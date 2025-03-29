@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://dnx078m804hk4"]
+
+[ext_resource type="PackedScene" uid="uid://cl33uk25n1mmc" path="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx" id="1_mrlqj"]
+
+[node name="SK_Colt_Fire" instance=ExtResource("1_mrlqj")]
+
+[node name="Skeleton3D" parent="Colt_Saa_Rig" index="0"]
+bones/0/rotation = Quaternion(0.999476, -0.0154803, 0.0019969, -0.0283603)
+bones/2/rotation = Quaternion(0.72762, 0.00451049, 0.00263506, 0.685961)
+bones/3/rotation = Quaternion(-0.831629, 1.23878e-07, -2.30275e-08, 0.555332)
+bones/6/scale = Vector3(1, 1.23283, 1)
+bones/7/rotation = Quaternion(-0.0217165, 0.018349, 0.685997, 0.727049)
+
+[node name="Barrel" parent="Colt_Saa_Rig/Skeleton3D" index="0"]
+layers = 2
+
+[node name="Base Pin" parent="Colt_Saa_Rig/Skeleton3D" index="1"]
+layers = 2
+
+[node name="Cylinder2" parent="Colt_Saa_Rig/Skeleton3D" index="2"]
+layers = 2
+
+[node name="Ejector_Rod" parent="Colt_Saa_Rig/Skeleton3D" index="3"]
+layers = 2
+
+[node name="GunFrame" parent="Colt_Saa_Rig/Skeleton3D" index="4"]
+layers = 2
+
+[node name="Hammer2" parent="Colt_Saa_Rig/Skeleton3D" index="5"]
+layers = 2
+
+[node name="Handles" parent="Colt_Saa_Rig/Skeleton3D" index="6"]
+layers = 2
+
+[node name="Hatch2" parent="Colt_Saa_Rig/Skeleton3D" index="7"]
+layers = 2
+
+[node name="Spring" parent="Colt_Saa_Rig/Skeleton3D" index="8"]
+layers = 2
+
+[node name="Trigger2" parent="Colt_Saa_Rig/Skeleton3D" index="9"]
+layers = 2

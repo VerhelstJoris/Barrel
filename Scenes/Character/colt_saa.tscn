@@ -122,7 +122,7 @@ states/Reloading_Idle/position = Vector2(658, 324)
 "states/Rotate Cylinder/position" = Vector2(942, 324)
 states/Start/position = Vector2(76, 154)
 transitions = ["Open_Hatch", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_6kob1"), "Reloading_Idle", "Close_Hatch", SubResource("AnimationNodeStateMachineTransition_kd25l"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_wnc3p"), "Idle", "Open_Hatch", SubResource("AnimationNodeStateMachineTransition_dnfrm"), "Idle", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_wvpd8"), "Colt_SAA_Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_5x86p"), "Close_Hatch", "Idle", SubResource("AnimationNodeStateMachineTransition_uaclk"), "Reloading_Idle", "Eject Shell", SubResource("AnimationNodeStateMachineTransition_j3djk"), "Idle", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_tigyd"), "Cock Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_srb26"), "Colt_SAA_Fire", "Cock Hammer", SubResource("AnimationNodeStateMachineTransition_o37g7"), "Cock Hammer", "Colt_SAA_Fire", SubResource("AnimationNodeStateMachineTransition_4i1iy"), "Reloading_Idle", "Insert_Round", SubResource("AnimationNodeStateMachineTransition_n0drd"), "Eject Shell", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_8kvvh"), "Insert_Round", "Rotate Cylinder", SubResource("AnimationNodeStateMachineTransition_wkvfo"), "Rotate Cylinder", "Reloading_Idle", SubResource("AnimationNodeStateMachineTransition_y452g")]
-graph_offset = Vector2(110, 108)
+graph_offset = Vector2(-37, 0)
 
 [sub_resource type="Animation" id="Animation_vrke4"]
 resource_name = "Cock Hammer"
@@ -488,7 +488,6 @@ visible = false
 layers = 2
 
 [node name="Hammer" parent="Colt_Saa/Skeleton3D" index="5"]
-visible = false
 layers = 2
 
 [node name="Handles" parent="Colt_Saa/Skeleton3D" index="6"]
@@ -496,7 +495,7 @@ visible = false
 layers = 2
 
 [node name="Hatch" parent="Colt_Saa/Skeleton3D" index="7"]
-layers = 0
+layers = 2
 
 [node name="Spring" parent="Colt_Saa/Skeleton3D" index="8"]
 layers = 2

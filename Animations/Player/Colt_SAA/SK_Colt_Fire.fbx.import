@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bi0o5nok8pab4"
-path="res://.godot/imported/Colt_SAA.dae-febfaa9b5ce4db1cd3571505864b33a6.scn"
+uid="uid://cl33uk25n1mmc"
+path="res://.godot/imported/SK_Colt_Fire.fbx-3576ce7e2692e880cf0a7c05026c2fac.scn"
 
 [deps]
 
-source_file="res://Origin/Revolver/Colt_SAA.dae"
-dest_files=["res://.godot/imported/Colt_SAA.dae-febfaa9b5ce4db1cd3571505864b33a6.scn"]
+source_file="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx"
+dest_files=["res://.godot/imported/SK_Colt_Fire.fbx-3576ce7e2692e880cf0a7c05026c2fac.scn"]
 
 [params]
 
@@ -27,8 +27,11 @@ meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
 animation/fps=30
-animation/trimming=false
+animation/trimming=true
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={}
+fbx/importer=0
+fbx/allow_geometry_helper_nodes=false
+fbx/embedded_image_handling=1

@@ -1,0 +1,102 @@
+[gd_scene load_steps=10 format=3 uid="uid://cb3ouoyimo83b"]
+
+[ext_resource type="PackedScene" uid="uid://d3nwutpv6cps7" path="res://Animations/Player/FP_Character/SK_FP.fbx" id="1_gfk37"]
+[ext_resource type="PackedScene" uid="uid://dnx078m804hk4" path="res://Scenes/Character/FP_Colt.tscn" id="2_5bwpq"]
+[ext_resource type="AnimationLibrary" uid="uid://rmpogfngnllv" path="res://Animations/Player/FP_Character/AL_FP_Character.res" id="3_tkuka"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_dae8t"]
+animation = &"FP_Character/A_FP_Char_Cock_Hammer"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_22ou5"]
+animation = &"FP_Character/A_FP_Char_Fire"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_cb6qp"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ghm7e"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_vh1wi"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_82jiu"]
+states/End/position = Vector2(1140, 93)
+states/FP_Character_A_FP_Char_Cock_Hammer/node = SubResource("AnimationNodeAnimation_dae8t")
+states/FP_Character_A_FP_Char_Cock_Hammer/position = Vector2(485, 93)
+states/FP_Character_A_FP_Char_Fire/node = SubResource("AnimationNodeAnimation_22ou5")
+states/FP_Character_A_FP_Char_Fire/position = Vector2(827, 93)
+states/Start/position = Vector2(221, 93)
+transitions = ["Start", "FP_Character_A_FP_Char_Cock_Hammer", SubResource("AnimationNodeStateMachineTransition_cb6qp"), "FP_Character_A_FP_Char_Cock_Hammer", "FP_Character_A_FP_Char_Fire", SubResource("AnimationNodeStateMachineTransition_ghm7e"), "FP_Character_A_FP_Char_Fire", "FP_Character_A_FP_Char_Cock_Hammer", SubResource("AnimationNodeStateMachineTransition_vh1wi")]
+
+[node name="SK_FP" instance=ExtResource("1_gfk37")]
+
+[node name="Arms_Rig" parent="." index="0"]
+transform = Transform3D(100, 0, 0, 0, -4.37114e-06, 100, 0, -100, -4.37114e-06, 0, 0, 0)
+
+[node name="Skeleton3D" parent="Arms_Rig" index="0"]
+bones/1/rotation = Quaternion(0.939627, -0.16914, 0.159461, 0.251128)
+bones/2/rotation = Quaternion(-0.740395, 0.013735, -0.231404, 0.630935)
+bones/2/scale = Vector3(1, 0.999964, 0.999959)
+bones/3/rotation = Quaternion(-4.94771e-08, 0.00260181, 4.19063e-08, 0.999997)
+bones/3/scale = Vector3(0.999999, 0.999991, 0.999992)
+bones/4/rotation = Quaternion(-2.63573e-08, 0.0179817, -1.29585e-08, 0.999838)
+bones/5/rotation = Quaternion(3.25179e-09, 0.0320353, -3.2392e-08, 0.999487)
+bones/6/rotation = Quaternion(0.519071, 0.0394024, 0.133901, 0.843258)
+bones/6/scale = Vector3(0.999992, 1.00001, 0.999997)
+bones/7/rotation = Quaternion(-0.55538, -0.10209, -0.0916295, 0.820204)
+bones/8/rotation = Quaternion(-0.0392506, 0.107327, -0.0309297, 0.992967)
+bones/9/rotation = Quaternion(0.142402, 0.0141479, 0.0010682, 0.989707)
+bones/10/rotation = Quaternion(-0.269522, 0.0287976, -0.0785145, 0.959356)
+bones/11/rotation = Quaternion(0.0407854, -0.00465104, -0.404659, 0.913546)
+bones/12/rotation = Quaternion(-0.0423768, -0.0665196, -0.465056, 0.881761)
+bones/13/rotation = Quaternion(-0.173004, 0.127554, -0.565126, 0.796513)
+bones/14/rotation = Quaternion(0.00032611, -0.0268102, -0.6174, 0.786192)
+bones/15/rotation = Quaternion(-0.028347, 0.0440371, -0.494303, 0.867711)
+bones/16/rotation = Quaternion(-0.153424, 0.174388, -0.473114, 0.849831)
+bones/17/rotation = Quaternion(-0.0183275, 0.00850773, -0.685782, 0.727527)
+bones/18/rotation = Quaternion(0.0189893, -0.0390819, -0.583485, 0.810961)
+bones/19/rotation = Quaternion(-0.172182, 0.178309, -0.27929, 0.927662)
+bones/20/rotation = Quaternion(-0.0262773, -0.0065584, -0.285146, 0.958102)
+bones/21/rotation = Quaternion(-0.0279905, -0.0742117, -0.745419, 0.661861)
+bones/23/rotation = Quaternion(0.967852, 0.189289, 0.03756, -0.161311)
+bones/24/rotation = Quaternion(-0.305023, 0.00124497, 0.0876582, 0.948301)
+bones/25/rotation = Quaternion(-1.81608e-08, 5.45662e-06, -1.86264e-08, 1)
+bones/26/rotation = Quaternion(-1.67642e-08, -0.00730872, 1.30389e-08, 0.999973)
+bones/27/rotation = Quaternion(4.05135e-08, -0.0036567, 2.69982e-08, 0.999993)
+bones/27/scale = Vector3(1, 0.999983, 0.999983)
+bones/28/rotation = Quaternion(0.0109786, -0.0614001, 0.05493, 0.99654)
+
+[node name="Arms_objects" parent="Arms_Rig/Skeleton3D" index="0"]
+layers = 2
+
+[node name="CameraAttachmentBone" type="BoneAttachment3D" parent="Arms_Rig/Skeleton3D" index="1"]
+transform = Transform3D(-1, 3.60887e-08, 8.17713e-08, -3.65544e-08, -1, 1.19758e-07, 8.15833e-08, 1.78488e-07, 1, 1.81899e-12, -1.16415e-10, 0.0106995)
+bone_name = "Camera"
+bone_idx = 22
+
+[node name="Camera3D" type="Camera3D" parent="Arms_Rig/Skeleton3D/CameraAttachmentBone" index="0"]
+transform = Transform3D(0.01, 1.8797e-12, 4.65672e-12, -8.32667e-17, -4.37114e-10, -0.01, -8.12237e-17, 0.01, 1.50186e-10, -2.00091e-11, -0.000554441, 0)
+keep_aspect = 0
+cull_mask = 2
+fov = 57.0
+near = 0.1
+
+[node name="RHandAttachmentBone" type="BoneAttachment3D" parent="Arms_Rig/Skeleton3D" index="2"]
+transform = Transform3D(0.98863, -0.0980161, 0.113958, -0.138512, -0.888382, 0.437619, 0.0583329, -0.448431, -0.891858, -0.00408807, -0.00518968, 0.00854963)
+bone_name = "Hand_R"
+bone_idx = 6
+
+[node name="FP_Colt" parent="Arms_Rig/Skeleton3D/RHandAttachmentBone" index="0" instance=ExtResource("2_5bwpq")]
+transform = Transform3D(0.00978781, -0.000524194, 0.00198091, -0.00204395, -0.00318266, 0.00925706, 0.000145207, -0.00946552, -0.00322227, 0.00031311, 0.00109048, -0.000546061)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1"]
+root_node = NodePath("")
+libraries = {
+"FP_Character": ExtResource("3_tkuka")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+tree_root = SubResource("AnimationNodeStateMachine_82jiu")
+anim_player = NodePath("../AnimationPlayer")
