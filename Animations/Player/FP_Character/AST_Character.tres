@@ -1,0 +1,108 @@
+[gd_resource type="AnimationNodeStateMachine" load_steps=22 format=3 uid="uid://b4h6og8ctmdcb"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4ugqg"]
+animation = &"FP_Character/A_FP_Char_Cock_Hammer"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_k0i0m"]
+animation = &"FP_Character/A_FP_Char_Fire"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_df4im"]
+animation = &"FP_Character/A_FP_Char_Idle"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_2jn6g"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_stymb"]
+advance_mode = 2
+advance_condition = &"try_fire"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_yqslx"]
+advance_mode = 2
+advance_condition = &"try_pull_hammer"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1dnhd"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_7vohl"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_3oubi"]
+states/FP_Character_A_FP_Char_Cock_Hammer/node = SubResource("AnimationNodeAnimation_4ugqg")
+states/FP_Character_A_FP_Char_Cock_Hammer/position = Vector2(644, 185)
+states/FP_Character_A_FP_Char_Fire/node = SubResource("AnimationNodeAnimation_k0i0m")
+states/FP_Character_A_FP_Char_Fire/position = Vector2(437, -37)
+states/NONE/node = SubResource("AnimationNodeAnimation_df4im")
+states/NONE/position = Vector2(377, 93)
+states/Start/position = Vector2(119, 121)
+transitions = ["Start", "NONE", SubResource("AnimationNodeStateMachineTransition_2jn6g"), "NONE", "FP_Character_A_FP_Char_Fire", SubResource("AnimationNodeStateMachineTransition_stymb"), "NONE", "FP_Character_A_FP_Char_Cock_Hammer", SubResource("AnimationNodeStateMachineTransition_yqslx"), "FP_Character_A_FP_Char_Cock_Hammer", "NONE", SubResource("AnimationNodeStateMachineTransition_1dnhd"), "FP_Character_A_FP_Char_Fire", "NONE", SubResource("AnimationNodeStateMachineTransition_7vohl")]
+graph_offset = Vector2(-146, -66)
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_x7rrs"]
+filter_enabled = true
+filters = ["Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_R"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_kww7d"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uxtsa"]
+animation = &"FP_Character/A_FP_Char_Idle"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_0na2r"]
+graph_offset = Vector2(-444, 242)
+nodes/Actions/node = SubResource("AnimationNodeStateMachine_3oubi")
+nodes/Actions/position = Vector2(-60, 460)
+nodes/Add2/node = SubResource("AnimationNodeAdd2_x7rrs")
+nodes/Add2/position = Vector2(160, 420)
+nodes/Blend2/node = SubResource("AnimationNodeBlend2_kww7d")
+nodes/Blend2/position = Vector2(201, 179)
+nodes/Idle/node = SubResource("AnimationNodeAnimation_uxtsa")
+nodes/Idle/position = Vector2(-160, 280)
+nodes/output/position = Vector2(500, 320)
+node_connections = [&"Add2", 0, &"Idle", &"Add2", 1, &"Actions", &"output", 0, &"Add2"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_dae8t"]
+animation = &"FP_Character/A_FP_Char_Cock_Hammer"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_22ou5"]
+animation = &"FP_Character/A_FP_Char_Fire"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jkevq"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_byy5m"]
+advance_mode = 2
+advance_condition = &"try_pull_hammer"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_erwk6"]
+advance_mode = 2
+advance_condition = &"try_fire"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_xgqgo"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ewao1"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0uv6y"]
+advance_mode = 2
+
+[resource]
+states/BlendTree/node = SubResource("AnimationNodeBlendTree_0na2r")
+states/BlendTree/position = Vector2(286, 296)
+states/End/position = Vector2(1140, 93)
+states/FP_Character_A_FP_Char_Cock_Hammer/node = SubResource("AnimationNodeAnimation_dae8t")
+states/FP_Character_A_FP_Char_Cock_Hammer/position = Vector2(415, 67)
+states/FP_Character_A_FP_Char_Fire/node = SubResource("AnimationNodeAnimation_22ou5")
+states/FP_Character_A_FP_Char_Fire/position = Vector2(679, 179)
+states/Idle/node = SubResource("AnimationNodeAnimation_jkevq")
+states/Idle/position = Vector2(373, 189)
+states/Start/position = Vector2(93, 196)
+transitions = ["Idle", "FP_Character_A_FP_Char_Cock_Hammer", SubResource("AnimationNodeStateMachineTransition_byy5m"), "Idle", "FP_Character_A_FP_Char_Fire", SubResource("AnimationNodeStateMachineTransition_erwk6"), "FP_Character_A_FP_Char_Cock_Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_xgqgo"), "FP_Character_A_FP_Char_Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_ewao1"), "Start", "BlendTree", SubResource("AnimationNodeStateMachineTransition_0uv6y")]
+graph_offset = Vector2(-141, -5)

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cl33uk25n1mmc"
-path="res://.godot/imported/SK_Colt_Fire.fbx-3576ce7e2692e880cf0a7c05026c2fac.scn"
+uid="uid://w8fw3rfgdfw4"
+path="res://.godot/imported/SK_Colt_CockHammer.fbx-a4fcb67ad7512b950e0b5ce7ac8e26b6.scn"
 
 [deps]
 
-source_file="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx"
-dest_files=["res://.godot/imported/SK_Colt_Fire.fbx-3576ce7e2692e880cf0a7c05026c2fac.scn"]
+source_file="res://Animations/Player/Colt_SAA/SK_Colt_CockHammer.fbx"
+dest_files=["res://.godot/imported/SK_Colt_CockHammer.fbx-a4fcb67ad7512b950e0b5ce7ac8e26b6.scn"]
 
 [params]
 
@@ -35,8 +35,8 @@ _subresources={
 "animations": {
 "Scene": {
 "save_to_file/enabled": true,
-"save_to_file/keep_custom_tracks": true,
-"save_to_file/path": "res://Animations/Player/Colt_SAA/A_Colt_Fire.res",
+"save_to_file/keep_custom_tracks": "",
+"save_to_file/path": "res://Animations/Player/Colt_SAA/A_Colt_Cock_Hammer.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

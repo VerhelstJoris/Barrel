@@ -1,0 +1,120 @@
+[gd_scene load_steps=16 format=3 uid="uid://dnx078m804hk4"]
+
+[ext_resource type="PackedScene" uid="uid://cl33uk25n1mmc" path="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx" id="1_mrlqj"]
+[ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
+[ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
+[ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
+[ext_resource type="PackedScene" uid="uid://dfqxuka7iftmi" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
+_data = {
+"Scene": ExtResource("2_u2pjc")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i5ta8"]
+animation = &"Scene"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8nh45"]
+animation = &"AL_Colt_SAA/A_Colt_Fire"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_fu7d5"]
+animation = &"Scene"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jy74s"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jsop2"]
+advance_mode = 2
+advance_condition = &"try_fire"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_y4qhd"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_evvux"]
+advance_mode = 2
+advance_condition = &"try_pull_hammer"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_43521"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_63u24"]
+states/Cock_Hammer/node = SubResource("AnimationNodeAnimation_i5ta8")
+states/Cock_Hammer/position = Vector2(607, 195)
+states/Fire/node = SubResource("AnimationNodeAnimation_8nh45")
+states/Fire/position = Vector2(529, 50)
+states/Idle/node = SubResource("AnimationNodeAnimation_fu7d5")
+states/Idle/position = Vector2(378, 116)
+states/Start/position = Vector2(234, 116)
+transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition_jy74s"), "Idle", "Fire", SubResource("AnimationNodeStateMachineTransition_jsop2"), "Fire", "Idle", SubResource("AnimationNodeStateMachineTransition_y4qhd"), "Idle", "Cock_Hammer", SubResource("AnimationNodeStateMachineTransition_evvux"), "Cock_Hammer", "Idle", SubResource("AnimationNodeStateMachineTransition_43521")]
+graph_offset = Vector2(-71, -22)
+
+[node name="SK_Colt_Fire" instance=ExtResource("1_mrlqj")]
+script = ExtResource("2_al4xy")
+bullet_scene = ExtResource("3_xgxry")
+
+[node name="Skeleton3D" parent="Colt_Saa_Rig" index="0"]
+bones/0/rotation = Quaternion(0.999476, -0.0154803, 0.0019969, -0.0283603)
+bones/1/position = Vector3(-7.30781e-11, 0.00340003, -0.00694271)
+bones/1/rotation = Quaternion(-0.00201056, 1.58391e-06, 3.07704e-08, 0.999998)
+bones/1/scale = Vector3(1, 1, 1)
+bones/2/position = Vector3(4.3949e-06, -0.000108105, -0.00184597)
+bones/2/rotation = Quaternion(0.573195, 0.00388156, 0.00349594, 0.819402)
+bones/2/scale = Vector3(1, 1, 1)
+bones/3/position = Vector3(1.89232e-09, -0.00265779, -0.00432491)
+bones/3/rotation = Quaternion(-0.699175, 1.16769e-07, -4.78618e-08, 0.71495)
+bones/3/scale = Vector3(1, 1, 1)
+bones/4/position = Vector3(-0.00271272, 7.53202e-05, -0.00536379)
+bones/4/rotation = Quaternion(-0.707105, 0.0015134, -0.00151347, 0.707105)
+bones/4/scale = Vector3(1, 1, 1)
+bones/5/rotation = Quaternion(5.28436e-07, 5.81654e-07, 0.707107, 0.707106)
+bones/5/scale = Vector3(1, 1, 1)
+bones/6/position = Vector3(2.4813e-08, -4.44797e-09, 1.12198e-09)
+bones/6/rotation = Quaternion(0.266893, -0.266989, 0.654666, 0.654902)
+bones/6/scale = Vector3(1, 1.23283, 1)
+bones/7/position = Vector3(-0.00141621, 0.00659841, -0.00735879)
+bones/7/rotation = Quaternion(-0.0217165, 0.018349, 0.685997, 0.727049)
+bones/7/scale = Vector3(1, 1, 1)
+
+[node name="Barrel" parent="Colt_Saa_Rig/Skeleton3D" index="0"]
+layers = 2
+
+[node name="Base Pin" parent="Colt_Saa_Rig/Skeleton3D" index="1"]
+layers = 2
+
+[node name="Cylinder2" parent="Colt_Saa_Rig/Skeleton3D" index="2"]
+layers = 2
+
+[node name="Ejector_Rod" parent="Colt_Saa_Rig/Skeleton3D" index="3"]
+layers = 2
+
+[node name="GunFrame" parent="Colt_Saa_Rig/Skeleton3D" index="4"]
+layers = 2
+
+[node name="Hammer2" parent="Colt_Saa_Rig/Skeleton3D" index="5"]
+layers = 2
+
+[node name="Handles" parent="Colt_Saa_Rig/Skeleton3D" index="6"]
+layers = 2
+
+[node name="Hatch2" parent="Colt_Saa_Rig/Skeleton3D" index="7"]
+layers = 2
+
+[node name="Spring" parent="Colt_Saa_Rig/Skeleton3D" index="8"]
+layers = 2
+
+[node name="Trigger2" parent="Colt_Saa_Rig/Skeleton3D" index="9"]
+layers = 2
+
+[node name="AnimationPlayer" parent="." index="1"]
+libraries = {
+"": SubResource("AnimationLibrary_1r5vu"),
+"AL_Colt_SAA": ExtResource("3_0cg5f")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="2"]
+tree_root = SubResource("AnimationNodeStateMachine_63u24")
+anim_player = NodePath("../AnimationPlayer")
+parameters/conditions/try_fire = false
+parameters/conditions/try_pull_hammer = false

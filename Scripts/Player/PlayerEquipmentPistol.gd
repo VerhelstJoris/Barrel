@@ -14,15 +14,17 @@ enum E_chamber_state{Empty, Ready, Fired}
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
+signal update_fire_action(new_value)
+signal update_hammer_action(new_value)
 
 const log_pistol : String = "PlayerPistol" 
-const anim_fire_condition : String = "parameters/conditions/try_fire"
-const anim_pull_hammer_condition : String = "parameters/conditions/try_pull_hammer"
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
 const anim_exit_reload_condition : String = "parameters/conditions/exit_reload"
 const anim_eject_condition : String = "parameters/conditions/eject_shell"
 const anim_insert_round_condition : String = "parameters/conditions/insert_round"
 
+const anim_fire_request : String = "parameters/FireOneShot/request"
+const anim_hammer_request : String = "parameters/HammerOneShot/request"
 
 var start_reload: bool = true;
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
@@ -38,19 +40,23 @@ var temp_bullet
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	cylinder_bone_modifier.finished_rotating.connect(_cylinder_finished_rotating)
+
+	anim_tree.animation_finished.connect(_on_animation_finished)
+	#cylinder_bone_modifier.finished_rotating.connect(_cylinder_finished_rotating)
 	#can fire all rounds
 	ChamberStates.resize(chamber_amount)
-	ChamberStates.fill(E_chamber_state.Empty)
+	ChamberStates.fill(E_chamber_state.Ready)
 	current_bullets.resize(chamber_amount)
+	CurrentState = E_Pistol_State.ReadyToFire
 	_log_chamber_states()
+	
 	pass # Replace with function body.
 
 func _physics_process(_delta: float):
 	super(_delta)
 	if Input.is_action_just_pressed(ENTER_RELOAD):
 		_try_reload()
-
+		
 
 func _try_use_equipment():
 	if(CurrentState == E_Pistol_State.Reloading):
@@ -62,11 +68,13 @@ func _try_use_equipment():
 		if _can_shoot():
 			print("shooting")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
-			anim_tree[anim_fire_condition] = true
+			anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			update_fire_action.emit()
 		elif(_can_cock_hammer()):
 			print("cocking hammer")
 			_proceed_to_state(E_Pistol_State.ReadyToFire)
-			anim_tree[anim_pull_hammer_condition] = true
+			anim_tree.set(anim_hammer_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			update_hammer_action.emit()
 			
 func _try_use_equipment_secondary():
 	if(CurrentState == E_Pistol_State.Reloading):
@@ -89,19 +97,16 @@ func _try_reload():
 			anim_tree[anim_exit_reload_condition] = true
 		
 
+func _on_animation_finished(name : String) -> void:
+	_enable_changing_states(true)
+	print(name)
+	
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
 	
 
 func _enable_changing_states(b_enabled : bool) -> void:
-	#reset animation variables
-	anim_tree[anim_fire_condition] = false
-	anim_tree[anim_pull_hammer_condition] = false
-	anim_tree[anim_eject_condition] = false
-	anim_tree[anim_enter_reload_condition] = false
-	anim_tree[anim_exit_reload_condition] = false
-	anim_tree[anim_insert_round_condition] = false
 	can_proceed_state = b_enabled
 	
 	
@@ -141,7 +146,7 @@ func _rotate_cylinder_over_time(_chamber_amount : int, time:float, curve: Curve)
 
 func _cylinder_finished_rotating(_rotated: float) -> void:
 	cylinder_is_rotating = false
-	var chambers_rotated: int = (int)(_rotated / 60)
+	var chambers_rotated: int = int(_rotated / 60)
 	current_chamber = (current_chamber + chambers_rotated) % chamber_amount
 	_log_chamber_states()
 
@@ -149,7 +154,7 @@ func _can_proceed_state() -> bool:
 	return can_proceed_state && !cylinder_is_rotating
 	
 func _can_insert_round() -> bool:
-	print("try inserting round")
+	print("Try inserting round")
 	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber] == E_chamber_state.Empty
 
 func _can_try_eject() -> bool:
@@ -169,7 +174,7 @@ func _can_cock_hammer() -> bool:
 	return CurrentState == E_Pistol_State.HammerUncocked && _can_proceed_state()
 
 func _can_shoot() -> bool:
-	print("try shooting")
+	print("Try shooting")
 	return CurrentState == E_Pistol_State.ReadyToFire && _can_proceed_state()
 	
 func _log_chamber_states() -> void:
