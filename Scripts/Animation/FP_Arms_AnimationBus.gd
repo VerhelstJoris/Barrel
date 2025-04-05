@@ -3,12 +3,17 @@ extends Node
 @onready var anim_tree : AnimationTree = %AnimationTree
 @onready var pistol : PlayerEquipmentPistol = %FP_Colt
 
-const anim_fire_condition : String = "parameters/Actions/conditions/try_fire"
-const anim_pull_hammer_condition : String = "parameters/Actions/conditions/try_pull_hammer"
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
 
+const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
+
+var movement_blend_value : Vector2 = Vector2.ZERO
+
+var prev_delta : float = 0
+#deltatime to forever blend towards the movement we're doing
+const movement_blend_rate : float = 15
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -19,6 +24,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	prev_delta = _delta
 	pass
 	
 func _oneshot_fire() -> void:
@@ -28,3 +34,9 @@ func _oneshot_fire() -> void:
 func _oneshot_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	pass
+
+
+func _on_player_player_movement_input(direction:Vector2) -> void:
+	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
+	anim_tree.set(anim_movement_blend,-movement_blend_value.y)
+	pass # Replace with function body.

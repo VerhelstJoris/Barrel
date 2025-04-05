@@ -1,6 +1,6 @@
+res://Animations/Player/FP_Character/A_FP_Char_Move_Forward.res
 res://example_scene/sandbox.tscn
 res://addons/fp_controller/player.tscn
-res://Scenes/Character/Character_Arms.tscn
+res://Scenes/Character/FP_Arms.tscn
+res://Scenes/Character/FP_Colt.tscn
 res://Scenes/Character/colt_saa.tscn
-res://Scenes/Character/Colt_Bullet.tscn
-res://Animations/Player/Colt_SAA/Colt_SAA_Rotate_Cylinder.res

@@ -367,4 +367,5 @@ script = ExtResource("11_gkc45")
 [node name="Slide" type="Node" parent="StateMachine"]
 script = ExtResource("12_bqyfq")
 
+[connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/SK_FP" method="_on_player_player_movement_input"]
 [connection signal="transitioned" from="StateMachine" to="." method="_on_state_machine_transitioned"]

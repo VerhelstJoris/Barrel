@@ -2,6 +2,8 @@ class_name Player extends CharacterBody3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+signal player_movement_input(direction)
+
 @export_group("Controls map names")
 @export var MOVE_FORWARD: String = "move_forward"
 @export var MOVE_BACK: String = "move_back"
@@ -103,6 +105,8 @@ func _physics_process(delta: float) -> void:
 		else:
 			input_direction = Vector2.ZERO
 	
+	player_movement_input.emit(input_direction)		
+
 	# Add the gravity.
 	if not is_on_floor() && is_affected_by_gravity:
 		velocity.y -= gravity * delta
