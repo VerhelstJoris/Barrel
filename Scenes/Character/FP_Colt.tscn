@@ -24,11 +24,12 @@ animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
 mix_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i37sa"]
+animation = &"Scene"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_brjqm"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(-502.681, -52.1781)
+graph_offset = Vector2(-476.149, -168.545)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_4geki")
 nodes/Animation/position = Vector2(-260, 160)
 nodes/FireOneShot/node = SubResource("AnimationNodeOneShot_3uw0u")
@@ -42,7 +43,7 @@ nodes/Idle/position = Vector2(-260, -20)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_brjqm")
 nodes/StateMachine/position = Vector2(-120, -100)
 nodes/output/position = Vector2(620, 180)
-node_connections = [&"FireOneShot", 0, &"StateMachine", &"FireOneShot", 1, &"Animation", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"HammerOneShot"]
+node_connections = [&"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Animation", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"HammerOneShot"]
 
 [node name="SK_Colt_Fire" instance=ExtResource("1_mrlqj")]
 script = ExtResource("2_al4xy")
@@ -54,13 +55,13 @@ transform = Transform3D(17, 0.0135273, 5.91297e-10, 0, -7.43094e-07, 17, 0.01352
 [node name="Skeleton3D" parent="Colt_Saa_Rig" index="0"]
 bones/0/rotation = Quaternion(0.999482, -0.0154804, 0.00411172, -0.0279105)
 bones/1/position = Vector3(-1.73345e-10, 0.00340003, -0.00694271)
-bones/1/rotation = Quaternion(-0.00201056, 1.58249e-06, 3.09593e-08, 0.999998)
+bones/1/rotation = Quaternion(-0.00174533, 0.49644, -0.000998097, 0.868069)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/position = Vector3(4.39456e-06, -0.000108102, -0.00184598)
-bones/2/rotation = Quaternion(0.72762, 0.00451049, 0.00263506, 0.685961)
+bones/2/rotation = Quaternion(0.573195, 0.00388155, 0.00349594, 0.819402)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/position = Vector3(2.09735e-09, -0.00265779, -0.00432491)
-bones/3/rotation = Quaternion(-0.699175, 1.19069e-07, -4.54906e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.699175, 1.15722e-07, -4.74181e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/position = Vector3(-0.00271272, 7.53233e-05, -0.00536379)
 bones/4/rotation = Quaternion(-0.707105, 0.0015134, -0.00151347, 0.707105)
