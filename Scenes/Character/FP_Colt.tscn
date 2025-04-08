@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=16 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="PackedScene" uid="uid://cl33uk25n1mmc" path="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx" id="1_mrlqj"]
 [ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
@@ -6,6 +6,9 @@
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
 [ext_resource type="PackedScene" uid="uid://dfqxuka7iftmi" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
 [ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverHammerModifier.gd" id="4_0cpdj"]
+[ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_itqks"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -124,6 +127,37 @@ active = true
 influence = 1.0
 script = ExtResource("4_0cpdj")
 hammer_bone = "Hammer"
+
+[node name="BoneAttachment3D" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D" index="11"]
+transform = Transform3D(0.999487, -0.0307516, 0.0089629, -0.0311745, -0.998179, 0.0516513, 0.00735821, -0.0519042, -0.998625, -0.000167496, -0.0144319, 0.00674153)
+bone_name = "Cylinder"
+bone_idx = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/BoneAttachment3D" index="0"]
+transform = Transform3D(0.01, 3.90313e-20, 1.04774e-11, 0, 0.01, -3.72529e-11, -1.04774e-11, 3.72529e-11, 0.01, 0.00823076, -0.000259786, 7.41496e-05)
+layers = 2
+mesh = SubResource("SphereMesh_itqks")
+
+[node name="SkeletonRevolverCylinderModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D" index="12"]
+_import_path = NodePath("")
+unique_name_in_owner = true
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+active = true
+influence = 1.0
+script = ExtResource("5_1n876")
+cylinder_bone = "Cylinder"
 
 [node name="AnimationPlayer" parent="." index="1"]
 libraries = {

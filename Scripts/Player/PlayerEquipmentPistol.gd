@@ -14,6 +14,8 @@ enum E_chamber_state{Empty, Ready, Fired}
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
+const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
+
 signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
 
@@ -29,7 +31,6 @@ const anim_hammer_request : String = "parameters/HammerOneShot/request"
 var start_reload: bool = true;
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
 var can_proceed_state: bool = true;
-var cylinder_is_rotating: bool = false;
 
 var ChamberStates : Array[E_chamber_state]
 var current_bullets: Array[Node3D]
@@ -42,7 +43,6 @@ var temp_bullet
 func _ready() -> void:
 
 	anim_tree.animation_finished.connect(_on_animation_finished)
-	#cylinder_bone_modifier.finished_rotating.connect(_cylinder_finished_rotating)
 	#can fire all rounds
 	ChamberStates.resize(chamber_amount)
 	ChamberStates.fill(E_chamber_state.Ready)
@@ -98,8 +98,10 @@ func _try_reload():
 		
 
 func _on_animation_finished(animation_name : String) -> void:
-	_enable_changing_states(true)
 	print(animation_name)
+	_enable_changing_states(true)
+	if(animation_name == fire_animation):
+		cylinder_bone_modifier.increment_cylinder_rotations(1)
 	
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
@@ -139,19 +141,9 @@ func _delete_bullet_from_chamber()-> void:
 	current_bullets[current_chamber] = null
 	ChamberStates[current_chamber] = E_chamber_state.Empty
 	pass
-
-func _rotate_cylinder_over_time(_chamber_amount : int, time:float, curve: Curve)->void:
-	cylinder_bone_modifier._rotate_over_time(_chamber_amount * 60, time, curve)
-	cylinder_is_rotating=true
-
-func _cylinder_finished_rotating(_rotated: float) -> void:
-	cylinder_is_rotating = false
-	var chambers_rotated: int = int(_rotated / 60)
-	current_chamber = (current_chamber + chambers_rotated) % chamber_amount
-	_log_chamber_states()
-
+	
 func _can_proceed_state() -> bool:
-	return can_proceed_state && !cylinder_is_rotating
+	return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
