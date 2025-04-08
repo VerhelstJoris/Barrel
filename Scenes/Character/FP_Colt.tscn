@@ -5,6 +5,7 @@
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
 [ext_resource type="PackedScene" uid="uid://dfqxuka7iftmi" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
+[ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverHammerModifier.gd" id="4_0cpdj"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -23,13 +24,11 @@ animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_gm6v4"]
 mix_mode = 1
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i37sa"]
-animation = &"Scene"
-
-[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_brjqm"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gm6oc"]
+animation = &"AL_Colt_SAA/A_Colt_Idle"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(-476.149, -168.545)
+graph_offset = Vector2(-550.149, -102.545)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_4geki")
 nodes/Animation/position = Vector2(-260, 160)
 nodes/FireOneShot/node = SubResource("AnimationNodeOneShot_3uw0u")
@@ -37,11 +36,9 @@ nodes/FireOneShot/position = Vector2(60, 60)
 nodes/Hammer/node = SubResource("AnimationNodeAnimation_51bhr")
 nodes/Hammer/position = Vector2(-160, 360)
 nodes/HammerOneShot/node = SubResource("AnimationNodeOneShot_gm6v4")
-nodes/HammerOneShot/position = Vector2(331.87, 190.52)
-nodes/Idle/node = SubResource("AnimationNodeAnimation_i37sa")
-nodes/Idle/position = Vector2(-260, -20)
-nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_brjqm")
-nodes/StateMachine/position = Vector2(-120, -100)
+nodes/HammerOneShot/position = Vector2(340, 200)
+nodes/Idle/node = SubResource("AnimationNodeAnimation_gm6oc")
+nodes/Idle/position = Vector2(-300, 0)
 nodes/output/position = Vector2(620, 180)
 node_connections = [&"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Animation", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"HammerOneShot"]
 
@@ -53,15 +50,16 @@ bullet_scene = ExtResource("3_xgxry")
 transform = Transform3D(17, 0.0135273, 5.91297e-10, 0, -7.43094e-07, 17, 0.0135273, -17, -7.43093e-07, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Colt_Saa_Rig" index="0"]
+unique_name_in_owner = true
 bones/0/rotation = Quaternion(0.999482, -0.0154804, 0.00411172, -0.0279105)
 bones/1/position = Vector3(-1.73345e-10, 0.00340003, -0.00694271)
-bones/1/rotation = Quaternion(-0.00174533, 0.49644, -0.000998097, 0.868069)
+bones/1/rotation = Quaternion(-0.00201056, 1.58391e-06, 3.02104e-08, 0.999998)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/position = Vector3(4.39456e-06, -0.000108102, -0.00184598)
 bones/2/rotation = Quaternion(0.573195, 0.00388155, 0.00349594, 0.819402)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/position = Vector3(2.09735e-09, -0.00265779, -0.00432491)
-bones/3/rotation = Quaternion(-0.699175, 1.15722e-07, -4.74181e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.699175, 1.14832e-07, -4.69085e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/position = Vector3(-0.00271272, 7.53233e-05, -0.00536379)
 bones/4/rotation = Quaternion(-0.707105, 0.0015134, -0.00151347, 0.707105)
@@ -105,6 +103,27 @@ layers = 2
 
 [node name="Trigger2" parent="Colt_Saa_Rig/Skeleton3D" index="9"]
 layers = 2
+
+[node name="SkeletonRevolverHammerModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D" index="10"]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+active = true
+influence = 1.0
+script = ExtResource("4_0cpdj")
+hammer_bone = "Hammer"
 
 [node name="AnimationPlayer" parent="." index="1"]
 libraries = {

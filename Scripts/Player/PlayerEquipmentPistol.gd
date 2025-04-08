@@ -97,9 +97,9 @@ func _try_reload():
 			anim_tree[anim_exit_reload_condition] = true
 		
 
-func _on_animation_finished(name : String) -> void:
+func _on_animation_finished(animation_name : String) -> void:
 	_enable_changing_states(true)
-	print(name)
+	print(animation_name)
 	
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
