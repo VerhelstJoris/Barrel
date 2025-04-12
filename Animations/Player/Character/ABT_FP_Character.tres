@@ -16,7 +16,9 @@ fadeout_curve = SubResource("Curve_wnf2r")
 animation = &"AL_FP_Character/A_FP_Cock_Hammer"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_12ano"]
+filters = ["Arms_Rig/Skeleton3D:Hand_R", "Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_R"]
 mix_mode = 1
+fadeout_time = 0.05
 autorestart_delay = 0.0
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ji06r"]
@@ -47,7 +49,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_72as8")
 blend_point_4/pos = Vector2(1, 0)
 
 [resource]
-graph_offset = Vector2(-560.89, -199.24)
+graph_offset = Vector2(-687.072, -214.91)
 nodes/Fire/node = SubResource("AnimationNodeAnimation_1o87o")
 nodes/Fire/position = Vector2(-420, 180)
 nodes/FireOneShot/node = SubResource("AnimationNodeOneShot_wsuj3")
@@ -57,6 +59,6 @@ nodes/Hammer/position = Vector2(-600, -40)
 nodes/HammerOneShot/node = SubResource("AnimationNodeOneShot_12ano")
 nodes/HammerOneShot/position = Vector2(-200, -120)
 nodes/MoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_qa77d")
-nodes/MoveBlendSpace/position = Vector2(-600, -300)
+nodes/MoveBlendSpace/position = Vector2(-460, -260)
 nodes/output/position = Vector2(260, 20)
 node_connections = [&"FireOneShot", 0, &"HammerOneShot", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"MoveBlendSpace", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"FireOneShot"]

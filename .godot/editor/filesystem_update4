@@ -25,3 +25,7 @@ res://addons/fp_controller/scripts/player_move_state/sprint.gd
 res://Scripts/Animation/FP_Arms_AnimationBus.gd
 res://addons/fp_controller/scripts/player_move_state/walk.gd
 res://Scripts/Player/PlayerEquipmentPistol.gd
+res://Animations/Player/Character/A_FP_Idle.res
+res://Animations/Player/Character/A_FP_Move_Back.res
+res://Animations/Player/Character/A_FP_Move_Forward.res
+res://Animations/Player/Character/A_FP_Move_Sideways.res
