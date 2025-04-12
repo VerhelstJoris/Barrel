@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://d3nwutpv6cps7"
-path="res://.godot/imported/SK_FP.fbx-65b9c93375955b997bd1eb5c249ad8cb.scn"
+uid="uid://blm74ny627hpu"
+path="res://.godot/imported/SK_FP.fbx-7134e235165bb1cbe80fe8a3723e07ec.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP.fbx"
-dest_files=["res://.godot/imported/SK_FP.fbx-65b9c93375955b997bd1eb5c249ad8cb.scn"]
+source_file="res://Animations/Player/Character/SK_FP.fbx"
+dest_files=["res://.godot/imported/SK_FP.fbx-7134e235165bb1cbe80fe8a3723e07ec.scn"]
 
 [params]
 
@@ -31,7 +31,13 @@ animation/trimming=true
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={}
+_subresources={
+"nodes": {
+"PATH:Skeleton3D": {
+"rest_pose/external_animation_library": null
+}
+}
+}
 fbx/importer=0
 fbx/allow_geometry_helper_nodes=false
 fbx/embedded_image_handling=1

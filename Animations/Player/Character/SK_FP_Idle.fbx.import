@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b01ngw8tku8y4"
-path="res://.godot/imported/SK_FP_CockHammer.fbx-451429f2e9593991f554d44e6cc7613b.scn"
+uid="uid://ej0r1je1dpyf"
+path="res://.godot/imported/SK_FP_Idle.fbx-0f0b428b6d6f4cc51f2afdfc2a7852e2.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_CockHammer.fbx"
-dest_files=["res://.godot/imported/SK_FP_CockHammer.fbx-451429f2e9593991f554d44e6cc7613b.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Idle.fbx"
+dest_files=["res://.godot/imported/SK_FP_Idle.fbx-0f0b428b6d6f4cc51f2afdfc2a7852e2.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Cock_Hammer.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Idle.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

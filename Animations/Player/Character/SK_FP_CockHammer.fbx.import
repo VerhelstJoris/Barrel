@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cplxqxuvoereq"
-path="res://.godot/imported/SK_FP_Move_Sideways.fbx-737f427532faeef1632adb0a07a2cbcb.scn"
+uid="uid://dndckxpoexlot"
+path="res://.godot/imported/SK_FP_CockHammer.fbx-1e1b23f0fa7d5852ad09d2a1c39e0490.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Move_Sideways.fbx"
-dest_files=["res://.godot/imported/SK_FP_Move_Sideways.fbx-737f427532faeef1632adb0a07a2cbcb.scn"]
+source_file="res://Animations/Player/Character/SK_FP_CockHammer.fbx"
+dest_files=["res://.godot/imported/SK_FP_CockHammer.fbx-1e1b23f0fa7d5852ad09d2a1c39e0490.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Move_Sideways.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Cock_Hammer.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

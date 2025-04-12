@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bgix44yguvq13"
-path="res://.godot/imported/SK_FP_Move_Backward.fbx-53b6e8f780d751542f7a0f569f1ac89a.scn"
+uid="uid://qdsbieevobb3"
+path="res://.godot/imported/SK_FP_Move_Forward.fbx-b6494a91a03fc9c19e56e40e8f719784.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Move_Backward.fbx"
-dest_files=["res://.godot/imported/SK_FP_Move_Backward.fbx-53b6e8f780d751542f7a0f569f1ac89a.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Move_Forward.fbx"
+dest_files=["res://.godot/imported/SK_FP_Move_Forward.fbx-b6494a91a03fc9c19e56e40e8f719784.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Move_Backward.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Move_Forward.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

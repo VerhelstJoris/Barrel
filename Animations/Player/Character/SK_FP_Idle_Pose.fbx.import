@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b2j5hs8u4q42e"
-path="res://.godot/imported/SK_FP_Move_Forward.fbx-c02a41da2c285d966e3096d46e74b0b7.scn"
+uid="uid://b2th3ysrmaqkg"
+path="res://.godot/imported/SK_FP_Idle_Pose.fbx-fb2d09a621aec766b560ee9a7f35a9c3.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Move_Forward.fbx"
-dest_files=["res://.godot/imported/SK_FP_Move_Forward.fbx-c02a41da2c285d966e3096d46e74b0b7.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Idle_Pose.fbx"
+dest_files=["res://.godot/imported/SK_FP_Idle_Pose.fbx-fb2d09a621aec766b560ee9a7f35a9c3.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Move_Forward.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Idle_Pose.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

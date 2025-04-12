@@ -36,7 +36,7 @@ func _oneshot_cock_hammer() -> void:
 	pass
 
 
-func _on_player_player_movement_input(direction:Vector2) -> void:
+func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
 	anim_tree.set(anim_movement_blend,movement_blend_value)
 	pass # Replace with function body.

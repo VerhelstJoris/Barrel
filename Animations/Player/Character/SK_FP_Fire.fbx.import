@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dwiied8y4mj0k"
-path="res://.godot/imported/SK_FP_Idle_Pose.fbx-3ddaea945387a562d3d7a4a7a4976e14.scn"
+uid="uid://cyha6brndli2q"
+path="res://.godot/imported/SK_FP_Fire.fbx-f3d7e7a6479b0d2bf98eca02d13b8a25.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Idle_Pose.fbx"
-dest_files=["res://.godot/imported/SK_FP_Idle_Pose.fbx-3ddaea945387a562d3d7a4a7a4976e14.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Fire.fbx"
+dest_files=["res://.godot/imported/SK_FP_Fire.fbx-f3d7e7a6479b0d2bf98eca02d13b8a25.scn"]
 
 [params]
 
@@ -35,8 +35,8 @@ _subresources={
 "animations": {
 "Scene": {
 "save_to_file/enabled": true,
-"save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Idle_Pose.res",
+"save_to_file/keep_custom_tracks": true,
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Fire.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
@@ -1831,6 +1831,13 @@ _subresources={
 "slice_99/save_to_file/path": "",
 "slice_99/start_frame": 0,
 "slices/amount": 0
+}
+},
+"nodes": {
+"PATH:Arms_Rig/Skeleton3D": {
+"rest_pose/external_animation_library": null,
+"rest_pose/load_pose": 1,
+"rest_pose/selected_animation": "Scene"
 }
 }
 }

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
-[ext_resource type="PackedScene" uid="uid://cb3ouoyimo83b" path="res://Scenes/Character/FP_Arms.tscn" id="3_lq1aj"]
+[ext_resource type="PackedScene" uid="uid://ccv4qg8ktshjt" path="res://Scenes/Character/FP_Char.tscn" id="3_vfk51"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/idle.gd" id="3_xe000"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/jump.gd" id="4_1lr3q"]
 [ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/walk.gd" id="5_bwgwe"]
@@ -332,8 +332,7 @@ handle_input_locally = false
 size = Vector2i(1152, 648)
 render_target_update_mode = 4
 
-[node name="SK_FP" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_lq1aj")]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0.610627, 0)
+[node name="FP_Char" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_vfk51")]
 
 [node name="StateMachine" type="Node" parent="."]
 unique_name_in_owner = true
@@ -367,5 +366,5 @@ script = ExtResource("11_gkc45")
 [node name="Slide" type="Node" parent="StateMachine"]
 script = ExtResource("12_bqyfq")
 
-[connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/SK_FP" method="_on_player_player_movement_input"]
+[connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/FP_Char" method="_on_player_movement_input"]
 [connection signal="transitioned" from="StateMachine" to="." method="_on_state_machine_transitioned"]

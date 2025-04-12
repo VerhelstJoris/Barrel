@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dd5cmk6lkecll"
-path="res://.godot/imported/SK_FP_Fire.fbx-246579f24ef5f646cd4ca4f7a14612b9.scn"
+uid="uid://c3tinktucnjlp"
+path="res://.godot/imported/SK_FP_Move_Backward.fbx-3fb7b3cd36489a2ed3edb42f0b41db43.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Fire.fbx"
-dest_files=["res://.godot/imported/SK_FP_Fire.fbx-246579f24ef5f646cd4ca4f7a14612b9.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Move_Backward.fbx"
+dest_files=["res://.godot/imported/SK_FP_Move_Backward.fbx-3fb7b3cd36489a2ed3edb42f0b41db43.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Fire.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Move_Back.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

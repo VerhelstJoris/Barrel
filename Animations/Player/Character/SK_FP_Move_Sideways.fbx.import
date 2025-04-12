@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ccr7w6jvw27k3"
-path="res://.godot/imported/SK_FP_Idle.fbx-e0c1e3ddde8886d1c8f92e5b5e8e9771.scn"
+uid="uid://dy6as5w6phx8v"
+path="res://.godot/imported/SK_FP_Move_Sideways.fbx-8003e4a3b851f4b3642d6036d44f3472.scn"
 
 [deps]
 
-source_file="res://Animations/Player/FP_Character/SK_FP_Idle.fbx"
-dest_files=["res://.godot/imported/SK_FP_Idle.fbx-e0c1e3ddde8886d1c8f92e5b5e8e9771.scn"]
+source_file="res://Animations/Player/Character/SK_FP_Move_Sideways.fbx"
+dest_files=["res://.godot/imported/SK_FP_Move_Sideways.fbx-8003e4a3b851f4b3642d6036d44f3472.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/FP_Character/A_FP_Char_Idle.res",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Move_Sideways.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
