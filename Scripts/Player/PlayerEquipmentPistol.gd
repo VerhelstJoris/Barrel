@@ -18,12 +18,10 @@ const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 
 signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
+signal change_reload_state(new_value)
 
 const log_pistol : String = "PlayerPistol" 
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
-const anim_exit_reload_condition : String = "parameters/conditions/exit_reload"
-const anim_eject_condition : String = "parameters/conditions/eject_shell"
-const anim_insert_round_condition : String = "parameters/conditions/insert_round"
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
@@ -63,7 +61,6 @@ func _try_use_equipment():
 		if(_can_insert_round()):
 			print("Inserting Shell")
 			_enable_changing_states(false)
-			anim_tree[anim_insert_round_condition] = true
 	else:
 		if _can_shoot():
 			print("shooting")
@@ -80,7 +77,6 @@ func _try_use_equipment_secondary():
 	if(CurrentState == E_Pistol_State.Reloading):
 		if(_can_try_eject()):
 			print("Ejecting Shell")
-			anim_tree[anim_eject_condition] = true
 			can_proceed_state = false
 		
 func _try_reload():
@@ -89,12 +85,12 @@ func _try_reload():
 		if(_can_enter_reload()):
 			print("start reload")
 			_proceed_to_state(E_Pistol_State.Reloading)
-			anim_tree[anim_enter_reload_condition] = true
+			change_reload_state.emit(true)
+			#anim_tree[anim_enter_reload_condition] = true
 	else:
 		if(_can_exit_reload()):
 			print("exit reload")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
-			anim_tree[anim_exit_reload_condition] = true
 		
 
 func _on_animation_finished(animation_name : String) -> void:
