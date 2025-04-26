@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cx842hbu1t65n"
-path="res://.godot/imported/SK_FP_Enter_Reload.fbx-7c6734b9ed857c7f46db6c0a393d6eb5.scn"
+uid="uid://du8yniigetg1f"
+path="res://.godot/imported/SK_Colt_Enter_Reload.fbx-9fecd1ad71f98ab523c34cf919538e60.scn"
 
 [deps]
 
-source_file="res://Animations/Player/Character/SK_FP_Enter_Reload.fbx"
-dest_files=["res://.godot/imported/SK_FP_Enter_Reload.fbx-7c6734b9ed857c7f46db6c0a393d6eb5.scn"]
+source_file="res://Animations/Player/Colt_SAA/SK_Colt_Enter_Reload.fbx"
+dest_files=["res://.godot/imported/SK_Colt_Enter_Reload.fbx-9fecd1ad71f98ab523c34cf919538e60.scn"]
 
 [params]
 
@@ -36,7 +36,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "res://Animations/Player/Character/A_FP_Enter_Reload.res",
+"save_to_file/path": "res://Animations/Player/Colt_SAA/A_Colt_Enter_Reload.tres",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
@@ -1831,13 +1831,6 @@ _subresources={
 "slice_99/save_to_file/path": "",
 "slice_99/start_frame": 0,
 "slices/amount": 0
-}
-},
-"nodes": {
-"PATH:AnimationPlayer": {
-"optimizer/enabled": false,
-"optimizer/max_angular_error": 0.0,
-"optimizer/max_velocity_error": 0.0
 }
 }
 }

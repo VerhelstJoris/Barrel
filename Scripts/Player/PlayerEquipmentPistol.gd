@@ -25,6 +25,7 @@ const anim_enter_reload_condition : String = "parameters/conditions/enter_reload
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
+const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
 
 var start_reload: bool = true;
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
@@ -86,7 +87,7 @@ func _try_reload():
 			print("start reload")
 			_proceed_to_state(E_Pistol_State.Reloading)
 			change_reload_state.emit(true)
-			#anim_tree[anim_enter_reload_condition] = true
+			anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:
 		if(_can_exit_reload()):
 			print("exit reload")

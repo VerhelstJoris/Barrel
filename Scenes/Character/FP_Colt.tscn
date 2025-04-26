@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=18 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="PackedScene" uid="uid://cl33uk25n1mmc" path="res://Animations/Player/Colt_SAA/SK_Colt_Fire.fbx" id="1_mrlqj"]
 [ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
@@ -18,6 +18,12 @@ _data = {
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4geki"]
 animation = &"AL_Colt_SAA/A_Colt_Fire"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1yo05"]
+animation = &"AL_Colt_SAA/A_Colt_Enter_Reload"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_2lov7"]
+mix_mode = 1
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_3uw0u"]
 mix_mode = 1
 
@@ -31,9 +37,13 @@ mix_mode = 1
 animation = &"AL_Colt_SAA/A_Colt_Idle"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(-550.149, -102.545)
+graph_offset = Vector2(-204.053, 260.779)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_4geki")
 nodes/Animation/position = Vector2(-260, 160)
+nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
+nodes/EnterReload/position = Vector2(240, 500)
+nodes/EnterReloadOneShot/node = SubResource("AnimationNodeOneShot_2lov7")
+nodes/EnterReloadOneShot/position = Vector2(635.186, 348.212)
 nodes/FireOneShot/node = SubResource("AnimationNodeOneShot_3uw0u")
 nodes/FireOneShot/position = Vector2(60, 60)
 nodes/Hammer/node = SubResource("AnimationNodeAnimation_51bhr")
@@ -42,8 +52,8 @@ nodes/HammerOneShot/node = SubResource("AnimationNodeOneShot_gm6v4")
 nodes/HammerOneShot/position = Vector2(340, 200)
 nodes/Idle/node = SubResource("AnimationNodeAnimation_gm6oc")
 nodes/Idle/position = Vector2(-300, 0)
-nodes/output/position = Vector2(620, 180)
-node_connections = [&"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Animation", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"HammerOneShot"]
+nodes/output/position = Vector2(900, 220)
+node_connections = [&"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOneShot", 1, &"EnterReload", &"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Animation", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"output", 0, &"EnterReloadOneShot"]
 
 [node name="SK_Colt_Fire" instance=ExtResource("1_mrlqj")]
 script = ExtResource("2_al4xy")
@@ -67,14 +77,13 @@ bones/3/scale = Vector3(1, 1, 1)
 bones/4/position = Vector3(-0.00271272, 7.53233e-05, -0.00536379)
 bones/4/rotation = Quaternion(-0.707105, 0.0015134, -0.00151347, 0.707105)
 bones/4/scale = Vector3(1, 1, 1)
-bones/5/position = Vector3(-0.00140988, 0.0242455, -0.00735879)
+bones/5/position = Vector3(-0.00141107, 0.0209127, -0.00735879)
 bones/5/rotation = Quaternion(5.28436e-07, 5.81654e-07, 0.707107, 0.707106)
 bones/5/scale = Vector3(1, 1, 1)
 bones/6/position = Vector3(1.80634e-08, -4.01396e-09, 6.98747e-15)
 bones/6/rotation = Quaternion(0.266893, -0.266989, 0.654667, 0.654902)
-bones/6/scale = Vector3(1, 1.23283, 1)
+bones/6/scale = Vector3(1, 1, 1)
 bones/7/position = Vector3(-0.00141621, 0.00659842, -0.00735879)
-bones/7/rotation = Quaternion(-0.0228692, 0.0165198, 0.686001, 0.727053)
 bones/7/scale = Vector3(1, 1, 1)
 
 [node name="Barrel" parent="Colt_Saa_Rig/Skeleton3D" index="0"]
@@ -171,6 +180,9 @@ unique_name_in_owner = true
 root_node = NodePath("%AnimationTree/..")
 tree_root = SubResource("AnimationNodeBlendTree_mgqe0")
 anim_player = NodePath("../AnimationPlayer")
+parameters/EnterReloadOneShot/active = false
+parameters/EnterReloadOneShot/internal_active = false
+parameters/EnterReloadOneShot/request = 0
 parameters/FireOneShot/active = false
 parameters/FireOneShot/internal_active = false
 parameters/FireOneShot/request = 0
