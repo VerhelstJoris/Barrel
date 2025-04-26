@@ -22,6 +22,8 @@ func _ready() -> void:
 	pistol.update_fire_action.connect(_oneshot_fire)
 	pistol.update_hammer_action.connect(_oneshot_cock_hammer)
 	pistol.change_reload_state.connect(_on_reload_state_change)
+	
+	
 	pass # Replace with function body.
 
 

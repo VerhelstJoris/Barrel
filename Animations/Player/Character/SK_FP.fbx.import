@@ -32,9 +32,24 @@ animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
+"meshes": {
+"Arms_001": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://Meshes/Character/M_FP_Arms.res"
+}
+},
 "nodes": {
-"PATH:Skeleton3D": {
-"rest_pose/external_animation_library": null
+"PATH:Arms_Rig/Skeleton3D": {
+"rest_pose/external_animation_library": null,
+"retarget/bone_map": Object(BoneMap,"resource_local_to_scene":false,"resource_name":"","profile":null,"bonemap":null,"script":null)
+,
+"retarget/bone_renamer/unique_node/make_unique": false,
+"retarget/bone_renamer/unique_node/skeleton_name": "Skeleton3D"
 }
 }
 }

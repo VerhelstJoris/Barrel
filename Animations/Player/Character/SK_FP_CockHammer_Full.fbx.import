@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c3tinktucnjlp"
-path="res://.godot/imported/SK_FP_Move_Backward.fbx-3fb7b3cd36489a2ed3edb42f0b41db43.scn"
+uid="uid://covaakj5hxq1l"
+path="res://.godot/imported/SK_FP_CockHammer_Full.fbx-384003abe875e2758265c13fac9f700d.scn"
 
 [deps]
 
-source_file="res://Animations/Player/Character/SK_FP_Move_Backward.fbx"
-dest_files=["res://.godot/imported/SK_FP_Move_Backward.fbx-3fb7b3cd36489a2ed3edb42f0b41db43.scn"]
+source_file="res://Animations/Player/Character/SK_FP_CockHammer_Full.fbx"
+dest_files=["res://.godot/imported/SK_FP_CockHammer_Full.fbx-384003abe875e2758265c13fac9f700d.scn"]
 
 [params]
 
@@ -35,9 +35,9 @@ _subresources={
 "animations": {
 "Scene": {
 "save_to_file/enabled": true,
-"save_to_file/keep_custom_tracks": false,
-"save_to_file/path": "res://Animations/Player/Character/A_FP_Move_Back.res",
-"settings/loop_mode": 1,
+"save_to_file/keep_custom_tracks": "",
+"save_to_file/path": "res://Animations/Player/Character/A_FP_Cock_Hammer_Full.res",
+"settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
 "slice_1/name": "",
