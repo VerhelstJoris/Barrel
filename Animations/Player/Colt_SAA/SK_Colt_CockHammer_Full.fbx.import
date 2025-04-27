@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://w8fw3rfgdfw4"
-path="res://.godot/imported/SK_Colt_CockHammer.fbx-a4fcb67ad7512b950e0b5ce7ac8e26b6.scn"
+uid="uid://dmq57bpjompld"
+path="res://.godot/imported/SK_Colt_CockHammer_Full.fbx-361b41a5e42f8d713b03358f415cf471.scn"
 
 [deps]
 
-source_file="res://Animations/Player/Colt_SAA/SK_Colt_CockHammer.fbx"
-dest_files=["res://.godot/imported/SK_Colt_CockHammer.fbx-a4fcb67ad7512b950e0b5ce7ac8e26b6.scn"]
+source_file="res://Animations/Player/Colt_SAA/SK_Colt_CockHammer_Full.fbx"
+dest_files=["res://.godot/imported/SK_Colt_CockHammer_Full.fbx-361b41a5e42f8d713b03358f415cf471.scn"]
 
 [params]
 
@@ -35,7 +35,7 @@ _subresources={
 "animations": {
 "Scene": {
 "save_to_file/enabled": true,
-"save_to_file/keep_custom_tracks": "",
+"save_to_file/keep_custom_tracks": true,
 "save_to_file/path": "res://Animations/Player/Colt_SAA/A_Colt_Cock_Hammer.res",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,

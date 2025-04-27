@@ -64,7 +64,6 @@ transform = Transform3D(17, 0.0135273, 5.91297e-10, 0, -7.43094e-07, 17, 0.01352
 
 [node name="Skeleton3D" parent="Colt_Saa_Rig" index="0"]
 unique_name_in_owner = true
-bones/0/rotation = Quaternion(0.999482, -0.0154804, 0.00411172, -0.0279105)
 bones/1/position = Vector3(-1.73345e-10, 0.00340003, -0.00694271)
 bones/1/rotation = Quaternion(-0.00201056, 1.58391e-06, 3.02104e-08, 0.999998)
 bones/1/scale = Vector3(1, 1, 1)
@@ -159,7 +158,7 @@ script = ExtResource("4_0cpdj")
 revolver_bone = "Hatch"
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D" index="12"]
-transform = Transform3D(0.999487, -0.0307516, 0.0089629, -0.0311745, -0.998179, 0.0516513, 0.00735821, -0.0519042, -0.998625, -0.000167496, -0.0144319, 0.00674153)
+transform = Transform3D(0.999633, 0.0271098, 0.000112202, 0.0271101, -0.999625, -0.0040194, 3.19423e-06, 0.00402097, -0.999992, 9.21749e-05, -0.0140511, 0.00694271)
 bone_name = "Cylinder"
 bone_idx = 1
 
