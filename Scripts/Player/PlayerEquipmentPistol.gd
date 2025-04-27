@@ -5,6 +5,8 @@ enum E_chamber_state{Empty, Ready, Fired}
 
 @export_group("Equipment Input Details")
 @export var ENTER_RELOAD: String = "enter_reload"
+@export var RELOAD_NEXT_CHAMBER: String = "enter_reload"
+@export var RELOAD_PREV_CHAMBER: String = "enter_reload"
 
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
@@ -14,9 +16,6 @@ enum E_chamber_state{Empty, Ready, Fired}
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
-const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
-const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
-
 signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
 signal change_reload_state(new_value)
@@ -24,9 +23,6 @@ signal change_reload_state(new_value)
 const log_pistol : String = "PlayerPistol" 
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
 
-const anim_fire_request : String = "parameters/FireOneShot/request"
-const anim_hammer_request : String = "parameters/HammerOneShot/request"
-const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
 
 var start_reload: bool = true;
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
@@ -38,6 +34,20 @@ var current_chamber :int = 0
 const chamber_amount: int = 6
 
 var temp_bullet
+
+#Animation stuff
+const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
+const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
+const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
+const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
+
+const anim_fire_request : String = "parameters/FireOneShot/request"
+const anim_hammer_request : String = "parameters/HammerOneShot/request"
+const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
+const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
+const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
+
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -54,9 +64,13 @@ func _ready() -> void:
 
 func _physics_process(_delta: float):
 	super(_delta)
+
 	if Input.is_action_just_pressed(ENTER_RELOAD):
 		_try_reload()
-		
+	elif Input.is_action_just_pressed(RELOAD_NEXT_CHAMBER):
+		_try_reload_move_cylinder(true)
+	elif Input.is_action_just_pressed(RELOAD_PREV_CHAMBER):
+		_try_reload_move_cylinder(false)
 
 func _try_use_equipment():
 	if(CurrentState == E_Pistol_State.Reloading):
@@ -94,13 +108,28 @@ func _try_reload():
 			print("exit reload")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
 		
+func _try_reload_move_cylinder(next: bool) -> void:
+	if(CurrentState != E_Pistol_State.Reloading):
+		pass
+		
+	if(!_can_proceed_state()):
+		pass
+		
+	if(next):
+		anim_tree.set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	else:
+		anim_tree.set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+
 
 func _on_animation_finished(animation_name : String) -> void:
 	print(animation_name)
 	_enable_changing_states(true)
-	if(animation_name == fire_animation):
+	if(animation_name == fire_animation || animation_name == reload_previous_chamber_animation):
 		cylinder_bone_modifier.increment_cylinder_rotations(1)
-	
+	elif(animation_name == reload_next_chamber_animation):
+		cylinder_bone_modifier.increment_cylinder_rotations(-1)
+
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
