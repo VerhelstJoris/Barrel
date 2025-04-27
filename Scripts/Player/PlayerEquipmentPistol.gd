@@ -15,6 +15,7 @@ enum E_chamber_state{Empty, Ready, Fired}
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
 const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
+const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
 
 signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
@@ -46,7 +47,7 @@ func _ready() -> void:
 	ChamberStates.resize(chamber_amount)
 	ChamberStates.fill(E_chamber_state.Ready)
 	current_bullets.resize(chamber_amount)
-	CurrentState = E_Pistol_State.ReadyToFire
+	CurrentState = E_Pistol_State.HammerUncocked
 	_log_chamber_states()
 	
 	pass # Replace with function body.

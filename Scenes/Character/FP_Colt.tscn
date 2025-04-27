@@ -5,7 +5,7 @@
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
 [ext_resource type="PackedScene" uid="uid://dfqxuka7iftmi" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
-[ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverHammerModifier.gd" id="4_0cpdj"]
+[ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverBoneCacheModifier.gd" id="4_0cpdj"]
 [ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_itqks"]
@@ -135,9 +135,30 @@ visibility_parent = NodePath("")
 active = true
 influence = 1.0
 script = ExtResource("4_0cpdj")
-hammer_bone = "Hammer"
+revolver_bone = "Hammer"
 
-[node name="BoneAttachment3D" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D" index="11"]
+[node name="SkeletonRevolverHatchModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D" index="11"]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+active = true
+influence = 1.0
+script = ExtResource("4_0cpdj")
+revolver_bone = "Hatch"
+
+[node name="BoneAttachment3D" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D" index="12"]
 transform = Transform3D(0.999487, -0.0307516, 0.0089629, -0.0311745, -0.998179, 0.0516513, 0.00735821, -0.0519042, -0.998625, -0.000167496, -0.0144319, 0.00674153)
 bone_name = "Cylinder"
 bone_idx = 1
@@ -148,7 +169,7 @@ visible = false
 layers = 2
 mesh = SubResource("SphereMesh_itqks")
 
-[node name="SkeletonRevolverCylinderModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D" index="12"]
+[node name="SkeletonRevolverCylinderModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D" index="13"]
 _import_path = NodePath("")
 unique_name_in_owner = true
 process_mode = 0

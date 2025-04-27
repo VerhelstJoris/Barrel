@@ -24,24 +24,31 @@ tracks/2/path = NodePath("Colt_Saa_Rig/Skeleton3D:Hatch")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = PackedFloat32Array(0, 1, -0.707105, 0.00151336, -0.00151353, 0.707105, 1.36667, 1, -0.707105, 0.00151336, -0.00151353, 0.707105, 1.4, 1, -0.70528, 0.0507974, 0.0477779, 0.705491, 1.43333, 1, -0.666836, 0.235224, 0.232367, 0.667836, 1.46667, 1, -0.627082, 0.326753, 0.324066, 0.628475, 2, 1, -0.627082, 0.326753, 0.324066, 0.628475)
-tracks/3/type = "position_3d"
-tracks/3/imported = true
+tracks/3/type = "method"
+tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Colt_Saa_Rig/Skeleton3D:Ejector Rod")
+tracks/3/path = NodePath("Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
-tracks/3/keys = PackedFloat32Array(0, 1, -0.00141108, 0.0209694, -0.00735879)
-tracks/4/type = "rotation_3d"
-tracks/4/imported = true
+tracks/3/keys = {
+"times": PackedFloat32Array(1.86667),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [true],
+"method": &"_cache_current_transform"
+}]
+}
+tracks/4/type = "method"
+tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Colt_Saa_Rig/Skeleton3D:Spring End")
+tracks/4/path = NodePath("Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
-tracks/4/keys = PackedFloat32Array(0, 1, 0.297998, 0.0189841, 0.776407, 0.555004)
-tracks/5/type = "scale_3d"
-tracks/5/imported = true
-tracks/5/enabled = true
-tracks/5/path = NodePath("Colt_Saa_Rig/Skeleton3D:Spring_Start")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/keys = PackedFloat32Array(0, 1, 1, 1.00396, 1)
+tracks/4/keys = {
+"times": PackedFloat32Array(1.86667),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [true],
+"method": &"_cache_current_transform"
+}]
+}
