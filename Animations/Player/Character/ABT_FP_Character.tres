@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=21 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=25 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -95,12 +95,32 @@ node_connections = [&"FireOneShot", 0, &"MoveBlendSpace", &"FireOneShot", 1, &"F
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_20p65"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_f8lkl"]
+mix_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xvjal"]
+animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_elkt0"]
+animation = &"AL_FP_Character/A_FP_Reload_Chamber_Previous"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_eu2xo"]
+mix_mode = 1
+
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-281, -113)
-nodes/Animation/node = SubResource("AnimationNodeAnimation_20p65")
-nodes/Animation/position = Vector2(60, 120)
-nodes/output/position = Vector2(420, 140)
-node_connections = [&"output", 0, &"Animation"]
+graph_offset = Vector2(-520.609, -90.0524)
+nodes/Idle/node = SubResource("AnimationNodeAnimation_20p65")
+nodes/Idle/position = Vector2(-300, 80)
+nodes/NextChamberOneShot/node = SubResource("AnimationNodeOneShot_f8lkl")
+nodes/NextChamberOneShot/position = Vector2(40, 180)
+nodes/Next_Chamber/node = SubResource("AnimationNodeAnimation_xvjal")
+nodes/Next_Chamber/position = Vector2(-400, 280)
+nodes/Prev_Chamber/node = SubResource("AnimationNodeAnimation_elkt0")
+nodes/Prev_Chamber/position = Vector2(-140, 480)
+nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_eu2xo")
+nodes/PreviousChamberOneShot/position = Vector2(360, 360)
+nodes/output/position = Vector2(660, 380)
+node_connections = [&"NextChamberOneShot", 0, &"Idle", &"NextChamberOneShot", 1, &"Next_Chamber", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Prev_Chamber", &"output", 0, &"PreviousChamberOneShot"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4m1l8"]
 switch_mode = 2
@@ -115,17 +135,17 @@ advance_condition = &"enter_reload"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_6324t"]
 "states/Enter Reload/node" = SubResource("AnimationNodeAnimation_e1q05")
-"states/Enter Reload/position" = Vector2(193, 282)
+"states/Enter Reload/position" = Vector2(199, 287)
 states/ReadyBlendTree/node = SubResource("AnimationNodeBlendTree_fbbjj")
 states/ReadyBlendTree/position = Vector2(365, 134)
 states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
-states/ReloadingBlendTree/position = Vector2(379, 346)
+states/ReloadingBlendTree/position = Vector2(358, 387)
 states/Start/position = Vector2(144, 139)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o")]
-graph_offset = Vector2(-264, 26)
+graph_offset = Vector2(-277, 50)
 
 [resource]
-graph_offset = Vector2(-88.7041, 239.437)
+graph_offset = Vector2(-223.459, 124.18)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)
 nodes/SM_Colt/node = SubResource("AnimationNodeStateMachine_6324t")

@@ -19,6 +19,7 @@ enum E_chamber_state{Empty, Ready, Fired}
 signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
 signal change_reload_state(new_value)
+signal reload_change_chamber(next)
 
 const log_pistol : String = "PlayerPistol" 
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
@@ -114,7 +115,10 @@ func _try_reload_move_cylinder(next: bool) -> void:
 		
 	if(!_can_proceed_state()):
 		pass
-		
+	
+	print("try move cylinder")	
+	reload_change_chamber.emit(next)
+
 	if(next):
 		anim_tree.set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:

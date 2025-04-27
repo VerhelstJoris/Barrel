@@ -77,14 +77,9 @@ node_connections = [&"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOne
 
 [node name="SK_Colt_Fire" instance=ExtResource("1_mrlqj")]
 script = ExtResource("2_al4xy")
-ENTER_RELOAD = null
 RELOAD_NEXT_CHAMBER = "cycle_cylinder_next"
 RELOAD_PREV_CHAMBER = "cycle_cylinder_previous"
 bullet_scene = ExtResource("3_xgxry")
-equip_type = null
-hold_type = null
-USE_EQUIPMENT = null
-USE_EQUIPMENT_SECONDARY = null
 
 [node name="Colt_Saa_Rig" parent="." index="0"]
 transform = Transform3D(17, 0.0135273, 5.91297e-10, 0, -7.43094e-07, 17, 0.0135273, -17, -7.43093e-07, 0, 0, -0.181667)
@@ -191,6 +186,7 @@ bone_idx = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/BoneAttachment3D" index="0"]
 transform = Transform3D(0.01, 3.90313e-20, 1.04774e-11, 0, 0.01, -3.72529e-11, -1.04774e-11, 3.72529e-11, 0.01, 0.00823076, -0.000259786, 7.41496e-05)
+visible = false
 layers = 2
 mesh = SubResource("SphereMesh_itqks")
 
