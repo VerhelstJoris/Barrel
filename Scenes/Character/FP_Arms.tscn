@@ -534,13 +534,8 @@ bone_idx = 23
 [node name="FP_Colt" parent="Arms_Rig/Skeleton3D/RPropBone" instance=ExtResource("3_j67vm")]
 unique_name_in_owner = true
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
-ENTER_RELOAD = null
 RELOAD_NEXT_CHAMBER = null
 RELOAD_PREV_CHAMBER = null
-equip_type = null
-hold_type = null
-USE_EQUIPMENT = null
-USE_EQUIPMENT_SECONDARY = null
 
 [node name="LPropBone" type="BoneAttachment3D" parent="Arms_Rig/Skeleton3D"]
 unique_name_in_owner = true

@@ -191,7 +191,6 @@ bone_idx = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/BoneAttachment3D" index="0"]
 transform = Transform3D(0.01, 3.90313e-20, 1.04774e-11, 0, 0.01, -3.72529e-11, -1.04774e-11, 3.72529e-11, 0.01, 0.00823076, -0.000259786, 7.41496e-05)
-visible = false
 layers = 2
 mesh = SubResource("SphereMesh_itqks")
 
