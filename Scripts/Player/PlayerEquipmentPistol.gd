@@ -61,7 +61,6 @@ func _ready() -> void:
 	CurrentState = E_Pistol_State.HammerUncocked
 	_log_chamber_states()
 	
-	pass # Replace with function body.
 
 func _physics_process(_delta: float):
 	super(_delta)
@@ -111,10 +110,10 @@ func _try_reload():
 		
 func _try_reload_move_cylinder(next: bool) -> void:
 	if(CurrentState != E_Pistol_State.Reloading):
-		pass
+		return
 		
 	if(!_can_proceed_state()):
-		pass
+		return
 	
 	print("try move cylinder")	
 	reload_change_chamber.emit(next)
@@ -165,13 +164,11 @@ func _reparent_current_bullet_to_cylinder_or_ejector(reparent_to_cylinder: bool)
 	from_transform.remove_child(current_bullets[current_chamber])
 	to_transform.add_child(current_bullets[current_chamber])
 	current_bullets[current_chamber].global_transform = old_transform
-	pass
 
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[current_chamber].queue_free()
 	current_bullets[current_chamber] = null
 	ChamberStates[current_chamber] = E_chamber_state.Empty
-	pass
 	
 func _can_proceed_state() -> bool:
 	return can_proceed_state

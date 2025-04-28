@@ -19,8 +19,7 @@ const anim_reload_preivous_chamber_request : String = "parameters/SM_Colt/Reload
 
 
 const anim_movement_blend : String = "parameters/SM_Colt/ReadyBlendTree/MoveBlendSpace/blend_position"
-
-
+const reload_movement_blend : String = "parameters/SM_Colt/ReloadingBlendTree/MoveBlendSpace/blend_position"
 
 
 var movement_blend_value : Vector2 = Vector2.ZERO
@@ -35,21 +34,17 @@ func _ready() -> void:
 	pistol.update_hammer_action.connect(_oneshot_cock_hammer)
 	pistol.change_reload_state.connect(_on_reload_state_change)
 	pistol.reload_change_chamber.connect(_on_reload_change_chamber)
-	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	prev_delta = _delta
-	pass
 	
 func _oneshot_fire() -> void:
 	anim_tree.set(anim_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	pass
 	
 func _oneshot_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	pass
 
 func _on_reload_state_change(_new_value:bool) -> void:
 	anim_tree[anim_enter_reload_condition] = _new_value
@@ -65,12 +60,11 @@ func _on_reload_change_chamber(_next_chamber: bool) -> void:
 func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
 	anim_tree.set(anim_movement_blend,movement_blend_value)
-	pass # Replace with function body.
+	anim_tree.set(reload_movement_blend,movement_blend_value)
 	
 
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	print("reparent gun")
-	pass
 	match (new_parent):
 		E_prop_bone_type.Left:
 			pistol.reparent(left_prop_bone,false)
@@ -78,4 +72,3 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 			pistol.reparent(right_prop_bone,false)
 		E_prop_bone_type.Global:
 			pistol.reparent(global_prop_bone,false)
-	pass
