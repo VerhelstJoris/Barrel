@@ -1,14 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://dfqxuka7iftmi"]
+[gd_scene load_steps=2 format=3 uid="uid://dfqxuka7iftmi"]
 
-[ext_resource type="ArrayMesh" uid="uid://y3xxvm1v4ym4" path="res://Meshes/Weapons/Colt_Bullet_Bullet.res" id="1_vo7lw"]
-[ext_resource type="ArrayMesh" uid="uid://biv5yw4io2pog" path="res://Meshes/Weapons/Colt_Bullet_Case.res" id="2_lwhkf"]
+[ext_resource type="PackedScene" uid="uid://dprfm8j61f7h5" path="res://Meshes/Weapons/Colt_Bullet.fbx" id="1_0wym2"]
 
-[node name="ColtBullet" type="Node3D"]
+[node name="Colt_Bullet" instance=ExtResource("1_0wym2")]
 
-[node name="Bullet" type="MeshInstance3D" parent="."]
+[node name="Bullet" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
-mesh = ExtResource("1_vo7lw")
 
-[node name="Case" type="MeshInstance3D" parent="Bullet"]
+[node name="Bullet_head" parent="Bullet" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
-mesh = ExtResource("2_lwhkf")

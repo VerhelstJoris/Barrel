@@ -42,15 +42,6 @@ _subresources={
 "save_to_file/enabled": true,
 "save_to_file/path": "res://Meshes/Character/M_FP_Arms.res"
 }
-},
-"nodes": {
-"PATH:Arms_Rig/Skeleton3D": {
-"rest_pose/external_animation_library": null,
-"retarget/bone_map": Object(BoneMap,"resource_local_to_scene":false,"resource_name":"","profile":null,"bonemap":null,"script":null)
-,
-"retarget/bone_renamer/unique_node/make_unique": false,
-"retarget/bone_renamer/unique_node/skeleton_name": "Skeleton3D"
-}
 }
 }
 fbx/importer=0

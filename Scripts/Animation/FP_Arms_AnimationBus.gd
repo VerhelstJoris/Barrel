@@ -15,7 +15,8 @@ const anim_hammer_request : String = "parameters/SM_Colt/ReadyBlendTree/HammerOn
 const anim_enter_reload_condition : String = "parameters/SM_Colt/conditions/enter_reload"
 
 const anim_reload_next_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/NextChamberOneShot/request"
-const anim_reload_preivous_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/PreviousChamberOneShot/request"
+const anim_reload_previous_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/PreviousChamberOneShot/request"
+const anim_reload_insert_shell_request : String = "parameters/SM_Colt/ReloadingBlendTree/InsertShellOneShot/request"
 
 
 const anim_movement_blend : String = "parameters/SM_Colt/ReadyBlendTree/MoveBlendSpace/blend_position"
@@ -34,6 +35,7 @@ func _ready() -> void:
 	pistol.update_hammer_action.connect(_oneshot_cock_hammer)
 	pistol.change_reload_state.connect(_on_reload_state_change)
 	pistol.reload_change_chamber.connect(_on_reload_change_chamber)
+	pistol.reload_insert_shell.connect(_on_reload_insert_shell)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -54,7 +56,10 @@ func _on_reload_change_chamber(_next_chamber: bool) -> void:
 	if _next_chamber:
 		anim_tree.set(anim_reload_next_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:
-		anim_tree.set(anim_reload_preivous_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		anim_tree.set(anim_reload_previous_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		
+func _on_reload_insert_shell() -> void:
+	anim_tree.set(anim_reload_insert_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 
 func _on_player_movement_input(direction:Vector2) -> void:

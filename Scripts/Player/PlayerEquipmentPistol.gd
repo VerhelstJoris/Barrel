@@ -20,6 +20,7 @@ signal update_fire_action(new_value)
 signal update_hammer_action(new_value)
 signal change_reload_state(new_value)
 signal reload_change_chamber(next)
+signal reload_insert_shell()
 
 const log_pistol : String = "PlayerPistol" 
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
@@ -47,7 +48,7 @@ const anim_hammer_request : String = "parameters/HammerOneShot/request"
 const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
 const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
 const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
-
+const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
 
 
 # Called when the node enters the scene tree for the first time.
@@ -56,7 +57,7 @@ func _ready() -> void:
 	anim_tree.animation_finished.connect(_on_animation_finished)
 	#can fire all rounds
 	ChamberStates.resize(chamber_amount)
-	ChamberStates.fill(E_chamber_state.Ready)
+	ChamberStates.fill(E_chamber_state.Empty)
 	current_bullets.resize(chamber_amount)
 	CurrentState = E_Pistol_State.HammerUncocked
 	_log_chamber_states()
@@ -77,6 +78,8 @@ func _try_use_equipment():
 		if(_can_insert_round()):
 			print("Inserting Shell")
 			_enable_changing_states(false)
+			anim_tree.set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			reload_insert_shell.emit()
 	else:
 		if _can_shoot():
 			print("shooting")
@@ -114,7 +117,8 @@ func _try_reload_move_cylinder(next: bool) -> void:
 		
 	if(!_can_proceed_state()):
 		return
-	
+
+	can_proceed_state = false
 	print("try move cylinder")	
 	reload_change_chamber.emit(next)
 
@@ -147,6 +151,7 @@ func _spawn_bullet_for_chamber() -> void:
 		print("Spawning bullet")
 		var new_bullet: Node3D = bullet_scene.instantiate()
 		bullet_attachment_point.add_child(new_bullet)
+		new_bullet.scale = Vector3(0.17,0.17,0.17)
 		current_bullets[current_chamber] = new_bullet
 		ChamberStates[current_chamber] = E_chamber_state.Ready
 		
