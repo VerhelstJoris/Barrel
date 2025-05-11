@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfqxuka7iftmi"]
+[gd_scene load_steps=2 format=3 uid="uid://xdok7aguyjvv"]
 
 [ext_resource type="PackedScene" uid="uid://dprfm8j61f7h5" path="res://Meshes/Weapons/Colt_Bullet.fbx" id="1_0wym2"]
 
@@ -9,5 +9,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2
 
 [node name="Bullet_head" parent="Bullet" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 layers = 2

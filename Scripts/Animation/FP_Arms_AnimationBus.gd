@@ -36,6 +36,7 @@ func _ready() -> void:
 	pistol.change_reload_state.connect(_on_reload_state_change)
 	pistol.reload_change_chamber.connect(_on_reload_change_chamber)
 	pistol.reload_insert_shell.connect(_on_reload_insert_shell)
+	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -57,7 +58,11 @@ func _on_reload_change_chamber(_next_chamber: bool) -> void:
 		anim_tree.set(anim_reload_next_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:
 		anim_tree.set(anim_reload_previous_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		
+	
+func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:		
+	right_prop_bone.add_child(_new_bullet)
+	
+
 func _on_reload_insert_shell() -> void:
 	anim_tree.set(anim_reload_insert_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 

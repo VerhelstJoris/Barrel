@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
-[ext_resource type="PackedScene" uid="uid://dfqxuka7iftmi" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
+[ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
 [ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverBoneCacheModifier.gd" id="4_0cpdj"]
 [ext_resource type="Script" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
 
@@ -550,12 +550,9 @@ transform = Transform3D(0.923879, 3.89414e-07, 0.382684, -3.90206e-07, 1, -1.045
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 
-[node name="Colt_Bullet" parent="Colt_Saa_Rig/Skeleton3D/BulletAttachmentPoint" instance=ExtResource("3_xgxry")]
-transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 0, 0, 0)
-visible = false
-
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/BulletAttachmentPoint"]
 transform = Transform3D(-0.00092388, 0, 0.000382684, 0, 0.001, 0, -0.000382684, 0, -0.00092388, 0, 0, 0)
+visible = false
 layers = 2
 mesh = SubResource("SphereMesh_itqks")
 skeleton = NodePath("../../CylinderAttachment")

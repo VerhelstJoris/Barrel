@@ -21,6 +21,7 @@ signal update_hammer_action(new_value)
 signal change_reload_state(new_value)
 signal reload_change_chamber(next)
 signal reload_insert_shell()
+signal bullet_spawned_for_inserting(new_bullet)
 
 const log_pistol : String = "PlayerPistol" 
 const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
@@ -150,25 +151,26 @@ func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
 		print("Spawning bullet")
 		var new_bullet: Node3D = bullet_scene.instantiate()
-		bullet_attachment_point.add_child(new_bullet)
-		new_bullet.scale = Vector3(0.17,0.17,0.17)
+		bullet_spawned_for_inserting.emit(new_bullet)
 		current_bullets[current_chamber] = new_bullet
 		ChamberStates[current_chamber] = E_chamber_state.Ready
 		
 func _reparent_current_bullet_to_cylinder_or_ejector(reparent_to_cylinder: bool) -> void:
-	var from_transform : Node3D
 	var to_transform: Node3D
+	
 	if(reparent_to_cylinder):
-		from_transform = bullet_attachment_point
 		to_transform = cylinder_attachment
 	else:
-		from_transform = cylinder_attachment
 		to_transform = bullet_attachment_point
-	
-	var old_transform: Transform3D = current_bullets[current_chamber].global_transform
-	from_transform.remove_child(current_bullets[current_chamber])
-	to_transform.add_child(current_bullets[current_chamber])
-	current_bullets[current_chamber].global_transform = old_transform
+		
+	print("reparent current bullet to  " + to_transform.name)
+
+	current_bullets[current_chamber].reparent(to_transform,true)
+	#var old_transform: Transform3D = current_bullets[current_chamber].global_transform
+	#from_transform.remove_child(current_bullets[current_chamber])
+	#to_transform.add_child(current_bullets[current_chamber])
+	#current_bullets[current_chamber].global_transform = old_transform
+
 
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[current_chamber].queue_free()
