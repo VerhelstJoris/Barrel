@@ -43,6 +43,7 @@ const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
 const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
+const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
@@ -154,24 +155,11 @@ func _spawn_bullet_for_chamber() -> void:
 		bullet_spawned_for_inserting.emit(new_bullet)
 		current_bullets[current_chamber] = new_bullet
 		ChamberStates[current_chamber] = E_chamber_state.Ready
-		
-func _reparent_current_bullet_to_cylinder_or_ejector(reparent_to_cylinder: bool) -> void:
-	var to_transform: Node3D
 	
-	if(reparent_to_cylinder):
-		to_transform = cylinder_attachment
-	else:
-		to_transform = bullet_attachment_point
-		
-	print("reparent current bullet to  " + to_transform.name)
-
-	current_bullets[current_chamber].reparent(to_transform,true)
-	#var old_transform: Transform3D = current_bullets[current_chamber].global_transform
-	#from_transform.remove_child(current_bullets[current_chamber])
-	#to_transform.add_child(current_bullets[current_chamber])
-	#current_bullets[current_chamber].global_transform = old_transform
-
-
+func _on_insert_finished() -> void:
+	current_bullets[current_chamber].reparent(cylinder_attachment,false)
+	current_bullets[current_chamber].set_global_position(bullet_attachment_point.get_global_position())
+	
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[current_chamber].queue_free()
 	current_bullets[current_chamber] = null
