@@ -33,13 +33,13 @@ var can_proceed_state: bool = true;
 
 var ChamberStates : Array[E_chamber_state]
 var current_bullets: Array[Node3D]
-var current_chamber :int = 0
+var current_chamber_id :int = 0
 const chamber_amount: int = 6
 
 var temp_bullet
 
 #Animation stuff
-const fire_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
+const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
 const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
@@ -134,47 +134,57 @@ func _try_reload_move_cylinder(next: bool) -> void:
 func _on_animation_finished(animation_name : String) -> void:
 	print(animation_name)
 	_enable_changing_states(true)
-	if(animation_name == fire_animation || animation_name == reload_previous_chamber_animation):
-		cylinder_bone_modifier.increment_cylinder_rotations(1)
-	elif(animation_name == reload_next_chamber_animation):
-		cylinder_bone_modifier.increment_cylinder_rotations(-1)
-
+	match animation_name:
+		cock_hammer_animation:
+			_increase_cylinder_rotations(1)
+		reload_previous_chamber_animation:
+			_increase_cylinder_rotations(1)
+		reload_next_chamber_animation:
+			_increase_cylinder_rotations(-1)
+			
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
 	
+func _increase_cylinder_rotations(amount : int) -> void:
+	var to_add : int = amount %6
+	cylinder_bone_modifier.increment_cylinder_rotations(to_add)
+	current_chamber_id = (current_chamber_id + to_add)%6
+	if(current_chamber_id < 0):
+		current_chamber_id = 6 + current_chamber_id
+	_log_chamber_states()
+
 
 func _enable_changing_states(b_enabled : bool) -> void:
 	can_proceed_state = b_enabled
-	
 	
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
 		print("Spawning bullet")
 		var new_bullet: Node3D = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
-		current_bullets[current_chamber] = new_bullet
-		ChamberStates[current_chamber] = E_chamber_state.Ready
+		current_bullets[current_chamber_id] = new_bullet
+		ChamberStates[current_chamber_id] = E_chamber_state.Ready
 	
 func _on_insert_finished() -> void:
-	current_bullets[current_chamber].reparent(cylinder_attachment,false)
-	current_bullets[current_chamber].set_global_position(bullet_attachment_point.get_global_position())
+	current_bullets[current_chamber_id].reparent(cylinder_attachment,false)
+	current_bullets[current_chamber_id].set_global_position(bullet_attachment_point.get_global_position())
 	
 func _delete_bullet_from_chamber()-> void:
-	current_bullets[current_chamber].queue_free()
-	current_bullets[current_chamber] = null
-	ChamberStates[current_chamber] = E_chamber_state.Empty
+	current_bullets[current_chamber_id].queue_free()
+	current_bullets[current_chamber_id] = null
+	ChamberStates[current_chamber_id] = E_chamber_state.Empty
 	
 func _can_proceed_state() -> bool:
 	return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber] == E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber_id] == E_chamber_state.Empty
 
 func _can_try_eject() -> bool:
 	print("Try ejecting shell")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber] != E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber_id] != E_chamber_state.Empty
 
 func _can_enter_reload() -> bool:
 	print("Try enter reload")
@@ -196,7 +206,7 @@ func _log_chamber_states() -> void:
 	var builtStr : String = ""
 	var index: int =  0
 	for chamber in ChamberStates:
-		var bcurrent : bool = (index == current_chamber)
+		var bcurrent : bool = (index == current_chamber_id)
 		if bcurrent:
 			builtStr+="(" 
 		else:
@@ -213,4 +223,4 @@ func _log_chamber_states() -> void:
 		else:
 			builtStr+="]"
 		index +=1
-	print(builtStr)
+	print(builtStr, " ", current_chamber_id)
