@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=41 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=43 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -92,11 +92,17 @@ nodes/MoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_x8cwr")
 nodes/MoveBlendSpace/position = Vector2(-260, -180)
 node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"MoveBlendSpace", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Cock Hammer"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e53n4"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x4084"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kfy3f"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_x8ke2"]
+mix_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
+animation = &"AL_FP_Character/A_FP_Reload_Eject_Shell"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_20p65"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
@@ -112,7 +118,7 @@ animation = &"AL_FP_Character/A_FP_Reload_Insert_Shell"
 
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_esh1b"]
 
-[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_pybp5"]
+[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_em04p"]
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_ea645"]
 
@@ -161,24 +167,24 @@ mix_mode = 1
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-318.511, 234.298)
-nodes/output/position = Vector2(1120, 620)
+graph_offset = Vector2(161.15, 489.742)
+nodes/output/position = Vector2(1500, 660)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_kfy3f")
 nodes/Animation/position = Vector2(-720, 440)
-"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_e53n4")
-"nodes/Animation 2/position" = Vector2(120, 1100)
+nodes/Eject_Shell/node = SubResource("AnimationNodeAnimation_g0oko")
+nodes/Eject_Shell/position = Vector2(380, 1060)
 nodes/Idle/node = SubResource("AnimationNodeAnimation_20p65")
 nodes/Idle/position = Vector2(-800, -160)
 nodes/InsertShellOneShot/node = SubResource("AnimationNodeOneShot_kiv7u")
 nodes/InsertShellOneShot/position = Vector2(800, 600)
 nodes/Insert_Shell/node = SubResource("AnimationNodeAnimation_c06vg")
-nodes/Insert_Shell/position = Vector2(0, 940)
+nodes/Insert_Shell/position = Vector2(280, 820)
 nodes/MinusPose/node = SubResource("AnimationNodeSub2_esh1b")
 nodes/MinusPose/position = Vector2(-360, 300)
 "nodes/MinusPose 2/node" = SubResource("AnimationNodeSub2_26701")
 "nodes/MinusPose 2/position" = Vector2(-85.245, 665.345)
-nodes/MinusPose3/node = SubResource("AnimationNodeSub2_pybp5")
-nodes/MinusPose3/position = Vector2(600, 1020)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_x4084")
+"nodes/Animation 3/position" = Vector2(420, 1240)
 nodes/MoveAdd/node = SubResource("AnimationNodeAdd2_ea645")
 nodes/MoveAdd/position = Vector2(-340, -40)
 nodes/MoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_vd61f")
@@ -193,7 +199,11 @@ nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_eu2xo")
 nodes/PreviousChamberOneShot/position = Vector2(360, 360)
 nodes/ReloadPose/node = SubResource("AnimationNodeAnimation_pureu")
 nodes/ReloadPose/position = Vector2(-640, 860)
-node_connections = [&"output", 0, &"InsertShellOneShot", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"MinusPose3", &"MinusPose", 0, &"Next_Chamber", &"MinusPose", 1, &"Animation", &"MinusPose 2", 0, &"Prev_Chamber", &"MinusPose 2", 1, &"ReloadPose", &"MinusPose3", 0, &"Insert_Shell", &"MinusPose3", 1, &"Animation 2", &"MoveAdd", 0, &"Idle", &"MoveAdd", 1, &"MoveBlendSpace", &"NextChamberOneShot", 0, &"MoveAdd", &"NextChamberOneShot", 1, &"MinusPose", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"MinusPose 2"]
+nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
+nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
+nodes/MinusPose4/node = SubResource("AnimationNodeSub2_em04p")
+nodes/MinusPose4/position = Vector2(960, 1080)
+node_connections = [&"output", 0, &"EjectShellOneShot", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Insert_Shell", &"MinusPose", 0, &"Next_Chamber", &"MinusPose", 1, &"Animation", &"MinusPose 2", 0, &"Prev_Chamber", &"MinusPose 2", 1, &"ReloadPose", &"MoveAdd", 0, &"Idle", &"MoveAdd", 1, &"MoveBlendSpace", &"NextChamberOneShot", 0, &"MoveAdd", &"NextChamberOneShot", 1, &"MinusPose", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"MinusPose 2", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"MinusPose4", &"MinusPose4", 0, &"Eject_Shell", &"MinusPose4", 1, &"Animation 3"]
 
 [sub_resource type="Curve" id="Curve_0l78c"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -221,10 +231,10 @@ states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(358, 387)
 states/Start/position = Vector2(144, 139)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o")]
-graph_offset = Vector2(-174, 102)
+graph_offset = Vector2(-194, 86)
 
 [resource]
-graph_offset = Vector2(-38, 93)
+graph_offset = Vector2(-42.93, 50.633)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

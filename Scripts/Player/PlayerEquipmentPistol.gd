@@ -21,6 +21,7 @@ signal update_hammer_action(new_value)
 signal change_reload_state(new_value)
 signal reload_change_chamber(next)
 signal reload_insert_shell()
+signal reload_eject_shell()
 signal bullet_spawned_for_inserting(new_bullet)
 
 const log_pistol : String = "PlayerPistol" 
@@ -51,6 +52,7 @@ const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/reques
 const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
 const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
 const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
+const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/request"
 
 
 # Called when the node enters the scene tree for the first time.
@@ -98,7 +100,9 @@ func _try_use_equipment_secondary():
 	if(CurrentState == E_Pistol_State.Reloading):
 		if(_can_try_eject()):
 			print("Ejecting Shell")
-			can_proceed_state = false
+			_enable_changing_states(false)
+			anim_tree.set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			reload_eject_shell.emit()
 		
 func _try_reload():
 	#if we're not already reloading, try to get into it
@@ -166,6 +170,10 @@ func _spawn_bullet_for_chamber() -> void:
 		current_bullets[current_chamber_id] = new_bullet
 		ChamberStates[current_chamber_id] = E_chamber_state.Ready
 	
+func _reparent_bullet_to_ejector() -> void:		
+	current_bullets[current_chamber_id].reparent(bullet_attachment_point,false)
+	current_bullets[current_chamber_id].set_global_position(bullet_attachment_point.get_global_position())
+
 func _on_insert_finished() -> void:
 	current_bullets[current_chamber_id].reparent(cylinder_attachment,false)
 	current_bullets[current_chamber_id].set_global_position(bullet_attachment_point.get_global_position())
