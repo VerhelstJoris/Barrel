@@ -360,7 +360,7 @@ parameters/PreviousChamberOneShot/internal_active = false
 parameters/PreviousChamberOneShot/request = 0
 
 [node name="Colt_Saa_Rig" type="Node3D" parent="."]
-transform = Transform3D(100, 0, 0, 0, -1.19209e-05, 100, 0, -100, -1.19209e-05, 0, -0.0827702, 0)
+transform = Transform3D(99.945, -3.31552, -1.44926e-07, 0, -4.37114e-06, 100, -3.31552, -99.945, -4.36874e-06, 0, -0.0827702, 0)
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Colt_Saa_Rig"]
 unique_name_in_owner = true
