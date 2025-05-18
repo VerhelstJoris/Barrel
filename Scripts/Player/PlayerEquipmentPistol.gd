@@ -54,7 +54,6 @@ const anim_reload_previous_chamber_request : String = "parameters/PreviousChambe
 const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/request"
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 
@@ -146,6 +145,7 @@ func _on_animation_finished(animation_name : String) -> void:
 		reload_next_chamber_animation:
 			_increase_cylinder_rotations(-1)
 			
+			
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
@@ -173,8 +173,9 @@ func _spawn_bullet_for_chamber() -> void:
 func _reparent_bullet_to_ejector() -> void:		
 	current_bullets[current_chamber_id].reparent(bullet_attachment_point,false)
 	current_bullets[current_chamber_id].set_global_position(bullet_attachment_point.get_global_position())
-
+	
 func _on_insert_finished() -> void:
+	print("insert finished")
 	current_bullets[current_chamber_id].reparent(cylinder_attachment,false)
 	current_bullets[current_chamber_id].set_global_position(bullet_attachment_point.get_global_position())
 	
