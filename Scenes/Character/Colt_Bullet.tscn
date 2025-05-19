@@ -38,7 +38,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_rtafe")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7d7q5"]
-albedo_color = Color(1, 0, 0, 1)
+albedo_color = Color(0.771427, 0.442441, 0.000363098, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_icst2"]
 

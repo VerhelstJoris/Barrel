@@ -174,8 +174,8 @@ func _spawn_bullet_for_chamber() -> void:
 	
 func _reparent_bullet_to_ejector() -> void:		
 	print("reparent to ejector")
-	current_bullets[current_chamber_id].reparent(bullet_attachment_point,false)
-	#current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
+	current_bullets[current_chamber_id].reparent(bullet_attachment_point,true)
+	current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 
 
 func _on_insert_finished() -> void:
