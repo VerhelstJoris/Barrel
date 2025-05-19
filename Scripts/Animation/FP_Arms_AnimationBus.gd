@@ -81,8 +81,9 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	print("reparent gun")
 	match (new_parent):
 		E_prop_bone_type.Left:
-			pistol.reparent(left_prop_bone,false)
+			pistol.reparent(left_prop_bone,true)
 		E_prop_bone_type.Right:
-			pistol.reparent(right_prop_bone,false)
+			pistol.reparent(right_prop_bone,true)
 		E_prop_bone_type.Global:
-			pistol.reparent(global_prop_bone,false)
+			pistol.reparent(global_prop_bone,true)
+		

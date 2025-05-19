@@ -14,6 +14,7 @@ enum E_chamber_state{Empty, Ready, Fired}
 
 @onready var cylinder_bone_modifier: SkeletonRevolverCylinderModifier = %SkeletonRevolverCylinderModifier
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
+@onready var bullet_reparent_point: Node3D = %BulletReparentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
 signal update_fire_action(new_value)
@@ -100,7 +101,7 @@ func _try_use_equipment_secondary():
 		if(_can_try_eject()):
 			print("Ejecting Shell")
 			_enable_changing_states(false)
-			_reparent_bullet_to_ejector()
+			#_reparent_bullet_to_ejector()
 			anim_tree.set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			reload_eject_shell.emit()
 		
@@ -172,13 +173,18 @@ func _spawn_bullet_for_chamber() -> void:
 		ChamberStates[current_chamber_id] = E_chamber_state.Ready
 	
 func _reparent_bullet_to_ejector() -> void:		
-	current_bullets[current_chamber_id].reparent(bullet_attachment_point,true)
+	print("reparent to ejector")
+	current_bullets[current_chamber_id].reparent(bullet_attachment_point,false)
+	#current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 
-	
+
 func _on_insert_finished() -> void:
 	print("insert finished")
+	current_bullets[current_chamber_id].reparent(bullet_reparent_point,true)
+	current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 	current_bullets[current_chamber_id].reparent(cylinder_attachment,true)
-	
+
+
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[current_chamber_id].queue_free()
 	current_bullets[current_chamber_id] = null
