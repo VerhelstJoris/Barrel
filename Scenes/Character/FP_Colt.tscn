@@ -56,7 +56,6 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(913.702, 569.727)
 nodes/output/position = Vector2(2160, 740)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)
@@ -379,35 +378,35 @@ bones/0/parent = -1
 bones/0/rest = Transform3D(1, 3.49691e-07, 1.50996e-07, 3.49691e-07, -1, 1.50996e-07, 1.50996e-07, -1.50996e-07, -1, 0, 0, 0)
 bones/0/enabled = true
 bones/0/position = Vector3(0, 0, 0)
-bones/0/rotation = Quaternion(1, 1.74846e-07, 7.54979e-08, -7.54979e-08)
+bones/0/rotation = Quaternion(1, 1.74845e-07, 7.5498e-08, -7.5498e-08)
 bones/0/scale = Vector3(1, 1, 1)
 bones/1/name = "Cylinder"
 bones/1/parent = 0
 bones/1/rest = Transform3D(1, -2.42203e-07, -4.71486e-10, 2.42202e-07, 0.999992, 0.00402129, -5.02484e-10, -0.00402129, 0.999992, 2.8852e-10, 0.000578005, -0.00118026)
 bones/1/enabled = true
 bones/1/position = Vector3(2.8852e-10, 0.000578005, -0.00118026)
-bones/1/rotation = Quaternion(-0.00201065, 7.74965e-12, 1.21101e-07, 0.999998)
+bones/1/rotation = Quaternion(-0.00174123, 0.500002, -0.00100526, 0.866022)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/name = "Trigger"
 bones/2/parent = 0
 bones/2/rest = Transform3D(0.999945, -0.00127956, 0.0103687, 0.0101789, 0.34287, -0.939328, -0.0023532, 0.939382, 0.342865, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.653821, 0.00421804, 0.00308159, 0.756632)
+bones/2/rotation = Quaternion(0.72762, 0.00451049, 0.00263506, 0.685961)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
 bones/3/rest = Transform3D(1, 3.80744e-08, 1.93973e-07, -1.94775e-07, 0.0223072, 0.999751, 3.37379e-08, -0.999751, 0.0223072, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.778789, 1.18173e-07, -2.92127e-08, 0.627286)
+bones/3/rotation = Quaternion(-0.950303, 1.19563e-07, 1.51904e-08, 0.311325)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
 bones/4/rest = Transform3D(0.999991, 1.49477e-07, 0.00428062, -0.00428062, 3.57628e-07, 0.999991, 1.4808e-07, -1, 3.57628e-07, -0.000461162, 1.28043e-05, -0.000911844)
 bones/4/enabled = true
 bones/4/position = Vector3(-0.000461162, 1.28043e-05, -0.000911844)
-bones/4/rotation = Quaternion(-0.707105, 0.00151338, -0.00151348, 0.707105)
+bones/4/rotation = Quaternion(-0.622351, 0.335678, 0.333011, 0.623782)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "Ejector Rod"
 bones/5/parent = 0
@@ -556,7 +555,7 @@ revolver_bone = "Hatch"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 1.06879e-07, 1.51929e-07, 1.07489e-07, -0.999992, -0.00402114, 1.51498e-07, 0.00402114, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
+transform = Transform3D(0.499994, 2.68871e-07, 0.866029, 0.00348244, -0.999992, -0.00201024, 0.866022, 0.004021, -0.49999, 3.12429e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
 
@@ -590,7 +589,7 @@ cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(-0.92354, -0.0271085, -0.382543, 0.025045, -0.999632, 0.0103742, -0.382684, 2.00491e-07, 0.92388, -0.000321851, -0.00110923, 0.00134809)
+transform = Transform3D(-0.92354, -0.0271084, -0.382543, 0.0250448, -0.999633, 0.0103741, -0.382684, 1.8559e-07, 0.92388, -0.000321851, -0.00110923, 0.00134809)
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 

@@ -79,11 +79,15 @@ func _on_player_movement_input(direction:Vector2) -> void:
 
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	print("reparent gun")
+	var bone_to_reparent_to : BoneAttachment3D
 	match (new_parent):
 		E_prop_bone_type.Left:
-			pistol.reparent(left_prop_bone,true)
+			bone_to_reparent_to = left_prop_bone
 		E_prop_bone_type.Right:
-			pistol.reparent(right_prop_bone,true)
+			bone_to_reparent_to = right_prop_bone
 		E_prop_bone_type.Global:
-			pistol.reparent(global_prop_bone,true)
+			bone_to_reparent_to = global_prop_bone
 		
+	pistol.reparent(bone_to_reparent_to,true)
+	var pistolNode = pistol.get_owner() as Node3D 
+	#pistolNode.set_global_transform(bone_to_reparent_to.get_global_transform())
