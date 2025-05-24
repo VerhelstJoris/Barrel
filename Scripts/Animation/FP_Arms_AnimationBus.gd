@@ -13,6 +13,7 @@ const anim_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/FireOneSho
 const anim_hammer_request : String = "parameters/SM_Colt/ReadyBlendTree/HammerOneShot/request"
 
 const anim_enter_reload_condition : String = "parameters/SM_Colt/conditions/enter_reload"
+const anim_exit_reload_condition : String = "parameters/SM_Colt/conditions/exit_reload"
 
 const anim_reload_next_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/NextChamberOneShot/request"
 const anim_reload_previous_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/PreviousChamberOneShot/request"
@@ -52,8 +53,13 @@ func _oneshot_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_reload_state_change(_new_value:bool) -> void:
-	anim_tree[anim_enter_reload_condition] = _new_value
-
+	if _new_value:
+		anim_tree[anim_enter_reload_condition] = true
+		anim_tree[anim_exit_reload_condition] = false
+	else:	
+		anim_tree[anim_exit_reload_condition] = true
+		anim_tree[anim_enter_reload_condition] = false
+		
 func _on_reload_change_chamber(_next_chamber: bool) -> void:
 	print("cylinder signal")
 	if _next_chamber:
@@ -89,5 +95,5 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 			bone_to_reparent_to = global_prop_bone
 		
 	pistol.reparent(bone_to_reparent_to,true)
-	var pistolNode = pistol.get_owner() as Node3D 
-	#pistolNode.set_global_transform(bone_to_reparent_to.get_global_transform())
+	var pistolNode : Node3D = pistol.get_owner() as Node3D 
+	pistolNode.set_global_transform(bone_to_reparent_to.get_global_transform())

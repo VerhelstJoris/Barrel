@@ -1,10 +1,13 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=43 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=46 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e1q05"]
 animation = &"AL_FP_Character/A_FP_Enter_Reload"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
+animation = &"AL_FP_Character/A_FP_Exit_Reload"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x6cgn"]
 animation = &"AL_FP_Character/A_FP_Cock_Hammer_Full"
@@ -222,19 +225,29 @@ advance_mode = 2
 advance_mode = 2
 advance_condition = &"enter_reload"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_g0oko"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_x4084"]
+advance_mode = 2
+advance_condition = &"exit_reload"
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_6324t"]
 "states/Enter Reload/node" = SubResource("AnimationNodeAnimation_e1q05")
 "states/Enter Reload/position" = Vector2(199, 287)
+"states/Exit Reload/node" = SubResource("AnimationNodeAnimation_x8ke2")
+"states/Exit Reload/position" = Vector2(527, 266)
 states/ReadyBlendTree/node = SubResource("AnimationNodeBlendTree_fbbjj")
 states/ReadyBlendTree/position = Vector2(365, 134)
 states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(358, 387)
 states/Start/position = Vector2(144, 139)
-transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o")]
-graph_offset = Vector2(-194, 86)
+transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084")]
+graph_offset = Vector2(-156, 73)
 
 [resource]
-graph_offset = Vector2(-42.93, 50.633)
+graph_offset = Vector2(8, 132)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

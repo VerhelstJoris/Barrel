@@ -117,6 +117,7 @@ func _try_reload():
 		if(_can_exit_reload()):
 			print("exit reload")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
+			change_reload_state.emit(false)
 		
 func _try_reload_move_cylinder(next: bool) -> void:
 	if(CurrentState != E_Pistol_State.Reloading):
