@@ -24,7 +24,7 @@ point_count = 2
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_58nbj"]
 fadein_time = 0.05
-fadeout_time = 0.1
+fadeout_time = 0.15
 fadeout_curve = SubResource("Curve_553cn")
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_slhe6"]
@@ -86,7 +86,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_vy5b7")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-703.353, -371.66)
+graph_offset = Vector2(-479.353, -137.66)
 nodes/output/position = Vector2(480, 240)
 "nodes/Cock Hammer/node" = SubResource("AnimationNodeAnimation_x6cgn")
 "nodes/Cock Hammer/position" = Vector2(-360, 300)
@@ -262,7 +262,7 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-143, 82)
 
 [resource]
-graph_offset = Vector2(-75, 155)
+graph_offset = Vector2(-126, 125)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

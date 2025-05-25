@@ -2093,6 +2093,9 @@ _subresources={
 }
 },
 "nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": false
+},
 "PATH:Arms_Rig/Skeleton3D": {
 "rest_pose/external_animation_library": null,
 "rest_pose/load_pose": 1,
