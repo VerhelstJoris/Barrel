@@ -38,7 +38,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Animations/Player/Character/A_FP_Enter_Reload.res",
-"save_to_file/keep_custom_tracks": "",
+"save_to_file/keep_custom_tracks": true,
 "save_to_file/path": "uid://bhqn574fsp4uf",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
