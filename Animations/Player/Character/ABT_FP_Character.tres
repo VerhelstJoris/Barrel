@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=47 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=49 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -8,6 +8,9 @@ animation = &"AL_FP_Character/A_FP_Enter_Reload"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
 animation = &"AL_FP_Character/A_FP_Exit_Reload"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_em04p"]
+animation = &"AL_FP_Character/A_FP_Idle_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x6cgn"]
 animation = &"AL_FP_Character/A_FP_Cock_Hammer_Full"
@@ -27,6 +30,8 @@ fadeout_curve = SubResource("Curve_553cn")
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_slhe6"]
 mix_mode = 1
 fadeout_time = 0.05
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_tmq1e"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kcdye"]
 animation = &"AL_FP_Character/A_FP_Idle"
@@ -81,7 +86,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_vy5b7")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-600.189, -75.455)
+graph_offset = Vector2(-703.353, -371.66)
 nodes/output/position = Vector2(480, 240)
 "nodes/Cock Hammer/node" = SubResource("AnimationNodeAnimation_x6cgn")
 "nodes/Cock Hammer/position" = Vector2(-360, 300)
@@ -92,8 +97,12 @@ nodes/FireOneShot/position = Vector2(20, -40)
 nodes/HammerOneShot/node = SubResource("AnimationNodeOneShot_slhe6")
 nodes/HammerOneShot/position = Vector2(230.677, 228.536)
 nodes/MoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_x8cwr")
-nodes/MoveBlendSpace/position = Vector2(-260, -180)
-node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"MoveBlendSpace", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Cock Hammer"]
+nodes/MoveBlendSpace/position = Vector2(-500, -180)
+nodes/IdleMoveBlend/node = SubResource("AnimationNodeBlend2_tmq1e")
+nodes/IdleMoveBlend/position = Vector2(-240, -340)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_em04p")
+nodes/Animation/position = Vector2(-600, -440)
+node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"IdleMoveBlend", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Cock Hammer", &"IdleMoveBlend", 0, &"Animation", &"IdleMoveBlend", 1, &"MoveBlendSpace"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x4084"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
@@ -226,13 +235,12 @@ advance_mode = 2
 advance_condition = &"enter_reload"
 
 [sub_resource type="Curve" id="Curve_x4084"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_g0oko"]
-xfade_time = 0.2
+xfade_time = 0.4
 xfade_curve = SubResource("Curve_x4084")
-reset = false
 switch_mode = 2
 advance_mode = 2
 
@@ -251,10 +259,10 @@ states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(358, 387)
 states/Start/position = Vector2(144, 139)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084")]
-graph_offset = Vector2(-215, 23)
+graph_offset = Vector2(-143, 82)
 
 [resource]
-graph_offset = Vector2(-71, 115)
+graph_offset = Vector2(-75, 155)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)
