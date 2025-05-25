@@ -50,6 +50,7 @@ const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
 const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
+const anim_exit_reload_request : String = "parameters/ExitReloadOneShot/request"
 const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
 const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
 const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
@@ -116,9 +117,11 @@ func _try_reload():
 	else:
 		if(_can_exit_reload()):
 			print("exit reload")
-			_proceed_to_state(E_Pistol_State.HammerUncocked)
+			_proceed_to_state(E_Pistol_State.ReadyToFire)
 			change_reload_state.emit(false)
-		
+			anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+
 func _try_reload_move_cylinder(next: bool) -> void:
 	if(CurrentState != E_Pistol_State.Reloading):
 		return
@@ -143,7 +146,9 @@ func _on_animation_finished(animation_name : String) -> void:
 	match animation_name:
 		cock_hammer_animation:
 			_increase_cylinder_rotations(1)
-		reload_previous_chamber_animation:
+		reload_previous_chamber_animation: 
+			_increase_cylinder_rotations(1)
+		enter_reload_animation:
 			_increase_cylinder_rotations(1)
 		reload_next_chamber_animation:
 			_increase_cylinder_rotations(-1)
