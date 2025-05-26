@@ -28,6 +28,8 @@ fadeout_time = 0.15
 fadeout_curve = SubResource("Curve_553cn")
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_slhe6"]
+filter_enabled = true
+filters = ["Arms_Rig/Skeleton3D:Hand_R", "Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Prop_R", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_R"]
 mix_mode = 1
 fadeout_time = 0.05
 
@@ -86,7 +88,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_vy5b7")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-479.353, -137.66)
+graph_offset = Vector2(-492.353, 31.34)
 nodes/output/position = Vector2(480, 240)
 "nodes/Cock Hammer/node" = SubResource("AnimationNodeAnimation_x6cgn")
 "nodes/Cock Hammer/position" = Vector2(-360, 300)
@@ -262,7 +264,7 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-143, 82)
 
 [resource]
-graph_offset = Vector2(-126, 125)
+graph_offset = Vector2(-150.818, 141.182)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

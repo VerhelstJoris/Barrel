@@ -38,7 +38,7 @@ _subresources={
 "Scene": {
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Animations/Player/Character/A_FP_Cock_Hammer_Full.res",
-"save_to_file/keep_custom_tracks": "",
+"save_to_file/keep_custom_tracks": true,
 "save_to_file/path": "uid://clol1hqw6ans6",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
@@ -2090,6 +2090,11 @@ _subresources={
 "slice_99/save_to_file/path": "",
 "slice_99/start_frame": 0,
 "slices/amount": 0
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": false
 }
 }
 }
