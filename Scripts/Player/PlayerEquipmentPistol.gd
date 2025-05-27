@@ -11,7 +11,6 @@ enum E_chamber_state{Empty, Ready, Fired}
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
-
 @onready var cylinder_bone_modifier: SkeletonRevolverCylinderModifier = %SkeletonRevolverCylinderModifier
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
 @onready var bullet_reparent_point: Node3D = %BulletReparentPoint
@@ -25,17 +24,17 @@ signal reload_insert_shell()
 signal reload_eject_shell()
 signal bullet_spawned_for_inserting(new_bullet)
 
-const log_pistol : String = "PlayerPistol" 
-const anim_enter_reload_condition : String = "parameters/conditions/enter_reload"
 
-
-var start_reload: bool = true;
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
 var can_proceed_state: bool = true;
 
 var ChamberStates : Array[E_chamber_state]
-var current_bullets: Array[Node3D]
+var current_bullets: Array[Node]
 var current_chamber_id :int = 0
+
+func _get_insert_chamber_id() -> int:
+	return (current_chamber_id - 1 % 6)
+
 const chamber_amount: int = 6
 
 var temp_bullet
@@ -64,6 +63,7 @@ func _ready() -> void:
 	ChamberStates.resize(chamber_amount)
 	ChamberStates.fill(E_chamber_state.Empty)
 	current_bullets.resize(chamber_amount)
+	current_bullets.fill(null)
 	CurrentState = E_Pistol_State.HammerUncocked
 	_log_chamber_states()
 	
@@ -91,6 +91,11 @@ func _try_use_equipment():
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
 			anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			update_fire_action.emit()
+			if(current_bullets[current_chamber_id] != null):
+				var bullet: ColtBullet = current_bullets[current_chamber_id] as ColtBullet
+				if(bullet != null):
+					bullet._on_fired()
+					
 		elif(_can_cock_hammer()):
 			print("cocking hammer")
 			_proceed_to_state(E_Pistol_State.ReadyToFire)
@@ -138,8 +143,7 @@ func _try_reload_move_cylinder(next: bool) -> void:
 	else:
 		anim_tree.set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
-
-
+	
 func _on_animation_finished(animation_name : String) -> void:
 	print(animation_name)
 	_enable_changing_states(true)
@@ -175,35 +179,35 @@ func _spawn_bullet_for_chamber() -> void:
 		print("Spawning bullet")
 		var new_bullet: Node3D = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
-		current_bullets[current_chamber_id] = new_bullet
-		ChamberStates[current_chamber_id] = E_chamber_state.Ready
+		current_bullets[_get_insert_chamber_id()] = new_bullet
+		ChamberStates[_get_insert_chamber_id()] = E_chamber_state.Ready
 	
 func _reparent_bullet_to_ejector() -> void:		
-	current_bullets[current_chamber_id].reparent(bullet_attachment_point,true)
-	current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
+	current_bullets[_get_insert_chamber_id()].reparent(bullet_attachment_point,true)
+	current_bullets[_get_insert_chamber_id()].set_global_transform(bullet_reparent_point.get_global_transform())
 
 
 func _on_insert_finished() -> void:
-	current_bullets[current_chamber_id].reparent(bullet_reparent_point,true)
-	current_bullets[current_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
-	current_bullets[current_chamber_id].reparent(cylinder_attachment,true)
+	current_bullets[_get_insert_chamber_id()].reparent(bullet_reparent_point,true)
+	current_bullets[_get_insert_chamber_id()].set_global_transform(bullet_reparent_point.get_global_transform())
+	current_bullets[_get_insert_chamber_id()].reparent(cylinder_attachment,true)
 
 
 func _delete_bullet_from_chamber()-> void:
-	current_bullets[current_chamber_id].queue_free()
-	current_bullets[current_chamber_id] = null
-	ChamberStates[current_chamber_id] = E_chamber_state.Empty
+	current_bullets[_get_insert_chamber_id()].queue_free()
+	current_bullets[_get_insert_chamber_id()] = null
+	ChamberStates[_get_insert_chamber_id()] = E_chamber_state.Empty
 	
 func _can_proceed_state() -> bool:
 	return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber_id] == E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[_get_insert_chamber_id()] == E_chamber_state.Empty
 
 func _can_try_eject() -> bool:
 	print("Try ejecting shell")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[current_chamber_id] != E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state()
 
 func _can_enter_reload() -> bool:
 	print("Try enter reload")

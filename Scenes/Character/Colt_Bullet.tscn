@@ -1,4 +1,6 @@
-[gd_scene load_steps=9 format=4 uid="uid://xdok7aguyjvv"]
+[gd_scene load_steps=10 format=4 uid="uid://xdok7aguyjvv"]
+
+[ext_resource type="Script" uid="uid://dymp5feewn6h6" path="res://Scripts/Gameplay/Colt/Colt_Bullet.gd" id="1_7d7q5"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ea12a"]
 albedo_color = Color(1, 1, 0, 1)
@@ -75,14 +77,16 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_qx8n7")
 
 [node name="Colt_Bullet" type="Node3D"]
+script = ExtResource("1_7d7q5")
 
-[node name="Bullet" type="MeshInstance3D" parent="."]
+[node name="Casing" type="MeshInstance3D" parent="."]
 layers = 2
 material_override = SubResource("StandardMaterial3D_ea12a")
 mesh = SubResource("ArrayMesh_rnkyi")
 skeleton = NodePath("")
 
-[node name="Bullet_head" type="MeshInstance3D" parent="Bullet"]
+[node name="Projectile" type="MeshInstance3D" parent="Casing"]
+unique_name_in_owner = true
 transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 0, 0, 0)
 layers = 2
 material_override = SubResource("StandardMaterial3D_7d7q5")

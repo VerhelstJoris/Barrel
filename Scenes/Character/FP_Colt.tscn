@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=4 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=51 format=4 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
 [ext_resource type="Material" uid="uid://ca8of3f8f21yd" path="res://Materials/Metals/Mat_GunMetal.tres" id="5_y5nk3"]
 [ext_resource type="Material" uid="uid://cw82q30kgrsub" path="res://Materials/Metals/Mat_GunMetal_Interior.tres" id="6_vss0d"]
+[ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/GunHandle.tres" id="7_xd1vc"]
+[ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="8_1detw"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -499,6 +501,7 @@ layers = 2
 gi_mode = 2
 mesh = SubResource("ArrayMesh_xvko2")
 skin = SubResource("Skin_y5nk3")
+surface_material_override/0 = ExtResource("7_xd1vc")
 
 [node name="Hatch2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
@@ -512,6 +515,7 @@ layers = 2
 gi_mode = 2
 mesh = SubResource("ArrayMesh_rt7h3")
 skin = SubResource("Skin_y5nk3")
+surface_material_override/0 = ExtResource("8_1detw")
 
 [node name="Trigger2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
