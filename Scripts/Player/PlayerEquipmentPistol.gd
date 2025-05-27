@@ -29,14 +29,14 @@ var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
 var can_proceed_state: bool = true;
 
 var ChamberStates : Array[E_chamber_state]
-var current_bullets: Array[Node]
+var current_bullets: Array[ColtBullet]
 var current_chamber_id :int = 0
+const chamber_amount: int = 6
 
 var insert_chamber_id: int:
 	get:
-		return (current_chamber_id - 1 % 6)
+		return (current_chamber_id - 1 % chamber_amount)
 
-const chamber_amount: int = 6
 
 var temp_bullet
 
@@ -158,7 +158,6 @@ func _on_animation_finished(animation_name : String) -> void:
 		reload_next_chamber_animation:
 			_increase_cylinder_rotations(-1)
 			
-			
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
@@ -178,7 +177,7 @@ func _enable_changing_states(b_enabled : bool) -> void:
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
 		print("Spawning bullet")
-		var new_bullet: Node3D = bullet_scene.instantiate()
+		var new_bullet: ColtBullet = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
 		current_bullets[insert_chamber_id] = new_bullet
 		ChamberStates[insert_chamber_id] = E_chamber_state.Ready
