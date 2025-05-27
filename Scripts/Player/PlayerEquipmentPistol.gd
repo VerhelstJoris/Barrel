@@ -32,8 +32,9 @@ var ChamberStates : Array[E_chamber_state]
 var current_bullets: Array[Node]
 var current_chamber_id :int = 0
 
-func _get_insert_chamber_id() -> int:
-	return (current_chamber_id - 1 % 6)
+var insert_chamber_id: int:
+	get:
+		return (current_chamber_id - 1 % 6)
 
 const chamber_amount: int = 6
 
@@ -179,31 +180,31 @@ func _spawn_bullet_for_chamber() -> void:
 		print("Spawning bullet")
 		var new_bullet: Node3D = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
-		current_bullets[_get_insert_chamber_id()] = new_bullet
-		ChamberStates[_get_insert_chamber_id()] = E_chamber_state.Ready
+		current_bullets[insert_chamber_id] = new_bullet
+		ChamberStates[insert_chamber_id] = E_chamber_state.Ready
 	
 func _reparent_bullet_to_ejector() -> void:		
-	current_bullets[_get_insert_chamber_id()].reparent(bullet_attachment_point,true)
-	current_bullets[_get_insert_chamber_id()].set_global_transform(bullet_reparent_point.get_global_transform())
+	current_bullets[insert_chamber_id].reparent(bullet_attachment_point,true)
+	current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 
 
 func _on_insert_finished() -> void:
-	current_bullets[_get_insert_chamber_id()].reparent(bullet_reparent_point,true)
-	current_bullets[_get_insert_chamber_id()].set_global_transform(bullet_reparent_point.get_global_transform())
-	current_bullets[_get_insert_chamber_id()].reparent(cylinder_attachment,true)
+	current_bullets[insert_chamber_id].reparent(bullet_reparent_point,true)
+	current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
+	current_bullets[insert_chamber_id].reparent(cylinder_attachment,true)
 
 
 func _delete_bullet_from_chamber()-> void:
-	current_bullets[_get_insert_chamber_id()].queue_free()
-	current_bullets[_get_insert_chamber_id()] = null
-	ChamberStates[_get_insert_chamber_id()] = E_chamber_state.Empty
+	current_bullets[insert_chamber_id].queue_free()
+	current_bullets[insert_chamber_id] = null
+	ChamberStates[insert_chamber_id] = E_chamber_state.Empty
 	
 func _can_proceed_state() -> bool:
 	return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[_get_insert_chamber_id()] == E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[insert_chamber_id] == E_chamber_state.Empty
 
 func _can_try_eject() -> bool:
 	print("Try ejecting shell")
