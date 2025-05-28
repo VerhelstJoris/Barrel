@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=4 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=52 format=4 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -15,6 +15,9 @@
 _data = {
 &"Scene": ExtResource("2_u2pjc")
 }
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1detw"]
+animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_j3cck"]
 
@@ -65,7 +68,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(-475.636, -56.3802)
+graph_offset = Vector2(1574.17, 516.55)
 nodes/output/position = Vector2(2540, 900)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)
@@ -101,6 +104,8 @@ nodes/ExitReloadOneShot/node = SubResource("AnimationNodeOneShot_y5nk3")
 nodes/ExitReloadOneShot/position = Vector2(940, 460)
 nodes/ExitReload/node = SubResource("AnimationNodeAnimation_j3cck")
 nodes/ExitReload/position = Vector2(520, 680)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_1detw")
+nodes/Animation/position = Vector2(2180, 640)
 node_connections = [&"output", 0, &"EjectShellOneShot", &"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOneShot", 1, &"EnterReload", &"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"FireOneShot", &"HammerOneShot", 1, &"Hammer", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Reload_Insert_Shell", &"NextChamberOneShot", 0, &"ExitReloadOneShot", &"NextChamberOneShot", 1, &"Reload_Next_Chamber", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Reload_Previous_Chamber", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"Reload_Eject_Shell", &"ExitReloadOneShot", 0, &"EnterReloadOneShot", &"ExitReloadOneShot", 1, &"ExitReload"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pfoqm"]
@@ -399,56 +404,56 @@ bones/0/rotation = Quaternion(1, 1.74845e-07, 7.5498e-08, -7.5498e-08)
 bones/0/scale = Vector3(1, 1, 1)
 bones/1/name = "Cylinder"
 bones/1/parent = 0
-bones/1/rest = Transform3D(1, -2.42203e-07, -4.71486e-10, 2.42202e-07, 0.999992, 0.00402129, -5.02484e-10, -0.00402129, 0.999992, 2.8852e-10, 0.000578005, -0.00118026)
+bones/1/rest = Transform3D(1, -7.07549e-08, 6.31926e-06, 4.53439e-08, 0.999992, 0.00402112, -6.31949e-06, -0.00402112, 0.999992, 2.8852e-10, 0.000578005, -0.00118026)
 bones/1/enabled = true
 bones/1/position = Vector3(2.8852e-10, 0.000578005, -0.00118026)
-bones/1/rotation = Quaternion(-0.00201065, 7.74991e-12, 1.21101e-07, 0.999998)
+bones/1/rotation = Quaternion(-0.00201056, 3.15969e-06, 2.90248e-08, 0.999998)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/name = "Trigger"
 bones/2/parent = 0
-bones/2/rest = Transform3D(0.999945, -0.00127956, 0.0103687, 0.0101789, 0.34287, -0.939328, -0.0023532, 0.939382, 0.342865, 7.4743e-07, -1.83778e-05, -0.000313815)
+bones/2/rest = Transform3D(0.999945, 0.0064272, 0.00823654, 0.010179, -0.421759, -0.906651, -0.0023534, 0.906685, -0.421801, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.573195, 0.00388147, 0.00349598, 0.819402)
+bones/2/rotation = Quaternion(0.72762, 0.0045105, 0.00263505, 0.685961)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
-bones/3/rest = Transform3D(1, 3.80744e-08, 1.93973e-07, -1.94775e-07, 0.0223072, 0.999751, 3.37379e-08, -0.999751, 0.0223072, 7.38402e-10, -0.000451824, -0.000735234)
+bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.699176, 5.60305e-08, -8.14216e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.936682, 1.19935e-07, 1.19313e-08, 0.35018)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
-bones/4/rest = Transform3D(0.999991, 1.49477e-07, 0.00428062, -0.00428062, 3.57628e-07, 0.999991, 1.4808e-07, -1, 3.57628e-07, -0.000461162, 1.28043e-05, -0.000911844)
+bones/4/rest = Transform3D(0.999991, 1.4971e-07, 0.00428062, -0.00428062, 3.57628e-07, 0.999991, 1.4808e-07, -1, 3.57628e-07, -0.000461162, 1.28043e-05, -0.000911844)
 bones/4/enabled = true
 bones/4/position = Vector3(-0.000461162, 1.28043e-05, -0.000911844)
 bones/4/rotation = Quaternion(-0.707105, 0.00151338, -0.00151348, 0.707105)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "Ejector Rod"
 bones/5/parent = 0
-bones/5/rest = Transform3D(-2.38419e-07, -1, 1.68458e-06, 1, -2.38419e-07, 4.31153e-07, -4.31153e-07, 1.68458e-06, 1, -0.000239883, 0.00355515, -0.00125099)
+bones/5/rest = Transform3D(0, -1, 1.68458e-06, 1, 0, 4.31153e-07, -4.31153e-07, 1.68458e-06, 1, -0.000239883, 0.00355515, -0.00125099)
 bones/5/enabled = true
 bones/5/position = Vector3(-0.000239883, 0.00355515, -0.00125099)
 bones/5/rotation = Quaternion(4.43154e-07, 7.48025e-07, 0.707107, 0.707107)
 bones/5/scale = Vector3(1, 1, 1)
 bones/6/name = "Spring_Start"
 bones/6/parent = 5
-bones/6/rest = Transform3D(0.000256479, -1, -0.000250995, 0.714757, 0.00035882, -0.699373, 0.699373, 0, 0.714757, 4.19617e-09, -7.39098e-10, -1.90732e-10)
+bones/6/rest = Transform3D(0.00025636, -1, -0.000250876, 0.714757, 0.000358701, -0.699373, 0.699373, -2.98023e-08, 0.714757, 4.27815e-09, -7.45877e-10, -1.12376e-10)
 bones/6/enabled = true
 bones/6/position = Vector3(4.27815e-09, -7.45877e-10, -1.12376e-10)
 bones/6/rotation = Quaternion(0.266993, -0.267089, 0.654626, 0.654861)
 bones/6/scale = Vector3(1, 1, 1)
 bones/7/name = "Bullet_Attachment_Point"
 bones/7/parent = 5
-bones/7/rest = Transform3D(-7.15256e-07, 1, 1.3411e-07, 0.92388, 5.36442e-07, 0.382682, 0.382682, 3.72529e-07, -0.92388, -0.0024515, 5.17768e-05, -9.89268e-05)
+bones/7/rest = Transform3D(-5.96046e-07, 1, 1.63913e-07, 0.92388, 4.76837e-07, 0.382682, 0.382682, 3.72529e-07, -0.92388, -0.0024515, 5.17768e-05, -9.89268e-05)
 bones/7/enabled = true
 bones/7/position = Vector3(-0.0024515, 5.17768e-05, -9.89268e-05)
 bones/7/rotation = Quaternion(0.69352, 0.69352, 0.137949, -0.137949)
 bones/7/scale = Vector3(1, 1, 1)
 bones/8/name = "Spring End"
 bones/8/parent = 0
-bones/8/rest = Transform3D(-1.19209e-07, -1, -8.52651e-14, 1, -1.19209e-07, 3.73808e-07, -3.73808e-07, 0, 1, -0.000240755, 0.00112173, -0.00125099)
+bones/8/rest = Transform3D(-1.19209e-07, -1, -4.26326e-14, 1, -1.19209e-07, 3.73808e-07, -3.73808e-07, 1.42109e-14, 1, -0.000240755, 0.00112173, -0.00125099)
 bones/8/enabled = true
 bones/8/position = Vector3(-0.000240755, 0.00112173, -0.00125099)
 bones/8/rotation = Quaternion(-1.32161e-07, 1.32161e-07, 0.707107, 0.707107)
@@ -611,7 +616,7 @@ revolver_bone = "Hatch"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 1.06879e-07, 1.51929e-07, 1.07489e-07, -0.999992, -0.00402114, 1.51498e-07, 0.00402114, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
+transform = Transform3D(1, 2.78326e-07, 6.47166e-06, 3.04346e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
 
