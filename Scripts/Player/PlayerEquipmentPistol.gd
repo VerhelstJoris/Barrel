@@ -1,7 +1,6 @@
 class_name PlayerEquipmentPistol extends "PlayerEquipment.gd"
 
 enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
-enum E_chamber_state{Empty, Ready, Fired}
 
 @export_group("Equipment Input Details")
 @export var ENTER_RELOAD: String = "enter_reload"
@@ -28,7 +27,6 @@ signal bullet_spawned_for_inserting(new_bullet)
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
 var can_proceed_state: bool = true;
 
-var ChamberStates : Array[E_chamber_state]
 var current_bullets: Array[ColtBullet]
 var current_chamber_id :int = 0
 const chamber_amount: int = 6
@@ -61,8 +59,6 @@ func _ready() -> void:
 
 	anim_tree.animation_finished.connect(_on_animation_finished)
 	#can fire all rounds
-	ChamberStates.resize(chamber_amount)
-	ChamberStates.fill(E_chamber_state.Empty)
 	current_bullets.resize(chamber_amount)
 	current_bullets.fill(null)
 	CurrentState = E_Pistol_State.HammerUncocked
@@ -180,7 +176,6 @@ func _spawn_bullet_for_chamber() -> void:
 		var new_bullet: ColtBullet = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
 		current_bullets[insert_chamber_id] = new_bullet
-		ChamberStates[insert_chamber_id] = E_chamber_state.Ready
 	
 func _reparent_bullet_to_ejector() -> void:		
 	current_bullets[insert_chamber_id].reparent(bullet_attachment_point,true)
@@ -196,14 +191,18 @@ func _on_insert_finished() -> void:
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[insert_chamber_id].queue_free()
 	current_bullets[insert_chamber_id] = null
-	ChamberStates[insert_chamber_id] = E_chamber_state.Empty
 	
+func _can_current_bullet_fire() -> bool:
+	if(current_bullets[insert_chamber_id] != null):
+		return current_bullets[insert_chamber_id]._can_be_fired()
+	return false
+
 func _can_proceed_state() -> bool:
 	return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
-	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && ChamberStates[insert_chamber_id] == E_chamber_state.Empty
+	return CurrentState == E_Pistol_State.Reloading && _can_proceed_state() && current_bullets[insert_chamber_id] == null
 
 func _can_try_eject() -> bool:
 	print("Try ejecting shell")
@@ -228,19 +227,21 @@ func _can_shoot() -> bool:
 func _log_chamber_states() -> void:
 	var builtStr : String = ""
 	var index: int =  0
-	for chamber in ChamberStates:
+	for bullet in current_bullets:
 		var bcurrent : bool = (index == current_chamber_id)
 		if bcurrent:
 			builtStr+="(" 
 		else:
 			builtStr+="["
-		match chamber:
-			E_chamber_state.Ready:
+		
+		if(bullet == null):
+			builtStr+="0"
+		else:
+			if(bullet._can_be_fired()):
 				builtStr+="1"
-			E_chamber_state.Empty:
-				builtStr+="0"
-			E_chamber_state.Fired:
+			else:
 				builtStr+="X"
+		
 		if bcurrent:
 			builtStr+=")"
 		else:
