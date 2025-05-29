@@ -10,6 +10,7 @@ extends Node
 enum E_prop_bone_type{Left, Right, Global}
 
 const anim_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/FireOneShot/request"
+const anim_dry_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/DryFireOneShot/request"
 const anim_hammer_request : String = "parameters/SM_Colt/ReadyBlendTree/HammerOneShot/request"
 
 const anim_enter_reload_condition : String = "parameters/SM_Colt/conditions/enter_reload"
@@ -33,8 +34,9 @@ const movement_blend_rate : float = 4
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pistol.update_fire_action.connect(_oneshot_fire)
-	pistol.update_hammer_action.connect(_oneshot_cock_hammer)
+	pistol.on_fire_action.connect(_oneshot_fire)
+	pistol.on_dry_fire_action.connect(_oneshot_dry_fire)
+	pistol.on_cock_hammer_action.connect(_oneshot_cock_hammer)
 	pistol.change_reload_state.connect(_on_reload_state_change)
 	pistol.reload_change_chamber.connect(_on_reload_change_chamber)
 	pistol.reload_insert_shell.connect(_on_reload_insert_shell)
@@ -49,6 +51,9 @@ func _process(_delta: float) -> void:
 func _oneshot_fire() -> void:
 	anim_tree.set(anim_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
+func _oneshot_dry_fire() -> void:
+	anim_tree.set(anim_dry_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
 func _oneshot_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 

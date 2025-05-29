@@ -15,8 +15,9 @@ enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
 @onready var bullet_reparent_point: Node3D = %BulletReparentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
-signal update_fire_action(new_value)
-signal update_hammer_action(new_value)
+signal on_fire_action()
+signal on_dry_fire_action()
+signal on_cock_hammer_action(new_value)
 signal change_reload_state(new_value)
 signal reload_change_chamber(next)
 signal reload_insert_shell()
@@ -46,6 +47,7 @@ const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Pr
 const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
+const anim_dry_fire_request : String = "parameters/DryFireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
 const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
 const anim_exit_reload_request : String = "parameters/ExitReloadOneShot/request"
@@ -86,18 +88,19 @@ func _try_use_equipment():
 		if _can_shoot():
 			print("shooting")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
-			anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-			update_fire_action.emit()
-			if(current_bullets[current_chamber_id] != null):
-				var bullet: ColtBullet = current_bullets[current_chamber_id] as ColtBullet
-				if(bullet != null):
-					bullet._on_fired()
-					
+			if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
+				anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+				on_fire_action.emit()
+				current_bullets[current_chamber_id]._on_fired()
+			else:
+				anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+				on_dry_fire_action.emit()
+
 		elif(_can_cock_hammer()):
 			print("cocking hammer")
 			_proceed_to_state(E_Pistol_State.ReadyToFire)
 			anim_tree.set(anim_hammer_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-			update_hammer_action.emit()
+			on_cock_hammer_action.emit()
 			
 func _try_use_equipment_secondary():
 	if(CurrentState == E_Pistol_State.Reloading):
