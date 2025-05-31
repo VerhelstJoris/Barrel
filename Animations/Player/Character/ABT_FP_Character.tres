@@ -280,7 +280,6 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-143, 82)
 
 [resource]
-graph_offset = Vector2(-116.809, 164.865)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

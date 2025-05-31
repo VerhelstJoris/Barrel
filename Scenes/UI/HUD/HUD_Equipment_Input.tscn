@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://din5t3mpcj8gc"]
+
+[ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/HUD_Equipment_Input_Item.gd" id="1_xpofu"]
+
+[sub_resource type="Gradient" id="Gradient_rtdxi"]
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ca7tg"]
+gradient = SubResource("Gradient_rtdxi")
+
+[node name="MarginContainer" type="MarginContainer"]
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_bottom = 1
+script = ExtResource("1_xpofu")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
+layout_mode = 2
+texture = SubResource("GradientTexture1D_ca7tg")
+expand_mode = 2
+
+[node name="InputTextLabel" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "lorem ipsum peepee poopoo"

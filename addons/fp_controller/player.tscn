@@ -1,18 +1,19 @@
-[gd_scene load_steps=22 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=23 format=3 uid="uid://dlbkch6iuy8gn"]
 
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
+[ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
+[ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
+[ext_resource type="Script" uid="uid://buakj47i2tl6l" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/idle.gd" id="3_xe000"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/jump.gd" id="4_1lr3q"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/walk.gd" id="5_bwgwe"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/sprint.gd" id="6_b4xrx"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/fall.gd" id="7_dv6ye"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/crouch.gd" id="9_yxb0u"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/climb.gd" id="10_o7gmx"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/grab.gd" id="11_gkc45"]
-[ext_resource type="Script" path="res://addons/fp_controller/scripts/player_move_state/slide.gd" id="12_bqyfq"]
+[ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
+[ext_resource type="Script" uid="uid://bqkpvi0mpwdbn" path="res://addons/fp_controller/scripts/player_move_state/idle.gd" id="3_xe000"]
+[ext_resource type="Script" uid="uid://bp2x7jwedb83f" path="res://addons/fp_controller/scripts/player_move_state/jump.gd" id="4_1lr3q"]
+[ext_resource type="Script" uid="uid://bqwmfs2jhrpjv" path="res://addons/fp_controller/scripts/player_move_state/walk.gd" id="5_bwgwe"]
+[ext_resource type="Script" uid="uid://dbxg76wdmkrrl" path="res://addons/fp_controller/scripts/player_move_state/sprint.gd" id="6_b4xrx"]
+[ext_resource type="Script" uid="uid://ct7aom5asadtr" path="res://addons/fp_controller/scripts/player_move_state/fall.gd" id="7_dv6ye"]
+[ext_resource type="Script" uid="uid://3w8thfte85ds" path="res://addons/fp_controller/scripts/player_move_state/crouch.gd" id="9_yxb0u"]
+[ext_resource type="Script" uid="uid://b7p1bqv64w6eb" path="res://addons/fp_controller/scripts/player_move_state/climb.gd" id="10_o7gmx"]
+[ext_resource type="Script" uid="uid://bdhxx7ecetgb8" path="res://addons/fp_controller/scripts/player_move_state/grab.gd" id="11_gkc45"]
+[ext_resource type="Script" uid="uid://bjm7d5eeviuqe" path="res://addons/fp_controller/scripts/player_move_state/slide.gd" id="12_bqyfq"]
 
 [sub_resource type="Animation" id="Animation_5udu4"]
 length = 0.001
@@ -191,8 +192,8 @@ tracks/6/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_4kkkr"]
 _data = {
-"RESET": SubResource("Animation_5udu4"),
-"crouch": SubResource("Animation_abp0t")
+&"RESET": SubResource("Animation_5udu4"),
+&"crouch": SubResource("Animation_abp0t")
 }
 
 [sub_resource type="Animation" id="Animation_caog8"]
@@ -229,8 +230,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_gsp4e"]
 _data = {
-"RESET": SubResource("Animation_caog8"),
-"view_bobbing": SubResource("Animation_463io")
+&"RESET": SubResource("Animation_caog8"),
+&"view_bobbing": SubResource("Animation_463io")
 }
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
@@ -245,13 +246,13 @@ script = ExtResource("1_5ras8")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries = {
-"": SubResource("AnimationLibrary_4kkkr")
+&"": SubResource("AnimationLibrary_4kkkr")
 }
 
 [node name="ViewBobbingPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries = {
-"": SubResource("AnimationLibrary_gsp4e")
+&"": SubResource("AnimationLibrary_gsp4e")
 }
 
 [node name="CrouchRaycast" type="RayCast3D" parent="."]
@@ -324,6 +325,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="HudEquipment" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
+visibility_layer = 2
+layout_mode = 2
+mouse_filter = 2
 
 [node name="SubViewport" type="SubViewport" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
 unique_name_in_owner = true
