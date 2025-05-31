@@ -5,7 +5,7 @@ var move_speed: float
 
 
 func enter(_msg := {}) -> void:
-	player.view_bobbing_amount = player.default_view_bobbing_amount
+	pass
 
 
 func handle_input(event: InputEvent) -> void:
@@ -20,16 +20,6 @@ func handle_input(event: InputEvent) -> void:
 				state_machine.TO : state_machine.WALK,
 			}
 		)
-	
-	if player.can_crouch && player.allow_crouch:
-		if event.is_action_pressed(player.CROUCH) && player.is_on_floor():
-			state_machine.transition_to(
-				state_machine.movement_state[state_machine.CROUCH],
-				{
-					state_machine.TO : state_machine.WALK
-				}
-			)
-
 
 func physics_update(_delta: float) -> void:
 	input_dir = player.input_direction

@@ -8,8 +8,6 @@ var has_direction: bool
 
 
 func enter(msg := {}) -> void:
-	if player.is_crouching:
-		player.stand_up()
 	if msg:
 		init_state = msg[state_machine.TO]
 	
