@@ -1,4 +1,4 @@
-extends Node
+class_name FPArmsAnimationBus extends Node
 
 @onready var anim_tree : AnimationTree = %AnimationTree
 @onready var pistol : PlayerEquipmentPistol = %FP_Colt
@@ -25,7 +25,6 @@ const anim_reload_eject_shell_request : String = "parameters/SM_Colt/ReloadingBl
 const anim_movement_blend : String = "parameters/SM_Colt/ReadyBlendTree/MoveBlendSpace/blend_position"
 const reload_movement_blend : String = "parameters/SM_Colt/ReloadingBlendTree/MoveBlendSpace/blend_position"
 
-
 var movement_blend_value : Vector2 = Vector2.ZERO
 
 var prev_delta : float = 0
@@ -49,7 +48,7 @@ func _process(_delta: float) -> void:
 	prev_delta = _delta
 	
 func _oneshot_fire() -> void:
-	anim_tree.set(anim_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set(anim_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
 func _oneshot_dry_fire() -> void:
 	anim_tree.set(anim_dry_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -66,7 +65,6 @@ func _on_reload_state_change(_new_value:bool) -> void:
 		anim_tree[anim_enter_reload_condition] = false
 		
 func _on_reload_change_chamber(_next_chamber: bool) -> void:
-	print("cylinder signal")
 	if _next_chamber:
 		anim_tree.set(anim_reload_next_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:

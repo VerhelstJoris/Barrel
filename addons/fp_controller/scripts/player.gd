@@ -18,9 +18,6 @@ signal player_movement_input(direction)
 @export var sprint_speed: float = 5.0
 @export var jump_height: float = 1.0
 @export var acceleration: float = 10.0
-@export var arm_length: float = 0.5
-
-@export_range(0.0, 1.0) var view_bobbing_amount: float = 1.0
 
 @export_range(1.0, 10.0) var camera_sensitivity: float = 2.0
 
@@ -37,27 +34,15 @@ signal player_movement_input(direction)
 # Player 'character' components
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var state_machine: PlayerStateMachine = %StateMachine
-# Raycasts used for detecting if the player is touching a wall
-@onready var bottom_raycast: RayCast3D = %BottomRaycast
-@onready var middle_raycast: RayCast3D = %MiddleRaycast
-@onready var top_raycast: RayCast3D = %TopRaycast
-# Raycasts used for getting the ledge position and checking if there's enough space
-@onready var surface_raycasts_root: Node3D = %SurfaceRaycasts
-@onready var projected_height_raycast: RayCast3D = %ProjectedHeightRaycast
-@onready var surface_raycast: RayCast3D = %SurfaceRaycast
-# Raycasts used for checking if there's enough horizontal space to climb
-@onready var left_climbable_raycast: RayCast3D = %LeftClimbableRaycast
-@onready var right_climbable_raycast: RayCast3D = %RightClimbableRaycast
+@onready var arms: FPArms = %FP_Arms
 
 # Dynamic values used for calculation
 var input_direction: Vector2
 var ledge_position: Vector3 = Vector3.ZERO
 var mouse_motion: Vector2
-var default_view_bobbing_amount: float
-var movement_strength: float
 # Player state values that are set by applying state
 var is_affected_by_gravity: bool = true
-var is_moving: bool              = false
+var is_moving: bool = false
 # Values that are set 'false' if corresponding controls aren't mapped
 var can_move: bool   = true
 var can_jump: bool   = true
@@ -67,6 +52,7 @@ var can_sprint: bool = true
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
+	player_movement_input.connect(arms.FPArmsAnimationBus._on_player_movement_input)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -80,7 +66,8 @@ func _physics_process(delta: float) -> void:
 			input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_FORWARD, MOVE_BACK)
 		else:
 			input_direction = Vector2.ZERO
-
+		
+	#print("emit ", input_direction)	
 	player_movement_input.emit(input_direction)
 
 	# Add the gravity.

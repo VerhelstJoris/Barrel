@@ -28,10 +28,7 @@ func physics_update(_delta: float) -> void:
 	if input_dir.y > 0:
 		move_speed = player.walk_back_speed
 	else:
-		if player.movement_strength == 0:
-			move_speed = player.walk_speed
-		else:
-			move_speed = player.walk_speed * player.movement_strength
+		move_speed = player.walk_speed
 	
 	if direction:
 		player.velocity.x = direction.x * move_speed

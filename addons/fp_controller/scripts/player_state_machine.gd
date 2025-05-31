@@ -11,10 +11,6 @@ static var WALK = 1
 static var SPRINT = 2
 static var JUMP = 3
 static var FALL = 4
-static var CROUCH = 5
-static var CLIMB = 6
-static var GRAB = 7
-static var SLIDE = 8
 
 static var movement_state = {
 	IDLE: "Idle",
@@ -22,10 +18,6 @@ static var movement_state = {
 	SPRINT: "Sprint", 
 	JUMP: "Jump", 
 	FALL: "Fall", 
-	CROUCH: "Crouch", 
-	CLIMB: "Climb",
-	GRAB: "Grab",
-	SLIDE: "Slide",
 }
 
 @export var initial_state := NodePath()
@@ -62,5 +54,4 @@ func transition_to(target_state_name: String, msg: Dictionary = {}) -> void:
 	state.exit()
 	state = get_node(target_state_name)
 	state.enter(msg)
-	Logging.info("Player state transitioned to %s" % target_state_name)
 	emit_signal("transitioned", state)
