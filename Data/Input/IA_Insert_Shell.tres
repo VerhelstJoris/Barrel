@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EquipmentInputInfo" load_steps=2 format=3 uid="uid://dsm4d3qqcepjo"]
+
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="1_0i5fn"]
+
+[resource]
+script = ExtResource("1_0i5fn")
+input_string = "equipment_main_use"
+description_string = "insert shell"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

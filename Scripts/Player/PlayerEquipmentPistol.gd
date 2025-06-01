@@ -3,9 +3,12 @@ class_name PlayerEquipmentPistol extends PlayerEquipment
 enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
 
 @export_group("Equipment Input Details")
-@export var ENTER_RELOAD: String = "enter_reload"
-@export var RELOAD_NEXT_CHAMBER: String = "enter_reload"
-@export var RELOAD_PREV_CHAMBER: String = "enter_reload"
+@export var reload_enter_input : EquipmentInputInfo
+@export var reload_exit_input : EquipmentInputInfo
+@export var reload_cycle_next_input : EquipmentInputInfo
+@export var reload_cycle_prev_input : EquipmentInputInfo
+@export var reload_insert_input : EquipmentInputInfo
+@export var reload_eject_input : EquipmentInputInfo
 
 @export var ready_state_input_details : Array[EquipmentInputInfo]
 @export var reload_state_input_details : Array[EquipmentInputInfo]
@@ -57,7 +60,6 @@ const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/r
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-
 	anim_tree.animation_finished.connect(_on_animation_finished)
 	#can fire all rounds
 	current_bullets.resize(chamber_amount)
@@ -67,13 +69,18 @@ func _ready() -> void:
 	
 		
 func _input(event: InputEvent) -> void:
-	super(event)		
-	if Input.is_action_just_pressed(ENTER_RELOAD):
-		_try_reload()
-	elif Input.is_action_just_pressed(RELOAD_NEXT_CHAMBER):
-		_try_reload_move_cylinder(true)
-	elif Input.is_action_just_pressed(RELOAD_PREV_CHAMBER):
-		_try_reload_move_cylinder(false)
+	super(event)
+	if CurrentState == E_Pistol_State.Reloading:
+		if event.is_action_pressed(reload_cycle_next_input.input_string):
+			_try_reload_move_cylinder(true)
+		elif event.is_action_pressed(reload_cycle_prev_input.input_string):
+			_try_reload_move_cylinder(false)
+		elif event.is_action_pressed(reload_exit_input.input_string):
+			_try_reload()
+	else:	
+		if event.is_action_pressed(reload_enter_input.input_string):
+			_try_reload()
+
 
 func _try_use_equipment():
 	if(CurrentState == E_Pistol_State.Reloading):
@@ -127,17 +134,13 @@ func _try_reload():
 func _enter_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.Reloading)
 		change_reload_state.emit(true)
-		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		available_inputs.clear()
-		available_inputs.resize(4)
-		
+		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
 		on_available_equipment_actions_changed.emit(reload_state_input_details)
 	
 func _exit_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.ReadyToFire)
 		change_reload_state.emit(false)
 		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		
 		on_available_equipment_actions_changed.emit(ready_state_input_details)
 
 func _try_reload_move_cylinder(next: bool) -> void:

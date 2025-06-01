@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EquipmentInputInfo" load_steps=2 format=3 uid="uid://d2vsm1pv2xlr"]
+
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="1_4mgs7"]
+
+[resource]
+script = ExtResource("1_4mgs7")
+input_string = "cycle_cylinder_previous"
+description_string = "cycle"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

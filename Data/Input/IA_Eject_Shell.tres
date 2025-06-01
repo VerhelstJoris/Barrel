@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EquipmentInputInfo" load_steps=2 format=3 uid="uid://dk7vsktkhily"]
+
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="1_rtvoh"]
+
+[resource]
+script = ExtResource("1_rtvoh")
+input_string = "equipment_secondary_use"
+description_string = "eject shell"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

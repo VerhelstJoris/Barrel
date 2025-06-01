@@ -9,19 +9,17 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @export var hold_type : Equipment_Hold = Equipment_Hold.MainHand
 
 @export_group("Equipment Input Details")
-@export var USE_EQUIPMENT: String = "equipment_main_use"
-@export var USE_EQUIPMENT_SECONDARY: String = "equipment_secondary_use"
-
-var available_inputs : Array[EquipmentInputInfo]
+@export var use_input : EquipmentInputInfo
+@export var secondary_use_input : EquipmentInputInfo
 
 @onready var anim_tree : AnimationTree = %AnimationTree
 
 signal on_available_equipment_actions_changed
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(USE_EQUIPMENT,true):
+	if event.is_action_pressed(use_input.input_string):
 		_try_use_equipment()
-	elif event.is_action_pressed(USE_EQUIPMENT_SECONDARY):
+	elif event.is_action_pressed(secondary_use_input.input_string):
 		_try_use_equipment_secondary()
 	
 func _on_equipped():
