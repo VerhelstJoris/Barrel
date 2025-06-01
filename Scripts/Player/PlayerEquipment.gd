@@ -1,4 +1,4 @@
-extends Node
+class_name PlayerEquipment extends Node
 
 
 enum Equipment_Type {Permanent , Consumable, Temporary}
@@ -12,14 +12,21 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @export var USE_EQUIPMENT: String = "equipment_main_use"
 @export var USE_EQUIPMENT_SECONDARY: String = "equipment_secondary_use"
 
+var available_inputs : Array[EquipmentInputInfo]
+
 @onready var anim_tree : AnimationTree = %AnimationTree
 
-func _physics_process(_delta: float):
-	if Input.is_action_just_pressed(USE_EQUIPMENT):
-		_try_use_equipment()
-	if Input.is_action_just_pressed(USE_EQUIPMENT_SECONDARY):
-		_try_use_equipment_secondary()
+signal on_available_equipment_actions_changed
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed(USE_EQUIPMENT,true):
+		_try_use_equipment()
+	elif event.is_action_pressed(USE_EQUIPMENT_SECONDARY):
+		_try_use_equipment_secondary()
+	
+func _on_equipped():
+	pass
+	
 func _try_use_equipment():
 	# not implemented in base class
 	pass	

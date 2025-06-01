@@ -1,4 +1,4 @@
-class_name PlayerEquipmentPistol extends "PlayerEquipment.gd"
+class_name PlayerEquipmentPistol extends PlayerEquipment
 
 enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
 
@@ -6,6 +6,9 @@ enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
 @export var ENTER_RELOAD: String = "enter_reload"
 @export var RELOAD_NEXT_CHAMBER: String = "enter_reload"
 @export var RELOAD_PREV_CHAMBER: String = "enter_reload"
+
+@export var ready_state_input_details : Array[EquipmentInputInfo]
+@export var reload_state_input_details : Array[EquipmentInputInfo]
 
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
@@ -24,7 +27,6 @@ signal reload_insert_shell()
 signal reload_eject_shell()
 signal bullet_spawned_for_inserting(new_bullet)
 
-
 var CurrentState: E_Pistol_State = E_Pistol_State.HammerUncocked
 var can_proceed_state: bool = true;
 
@@ -35,9 +37,6 @@ const chamber_amount: int = 6
 var insert_chamber_id: int:
 	get:
 		return (current_chamber_id - 1 % chamber_amount)
-
-
-var temp_bullet
 
 #Animation stuff
 const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
@@ -66,10 +65,9 @@ func _ready() -> void:
 	CurrentState = E_Pistol_State.HammerUncocked
 	_log_chamber_states()
 	
-
-func _physics_process(_delta: float):
-	super(_delta)
-
+		
+func _input(event: InputEvent) -> void:
+	super(event)		
 	if Input.is_action_just_pressed(ENTER_RELOAD):
 		_try_reload()
 	elif Input.is_action_just_pressed(RELOAD_NEXT_CHAMBER):
@@ -111,21 +109,36 @@ func _try_use_equipment_secondary():
 			anim_tree.set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			reload_eject_shell.emit()
 		
+func _on_equipped():
+	super()
+	on_available_equipment_actions_changed.emit(ready_state_input_details)
+
+
 func _try_reload():
 	#if we're not already reloading, try to get into it
 	if(CurrentState != E_Pistol_State.Reloading):
 		if(_can_enter_reload()):
-			print("start reload")
-			_proceed_to_state(E_Pistol_State.Reloading)
-			change_reload_state.emit(true)
-			anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			_enter_reload_state()
 	else:
 		if(_can_exit_reload()):
-			print("exit reload")
-			_proceed_to_state(E_Pistol_State.ReadyToFire)
-			change_reload_state.emit(false)
-			anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			_exit_reload_state()
+			
 
+func _enter_reload_state() -> void:
+		_proceed_to_state(E_Pistol_State.Reloading)
+		change_reload_state.emit(true)
+		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		available_inputs.clear()
+		available_inputs.resize(4)
+		
+		on_available_equipment_actions_changed.emit(reload_state_input_details)
+	
+func _exit_reload_state() -> void:
+		_proceed_to_state(E_Pistol_State.ReadyToFire)
+		change_reload_state.emit(false)
+		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		
+		on_available_equipment_actions_changed.emit(ready_state_input_details)
 
 func _try_reload_move_cylinder(next: bool) -> void:
 	if(CurrentState != E_Pistol_State.Reloading):
@@ -183,13 +196,11 @@ func _spawn_bullet_for_chamber() -> void:
 func _reparent_bullet_to_ejector() -> void:		
 	current_bullets[insert_chamber_id].reparent(bullet_attachment_point,true)
 	current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
-
-
+	
 func _on_insert_finished() -> void:
 	current_bullets[insert_chamber_id].reparent(bullet_reparent_point,true)
 	current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 	current_bullets[insert_chamber_id].reparent(cylinder_attachment,true)
-
 
 func _delete_bullet_from_chamber()-> void:
 	current_bullets[insert_chamber_id].queue_free()

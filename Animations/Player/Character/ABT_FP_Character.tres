@@ -23,6 +23,7 @@ _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_forti"]
+mix_mode = 1
 fadein_time = 0.05
 fadeout_time = 0.1
 fadeout_curve = SubResource("Curve_hxvos")
@@ -100,7 +101,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_vy5b7")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-597.353, -266.66)
+graph_offset = Vector2(-598.421, -162.998)
 nodes/output/position = Vector2(800, 260)
 "nodes/Cock Hammer/node" = SubResource("AnimationNodeAnimation_x6cgn")
 "nodes/Cock Hammer/position" = Vector2(100, 400)

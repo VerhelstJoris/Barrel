@@ -1,122 +1,59 @@
-[gd_scene load_steps=54 format=4 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=42 format=4 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="2_xvko2"]
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
-[ext_resource type="Script" uid="uid://547ntu3et701" path="res://Scripts/Animation/SkeletonRevolverBoneCacheModifier.gd" id="4_0cpdj"]
-[ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
+[ext_resource type="Script" uid="uid://547ntu3et701" path="res://Scripts/Animation/Colt/SkeletonRevolverBoneCacheModifier.gd" id="4_0cpdj"]
+[ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/Colt/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
+[ext_resource type="AnimationNodeBlendTree" uid="uid://blsb7g0t5c8mx" path="res://Animations/Player/Colt_SAA/ABT_Colt_SAA.tres" id="5_hy8au"]
+[ext_resource type="Script" uid="uid://dw4df7mvaykwb" path="res://Scripts/Animation/Colt/Colt_AnimationBus.gd" id="5_troah"]
 [ext_resource type="Material" uid="uid://ca8of3f8f21yd" path="res://Materials/Metals/Mat_GunMetal.tres" id="5_y5nk3"]
 [ext_resource type="Material" uid="uid://cw82q30kgrsub" path="res://Materials/Metals/Mat_GunMetal_Interior.tres" id="6_vss0d"]
 [ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/GunHandle.tres" id="7_xd1vc"]
 [ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="8_1detw"]
 
+[sub_resource type="Resource" id="Resource_7yk7a"]
+script = ExtResource("2_xvko2")
+input_string = "enter_reload"
+description_string = "reload"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
+[sub_resource type="Resource" id="Resource_xvko2"]
+script = ExtResource("2_xvko2")
+input_string = "equipment_main_use"
+description_string = "fire"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
+[sub_resource type="Resource" id="Resource_rt7h3"]
+script = ExtResource("2_xvko2")
+input_string = "enter_reload"
+description_string = "exit reload"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
+[sub_resource type="Resource" id="Resource_0on26"]
+script = ExtResource("2_xvko2")
+input_string = "cycle_cylinder_next"
+description_string = "cycle"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
+[sub_resource type="Resource" id="Resource_upuq7"]
+script = ExtResource("2_xvko2")
+input_string = "equipment_main_use"
+description_string = "insert shell"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
+[sub_resource type="Resource" id="Resource_61tmk"]
+script = ExtResource("2_xvko2")
+input_string = "equipment_secondary_use"
+description_string = "eject shell"
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
 &"Scene": ExtResource("2_u2pjc")
 }
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1detw"]
-animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_1detw"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_troah"]
-animation = &"AL_Colt_SAA/A_Colt_Dry_Fire"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_j3cck"]
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1yo05"]
-animation = &"AL_Colt_SAA/A_Colt_Enter_Reload"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_2lov7"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j3cck"]
-animation = &"AL_Colt_SAA/A_Colt_Exit_Reload"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_y5nk3"]
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4geki"]
-animation = &"AL_Colt_SAA/A_Colt_Fire"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_3uw0u"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_51bhr"]
-animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_gm6v4"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gm6oc"]
-animation = &"AL_Colt_SAA/A_Colt_Idle"
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_bdumg"]
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_sap47"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_uw3if"]
-mix_mode = 1
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_y5nk3"]
-animation = &"AL_Colt_SAA/A_Colt_Reload_Eject_Shell"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_10t7l"]
-animation = &"AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_us6f0"]
-animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_glfq0"]
-animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
-
-[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_mgqe0"]
-graph_offset = Vector2(-683.982, -276.823)
-nodes/output/position = Vector2(2540, 900)
-nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
-nodes/EnterReload/position = Vector2(240, 500)
-nodes/EnterReloadOneShot/node = SubResource("AnimationNodeOneShot_2lov7")
-nodes/EnterReloadOneShot/position = Vector2(635.186, 348.212)
-nodes/Fire/node = SubResource("AnimationNodeAnimation_4geki")
-nodes/Fire/position = Vector2(-640, 20)
-nodes/FireOneShot/node = SubResource("AnimationNodeOneShot_3uw0u")
-nodes/FireOneShot/position = Vector2(-320, -80)
-nodes/Hammer/node = SubResource("AnimationNodeAnimation_51bhr")
-nodes/Hammer/position = Vector2(-160, 360)
-nodes/HammerOneShot/node = SubResource("AnimationNodeOneShot_gm6v4")
-nodes/HammerOneShot/position = Vector2(340, 200)
-nodes/Idle/node = SubResource("AnimationNodeAnimation_gm6oc")
-nodes/Idle/position = Vector2(-700, -200)
-nodes/InsertShellOneShot/node = SubResource("AnimationNodeOneShot_bdumg")
-nodes/InsertShellOneShot/position = Vector2(2000, 800)
-nodes/NextChamberOneShot/node = SubResource("AnimationNodeOneShot_sap47")
-nodes/NextChamberOneShot/position = Vector2(1340, 640)
-nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_uw3if")
-nodes/PreviousChamberOneShot/position = Vector2(1640, 780)
-nodes/Reload_Insert_Shell/node = SubResource("AnimationNodeAnimation_10t7l")
-nodes/Reload_Insert_Shell/position = Vector2(1580, 1080)
-nodes/Reload_Next_Chamber/node = SubResource("AnimationNodeAnimation_us6f0")
-nodes/Reload_Next_Chamber/position = Vector2(900, 800)
-nodes/Reload_Previous_Chamber/node = SubResource("AnimationNodeAnimation_glfq0")
-nodes/Reload_Previous_Chamber/position = Vector2(1140, 960)
-nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_j3cck")
-nodes/EjectShellOneShot/position = Vector2(2280, 880)
-nodes/Reload_Eject_Shell/node = SubResource("AnimationNodeAnimation_y5nk3")
-nodes/Reload_Eject_Shell/position = Vector2(1800, 1260)
-nodes/ExitReloadOneShot/node = SubResource("AnimationNodeOneShot_y5nk3")
-nodes/ExitReloadOneShot/position = Vector2(940, 460)
-nodes/ExitReload/node = SubResource("AnimationNodeAnimation_j3cck")
-nodes/ExitReload/position = Vector2(520, 680)
-nodes/Animation/node = SubResource("AnimationNodeAnimation_1detw")
-nodes/Animation/position = Vector2(2180, 640)
-nodes/Dry_Fire/node = SubResource("AnimationNodeAnimation_troah")
-nodes/Dry_Fire/position = Vector2(-540, 260)
-nodes/DryFireOneShot/node = SubResource("AnimationNodeOneShot_1detw")
-nodes/DryFireOneShot/position = Vector2(-60, 0)
-node_connections = [&"output", 0, &"EjectShellOneShot", &"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOneShot", 1, &"EnterReload", &"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"DryFireOneShot", &"HammerOneShot", 1, &"Hammer", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Reload_Insert_Shell", &"NextChamberOneShot", 0, &"ExitReloadOneShot", &"NextChamberOneShot", 1, &"Reload_Next_Chamber", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Reload_Previous_Chamber", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"Reload_Eject_Shell", &"ExitReloadOneShot", 0, &"EnterReloadOneShot", &"ExitReloadOneShot", 1, &"ExitReload", &"DryFireOneShot", 0, &"FireOneShot", &"DryFireOneShot", 1, &"Dry_Fire"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pfoqm"]
 
@@ -362,6 +299,8 @@ blend_shape_mode = 0
 script = ExtResource("2_al4xy")
 RELOAD_NEXT_CHAMBER = "cycle_cylinder_next"
 RELOAD_PREV_CHAMBER = "cycle_cylinder_previous"
+ready_state_input_details = Array[ExtResource("2_xvko2")]([SubResource("Resource_7yk7a"), SubResource("Resource_xvko2")])
+reload_state_input_details = Array[ExtResource("2_xvko2")]([SubResource("Resource_rt7h3"), SubResource("Resource_0on26"), SubResource("Resource_upuq7"), SubResource("Resource_61tmk")])
 bullet_scene = ExtResource("3_xgxry")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -373,7 +312,7 @@ libraries = {
 [node name="AnimationTree" type="AnimationTree" parent="."]
 unique_name_in_owner = true
 root_node = NodePath("%AnimationTree/..")
-tree_root = SubResource("AnimationNodeBlendTree_mgqe0")
+tree_root = ExtResource("5_hy8au")
 anim_player = NodePath("../AnimationPlayer")
 parameters/EnterReloadOneShot/active = false
 parameters/EnterReloadOneShot/internal_active = false
@@ -402,6 +341,7 @@ parameters/ExitReloadOneShot/request = 0
 parameters/DryFireOneShot/active = false
 parameters/DryFireOneShot/internal_active = false
 parameters/DryFireOneShot/request = 0
+script = ExtResource("5_troah")
 
 [node name="Colt_Saa_Rig" type="Node3D" parent="."]
 transform = Transform3D(100, 0, 0, 0, -1.19209e-05, 100, 0, -100, -1.19209e-05, 0, 0, 0)

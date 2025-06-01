@@ -7,11 +7,24 @@ class_name HUDEquipmentInput extends Control
 
 
 func _ready() -> void:
+	_clear_current_input_details()
+		
+	_create_new_item("peepee")
+	_create_new_item("poopoo")
+	#input_item_container.set_size(input_item_container.get_minimum_size())
+	
+func _clear_current_input_details() -> void:
 	for child in input_item_container.get_children():
 		input_item_container.remove_child(child)
-		
-	#var new_item: HUDEquipmentInputItem = input_item_scene.instantiate()
-	#new_item._set_label_text("peepee poopoo")
-	#input_item_container.add_child(new_item)
-	#input_item_container.resized.emit()
-		
+
+func _create_new_item(label_text : String):
+	var new_item: HUDEquipmentInputItem = input_item_scene.instantiate()
+	input_item_container.add_child(new_item)
+	new_item.input_text = label_text
+
+	input_item_container.notification(NOTIFICATION_RESIZED)
+	
+func _on_equipment_input_actions_changed(new_inputs : Array[EquipmentInputInfo]) -> void:
+	_clear_current_input_details()
+	for info in new_inputs:
+		_create_new_item(info.description_string)

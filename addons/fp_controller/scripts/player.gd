@@ -36,6 +36,12 @@ signal player_movement_input(direction)
 @onready var state_machine: PlayerStateMachine = %StateMachine
 @onready var arms: FPArms = %FP_Arms
 
+@onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
+
+
+var current_equipment : PlayerEquipment = null:
+	set = _change_equipment
+
 # Dynamic values used for calculation
 var input_direction: Vector2
 var ledge_position: Vector3 = Vector3.ZERO
@@ -52,13 +58,12 @@ var can_sprint: bool = true
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
-	player_movement_input.connect(arms.FPArmsAnimationBus._on_player_movement_input)
-
+	player_movement_input.connect(arms.arms_animation_bus._on_player_movement_input)
+	current_equipment = arms.pistol_equipment
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		mouse_motion = -event.relative * 0.001
-
 
 func _physics_process(delta: float) -> void:
 	if can_move:
@@ -75,14 +80,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	move_and_slide()
-
-
+	
 func _process(_delta: float):
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
-
-
+		
 func _handle_camera_motion() -> void:
 	rotate_y(mouse_motion.x * camera_sensitivity)
 	camera_pivot.rotate_x(mouse_motion.y  * camera_sensitivity)
@@ -92,8 +95,7 @@ func _handle_camera_motion() -> void:
 	)
 
 	mouse_motion = Vector2.ZERO
-
-
+	
 func _handle_joy_camera_motion() -> void:
 	var x_axis : float = Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
 	var y_axis : float = Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
@@ -126,5 +128,24 @@ func _handle_joy_camera_motion() -> void:
 		camera_pivot.rotation_degrees.x, -89.0, 89.0
 	)
 
+func _change_equipment(new_equipment : PlayerEquipment) -> void:
+	if(new_equipment == current_equipment):
+		print("trying to change to already equipped: ", new_equipment)
+		return
+		
+	_on_unequip(current_equipment)
 
+	current_equipment = new_equipment
+	
+	_on_equip(current_equipment)
+	
+func _on_unequip(old_equipment : PlayerEquipment) -> void:
+	if(old_equipment != null):
+		old_equipment.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
+	
+func _on_equip(new_equipment : PlayerEquipment) -> void:
+	if(new_equipment != null):
+		new_equipment.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
+		new_equipment._on_equipped()
+	
 	
