@@ -1,10 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://dymwfb8k5bofe"]
+[gd_scene load_steps=5 format=3 uid="uid://dymwfb8k5bofe"]
 
 [ext_resource type="PackedScene" uid="uid://din5t3mpcj8gc" path="res://Scenes/UI/HUD/HUD_Equipment_Input.tscn" id="1_4fuvh"]
 [ext_resource type="Script" uid="uid://d2p238e3dw4p6" path="res://Scripts/UI/HUD/HUD_Equipment_Input.gd" id="1_hdvdu"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_rtdxi"]
 blend_mode = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hdvdu"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+draw_center = false
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [node name="HudEquipment" type="Control"]
 layout_mode = 3
@@ -32,6 +45,7 @@ offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
 pivot_offset = Vector2(100, 20)
+theme_override_styles/panel = SubResource("StyleBoxFlat_hdvdu")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2

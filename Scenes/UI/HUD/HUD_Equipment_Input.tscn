@@ -1,6 +1,25 @@
-[gd_scene load_steps=4 format=3 uid="uid://din5t3mpcj8gc"]
+[gd_scene load_steps=7 format=3 uid="uid://din5t3mpcj8gc"]
 
 [ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/HUD_Equipment_Input_Item.gd" id="1_xpofu"]
+[ext_resource type="FontFile" uid="uid://bkrmbxj3lfo56" path="res://Fonts/Arvo-Italic.ttf" id="2_ucgfk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ucgfk"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+draw_center = false
+skew = Vector2(0.2, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 15
+
+[sub_resource type="Theme" id="Theme_ucgfk"]
+default_font = ExtResource("2_ucgfk")
+default_font_size = 0
 
 [sub_resource type="Gradient" id="Gradient_rtdxi"]
 
@@ -8,19 +27,44 @@
 gradient = SubResource("Gradient_rtdxi")
 
 [node name="MarginContainer" type="MarginContainer"]
-theme_override_constants/margin_top = 1
-theme_override_constants/margin_bottom = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -254.0
+offset_top = -12.5
+offset_bottom = 12.5
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 script = ExtResource("1_xpofu")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ucgfk")
+
+[node name="InputTextLabel" type="Label" parent="HBoxContainer/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme = SubResource("Theme_ucgfk")
+theme_override_colors/font_color = Color(0.860369, 0.860369, 0.860369, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_constants/shadow_outline_size = 2
+text = "Lorem Ipsum peepee poopoo"
+horizontal_alignment = 2
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
 layout_mode = 2
 texture = SubResource("GradientTexture1D_ca7tg")
 expand_mode = 2
-
-[node name="InputTextLabel" type="Label" parent="HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "lorem ipsum peepee poopoo"
