@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_0i5fn")
 input_string = "equipment_main_use"
-description_string = "insert shell"
+description_string = "Insert"
 metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

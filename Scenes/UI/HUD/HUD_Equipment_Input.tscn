@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/HUD_Equipment_Input_Item.gd" id="1_xpofu"]
 [ext_resource type="FontFile" uid="uid://bkrmbxj3lfo56" path="res://Fonts/Arvo-Italic.ttf" id="2_ucgfk"]
+[ext_resource type="Script" uid="uid://dnx3ficr864og" path="res://addons/input_prompts/action_prompt/action_prompt.gd" id="3_awh55"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ucgfk"]
 bg_color = Color(0, 0, 0, 0.109804)
@@ -19,10 +20,10 @@ anti_aliasing_size = 10.0
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[sub_resource type="Gradient" id="Gradient_rtdxi"]
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_ca7tg"]
-gradient = SubResource("Gradient_rtdxi")
+[sub_resource type="InputEventKey" id="InputEventKey_awh55"]
+device = -1
+physical_keycode = 82
+unicode = 82
 
 [node name="MarginContainer" type="MarginContainer"]
 anchors_preset = 6
@@ -49,7 +50,12 @@ size_flags_horizontal = 8
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ucgfk")
 
-[node name="InputTextLabel" type="Label" parent="HBoxContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="InputTextLabel" type="Label" parent="HBoxContainer/PanelContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme = SubResource("Theme_ucgfk")
@@ -67,7 +73,14 @@ layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/MarginContainer"]
+[node name="ActionPrompt" type="TextureRect" parent="HBoxContainer/MarginContainer"]
+unique_name_in_owner = true
+texture_filter = 1
 layout_mode = 2
-texture = SubResource("GradientTexture1D_ca7tg")
 expand_mode = 2
+stretch_mode = 5
+script = ExtResource("3_awh55")
+action = "enter_reload"
+icon = 0
+events = Array[InputEvent]([SubResource("InputEventKey_awh55")])
+metadata/_custom_type_script = "uid://dnx3ficr864og"

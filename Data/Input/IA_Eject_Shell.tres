@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_rtvoh")
 input_string = "equipment_secondary_use"
-description_string = "eject shell"
+description_string = "Eject"
 metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

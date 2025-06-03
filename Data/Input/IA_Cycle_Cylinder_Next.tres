@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_gidow")
 input_string = "cycle_cylinder_next"
-description_string = "cycle"
+description_string = "Cycle"
 metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

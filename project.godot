@@ -15,9 +15,17 @@ run/main_scene="res://example_scene/sandbox.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+PromptManager="*res://addons/input_prompts/input_prompt_manager.gd"
+
 [dotnet]
 
 project/assembly_name="Barrel"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/input_prompts/plugin.cfg")
 
 [input]
 
