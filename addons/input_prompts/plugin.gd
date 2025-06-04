@@ -25,7 +25,7 @@ func _enter_tree():
 				}
 			)
 
-		var icon_settings = {
+		var icon_settings: Dictionary = {
 			"addons/input_prompts/icons/keyboard":
 			"res://addons/input_prompts/key_prompt/keys.tres",
 			"addons/input_prompts/icons/mouse_buttons":

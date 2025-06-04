@@ -19,5 +19,5 @@ class_name HUDEquipmentInputItem extends Control
 	
 func _ready() -> void:
 	input_label.text = input_text
-	action_prompt.action = input_action
+	action_prompt._set_action(input_action)
 	

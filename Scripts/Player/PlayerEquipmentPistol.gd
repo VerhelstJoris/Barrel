@@ -121,6 +121,7 @@ func _on_equipped():
 	on_available_equipment_actions_changed.emit(ready_state_input_details)
 
 
+
 func _try_reload():
 	#if we're not already reloading, try to get into it
 	if(CurrentState != E_Pistol_State.Reloading):
@@ -197,8 +198,9 @@ func _spawn_bullet_for_chamber() -> void:
 		current_bullets[insert_chamber_id] = new_bullet
 	
 func _reparent_bullet_to_ejector() -> void:		
-	current_bullets[insert_chamber_id].reparent(bullet_attachment_point,true)
-	current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
+	if(current_bullets[insert_chamber_id] != null):
+		current_bullets[insert_chamber_id].reparent(bullet_attachment_point,true)
+		current_bullets[insert_chamber_id].set_global_transform(bullet_reparent_point.get_global_transform())
 	
 func _on_insert_finished() -> void:
 	current_bullets[insert_chamber_id].reparent(bullet_reparent_point,true)
@@ -206,8 +208,9 @@ func _on_insert_finished() -> void:
 	current_bullets[insert_chamber_id].reparent(cylinder_attachment,true)
 
 func _delete_bullet_from_chamber()-> void:
-	current_bullets[insert_chamber_id].queue_free()
-	current_bullets[insert_chamber_id] = null
+	if(current_bullets[insert_chamber_id] != null):
+		current_bullets[insert_chamber_id].queue_free()
+		current_bullets[insert_chamber_id] = null
 	
 func _can_current_bullet_fire() -> bool:
 	if(current_bullets[insert_chamber_id] != null):

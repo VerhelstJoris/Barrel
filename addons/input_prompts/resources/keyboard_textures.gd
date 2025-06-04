@@ -12,6 +12,7 @@ extends Resource
 ## [method OS.get_keycode_string]) to textures.
 var textures: Dictionary = {}
 
+var fallback : Texture2D
 
 func _init():
 	for k in KeyPrompt._KEYS:
@@ -32,14 +33,16 @@ func get_texture(event: InputEvent) -> Texture2D:
 func _get(property):
 	if property in textures.keys():
 		return textures[property]
-	return null
+	return null	
 
 
 func _set(property, value):
 	if property in textures.keys():
 		textures[property] = value
 		return true
-	return false
+	else:
+		fallback = value
+		return true
 
 
 func _get_property_list():
@@ -53,4 +56,12 @@ func _get_property_list():
 				hint_string = "Texture2D"
 			}
 		)
+
+	properties.append(
+	{
+		name = "fallback",
+		type = TYPE_OBJECT,
+		hint = PROPERTY_HINT_RESOURCE_TYPE,
+		hint_string = "Texture2D"
+	})
 	return properties
