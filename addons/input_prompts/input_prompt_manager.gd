@@ -52,49 +52,42 @@ var joypad_detection_deadzone := ProjectSettings.get_setting(
 
 var _keyboard_textures: KeyboardTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/keyboard", "res://addons/input_prompts/key_prompt/keys.tres"
+		"addons/input_prompts/icons/keyboard"
 	)
 )
 var _mouse_button_textures: MouseButtonTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/mouse_buttons",
-		"res://addons/input_prompts/mouse_button_prompt/buttons.tres"
+		"addons/input_prompts/icons/mouse_buttons"
 	)
 )
 var _nintendo_button_textures: JoypadButtonTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_buttons/nintendo",
-		"res://addons/input_prompts/joypad_button_prompt/nintendo.tres"
+		"addons/input_prompts/icons/joypad_buttons/nintendo",""
 	)
 )
 var _sony_button_textures: JoypadButtonTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_buttons/sony",
-		"res://addons/input_prompts/joypad_button_prompt/sony.tres"
+		"addons/input_prompts/icons/joypad_buttons/sony", ""
 	)
 )
 var _xbox_button_textures: JoypadButtonTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_buttons/xbox",
-		"res://addons/input_prompts/joypad_button_prompt/xbox.tres"
+		"addons/input_prompts/icons/joypad_buttons/xbox", ""
 	)
 )
 var _nintendo_motion_textures: JoypadMotionTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_motion/nintendo",
-		"res://addons/input_prompts/joypad_motion_prompt/nintendo.tres"
+		"addons/input_prompts/icons/joypad_motion/nintendo", ""
 	)
 )
 var _sony_motion_textures: JoypadMotionTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_motion/sony",
-		"res://addons/input_prompts/joypad_motion_prompt/sony.tres"
+		"addons/input_prompts/icons/joypad_motion/sony", ""
 	)
 )
 var _xbox_motion_textures: JoypadMotionTextures = load(
 	ProjectSettings.get_setting(
-		"addons/input_prompts/icons/joypad_motion/xbox",
-		"res://addons/input_prompts/joypad_motion_prompt/xbox.tres"
+		"addons/input_prompts/icons/joypad_motion/xbox", ""
 	)
 )
 

@@ -62,6 +62,7 @@
 [ext_resource type="Texture2D" uid="uid://bsadfl6dbm2jw" path="res://addons/input_prompts/icons/keyboard/T_PrtScrn_Key_Retro.png" id="60_deyjv"]
 [ext_resource type="Texture2D" uid="uid://bu6ks485kmqj8" path="res://addons/input_prompts/icons/keyboard/T_Q_Key_Retro.png" id="61_v4jx0"]
 [ext_resource type="Texture2D" uid="uid://c1rd5f88ihygw" path="res://addons/input_prompts/icons/keyboard/T_Question_Mark_Key_Retro.png" id="62_lq8fu"]
+[ext_resource type="Texture2D" uid="uid://1mp043iv0a8j" path="res://addons/input_prompts/icons/keyboard/T_R_Key_Retro.png" id="63_jy6sc"]
 [ext_resource type="Texture2D" uid="uid://cipswf5louk6k" path="res://addons/input_prompts/icons/keyboard/T_Quotation_Key_Retro.png" id="63_v58v7"]
 [ext_resource type="Texture2D" uid="uid://ctp0jxwgnjfk8" path="res://addons/input_prompts/icons/keyboard/T_Right_Key_Retro.png" id="64_5yfy2"]
 [ext_resource type="Texture2D" uid="uid://c7fw85sgemisf" path="res://addons/input_prompts/icons/keyboard/T_S_Key_Retro.png" id="65_5vjpk"]
@@ -79,9 +80,6 @@
 [ext_resource type="Texture2D" uid="uid://dopswompgyuen" path="res://addons/input_prompts/icons/keyboard/T_Y_Key_Retro.png" id="77_18dg2"]
 [ext_resource type="Texture2D" uid="uid://c3opt6528n5n3" path="res://addons/input_prompts/icons/keyboard/T_Blank_Retro_Normal.png" id="78_6d452"]
 [ext_resource type="Texture2D" uid="uid://fhae2waxn41w" path="res://addons/input_prompts/icons/keyboard/T_Z_Key_Retro.png" id="78_psjeu"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_3e8k4"]
-load_path = "res://.godot/imported/T_R_Key_Retro.png-73afb3b0190a5ebfc08b6a991ff8f73a.ctex"
 
 [resource]
 script = ExtResource("1_uojqg")
@@ -115,7 +113,7 @@ Backspace = ExtResource("16_w562j")
 Q = ExtResource("61_v4jx0")
 W = ExtResource("75_is0r8")
 E = ExtResource("25_n8wjt")
-R = SubResource("CompressedTexture2D_3e8k4")
+R = ExtResource("63_jy6sc")
 T = ExtResource("70_hf157")
 Y = ExtResource("77_18dg2")
 U = ExtResource("72_b7inj")

@@ -22,13 +22,15 @@ corner_detail = 5
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_3e8k4"]
-load_path = "res://.godot/imported/T_R_Key_Retro.png-73afb3b0190a5ebfc08b6a991ff8f73a.ctex"
-
-[sub_resource type="InputEventKey" id="InputEventKey_awh55"]
+[sub_resource type="InputEventKey" id="InputEventKey_cjqlk"]
 device = -1
 physical_keycode = 82
 unicode = 82
+
+[sub_resource type="SystemFont" id="SystemFont_cjqlk"]
+font_names = PackedStringArray("Times New Roman")
+font_weight = 600
+subpixel_positioning = 0
 
 [node name="MarginContainer" type="MarginContainer"]
 anchors_preset = 6
@@ -87,11 +89,29 @@ theme_override_constants/margin_right = 5
 unique_name_in_owner = true
 texture_filter = 2
 layout_mode = 2
-texture = SubResource("CompressedTexture2D_3e8k4")
 expand_mode = 2
 stretch_mode = 5
 script = ExtResource("3_awh55")
 action = "enter_reload"
 icon = 0
-events = Array[InputEvent]([SubResource("InputEventKey_awh55")])
+events = Array[InputEvent]([SubResource("InputEventKey_cjqlk")])
 metadata/_custom_type_script = "uid://dnx3ficr864og"
+
+[node name="BackUpLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer/ActionPrompt"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.0
+offset_top = -9.5
+offset_right = 6.0
+offset_bottom = 9.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.0823529, 0.0352941, 0.0196078, 1)
+theme_override_fonts/font = SubResource("SystemFont_cjqlk")
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
