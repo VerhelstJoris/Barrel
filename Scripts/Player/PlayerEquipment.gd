@@ -15,6 +15,7 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @onready var anim_tree : AnimationTree = %AnimationTree
 
 signal on_available_equipment_actions_changed
+signal on_available_equipment_actions_cleared
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(use_input.input_string):

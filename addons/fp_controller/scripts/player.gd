@@ -142,10 +142,12 @@ func _change_equipment(new_equipment : PlayerEquipment) -> void:
 func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	if(old_equipment != null):
 		old_equipment.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
+		old_equipment.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._on_equipment_input_actions_cleared)
 	
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
 		new_equipment.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
+		new_equipment.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped()
 	
 	

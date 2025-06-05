@@ -4,42 +4,44 @@ var default_offset = 8.0
 var default_speed = 0.3
 
 
-
 func get_node_center(node):
 	return (get_viewport().get_visible_rect().size.x / 2) - (node.size.x / 2)
 
 
-func animate_slide_from_left(node, offset = default_offset, speed = default_speed):
+func animate_slide_from_left(node, offset = default_offset, speed = default_speed, ease_type = Tween.EASE_OUT, trans_type = Tween.TRANS_BACK):
 	node.position.x = -node.size.x
 	
 	var t = create_tween()
-	t.tween_property(node, 'position:x', offset, speed).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(node, 'position:x', offset, speed).set_trans(trans_type).set_ease(ease_type)
 	
 	return t.finished
 
 
-func animate_slide_to_left(node, offset = default_offset, speed = default_speed):
+func animate_slide_to_left(node, speed = default_speed, ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
 	var t = create_tween()
-	t.tween_property(node, 'position:x', -node.size.x, speed).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	t.tween_property(node, 'position:x', -node.size.x, speed).set_trans(trans_type).set_ease(ease_type)
 	
 	return t.finished
 
 
-func animate_slide_from_right(node, offset = default_offset, speed = default_speed, tween_type = Tween.EASE_OUT, trans_type = Tween.TRANS_BACK):
+func animate_slide_from_right(node, offset = default_offset, speed = default_speed, ease_type = Tween.EASE_OUT, trans_type = Tween.TRANS_BACK):
 	node.position.x = get_viewport().size.x
 	
 	var vp_size = get_viewport().get_visible_rect().size.x
 	
 	var t = create_tween()
-	t.tween_property(node, 'position:x', (vp_size - node.size.x) - offset, speed).set_trans(trans_type).set_ease(tween_type)
+	t.tween_property(node, 'position:x', (vp_size - node.size.x) - offset, speed).set_trans(trans_type).set_ease(ease_type)
 	
 	return t.finished
 
 
-func animate_slide_to_right(node, offset = default_offset, speed = default_speed):
+func animate_slide_to_right(node, speed = default_speed, ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
+	var vp_size = get_viewport().get_visible_rect().size.x
+
 	var t = create_tween()
-	t.tween_property(node, 'position:x', get_viewport().size.x, speed).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	
+	t.tween_property(node, 'position:x', node.size.x, speed).set_trans(trans_type).set_ease(ease_type)
+
+
 	return t.finished
 
 

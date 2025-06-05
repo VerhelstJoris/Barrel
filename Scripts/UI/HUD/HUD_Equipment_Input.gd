@@ -5,6 +5,7 @@ class_name HUDEquipmentInput extends Control
 
 @onready var input_item_container: BoxContainer = %VBoxContainer
 
+var animate_speed : float = 0.3
 
 func _ready() -> void:
 	_clear_current_input_details()
@@ -22,8 +23,12 @@ func _create_new_item(info: EquipmentInputInfo):
 	input_item_container.notification(NOTIFICATION_RESIZED)
 	
 func _on_equipment_input_actions_changed(new_inputs : Array[EquipmentInputInfo]) -> void:
+
 	_clear_current_input_details()
 	for info in new_inputs:
 		_create_new_item(info)
-	UIAnimation.animate_slide_from_right(self, 5.0, 0.3, Tween.EASE_OUT, Tween.TRANS_CUBIC);	
+		UIAnimation.animate_slide_from_right(self, 5.0, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
 		
+
+func _on_equipment_input_actions_cleared() -> void:
+	UIAnimation.animate_slide_to_right(self, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)

@@ -44,6 +44,7 @@ var insert_chamber_id: int:
 #Animation stuff
 const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
+const exit_reload_animation : String = "AL_Colt_SAA/A_Colt_Exit_Reload"
 const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
@@ -136,13 +137,15 @@ func _enter_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.Reloading)
 		change_reload_state.emit(true)
 		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
-		on_available_equipment_actions_changed.emit(reload_state_input_details)
+		print("send")
+		on_available_equipment_actions_cleared.emit()
 	
 func _exit_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.ReadyToFire)
 		change_reload_state.emit(false)
 		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		on_available_equipment_actions_changed.emit(ready_state_input_details)
+		print("send")
+		on_available_equipment_actions_cleared.emit()
 
 func _try_reload_move_cylinder(next: bool) -> void:
 	if(CurrentState != E_Pistol_State.Reloading):
@@ -171,9 +174,12 @@ func _on_animation_finished(animation_name : String) -> void:
 			_increase_cylinder_rotations(1)
 		enter_reload_animation:
 			_increase_cylinder_rotations(1)
+			on_available_equipment_actions_changed.emit(reload_state_input_details)
 		reload_next_chamber_animation:
 			_increase_cylinder_rotations(-1)
-			
+		exit_reload_animation:
+			on_available_equipment_actions_changed.emit(ready_state_input_details)
+
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
