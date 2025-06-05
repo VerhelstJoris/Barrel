@@ -78,8 +78,8 @@
 [ext_resource type="Texture2D" uid="uid://choiyc7p8n762" path="res://addons/input_prompts/icons/keyboard/T_W_Key_Retro.png" id="75_is0r8"]
 [ext_resource type="Texture2D" uid="uid://cn2tl0lvwhv0n" path="res://addons/input_prompts/icons/keyboard/T_X_Key_Retro.png" id="76_p6aua"]
 [ext_resource type="Texture2D" uid="uid://dopswompgyuen" path="res://addons/input_prompts/icons/keyboard/T_Y_Key_Retro.png" id="77_18dg2"]
-[ext_resource type="Texture2D" uid="uid://c3opt6528n5n3" path="res://addons/input_prompts/icons/keyboard/T_Blank_Retro_Normal.png" id="78_6d452"]
 [ext_resource type="Texture2D" uid="uid://fhae2waxn41w" path="res://addons/input_prompts/icons/keyboard/T_Z_Key_Retro.png" id="78_psjeu"]
+[ext_resource type="Texture2D" uid="uid://dyq3wtdso01x0" path="res://addons/input_prompts/icons/keyboard/T_Blank_Retro_Wide.png" id="79_jy6sc"]
 
 [resource]
 script = ExtResource("1_uojqg")
@@ -164,4 +164,4 @@ Space = ExtResource("69_eusfn")
 Shift = ExtResource("67_abo1u")
 Insert = ExtResource("46_v82nd")
 Print = ExtResource("60_deyjv")
-fallback = ExtResource("78_6d452")
+fallback = ExtResource("79_jy6sc")

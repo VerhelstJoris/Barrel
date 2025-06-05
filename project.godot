@@ -28,6 +28,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 PromptManager="*res://addons/input_prompts/input_prompt_manager.gd"
+UIAnimation="*res://addons/godot_ui_animations/UIAnimationHandler.tscn"
 
 [dotnet]
 
@@ -35,7 +36,7 @@ project/assembly_name="Barrel"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/input_prompts/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot_ui_animations/plugin.cfg", "res://addons/input_prompts/plugin.cfg")
 
 [input]
 

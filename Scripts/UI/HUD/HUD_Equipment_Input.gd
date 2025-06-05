@@ -25,3 +25,5 @@ func _on_equipment_input_actions_changed(new_inputs : Array[EquipmentInputInfo])
 	_clear_current_input_details()
 	for info in new_inputs:
 		_create_new_item(info)
+	UIAnimation.animate_slide_from_right(self, 5.0, 0.3, Tween.EASE_OUT, Tween.TRANS_CUBIC);	
+		

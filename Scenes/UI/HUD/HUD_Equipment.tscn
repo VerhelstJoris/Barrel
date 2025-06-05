@@ -32,6 +32,7 @@ script = ExtResource("1_hdvdu")
 input_item_scene = ExtResource("1_4fuvh")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
+unique_name_in_owner = true
 material = SubResource("CanvasItemMaterial_rtdxi")
 layout_mode = 1
 anchors_preset = 6
