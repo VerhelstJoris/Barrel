@@ -318,6 +318,9 @@ parameters/ExitReloadOneShot/request = 0
 parameters/DryFireOneShot/active = false
 parameters/DryFireOneShot/internal_active = false
 parameters/DryFireOneShot/request = 0
+parameters/EnterReloadUncockOneShot/active = false
+parameters/EnterReloadUncockOneShot/internal_active = false
+parameters/EnterReloadUncockOneShot/request = 0
 script = ExtResource("5_troah")
 
 [node name="Colt_Saa_Rig" type="Node3D" parent="."]
@@ -337,28 +340,28 @@ bones/1/parent = 0
 bones/1/rest = Transform3D(1, -7.07549e-08, 6.31926e-06, 4.53439e-08, 0.999992, 0.00402112, -6.31949e-06, -0.00402112, 0.999992, 2.8852e-10, 0.000578005, -0.00118026)
 bones/1/enabled = true
 bones/1/position = Vector3(2.8852e-10, 0.000578005, -0.00118026)
-bones/1/rotation = Quaternion(-0.00201056, 3.15969e-06, 2.90248e-08, 0.999998)
+bones/1/rotation = Quaternion(-0.00174122, 0.500002, -0.00100527, 0.866022)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/name = "Trigger"
 bones/2/parent = 0
 bones/2/rest = Transform3D(0.999945, 0.0064272, 0.00823654, 0.010179, -0.421759, -0.906651, -0.0023534, 0.906685, -0.421801, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.843135, 0.00492396, 0.00174444, 0.537677)
+bones/2/rotation = Quaternion(0.573195, 0.00388159, 0.00349595, 0.819402)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.845893, 1.28332e-07, -1.11414e-08, 0.533352)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
 bones/4/rest = Transform3D(0.999991, 1.4971e-07, 0.00428062, -0.00428062, 3.57628e-07, 0.999991, 1.4808e-07, -1, 3.57628e-07, -0.000461162, 1.28043e-05, -0.000911844)
 bones/4/enabled = true
 bones/4/position = Vector3(-0.000461162, 1.28043e-05, -0.000911844)
-bones/4/rotation = Quaternion(-0.707105, 0.00151338, -0.00151348, 0.707105)
+bones/4/rotation = Quaternion(-0.707105, 0.00151348, -0.00151343, 0.707105)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "Ejector Rod"
 bones/5/parent = 0
@@ -546,7 +549,7 @@ revolver_bone = "Hatch"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 2.78326e-07, 6.47166e-06, 3.04346e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
+transform = Transform3D(0.499994, 2.88312e-07, 0.866029, 0.00348244, -0.999992, -0.00201022, 0.866022, 0.00402099, -0.49999, 3.12429e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
 

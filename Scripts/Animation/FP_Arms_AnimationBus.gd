@@ -14,6 +14,7 @@ const anim_dry_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/DryFir
 const anim_hammer_request : String = "parameters/SM_Colt/ReadyBlendTree/HammerOneShot/request"
 
 const anim_enter_reload_condition : String = "parameters/SM_Colt/conditions/enter_reload"
+const anim_enter_reload_uncock_condition : String = "parameters/SM_Colt/conditions/enter_reload_uncock"
 const anim_exit_reload_condition : String = "parameters/SM_Colt/conditions/exit_reload"
 
 const anim_reload_next_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/NextChamberOneShot/request"
@@ -56,11 +57,19 @@ func _oneshot_dry_fire() -> void:
 func _oneshot_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
-func _on_reload_state_change(_new_value:bool) -> void:
+func _on_reload_state_change(_new_value:bool, current_pistol_state: EPistolState.State) -> void:
+	print("received")
 	if _new_value:
-		anim_tree[anim_enter_reload_condition] = true
-		anim_tree[anim_exit_reload_condition] = false
+		if(current_pistol_state == EPistolState.State.HammerUncocked):
+			anim_tree[anim_enter_reload_condition] = true
+			anim_tree[anim_exit_reload_condition] = false
+			anim_tree[anim_enter_reload_uncock_condition] = false
+		else:
+			anim_tree[anim_enter_reload_condition] = false
+			anim_tree[anim_exit_reload_condition] = false
+			anim_tree[anim_enter_reload_uncock_condition] = true
 	else:	
+		anim_tree[anim_enter_reload_uncock_condition] = false
 		anim_tree[anim_exit_reload_condition] = true
 		anim_tree[anim_enter_reload_condition] = false
 		

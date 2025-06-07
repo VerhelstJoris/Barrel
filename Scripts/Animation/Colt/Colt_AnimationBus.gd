@@ -11,6 +11,7 @@ var colt_equipment : PlayerEquipmentPistol = null
 
 const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
+const enter_reload_uncock_animation : String = "AL_Colt_SAA/A_Colt_Enter_Uncock_Reload"
 const exit_reload_animation : String = "AL_Colt_SAA/A_Colt_Exit_Reload"
 const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
@@ -20,6 +21,7 @@ const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_dry_fire_request : String = "parameters/DryFireOneShot/request"
 const anim_hammer_request : String = "parameters/HammerOneShot/request"
 const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
+const anim_enter_reload_uncock_request : String = "parameters/EnterReloadUncockOneShot/request"
 const anim_exit_reload_request : String = "parameters/ExitReloadOneShot/request"
 const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
 const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
@@ -53,9 +55,12 @@ func _on_dry_fire() -> void:
 func _on_cock_hammer() -> void:
 	anim_tree.set(anim_hammer_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
-func _on_reload_state_changed(entering : bool)	-> void:
+func _on_reload_state_changed(entering : bool, current_pistol_state: EPistolState.State)	-> void:
 	if(entering):
-		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
+		if(current_pistol_state == EPistolState.State.HammerUncocked):
+			anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
+		else:
+			anim_tree.set(anim_enter_reload_uncock_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:
 		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
@@ -73,9 +78,14 @@ func _on_animation_finished(animation_name : String) -> void:
 		reload_previous_chamber_animation:
 			colt_equipment._increase_cylinder_rotations(1)
 		enter_reload_animation:
-			colt_equipment._increase_cylinder_rotations(1)
-			colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.reload_state_input_details)
+			_on_enter_reload_finish()
+		enter_reload_uncock_animation:
+			_on_enter_reload_finish()
 		reload_next_chamber_animation:
 			colt_equipment._increase_cylinder_rotations(-1)
 		exit_reload_animation:
 			colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.ready_state_input_details)
+		
+func _on_enter_reload_finish()->void:
+	colt_equipment._increase_cylinder_rotations(1)
+	colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.reload_state_input_details)	
