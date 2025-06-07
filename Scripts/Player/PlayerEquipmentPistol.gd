@@ -16,6 +16,7 @@ enum E_Pistol_State{ReadyToFire, HammerUncocked, Reloading}
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
+@onready var animation_bus : ColtAnimationBus = %AnimationTree
 @onready var cylinder_bone_modifier: SkeletonRevolverCylinderModifier = %SkeletonRevolverCylinderModifier
 @onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
 @onready var bullet_reparent_point: Node3D = %BulletReparentPoint
@@ -49,19 +50,9 @@ const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_C
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
 
-const anim_fire_request : String = "parameters/FireOneShot/request"
-const anim_dry_fire_request : String = "parameters/DryFireOneShot/request"
-const anim_hammer_request : String = "parameters/HammerOneShot/request"
-const anim_enter_reload_request : String = "parameters/EnterReloadOneShot/request"
-const anim_exit_reload_request : String = "parameters/ExitReloadOneShot/request"
-const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot/request"
-const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
-const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
-const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/request"
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	anim_tree.animation_finished.connect(_on_animation_finished)
+	animation_bus._initialize(self)
 	#can fire all rounds
 	current_bullets.resize(chamber_amount)
 	current_bullets.fill(null)
@@ -81,31 +72,26 @@ func _input(event: InputEvent) -> void:
 	else:	
 		if event.is_action_pressed(reload_enter_input.input_string):
 			_try_reload()
-
-
+			
 func _try_use_equipment():
 	if(CurrentState == E_Pistol_State.Reloading):
 		if(_can_insert_round()):
 			print("Inserting Shell")
 			_enable_changing_states(false)
-			anim_tree.set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			reload_insert_shell.emit()
 	else:
 		if _can_shoot():
 			print("shooting")
 			_proceed_to_state(E_Pistol_State.HammerUncocked)
 			if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
-				anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 				on_fire_action.emit()
 				current_bullets[current_chamber_id]._on_fired()
 			else:
-				anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 				on_dry_fire_action.emit()
 
 		elif(_can_cock_hammer()):
 			print("cocking hammer")
 			_proceed_to_state(E_Pistol_State.ReadyToFire)
-			anim_tree.set(anim_hammer_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			on_cock_hammer_action.emit()
 			
 func _try_use_equipment_secondary():
@@ -113,15 +99,11 @@ func _try_use_equipment_secondary():
 		if(_can_try_eject()):
 			print("Ejecting Shell")
 			_enable_changing_states(false)
-			#_reparent_bullet_to_ejector()
-			anim_tree.set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 			reload_eject_shell.emit()
 		
 func _on_equipped():
 	super()
 	on_available_equipment_actions_changed.emit(ready_state_input_details)
-
-
 
 func _try_reload():
 	#if we're not already reloading, try to get into it
@@ -136,15 +118,11 @@ func _try_reload():
 func _enter_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.Reloading)
 		change_reload_state.emit(true)
-		anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
-		print("send")
 		on_available_equipment_actions_cleared.emit()
 	
 func _exit_reload_state() -> void:
 		_proceed_to_state(E_Pistol_State.ReadyToFire)
 		change_reload_state.emit(false)
-		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		print("send")
 		on_available_equipment_actions_cleared.emit()
 
 func _try_reload_move_cylinder(next: bool) -> void:
@@ -155,31 +133,8 @@ func _try_reload_move_cylinder(next: bool) -> void:
 		return
 
 	can_proceed_state = false
-	print("try move cylinder")	
 	reload_change_chamber.emit(next)
-
-	if(next):
-		anim_tree.set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	else:
-		anim_tree.set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-
 	
-func _on_animation_finished(animation_name : String) -> void:
-	print(animation_name)
-	_enable_changing_states(true)
-	match animation_name:
-		cock_hammer_animation:
-			_increase_cylinder_rotations(1)
-		reload_previous_chamber_animation: 
-			_increase_cylinder_rotations(1)
-		enter_reload_animation:
-			_increase_cylinder_rotations(1)
-			on_available_equipment_actions_changed.emit(reload_state_input_details)
-		reload_next_chamber_animation:
-			_increase_cylinder_rotations(-1)
-		exit_reload_animation:
-			on_available_equipment_actions_changed.emit(ready_state_input_details)
-
 func _proceed_to_state(new_state: E_Pistol_State) -> void:
 	can_proceed_state = false
 	CurrentState = new_state
@@ -198,7 +153,6 @@ func _enable_changing_states(b_enabled : bool) -> void:
 	
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
-		print("Spawning bullet")
 		var new_bullet: ColtBullet = bullet_scene.instantiate()
 		bullet_spawned_for_inserting.emit(new_bullet)
 		current_bullets[insert_chamber_id] = new_bullet
