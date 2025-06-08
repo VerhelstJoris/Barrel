@@ -11,7 +11,7 @@ var colt_equipment : PlayerEquipmentPistol = null
 
 const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
 const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
-const enter_reload_uncock_animation : String = "AL_Colt_SAA/A_Colt_Enter_Uncock_Reload"
+const enter_reload_uncock_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload_Uncock"
 const exit_reload_animation : String = "AL_Colt_SAA/A_Colt_Exit_Reload"
 const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
