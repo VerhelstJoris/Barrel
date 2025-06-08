@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=55 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=56 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -274,7 +274,13 @@ advance_condition = &"exit_reload"
 advance_mode = 2
 advance_condition = &"enter_reload_uncock"
 
+[sub_resource type="Curve" id="Curve_x8ke2"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_es4ed"]
+xfade_time = 0.1
+xfade_curve = SubResource("Curve_x8ke2")
 switch_mode = 2
 advance_mode = 2
 
@@ -291,10 +297,10 @@ states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(358, 387)
 states/Start/position = Vector2(144, 139)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "ReadyBlendTree", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_forti"), "Enter Reload Uncock", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_es4ed")]
-graph_offset = Vector2(-207, 24)
+graph_offset = Vector2(-210, 92)
 
 [resource]
-graph_offset = Vector2(-235, 205)
+graph_offset = Vector2(-75, 244)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

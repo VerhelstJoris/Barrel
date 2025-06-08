@@ -9,8 +9,9 @@ seamless_blend_skirt = 0.126
 noise = SubResource("FastNoiseLite_y06g2")
 
 [resource]
-albedo_color = Color(0.36, 0.2427, 0.054, 1)
-metallic_specular = 0.6
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.956863, 0.882353, 0.823529, 1)
+metallic_specular = 0.34
 roughness = 0.85
 normal_scale = 0.5
 normal_texture = SubResource("NoiseTexture2D_y06g2")
