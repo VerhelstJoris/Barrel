@@ -58,6 +58,7 @@ render_target_update_mode = 4
 
 [node name="FP_Arms" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
+transform = Transform3D(-100, 0, -8.74228e-06, 0, 100, 0, 8.74228e-06, 0, -100, 0, 0.639805, 0)
 
 [node name="StateMachine" type="Node" parent="."]
 unique_name_in_owner = true

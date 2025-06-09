@@ -1,0 +1,12 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cgjfhtmk1neg"]
+
+[resource]
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+albedo_color = Color(0.803977, 0.857484, 0.81119, 1)
+albedo_texture_force_srgb = true
+metallic_specular = 0.35
+roughness = 0.72
+subsurf_scatter_strength = 1.0
+subsurf_scatter_skin_mode = true
+subsurf_scatter_transmittance_depth = 0.423
