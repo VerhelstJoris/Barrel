@@ -2,6 +2,7 @@
 
 [resource]
 vertex_color_use_as_albedo = true
+albedo_color = Color(0.79, 0.65175, 0.5925, 1)
 metallic_specular = 0.0
 subsurf_scatter_strength = 1.0
 subsurf_scatter_skin_mode = true
