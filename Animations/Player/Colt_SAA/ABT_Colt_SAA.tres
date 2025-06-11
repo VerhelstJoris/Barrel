@@ -42,6 +42,11 @@ mix_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gm6oc"]
 animation = &"AL_Colt_SAA/A_Colt_Idle"
+use_custom_timeline = true
+timeline_length = 1.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_bdumg"]
 
@@ -64,7 +69,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
-graph_offset = Vector2(322.823, 272.233)
+graph_offset = Vector2(-799.201, -256.344)
 nodes/output/position = Vector2(3040, 1140)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)
