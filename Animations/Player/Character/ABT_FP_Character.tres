@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=58 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=55 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -129,11 +129,7 @@ node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"IdleMov
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x4084"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kfy3f"]
-animation = &"AL_FP_Character/A_FP_Reload_Pose"
-
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_x8ke2"]
-mix_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
 animation = &"AL_FP_Character/A_FP_Reload_Eject_Shell"
@@ -147,10 +143,6 @@ fadeout_time = 0.05
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_c06vg"]
 animation = &"AL_FP_Character/A_FP_Reload_Insert_Shell"
-
-[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_26701"]
-
-[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_esh1b"]
 
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_em04p"]
 
@@ -189,8 +181,8 @@ _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_f8lkl"]
+filter_enabled = true
 filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
-mix_mode = 1
 fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_em04p")
 
@@ -200,23 +192,27 @@ animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_elkt0"]
 animation = &"AL_FP_Character/A_FP_Reload_Chamber_Previous"
 
+[sub_resource type="Curve" id="Curve_tmq1e"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="Curve" id="Curve_g0oko"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_eu2xo"]
-mix_mode = 1
+filter_enabled = true
+filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
+fadein_time = 0.1
+fadein_curve = SubResource("Curve_tmq1e")
 fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_g0oko")
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_pureu"]
-animation = &"AL_FP_Character/A_FP_Reload_Pose"
-
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-529.034, 99.392)
+graph_offset = Vector2(-233.897, 234.771)
 nodes/output/position = Vector2(1500, 660)
-nodes/Animation/node = SubResource("AnimationNodeAnimation_kfy3f")
-nodes/Animation/position = Vector2(-720, 440)
+nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
+nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
 nodes/Eject_Shell/node = SubResource("AnimationNodeAnimation_g0oko")
 nodes/Eject_Shell/position = Vector2(380, 1060)
 nodes/Idle/node = SubResource("AnimationNodeAnimation_20p65")
@@ -225,10 +221,10 @@ nodes/InsertShellOneShot/node = SubResource("AnimationNodeOneShot_kiv7u")
 nodes/InsertShellOneShot/position = Vector2(800, 600)
 nodes/Insert_Shell/node = SubResource("AnimationNodeAnimation_c06vg")
 nodes/Insert_Shell/position = Vector2(280, 820)
-nodes/MinusPose/node = SubResource("AnimationNodeSub2_esh1b")
-nodes/MinusPose/position = Vector2(-360, 300)
-"nodes/MinusPose 2/node" = SubResource("AnimationNodeSub2_26701")
-"nodes/MinusPose 2/position" = Vector2(-85.245, 665.345)
+nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_eu2xo")
+nodes/PreviousChamberOneShot/position = Vector2(360, 360)
+nodes/MinusPose4/node = SubResource("AnimationNodeSub2_em04p")
+nodes/MinusPose4/position = Vector2(960, 1080)
 "nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_x4084")
 "nodes/Animation 3/position" = Vector2(420, 1240)
 nodes/MoveAdd/node = SubResource("AnimationNodeAdd2_ea645")
@@ -240,16 +236,8 @@ nodes/NextChamberOneShot/position = Vector2(-40, 240)
 nodes/Next_Chamber/node = SubResource("AnimationNodeAnimation_xvjal")
 nodes/Next_Chamber/position = Vector2(-780, 260)
 nodes/Prev_Chamber/node = SubResource("AnimationNodeAnimation_elkt0")
-nodes/Prev_Chamber/position = Vector2(-640, 680)
-nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_eu2xo")
-nodes/PreviousChamberOneShot/position = Vector2(360, 360)
-nodes/ReloadPose/node = SubResource("AnimationNodeAnimation_pureu")
-nodes/ReloadPose/position = Vector2(-640, 860)
-nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
-nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
-nodes/MinusPose4/node = SubResource("AnimationNodeSub2_em04p")
-nodes/MinusPose4/position = Vector2(960, 1080)
-node_connections = [&"output", 0, &"EjectShellOneShot", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Insert_Shell", &"MinusPose", 0, &"Next_Chamber", &"MinusPose", 1, &"Animation", &"MinusPose 2", 0, &"Prev_Chamber", &"MinusPose 2", 1, &"ReloadPose", &"MoveAdd", 0, &"Idle", &"MoveAdd", 1, &"MoveBlendSpace", &"NextChamberOneShot", 0, &"MoveAdd", &"NextChamberOneShot", 1, &"MinusPose", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"MinusPose 2", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"MinusPose4", &"MinusPose4", 0, &"Eject_Shell", &"MinusPose4", 1, &"Animation 3"]
+nodes/Prev_Chamber/position = Vector2(-200, 660)
+node_connections = [&"output", 0, &"EjectShellOneShot", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"MinusPose4", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Insert_Shell", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Prev_Chamber", &"MinusPose4", 0, &"Eject_Shell", &"MinusPose4", 1, &"Animation 3", &"MoveAdd", 0, &"Idle", &"MoveAdd", 1, &"MoveBlendSpace", &"NextChamberOneShot", 0, &"MoveAdd", &"NextChamberOneShot", 1, &"Next_Chamber"]
 
 [sub_resource type="Curve" id="Curve_0l78c"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -312,7 +300,7 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-210, 92)
 
 [resource]
-graph_offset = Vector2(0, 244)
+graph_offset = Vector2(-236, 47)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)
