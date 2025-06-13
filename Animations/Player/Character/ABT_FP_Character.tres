@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=56 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=58 format=3 uid="uid://blgtcmlreana8"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
@@ -184,9 +184,15 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_qlfwh")
 blend_point_4/pos = Vector2(-1, 0)
 snap = Vector2(0.25, 0.25)
 
+[sub_resource type="Curve" id="Curve_em04p"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_f8lkl"]
 filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
 mix_mode = 1
+fadeout_time = 0.05
+fadeout_curve = SubResource("Curve_em04p")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xvjal"]
 animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next"
@@ -194,14 +200,20 @@ animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_elkt0"]
 animation = &"AL_FP_Character/A_FP_Reload_Chamber_Previous"
 
+[sub_resource type="Curve" id="Curve_g0oko"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_eu2xo"]
 mix_mode = 1
+fadeout_time = 0.05
+fadeout_curve = SubResource("Curve_g0oko")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_pureu"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(161.15, 489.742)
+graph_offset = Vector2(-529.034, 99.392)
 nodes/output/position = Vector2(1500, 660)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_kfy3f")
 nodes/Animation/position = Vector2(-720, 440)
@@ -300,7 +312,7 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-210, 92)
 
 [resource]
-graph_offset = Vector2(-75, 244)
+graph_offset = Vector2(0, 244)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

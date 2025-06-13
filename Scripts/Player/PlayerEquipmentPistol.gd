@@ -123,11 +123,10 @@ func _try_reload_move_cylinder(next: bool) -> void:
 	if(current_state != EPistolState.State.Reloading):
 		return
 		
-	if(!_can_proceed_state()):
+	if(!_can_proceed_state(true)):
 		return
 
-	can_proceed_state = false
-	can_interrupt_into_next_state = false
+	_proceed_to_state(current_state)
 	reload_change_chamber.emit(next)
 	
 func _proceed_to_state(new_state: EPistolState.State) -> void:
