@@ -1,6 +1,5 @@
 class_name PlayerEquipmentPistol extends PlayerEquipment 
 
-
 @export_group("Equipment Input Details")
 @export var reload_enter_input : EquipmentInputInfo
 @export var reload_exit_input : EquipmentInputInfo
@@ -29,9 +28,11 @@ signal reload_change_chamber(next)
 signal reload_insert_shell()
 signal reload_eject_shell()
 signal bullet_spawned_for_inserting(new_bullet)
+signal on_current_action_interrupted()
 
 var current_state: EPistolState.State = EPistolState.State.HammerUncocked
-var can_proceed_state: bool           = true;
+var can_proceed_state: bool = true;
+var can_interrupt_into_next_state: bool = false;
 
 var current_bullets: Array[ColtBullet]
 var current_chamber_id :int = 0
@@ -105,7 +106,9 @@ func _try_reload():
 		if(_can_exit_reload()):
 			_exit_reload_state()
 			
-
+func _enable_interrupting_action() -> void:
+	can_interrupt_into_next_state = true
+		
 func _enter_reload_state() -> void:
 		_proceed_to_state(EPistolState.State.Reloading)
 		change_reload_state.emit(true, current_state)
@@ -124,9 +127,13 @@ func _try_reload_move_cylinder(next: bool) -> void:
 		return
 
 	can_proceed_state = false
+	can_interrupt_into_next_state = false
 	reload_change_chamber.emit(next)
 	
 func _proceed_to_state(new_state: EPistolState.State) -> void:
+	if(can_interrupt_into_next_state):
+		on_current_action_interrupted.emit()
+	can_interrupt_into_next_state = false
 	can_proceed_state = false
 	current_state = new_state
 	
@@ -139,8 +146,9 @@ func _increase_cylinder_rotations(amount : int) -> void:
 	_log_chamber_states()
 
 
-func _enable_changing_states(b_enabled : bool) -> void:
-	can_proceed_state = b_enabled
+func _enable_changing_states(enabled : bool) -> void:
+	can_proceed_state = enabled
+	can_interrupt_into_next_state = false
 	
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
@@ -168,8 +176,11 @@ func _can_current_bullet_fire() -> bool:
 		return current_bullets[insert_chamber_id]._can_be_fired()
 	return false
 
-func _can_proceed_state() -> bool:
-	return can_proceed_state
+func _can_proceed_state(allow_interrupt : bool = false) -> bool:
+	if allow_interrupt:
+		return can_proceed_state || can_interrupt_into_next_state
+	else:
+		return can_proceed_state
 	
 func _can_insert_round() -> bool:
 	print("Try inserting round")
@@ -189,11 +200,11 @@ func _can_exit_reload() -> bool:
 	
 func _can_cock_hammer() -> bool:
 	print("Try cocking hammer")
-	return current_state == EPistolState.State.HammerUncocked && _can_proceed_state()
+	return current_state == EPistolState.State.HammerUncocked && _can_proceed_state(true)
 
 func _can_shoot() -> bool:
 	print("Try shooting")
-	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state()
+	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
 	
 func _log_chamber_states() -> void:
 	var builtStr : String = ""

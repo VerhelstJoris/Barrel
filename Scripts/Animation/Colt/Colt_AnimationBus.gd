@@ -9,13 +9,7 @@ class_name ColtAnimationBus extends Node
 
 var colt_equipment : PlayerEquipmentPistol = null
 
-const cock_hammer_animation : String = "AL_Colt_SAA/A_Colt_Cock_Hammer"
-const enter_reload_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload"
-const enter_reload_uncock_animation : String = "AL_Colt_SAA/A_Colt_Enter_Reload_Uncock"
-const exit_reload_animation : String = "AL_Colt_SAA/A_Colt_Exit_Reload"
-const reload_next_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
-const reload_previous_chamber_animation : String = "AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
-const reload_insert_shell_animation : String = "AL_Colt_SAA/A_Colt_Reload_Insert_Shell"
+var current_action : String = ""
 
 const anim_fire_request : String = "parameters/FireOneShot/request"
 const anim_dry_fire_request : String = "parameters/DryFireOneShot/request"
@@ -37,55 +31,74 @@ func _initialize( pistol : PlayerEquipmentPistol)-> void:
 	pistol.on_cock_hammer_action.connect(_on_cock_hammer)
 	pistol.change_reload_state.connect(_on_reload_state_changed)
 	pistol.reload_change_chamber.connect(_on_reload_cycle_cylinder)
+	pistol.on_current_action_interrupted.connect(_interrupt_current_action)
 	anim_tree.animation_finished.connect(_on_animation_finished)
 	
+func _set_anim_tree_oneshot_request(request_name):
+	anim_tree.set(request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	current_action = request_name
+	
+func _interrupt_current_action() -> void:
+	if(current_action != ""):
+		anim_tree.set(current_action, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
+		#this is the request, not the animation name
+		_on_current_action_finished()
+		
 func _insert_shell() -> void:
-	anim_tree.set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
 
 func _eject_shell() -> void:
-	anim_tree.set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
 	
-
 func _on_fire() -> void:
-	anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	
+	_set_anim_tree_oneshot_request(anim_fire_request)
+
 func _on_dry_fire() -> void:
-	anim_tree.set(anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	_set_anim_tree_oneshot_request(anim_dry_fire_request)
 	
 func _on_cock_hammer() -> void:
-	anim_tree.set(anim_hammer_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-
+	_set_anim_tree_oneshot_request(anim_hammer_request)
+	
 func _on_reload_state_changed(entering : bool, current_pistol_state: EPistolState.State)	-> void:
 	if(entering):
 		if(current_pistol_state == EPistolState.State.HammerUncocked):
-			anim_tree.set(anim_enter_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)		
+			_set_anim_tree_oneshot_request(anim_enter_reload_request)
 		else:
-			anim_tree.set(anim_enter_reload_uncock_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
 	else:
-		anim_tree.set(anim_exit_reload_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		_set_anim_tree_oneshot_request(anim_exit_reload_request)
 
 func _on_reload_cycle_cylinder(next : bool)	-> void:
 	if(next):
-		anim_tree.set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
 	else:
-		anim_tree.set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
 		
-func _on_animation_finished(animation_name : String) -> void:
+func _on_animation_finished(_animation_name : String) -> void:
+	_on_current_action_finished()
+
+func _on_current_action_finished() -> void:
+	if(current_action == ""):
+		return
+	
 	colt_equipment._enable_changing_states(true)
-	match animation_name:
-		cock_hammer_animation:
+	match current_action:
+		anim_hammer_request:
 			colt_equipment._increase_cylinder_rotations(1)
-		reload_previous_chamber_animation:
+		anim_reload_previous_chamber_request:
 			colt_equipment._increase_cylinder_rotations(1)
-		enter_reload_animation:
-			_on_enter_reload_finish()
-		enter_reload_uncock_animation:
-			_on_enter_reload_finish()
-		reload_next_chamber_animation:
+		anim_reload_next_chamber_request:
 			colt_equipment._increase_cylinder_rotations(-1)
-		exit_reload_animation:
+		anim_enter_reload_request:
+			_on_enter_reload_finish()
+		anim_enter_reload_uncock_request:
+			_on_enter_reload_finish()
+		anim_exit_reload_request:
 			colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.ready_state_input_details)
-		
+			
+	current_action = ""		
+
+
 func _on_enter_reload_finish()->void:
 	colt_equipment._increase_cylinder_rotations(1)
 	colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.reload_state_input_details)	

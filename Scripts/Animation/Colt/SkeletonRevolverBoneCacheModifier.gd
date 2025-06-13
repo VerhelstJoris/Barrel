@@ -28,7 +28,7 @@ func _ready() -> void:
 
 func _cache_current_transform(cache : bool) -> void:
 	currently_caching = cache
-	print("cache " + revolver_bone)
+	#print("cache " + revolver_bone)
 	if(cache):
 		cached_transform = skeleton.get_bone_global_pose(revolver_bone_id)
 	else:
