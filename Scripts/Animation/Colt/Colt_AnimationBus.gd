@@ -80,15 +80,12 @@ func _on_animation_finished(_animation_name : String) -> void:
 func _on_current_action_finished() -> void:
 	if(current_action == ""):
 		return
-	
+		
+	cylinder_bone_modifier.increment_cylinder_rotations(colt_equipment.current_action_cylinder_rotations)
+	print("ACTION FINISH", current_action)
+		
 	colt_equipment._enable_changing_states(true)
 	match current_action:
-		anim_hammer_request:
-			colt_equipment._increase_cylinder_rotations(1)
-		anim_reload_previous_chamber_request:
-			colt_equipment._increase_cylinder_rotations(1)
-		anim_reload_next_chamber_request:
-			colt_equipment._increase_cylinder_rotations(-1)
 		anim_enter_reload_request:
 			_on_enter_reload_finish()
 		anim_enter_reload_uncock_request:
@@ -100,5 +97,4 @@ func _on_current_action_finished() -> void:
 
 
 func _on_enter_reload_finish()->void:
-	colt_equipment._increase_cylinder_rotations(1)
 	colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.reload_state_input_details)	

@@ -52,10 +52,10 @@ func _oneshot_fire() -> void:
 	set(anim_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
 func _oneshot_dry_fire() -> void:
-	anim_tree.set(anim_dry_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set(anim_dry_fire_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _oneshot_cock_hammer() -> void:
-	anim_tree.set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set(anim_hammer_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_reload_state_change(_new_value:bool, current_pistol_state: EPistolState.State) -> void:
 	print("received")
@@ -75,24 +75,24 @@ func _on_reload_state_change(_new_value:bool, current_pistol_state: EPistolState
 		
 func _on_reload_change_chamber(_next_chamber: bool) -> void:
 	if _next_chamber:
-		anim_tree.set(anim_reload_next_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		set(anim_reload_next_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	else:
-		anim_tree.set(anim_reload_previous_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		set(anim_reload_previous_chamber_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:		
 	right_prop_bone.add_child(_new_bullet)
 	
 
 func _on_reload_insert_shell() -> void:
-	anim_tree.set(anim_reload_insert_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set(anim_reload_insert_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
 func _on_reload_eject_shell() -> void:
-	anim_tree.set(anim_reload_eject_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set(anim_reload_eject_shell_request,AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
-	anim_tree.set(anim_movement_blend,movement_blend_value)
-	anim_tree.set(reload_movement_blend,movement_blend_value)
+	set(anim_movement_blend,movement_blend_value)
+	set(reload_movement_blend,movement_blend_value)
 	
 
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:

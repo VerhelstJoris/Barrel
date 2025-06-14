@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=34 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -35,6 +35,8 @@
 _data = {
 &"Scene": ExtResource("2_u2pjc")
 }
+
+[sub_resource type="SphereMesh" id="SphereMesh_j6i3l"]
 
 [sub_resource type="Skin" id="Skin_upuq7"]
 resource_name = "Skin"
@@ -280,9 +282,14 @@ revolver_bone = "Hatch"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 2.78326e-07, 6.47166e-06, 3.04346e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
+transform = Transform3D(1, 2.78325e-07, 6.47166e-06, 3.04345e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12428e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/CylinderAttachment"]
+transform = Transform3D(0.001, -5.55112e-17, -2.11094e-15, 1.94289e-16, 0.001, -3.18323e-12, 5.43814e-15, 3.18323e-12, 0.001, -0.002, 0, 0)
+layers = 2
+mesh = SubResource("SphereMesh_j6i3l")
 
 [node name="SkeletonRevolverCylinderModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
 _import_path = NodePath("")
@@ -314,7 +321,7 @@ cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(-0.923879, -1.27146e-07, -0.382684, 1.65763e-07, -1, -3.89026e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
+transform = Transform3D(-0.923879, -1.27147e-07, -0.382684, 1.65764e-07, -1, -3.89022e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 

@@ -130,6 +130,8 @@ node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"IdleMov
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_x8ke2"]
+fadein_time = 0.1
+fadeout_time = 0.05
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
 animation = &"AL_FP_Character/A_FP_Reload_Eject_Shell"
@@ -209,7 +211,7 @@ fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_g0oko")
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-233.897, 234.771)
+graph_offset = Vector2(20.3351, 465.475)
 nodes/output/position = Vector2(1500, 660)
 nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
 nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
@@ -300,7 +302,7 @@ transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeS
 graph_offset = Vector2(-210, 92)
 
 [resource]
-graph_offset = Vector2(-236, 47)
+graph_offset = Vector2(-184, 280)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)
