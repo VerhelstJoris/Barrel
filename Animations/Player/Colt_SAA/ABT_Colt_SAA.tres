@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=23 format=3 uid="uid://blsb7g0t5c8mx"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=27 format=3 uid="uid://blsb7g0t5c8mx"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1detw"]
 animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
@@ -9,7 +9,19 @@ mix_mode = 1
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_troah"]
 animation = &"AL_Colt_SAA/A_Colt_Dry_Fire"
 
+[sub_resource type="Curve" id="Curve_kswon"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_ee8yy"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_j3cck"]
+fadein_time = 0.15
+fadein_curve = SubResource("Curve_kswon")
+fadeout_time = 0.15
+fadeout_curve = SubResource("Curve_ee8yy")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1yo05"]
 animation = &"AL_Colt_SAA/A_Colt_Enter_Reload"
@@ -48,7 +60,19 @@ stretch_time_scale = true
 start_offset = 0.0
 loop_mode = 1
 
+[sub_resource type="Curve" id="Curve_qq01v"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_4j58a"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_bdumg"]
+fadein_time = 0.05
+fadein_curve = SubResource("Curve_qq01v")
+fadeout_time = 0.05
+fadeout_curve = SubResource("Curve_4j58a")
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_sap47"]
 mix_mode = 1
@@ -69,6 +93,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
+graph_offset = Vector2(1078, 649)
 nodes/output/position = Vector2(3040, 1140)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)

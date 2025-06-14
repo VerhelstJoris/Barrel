@@ -288,6 +288,7 @@ bone_idx = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/CylinderAttachment"]
 transform = Transform3D(0.001, -5.55112e-17, -2.11094e-15, 1.94289e-16, 0.001, -3.18323e-12, 5.43814e-15, 3.18323e-12, 0.001, -0.002, 0, 0)
+visible = false
 layers = 2
 mesh = SubResource("SphereMesh_j6i3l")
 
@@ -332,10 +333,6 @@ visible = false
 [node name="BulletReparentPoint" type="Node3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -1, -8.74228e-08, 0, 8.74228e-08, -1, -0.000292314, -0.00110386, 0.00134544)
-
-[node name="Colt_Bullet" parent="Colt_Saa_Rig/Skeleton3D/BulletReparentPoint" instance=ExtResource("3_xgxry")]
-transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, 1.04787e-14, 7.10543e-15, 1, 0, 0, 0)
-visible = false
 
 [node name="Barrel" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
