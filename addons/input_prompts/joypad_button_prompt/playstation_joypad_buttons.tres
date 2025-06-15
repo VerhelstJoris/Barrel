@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="JoypadButtonTextures" load_steps=2 format=3 uid="uid://0xc6pdew3ihn"]
+
+[ext_resource type="Script" uid="uid://duk6ls6g38p06" path="res://addons/input_prompts/resources/joypad_button_textures.gd" id="1_kwj5x"]
+
+[resource]
+script = ExtResource("1_kwj5x")
+metadata/_custom_type_script = "uid://duk6ls6g38p06"

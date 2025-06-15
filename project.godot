@@ -12,6 +12,12 @@ config_version=5
 
 input_prompts/icons/keyboard="uid://domrawueas2s"
 input_prompts/icons/mouse_buttons="uid://bt25mebuyicjf"
+input_prompts/icons/joypad_buttons/nintendo="uid://b6c8pokb8gcw7"
+input_prompts/icons/joypad_buttons/sony="uid://0xc6pdew3ihn"
+input_prompts/icons/joypad_buttons/xbox="uid://dyji5vfuvoxpk"
+input_prompts/icons/joypad_motion/nintendo="uid://du54xrg6060as"
+input_prompts/icons/joypad_motion/sony="uid://bcfyuk0xhldj1"
+input_prompts/icons/joypad_motion/xbox="uid://dkjlrandqglyj"
 
 [application]
 
