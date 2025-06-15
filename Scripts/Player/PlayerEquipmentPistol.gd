@@ -24,7 +24,11 @@ signal on_action_started(new_action)
 signal on_current_action_interrupted(current_action, new_action)
 
 var current_state: EPistolState.State = EPistolState.State.HammerUncocked
-var current_action : EPistolState.Actions = EPistolState.Actions.None
+var current_action : EPistolState.Actions = EPistolState.Actions.None:
+	set(new):
+		on_action_started.emit(new)
+		current_action = new
+		
 
 var can_proceed_state: bool = true;
 var can_interrupt_into_next_state: bool = false;
@@ -41,7 +45,6 @@ var insert_chamber_id: int:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	animation_bus._initialize(self)
 	current_bullets.resize(chamber_amount)
 	current_bullets.fill(null)
 	current_state = EPistolState.State.HammerUncocked
@@ -123,14 +126,13 @@ func _try_reload_move_cylinder(next: bool) -> void:
 func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState.State, cylinder_rotations : int) -> void:
 	if(can_interrupt_into_next_state):
 		on_current_action_interrupted.emit(current_action, new_action)
-	current_action = new_action
-	on_action_started.emit(current_action)
 	
+	current_action = new_action
 	can_interrupt_into_next_state = false
 	can_proceed_state = false
 	current_state = new_state
 	_update_action_cylinder_increment_amount(cylinder_rotations)
-	
+
 func _update_action_cylinder_increment_amount(cylinder_rotations : int) -> void:
 	current_action_cylinder_rotations = cylinder_rotations
 	_increase_cylinder_rotations(current_action_cylinder_rotations)

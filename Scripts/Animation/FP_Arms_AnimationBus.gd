@@ -57,12 +57,12 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 			_on_reload_change(true,false,false)
 		EPistolState.Actions.EnterReloadUncock:
 			_on_reload_change(false,true,false)
+		EPistolState.Actions.ExitReload:
+			_on_reload_change(false,false,true)
 		EPistolState.Actions.CylinderNext:
 			_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
 		EPistolState.Actions.CylinderPrev:
 			_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
-		EPistolState.Actions.ExitReload:
-			_on_reload_change(false,false,true)
 		EPistolState.Actions.Insert:
 			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
 		EPistolState.Actions.Eject:
@@ -79,7 +79,6 @@ func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Ac
 	if(_prev == EPistolState.Actions.Insert || _prev == EPistolState.Actions.Eject):
 		match _new:
 			EPistolState.Actions.Insert, EPistolState.Actions.Eject:
-				print("FADE OUT ", current_action)
 				set(current_action, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 			_:
 				pass
@@ -92,8 +91,8 @@ func _process(_delta: float) -> void:
 	
 func _on_reload_change(enter : bool, enter_unock : bool, exit : bool)-> void:
 	anim_tree[anim_enter_reload_condition] = enter
-	anim_tree[anim_exit_reload_condition] = enter_unock
-	anim_tree[anim_enter_reload_uncock_condition] = exit
+	anim_tree[anim_enter_reload_uncock_condition] = enter_unock
+	anim_tree[anim_exit_reload_condition] = exit
 		
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:		
 	right_prop_bone.add_child(_new_bullet)
