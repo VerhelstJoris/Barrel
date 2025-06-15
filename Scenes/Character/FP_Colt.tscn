@@ -150,14 +150,14 @@ bones/2/parent = 0
 bones/2/rest = Transform3D(0.999945, 0.0064272, 0.00823654, 0.010179, -0.421759, -0.906651, -0.0023534, 0.906685, -0.421801, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.843135, 0.00492396, 0.00174444, 0.537677)
+bones/2/rotation = Quaternion(0.843135, 0.00492394, 0.00174441, 0.537677)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.699175, 1.21471e-07, -3.89164e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
@@ -286,7 +286,7 @@ transform = Transform3D(1, 2.78325e-07, 6.47166e-06, 3.04345e-07, -0.999992, -0.
 bone_name = "Cylinder"
 bone_idx = 1
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/CylinderAttachment"]
+[node name="DebugCylinderIndicator" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/CylinderAttachment"]
 transform = Transform3D(0.001, -5.55112e-17, -2.11094e-15, 1.94289e-16, 0.001, -3.18323e-12, 5.43814e-15, 3.18323e-12, 0.001, -0.002, 0, 0)
 visible = false
 layers = 2
