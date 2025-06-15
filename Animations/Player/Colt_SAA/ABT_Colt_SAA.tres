@@ -93,7 +93,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
-graph_offset = Vector2(1078, 649)
+graph_offset = Vector2(1523, 845)
 nodes/output/position = Vector2(3040, 1140)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)

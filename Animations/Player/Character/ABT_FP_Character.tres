@@ -148,6 +148,11 @@ animation = &"AL_FP_Character/A_FP_Reload_Eject_Shell"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_20p65"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
+use_custom_timeline = true
+timeline_length = 1.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
 
 [sub_resource type="Curve" id="Curve_ys0lo"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -231,7 +236,7 @@ fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_g0oko")
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(104.202, 397.453)
+graph_offset = Vector2(-1047.8, -123.455)
 nodes/output/position = Vector2(1500, 660)
 nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
 nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
@@ -268,8 +273,8 @@ point_count = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4m1l8"]
 xfade_time = 0.1
 xfade_curve = SubResource("Curve_0l78c")
-switch_mode = 2
 advance_mode = 2
+advance_expression = "enter_reload_done"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_u0joy"]
 advance_mode = 2
@@ -285,8 +290,8 @@ point_count = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_g0oko"]
 xfade_time = 0.4
 xfade_curve = SubResource("Curve_x4084")
-switch_mode = 2
 advance_mode = 2
+advance_expression = "exit_reload_done"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_x4084"]
 advance_mode = 2
@@ -303,8 +308,8 @@ point_count = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_es4ed"]
 xfade_time = 0.1
 xfade_curve = SubResource("Curve_x8ke2")
-switch_mode = 2
 advance_mode = 2
+advance_expression = "enter_reload_done"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_6324t"]
 "states/Enter Reload/node" = SubResource("AnimationNodeAnimation_e1q05")
@@ -316,13 +321,13 @@ advance_mode = 2
 states/ReadyBlendTree/node = SubResource("AnimationNodeBlendTree_fbbjj")
 states/ReadyBlendTree/position = Vector2(358, 139)
 states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
-states/ReloadingBlendTree/position = Vector2(358, 387)
+states/ReloadingBlendTree/position = Vector2(358, 388)
 states/Start/position = Vector2(144, 139)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "Start", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_u0joy"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "ReadyBlendTree", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_forti"), "Enter Reload Uncock", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_es4ed")]
-graph_offset = Vector2(-210, 92)
+graph_offset = Vector2(-119, 95)
 
 [resource]
-graph_offset = Vector2(-419.45, 141.96)
+graph_offset = Vector2(-399.347, 46.5755)
 nodes/output/position = Vector2(420, 320)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
 nodes/Animation/position = Vector2(60, 160)

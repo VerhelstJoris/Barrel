@@ -25,8 +25,11 @@ const anim_reload_eject_shell_request : String = "parameters/SM_Colt/ReloadingBl
 const anim_movement_blend : String = "parameters/SM_Colt/ReadyBlendTree/MoveBlendSpace/blend_position"
 const reload_movement_blend : String = "parameters/SM_Colt/ReloadingBlendTree/MoveBlendSpace/blend_position"
 
+# these 2 are checked by the state machine itself as an expression
+var enter_reload_done : bool = false
+var exit_reload_done : bool = false
 
-var current_action : String = ""
+var current_action : EPistolState.Actions = EPistolState.Actions.None
 
 var movement_blend_value : Vector2 = Vector2.ZERO
 
@@ -37,13 +40,13 @@ const movement_blend_rate : float = 4
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pistol.on_action_started.connect(_on_action_started)
-	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
+	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
+	anim_tree.animation_finished.connect(_on_animation_finished)
 
 
 func _set_anim_tree_oneshot_request(request_name):
 	set(request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	current_action = request_name
 
 func _on_action_started(new_action : EPistolState.Actions) -> void:
 	match new_action:
@@ -69,21 +72,42 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
 		_:
 			pass
+	current_action = new_action
 
 
 func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
-	if (current_action == ""):
+	if (_prev == EPistolState.Actions.None):
 		return
 		
-	#only do this with a select few actions that are incoming?
-	if(_prev == EPistolState.Actions.Insert || _prev == EPistolState.Actions.Eject):
-		match _new:
-			EPistolState.Actions.Insert, EPistolState.Actions.Eject:
-				set(current_action, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-			_:
-				pass
+	#specific edge cases to compensate for hand going forward/back
+	if(_prev == EPistolState.Actions.Insert && _new == EPistolState.Actions.Eject):
+		set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+
+	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
+		set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+			
+	elif(_prev == EPistolState.Actions.EnterReloadUncock || _prev == EPistolState.Actions.EnterReload):
+		_on_enter_reload_interrupted()
+		
+	elif(_prev == EPistolState.Actions.ExitReload):
+		_on_exit_reload_interrupted()
 	
-	current_action = ""
+
+func _on_enter_reload_interrupted() -> void:
+	enter_reload_done = true
+
+func _on_exit_reload_interrupted() -> void:
+	exit_reload_done = true
+
+func _on_animation_finished(_animation_name : String) -> void:
+	
+	if(current_action == EPistolState.Actions.EnterReload || EPistolState.Actions.EnterReloadUncock):
+		enter_reload_done = true
+	elif (current_action == EPistolState.Actions.ExitReload):
+		exit_reload_done = true
+	else:
+		exit_reload_done = false
+		enter_reload_done = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -93,8 +117,9 @@ func _on_reload_change(enter : bool, enter_unock : bool, exit : bool)-> void:
 	anim_tree[anim_enter_reload_condition] = enter
 	anim_tree[anim_enter_reload_uncock_condition] = enter_unock
 	anim_tree[anim_exit_reload_condition] = exit
-		
-func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:		
+	
+	
+func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 	
 func _on_player_movement_input(direction:Vector2) -> void:

@@ -191,11 +191,11 @@ func _can_try_eject() -> bool:
 
 func _can_enter_reload() -> bool:
 	print("Try enter reload")
-	return _can_proceed_state(false)
+	return _can_proceed_state(true)
 	
 func _can_exit_reload() -> bool:
 	print("Try exit reload")
-	return _can_proceed_state(false) && current_state == EPistolState.State.Reloading
+	return _can_proceed_state(true) && current_state == EPistolState.State.Reloading
 	
 func _can_cock_hammer() -> bool:
 	print("Try cocking hammer")

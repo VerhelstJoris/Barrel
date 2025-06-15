@@ -60,20 +60,21 @@ func _on_action_started(new_action : EPistolState.Actions)	-> void:
 func _interrupt_current_action(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
 	if(current_anim_request != ""):
 		anim_tree.set(current_anim_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
-		#this is the request, not the animation name
+	
+	if(_prev != EPistolState.Actions.None):
 		_on_current_action_finished()
 		
 func _on_animation_finished(_animation_name : String) -> void:
 	_on_current_action_finished()
+	colt_equipment._enable_changing_states(true)
+
 
 func _on_current_action_finished() -> void:
 	if(current_anim_request == ""):
 		return
 		
 	cylinder_bone_modifier.increment_cylinder_rotations(colt_equipment.current_action_cylinder_rotations)
-	print("ACTION FINISH", current_anim_request)
 		
-	colt_equipment._enable_changing_states(true)
 	match current_anim_request:
 		anim_enter_reload_request:
 			_on_enter_reload_finish()
