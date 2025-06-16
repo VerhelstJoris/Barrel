@@ -100,7 +100,6 @@ func _on_exit_reload_interrupted() -> void:
 	exit_reload_done = true
 
 func _on_animation_finished(_animation_name : String) -> void:
-	
 	if(current_action == EPistolState.Actions.EnterReload || EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
 	elif (current_action == EPistolState.Actions.ExitReload):
@@ -113,9 +112,14 @@ func _on_animation_finished(_animation_name : String) -> void:
 func _process(_delta: float) -> void:
 	prev_delta = _delta
 	
-func _on_reload_change(enter : bool, enter_unock : bool, exit : bool)-> void:
+func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
+	if(enter || enter_uncock):
+		enter_reload_done = false
+	elif(exit):
+		exit_reload_done = false
+	
 	anim_tree[anim_enter_reload_condition] = enter
-	anim_tree[anim_enter_reload_uncock_condition] = enter_unock
+	anim_tree[anim_enter_reload_uncock_condition] = enter_uncock
 	anim_tree[anim_exit_reload_condition] = exit
 	
 	

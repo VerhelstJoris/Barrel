@@ -31,6 +31,10 @@ config/icon="res://icon.svg"
 PromptManager="*res://addons/input_prompts/input_prompt_manager.gd"
 UIAnimation="*res://addons/godot_ui_animations/UIAnimationHandler.tscn"
 
+[debug]
+
+shader_language/warnings/unused_function=false
+
 [dotnet]
 
 project/assembly_name="Barrel"
