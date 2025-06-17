@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dt45lvppflhmo"]
+
+[ext_resource type="Script" uid="uid://dy40xltr7guff" path="res://Scripts/Tools/ImguiDebugTool.gd" id="1_fpfek"]
+
+[node name="ImGuiTool" type="Node2D"]
+script = ExtResource("1_fpfek")

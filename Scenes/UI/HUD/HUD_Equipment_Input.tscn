@@ -23,7 +23,7 @@ corner_detail = 5
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[sub_resource type="InputEventKey" id="InputEventKey_cjqlk"]
+[sub_resource type="InputEventKey" id="InputEventKey_272gq"]
 device = -1
 physical_keycode = 82
 unicode = 82
@@ -96,7 +96,7 @@ stretch_mode = 5
 script = ExtResource("3_awh55")
 action = "enter_reload"
 icon = 4
-events = Array[InputEvent]([SubResource("InputEventKey_cjqlk")])
+events = Array[InputEvent]([SubResource("InputEventKey_272gq")])
 metadata/_custom_type_script = "uid://dnx3ficr864og"
 
 [node name="BackUpLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer/ActionPrompt"]
