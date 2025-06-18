@@ -1,5 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=14 format=3 uid="uid://dlbkch6iuy8gn"]
 
+[ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="Script" uid="uid://buakj47i2tl6l" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
@@ -79,6 +80,10 @@ script = ExtResource("6_b4xrx")
 
 [node name="Fall" type="Node" parent="StateMachine"]
 script = ExtResource("7_dv6ye")
+
+[node name="BarrelPlayerSceneDebug" type="Node" parent="."]
+script = ExtResource("1_2gem6")
+metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 
 [connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/FP_Arms" method="_on_player_movement_input"]
 [connection signal="transitioned" from="StateMachine" to="." method="_on_state_machine_transitioned"]

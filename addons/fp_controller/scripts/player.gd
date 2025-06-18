@@ -38,7 +38,6 @@ signal player_movement_input(direction)
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
-
 var current_equipment : PlayerEquipment = null:
 	set = _change_equipment
 
@@ -54,13 +53,12 @@ var can_move: bool   = true
 var can_jump: bool   = true
 var can_sprint: bool = true
 
-
 func _ready() -> void:
+	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
 	player_movement_input.connect(arms.arms_animation_bus._on_player_movement_input)
 	current_equipment = arms.pistol_equipment
-		
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
@@ -87,7 +85,6 @@ func _process(_delta: float):
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
-	_onImGuiLayout()	
 		
 func _handle_camera_motion() -> void:
 	rotate_y(mouse_motion.x * camera_sensitivity)
@@ -152,7 +149,4 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 		new_equipment.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped()
-	
-func _onImGuiLayout() -> void:
-
-	pass
+		
