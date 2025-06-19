@@ -6,6 +6,7 @@ const debug_toggle_mouse_capture : String = "debug_toggle_mouse_capture"
 var tool_open :bool = false;
 
 signal draw_player_debug(_delta)
+signal draw_current_equipment(_delta)
 
 func _input(event: InputEvent) -> void:
 	if(event.is_action_pressed(debug_toggle_input)):

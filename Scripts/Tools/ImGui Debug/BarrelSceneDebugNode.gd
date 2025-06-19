@@ -11,8 +11,8 @@ func _draw(_delta: float) -> void:
 	pass
 
 func _draw_children(_delta : float) -> void:
-	pass
-	
-
-
-	
+	ImGui.Indent()
+	for child in ChildNodesToDisplay:
+		if(child != null):
+			child._draw(_delta)
+	ImGui.Unindent()

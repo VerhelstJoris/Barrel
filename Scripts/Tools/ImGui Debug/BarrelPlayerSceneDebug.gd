@@ -1,6 +1,5 @@
 class_name BarrelPlayerSceneDebug extends BarrelSceneDebugNode
 
-
 var player : Player
 
 func _ready() -> void:
@@ -10,6 +9,10 @@ func _ready() -> void:
 	BarrelDebugWindow.draw_player_debug.connect(_imgui_debug)
 	
 func _imgui_debug(_delta : float) -> void:
-	ImGui.Text("testing")
 	ImGui.Text("movement input: " + str(player.input_direction))
+	if(player.current_equipment != null):
+		ImGui.Text("we have equipment: " + str(player.current_equipment))
+		BarrelDebugWindow.draw_current_equipment.emit(_delta)
+	else:
+		ImGui.Text("No Equipment Equipped")
 	pass

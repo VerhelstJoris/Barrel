@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=36 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -18,6 +18,7 @@
 [ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/IA_Cycle_Cylinder_Next.tres" id="6_yeo0u"]
 [ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="7_yeo0u"]
 [ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="8_1detw"]
+[ext_resource type="Script" uid="uid://bthbdif7kukap" path="res://Scripts/Tools/ImGui Debug/Components/BarrelBoneCacheModifierDebugNode.gd" id="16_82rlu"]
 [ext_resource type="ArrayMesh" uid="uid://c6homiyfttq2k" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Barrel.res" id="17_yeo0u"]
 [ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/Mat_GunHandle.tres" id="18_61tmk"]
 [ext_resource type="ArrayMesh" uid="uid://cprfk4i0gru8b" path="res://Meshes/Weapons/Colt_SAA/M_Colt_BasePin.res" id="18_tjrp1"]
@@ -30,6 +31,7 @@
 [ext_resource type="ArrayMesh" uid="uid://c2fvdldnfuxf1" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Hatch.res" id="26_3vw6q"]
 [ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="27_b1r64"]
 [ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="29_n7a1r"]
+[ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="32_82rlu"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -157,14 +159,14 @@ bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.950304, 9.80028e-08, 2.35206e-08, 0.311325)
+bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
 bones/4/rest = Transform3D(0.999991, 1.4971e-07, 0.00428062, -0.00428062, 3.57628e-07, 0.999991, 1.4808e-07, -1, 3.57628e-07, -0.000461162, 1.28043e-05, -0.000911844)
 bones/4/enabled = true
 bones/4/position = Vector3(-0.000461162, 1.28043e-05, -0.000911844)
-bones/4/rotation = Quaternion(-0.707105, 0.00151341, -0.00151352, 0.707105)
+bones/4/rotation = Quaternion(-0.707105, 0.00151338, -0.00151348, 0.707105)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "Ejector Rod"
 bones/5/parent = 0
@@ -184,8 +186,8 @@ bones/7/name = "Bullet_Attachment_Point"
 bones/7/parent = 5
 bones/7/rest = Transform3D(-5.96046e-07, 1, 1.63913e-07, 0.92388, 4.76837e-07, 0.382682, 0.382682, 3.72529e-07, -0.92388, -0.0024515, 5.17768e-05, -9.89268e-05)
 bones/7/enabled = true
-bones/7/position = Vector3(-0.00244593, 8.19686e-05, -9.70957e-05)
-bones/7/rotation = Quaternion(0.684055, 0.702857, 0.136066, -0.139806)
+bones/7/position = Vector3(-0.0024515, 5.17768e-05, -9.89268e-05)
+bones/7/rotation = Quaternion(0.69352, 0.69352, 0.137949, -0.137949)
 bones/7/scale = Vector3(1, 1, 1)
 bones/8/name = "Spring End"
 bones/8/parent = 0
@@ -224,6 +226,11 @@ script = ExtResource("4_0cpdj")
 revolver_bone = "Trigger"
 metadata/_custom_type_script = "uid://547ntu3et701"
 
+[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier" node_paths=PackedStringArray("BoneCacheModifier")]
+script = ExtResource("16_82rlu")
+BoneCacheModifier = NodePath("..")
+metadata/_custom_type_script = "uid://bthbdif7kukap"
+
 [node name="SkeletonRevolverHammerModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
 _import_path = NodePath("")
 unique_name_in_owner = false
@@ -252,6 +259,11 @@ influence = 1.0
 script = ExtResource("4_0cpdj")
 revolver_bone = "Hammer"
 
+[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier" node_paths=PackedStringArray("BoneCacheModifier")]
+script = ExtResource("16_82rlu")
+BoneCacheModifier = NodePath("..")
+metadata/_custom_type_script = "uid://bthbdif7kukap"
+
 [node name="SkeletonRevolverHatchModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
 _import_path = NodePath("")
 unique_name_in_owner = false
@@ -279,6 +291,11 @@ active = true
 influence = 1.0
 script = ExtResource("4_0cpdj")
 revolver_bone = "Hatch"
+
+[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier" node_paths=PackedStringArray("BoneCacheModifier")]
+script = ExtResource("16_82rlu")
+BoneCacheModifier = NodePath("..")
+metadata/_custom_type_script = "uid://bthbdif7kukap"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
@@ -322,7 +339,7 @@ cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(-0.92354, -0.0271084, -0.382543, 0.0250448, -0.999633, 0.0103742, -0.382684, 2.30294e-07, 0.92388, -0.000321852, -0.00110922, 0.00134808)
+transform = Transform3D(-0.923879, -1.27147e-07, -0.382684, 1.65764e-07, -1, -3.89022e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 
@@ -403,3 +420,9 @@ material_override = ExtResource("5_y5nk3")
 gi_mode = 2
 mesh = ExtResource("29_n7a1r")
 skin = SubResource("Skin_upuq7")
+
+[node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("current_equipment", "ChildNodesToDisplay")]
+script = ExtResource("32_82rlu")
+current_equipment = NodePath("..")
+ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebug"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebug"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebug")]
+metadata/_custom_type_script = "uid://binu307e8ex3o"
