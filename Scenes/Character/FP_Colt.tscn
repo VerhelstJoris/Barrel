@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=35 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -6,7 +6,6 @@
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
 [ext_resource type="Resource" uid="uid://bs0loyw07mm2d" path="res://Data/Input/IA_Enter_Reload.tres" id="3_7yk7a"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
-[ext_resource type="Script" uid="uid://547ntu3et701" path="res://Scripts/Animation/Colt/SkeletonRevolverBoneCacheModifier.gd" id="4_0cpdj"]
 [ext_resource type="Resource" uid="uid://by15g85r6kgap" path="res://Data/Input/IA_Fire.tres" id="4_rt7h3"]
 [ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/Colt/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
 [ext_resource type="Resource" uid="uid://c4vgprx6fkfvx" path="res://Data/Input/IA_Exit_Reload.tres" id="5_61tmk"]
@@ -18,7 +17,7 @@
 [ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/IA_Cycle_Cylinder_Next.tres" id="6_yeo0u"]
 [ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="7_yeo0u"]
 [ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="8_1detw"]
-[ext_resource type="Script" uid="uid://bthbdif7kukap" path="res://Scripts/Tools/ImGui Debug/Components/BarrelBoneCacheModifierDebugNode.gd" id="16_82rlu"]
+[ext_resource type="PackedScene" uid="uid://bp7nyfexdkbri" path="res://Scenes/Components/SkeletonBoneCacheModifier.tscn" id="15_vp620"]
 [ext_resource type="ArrayMesh" uid="uid://c6homiyfttq2k" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Barrel.res" id="17_yeo0u"]
 [ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/Mat_GunHandle.tres" id="18_61tmk"]
 [ext_resource type="ArrayMesh" uid="uid://cprfk4i0gru8b" path="res://Meshes/Weapons/Colt_SAA/M_Colt_BasePin.res" id="18_tjrp1"]
@@ -197,105 +196,13 @@ bones/8/position = Vector3(-0.000240755, 0.00112173, -0.00125099)
 bones/8/rotation = Quaternion(-1.32161e-07, 1.32161e-07, 0.707107, 0.707107)
 bones/8/scale = Vector3(1, 1, 1)
 
-[node name="SkeletonRevolverTriggerCacheModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-accessibility_name = ""
-accessibility_description = ""
-accessibility_live = 0
-accessibility_controls_nodes = Array[NodePath]([])
-accessibility_described_by_nodes = Array[NodePath]([])
-accessibility_labeled_by_nodes = Array[NodePath]([])
-accessibility_flow_to_nodes = Array[NodePath]([])
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-active = true
-influence = 1.0
-script = ExtResource("4_0cpdj")
+[node name="SkeletonRevolverHatchModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
+
+[node name="SkeletonRevolverTriggerCacheModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
 revolver_bone = "Trigger"
-metadata/_custom_type_script = "uid://547ntu3et701"
 
-[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier" node_paths=PackedStringArray("BoneCacheModifier")]
-script = ExtResource("16_82rlu")
-BoneCacheModifier = NodePath("..")
-metadata/_custom_type_script = "uid://bthbdif7kukap"
-
-[node name="SkeletonRevolverHammerModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-accessibility_name = ""
-accessibility_description = ""
-accessibility_live = 0
-accessibility_controls_nodes = Array[NodePath]([])
-accessibility_described_by_nodes = Array[NodePath]([])
-accessibility_labeled_by_nodes = Array[NodePath]([])
-accessibility_flow_to_nodes = Array[NodePath]([])
-transform = Transform3D(1.69907e-09, 1.35226e-12, -5.6364e-11, 5.6364e-11, 4.46023e-14, 1.69907e-09, 1.353e-12, -1.7e-09, -2.56804e-16, -0.00380263, -0.00831858, -0.00889954)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-active = true
-influence = 1.0
-script = ExtResource("4_0cpdj")
+[node name="SkeletonRevolverHammerModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
 revolver_bone = "Hammer"
-
-[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier" node_paths=PackedStringArray("BoneCacheModifier")]
-script = ExtResource("16_82rlu")
-BoneCacheModifier = NodePath("..")
-metadata/_custom_type_script = "uid://bthbdif7kukap"
-
-[node name="SkeletonRevolverHatchModifier" type="SkeletonModifier3D" parent="Colt_Saa_Rig/Skeleton3D"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-accessibility_name = ""
-accessibility_description = ""
-accessibility_live = 0
-accessibility_controls_nodes = Array[NodePath]([])
-accessibility_described_by_nodes = Array[NodePath]([])
-accessibility_labeled_by_nodes = Array[NodePath]([])
-accessibility_flow_to_nodes = Array[NodePath]([])
-transform = Transform3D(1.69907e-09, 1.35226e-12, -5.6364e-11, 5.6364e-11, 4.46023e-14, 1.69907e-09, 1.353e-12, -1.7e-09, -2.56804e-16, -0.00380263, -0.00831858, -0.00889954)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-active = true
-influence = 1.0
-script = ExtResource("4_0cpdj")
-revolver_bone = "Hatch"
-
-[node name="BarrelBoneCacheModifierDebug" type="Node" parent="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier" node_paths=PackedStringArray("BoneCacheModifier")]
-script = ExtResource("16_82rlu")
-BoneCacheModifier = NodePath("..")
-metadata/_custom_type_script = "uid://bthbdif7kukap"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
@@ -424,5 +331,9 @@ skin = SubResource("Skin_upuq7")
 [node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("current_equipment", "ChildNodesToDisplay")]
 script = ExtResource("32_82rlu")
 current_equipment = NodePath("..")
-ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebug"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebug"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebug")]
+ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode")]
 metadata/_custom_type_script = "uid://binu307e8ex3o"
+
+[editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]
+[editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier"]
+[editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier"]
