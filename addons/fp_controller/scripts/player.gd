@@ -38,6 +38,10 @@ signal player_movement_input(direction)
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
+
+signal on_equipped(new_equipment : PlayerEquipment)
+signal on_unequipped(old_equipment : PlayerEquipment)
+
 var current_equipment : PlayerEquipment = null:
 	set = _change_equipment
 
@@ -54,7 +58,6 @@ var can_jump: bool   = true
 var can_sprint: bool = true
 
 func _ready() -> void:
-	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
 	player_movement_input.connect(arms.arms_animation_bus._on_player_movement_input)
@@ -143,10 +146,14 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	if(old_equipment != null):
 		old_equipment.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
 		old_equipment.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._on_equipment_input_actions_cleared)
+	on_unequipped.emit(old_equipment)	
 	
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
 		new_equipment.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped()
+	on_equipped.emit(new_equipment)
+	print("EMIT")
+	
 		

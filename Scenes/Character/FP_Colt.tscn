@@ -328,9 +328,8 @@ gi_mode = 2
 mesh = ExtResource("29_n7a1r")
 skin = SubResource("Skin_upuq7")
 
-[node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("current_equipment", "ChildNodesToDisplay")]
+[node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("32_82rlu")
-current_equipment = NodePath("..")
 ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode")]
 metadata/_custom_type_script = "uid://binu307e8ex3o"
 

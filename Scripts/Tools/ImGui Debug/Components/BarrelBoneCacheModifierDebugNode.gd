@@ -7,7 +7,7 @@ func _ready() -> void:
 	await owner.ready
 	BoneCacheModifier = owner as SkeletonRevolverBoneCacheModifier
 
-func _draw(_delta : float) -> void:
+func _draw_contents(_delta : float) -> void:
 	super(_delta)
 	if(BoneCacheModifier != null):
 		ImGui.Text(str(BoneCacheModifier))

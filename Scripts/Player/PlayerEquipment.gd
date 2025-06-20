@@ -14,9 +14,6 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 
 @onready var anim_tree : AnimationTree = %AnimationTree
 
-signal on_equipped()
-signal on_unequipped()
-
 signal on_available_equipment_actions_changed
 signal on_available_equipment_actions_cleared
 
@@ -27,11 +24,11 @@ func _input(event: InputEvent) -> void:
 		_try_use_equipment_secondary()
 	
 func _on_equipped():
-	on_equipped.emit()
+	pass
 	
 func _on_unequipped():
-	on_unequipped.emit()
-
+	pass
+	
 func _try_use_equipment():
 	# not implemented in base class
 	pass	
