@@ -197,6 +197,7 @@ bones/8/rotation = Quaternion(-1.32161e-07, 1.32161e-07, 0.707107, 0.707107)
 bones/8/scale = Vector3(1, 1, 1)
 
 [node name="SkeletonRevolverHatchModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
+revolver_bone = "Hatch"
 
 [node name="SkeletonRevolverTriggerCacheModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
 revolver_bone = "Trigger"

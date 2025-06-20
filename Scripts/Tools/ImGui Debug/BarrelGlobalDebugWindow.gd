@@ -6,6 +6,8 @@ const debug_toggle_mouse_capture : String = "debug_toggle_mouse_capture"
 var tool_open :bool = false;
 
 signal draw_player_debug(_delta)
+signal draw_favourited_debug(_delta)
+
 
 func _input(event: InputEvent) -> void:
 	if(event.is_action_pressed(debug_toggle_input)):
@@ -37,6 +39,9 @@ func _process(_delta: float) -> void:
 				draw_player_debug.emit(_delta)
 				ImGui.EndTabItem()
 			if(ImGui.BeginTabItem("Environment")):
+				ImGui.EndTabItem()
+			if(ImGui.BeginTabItem("Favourites")):
+				draw_favourited_debug.emit(_delta)
 				ImGui.EndTabItem()	
 			ImGui.EndTabBar()	
 			

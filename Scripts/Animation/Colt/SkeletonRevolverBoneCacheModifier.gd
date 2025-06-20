@@ -9,7 +9,7 @@ var rotation_to_cache : float =0
 var currently_caching : bool = false
 var cached_transform : Transform3D  = Transform3D.IDENTITY
 
-@onready var skeleton: Skeleton3D = %Skeleton3D
+var skeleton: Skeleton3D
 var revolver_bone_id  : int = 0
 
 
@@ -22,6 +22,8 @@ func _validate_property(property: Dictionary) -> void:
 			property.hint_string = found_skeleton.get_concatenated_bone_names() 
 
 func _ready() -> void:
+	skeleton = get_skeleton()
+	
 	if(skeleton):
 		revolver_bone_id = skeleton.find_bone(revolver_bone)
 

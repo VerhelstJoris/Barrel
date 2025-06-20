@@ -11,7 +11,6 @@ func _ready() -> void:
 	BarrelDebugWindow.draw_player_debug.connect(_draw)
 	player.on_equipped.connect(_on_new_equipped)
 	player.on_unequipped.connect(_on_old_unequipped)
-	print("READY")
 	
 func _draw(_delta: float) -> void:
 	super(_delta)

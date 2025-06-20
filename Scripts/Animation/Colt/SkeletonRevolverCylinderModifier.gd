@@ -5,8 +5,8 @@ class_name SkeletonRevolverCylinderModifier extends SkeletonModifier3D
 
 @export_enum(" ") var cylinder_bone: String
 
+var skeleton: Skeleton3D = null
 
-@onready var skeleton: Skeleton3D = %Skeleton3D
 var cylinder_bone_id  : int = 0
 
 var amount_of_rotations : int =0
@@ -20,6 +20,8 @@ func _validate_property(property: Dictionary) -> void:
 			property.hint_string = found_skeleton.get_concatenated_bone_names() 
 
 func _ready() -> void:
+	skeleton = get_skeleton()
+	
 	if(skeleton):
 		cylinder_bone_id = skeleton.find_bone(cylinder_bone)
 		

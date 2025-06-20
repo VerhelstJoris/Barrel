@@ -4,6 +4,11 @@ class_name BarrelSceneDebugNode extends Node
 @export var ChildNodesToDisplay : Array[BarrelSceneDebugNode]
 
 var is_favourited : Array[bool] = [false]
+	
+func _set_favourited(value):
+	is_favourited = value
+	print("set")
+
 
 func _ready() -> void:
 	if(!OS.is_debug_build()):
@@ -20,7 +25,11 @@ func _draw_banner(_delta : float) -> bool:
 	
 	ImGui.SameLineEx(ImGui.GetWindowWidth() - 50)
 	ImGui.PushID(owner.name + "favourite")
-	ImGui.Checkbox("Fav", is_favourited)
+	if(ImGui.Checkbox("Fav", is_favourited)):
+		if(is_favourited[0] == true):
+			BarrelDebugWindow.draw_favourited_debug.connect(_draw)
+		else:
+			BarrelDebugWindow.draw_favourited_debug.disconnect(_draw)
 	ImGui.PopID()
 	
 	return header_open	
