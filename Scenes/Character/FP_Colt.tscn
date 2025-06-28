@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=37 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
@@ -31,6 +31,8 @@
 [ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="27_b1r64"]
 [ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="29_n7a1r"]
 [ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="32_82rlu"]
+[ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="32_vp620"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="33_sp6cv"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -333,6 +335,17 @@ skin = SubResource("Skin_upuq7")
 script = ExtResource("32_82rlu")
 ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode")]
 metadata/_custom_type_script = "uid://binu307e8ex3o"
+
+[node name="InputReceiverComponent" parent="." instance=ExtResource("32_vp620")]
+input_dictionary = Dictionary[ExtResource("2_xvko2"), ExtResource("33_sp6cv")]({
+ExtResource("6_yeo0u"): null,
+ExtResource("5_yeo0u"): null,
+ExtResource("7_yeo0u"): null,
+ExtResource("3_7yk7a"): null,
+ExtResource("5_61tmk"): null,
+ExtResource("4_rt7h3"): null,
+ExtResource("6_i36na"): null
+})
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier"]

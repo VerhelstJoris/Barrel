@@ -1,31 +1,29 @@
 class_name Walk extends PlayerState
 
-var input_dir: Vector2
 var move_speed: float
-
 
 func enter(_msg := {}) -> void:
 	pass
-
-
-func handle_input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed(player.SPRINT) && player.allow_sprint:
-		state_machine.transition_to(state_machine.movement_state[state_machine.SPRINT])
 	
-	if event.is_action_pressed(player.JUMP) && player.is_on_floor() && player.allow_jump:
-		state_machine.transition_to(
-			state_machine.movement_state[state_machine.JUMP], 
-			{ 
-				"player_velocity" : player.velocity, 
-				state_machine.TO : state_machine.WALK,
-			}
-		)
+func handle_input(event: InputEvent) -> void:
+	#if Input.is_action_just_pressed(player.SPRINT) && player.allow_sprint:
+	#	state_machine.transition_to(state_machine.movement_state[state_machine.SPRINT])
+	#
+	#if event.is_action_pressed(player.JUMP) && player.is_on_floor() && player.allow_jump:
+	#	state_machine.transition_to(
+	#		state_machine.movement_state[state_machine.JUMP], 
+	#		{ 
+	#			"player_velocity" : player.velocity, 
+	#			state_machine.TO : state_machine.WALK,
+	#		}
+	#	)
+	pass
 
 func physics_update(_delta: float) -> void:
-	input_dir = player.input_direction
-	var direction := (player.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var input_dir : Vector2 = player.input_direction
+	var direction := (player.transform.basis * Vector3(input_dir.x, 0, -input_dir.y)).normalized()
 	
-	if input_dir.y > 0:
+	if input_dir.y < 0:
 		move_speed = player.walk_back_speed
 	else:
 		move_speed = player.walk_speed

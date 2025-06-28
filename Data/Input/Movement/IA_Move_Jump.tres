@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EquipmentInputInfo" load_steps=2 format=3 uid="uid://bfw1mhriic6yq"]
+
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="1_soggq"]
+
+[resource]
+script = ExtResource("1_soggq")
+input_string = "jump"
+description_string = ""
+metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

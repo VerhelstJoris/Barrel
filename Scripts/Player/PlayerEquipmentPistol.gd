@@ -50,18 +50,25 @@ func _ready() -> void:
 	current_state = EPistolState.State.HammerUncocked
 	_log_chamber_states()
 	
+func _get_available_inputs() -> Array[EquipmentInputInfo]:
+	if(current_state == EPistolState.State.Reloading):
+		return reload_state_input_details
+	else:
+		return ready_state_input_details
+	
 func _input(event: InputEvent) -> void:
-	super(event)
-	if current_state == EPistolState.State.Reloading:
-		if event.is_action_pressed(reload_cycle_next_input.input_string):
-			_try_reload_move_cylinder(true)
-		elif event.is_action_pressed(reload_cycle_prev_input.input_string):
-			_try_reload_move_cylinder(false)
-		elif event.is_action_pressed(reload_exit_input.input_string):
-			_try_reload()
-	else:	
-		if event.is_action_pressed(reload_enter_input.input_string):
-			_try_reload()
+	#super(event)
+	#if current_state == EPistolState.State.Reloading:
+	#	if event.is_action_pressed(reload_cycle_next_input.input_string):
+	#		_try_reload_move_cylinder(true)
+	#	elif event.is_action_pressed(reload_cycle_prev_input.input_string):
+	#		_try_reload_move_cylinder(false)
+	#	elif event.is_action_pressed(reload_exit_input.input_string):
+	#		_try_reload()
+	#else:	
+	#	if event.is_action_pressed(reload_enter_input.input_string):
+	#		_try_reload()
+	pass
 			
 func _try_use_equipment():
 	if(current_state == EPistolState.State.Reloading):
@@ -106,6 +113,7 @@ func _enter_reload_state() -> void:
 
 	_start_new_action( action, EPistolState.State.Reloading ,1)
 	on_available_equipment_actions_cleared.emit()
+
 	
 func _exit_reload_state() -> void:
 	_start_new_action( EPistolState.Actions.ExitReload, EPistolState.State.ReadyToFire, 0)

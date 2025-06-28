@@ -3,6 +3,7 @@ extends CharacterBody3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 signal player_movement_input(direction)
+
 @export_group("Controls map names")
 @export var MOVE_FORWARD: String = "move_forward"
 @export var MOVE_BACK: String = "move_back"
@@ -10,9 +11,11 @@ signal player_movement_input(direction)
 @export var MOVE_RIGHT: String = "move_right"
 @export var JUMP: String = "jump"
 @export var SPRINT: String = "sprint"
+@export var holster : String = "holster"
 @export_group("Customizable player stats")
 @export var walk_back_speed: float = 1.5
 @export var walk_speed: float = 2.5
+
 #Is Sprint a hold or toggle input?
 @export var sprint_toggle: bool = true
 @export var sprint_speed: float = 5.0
@@ -25,22 +28,25 @@ signal player_movement_input(direction)
 
 @export_range(0.0, 0.5) var camera_end_deadzone: float = .1
 @export_group("Feature toggles")
-@export var allow_jump: bool = true
 @export var allow_sprint: bool = true
 
 @export_group("Components")
+@export var input_receiver : InputReceiver = %InputReceiverComponent
 @onready var sub_viewport: SubViewport = %SubViewport
-
-# Player 'character' components
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var state_machine: PlayerStateMachine = %StateMachine
 @onready var arms: FPArms = %FP_Arms
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
+signal on_holster_changed(holstered : bool)
+signal on_movement_input_received(event: InputEvent)
 
 signal on_equipped(new_equipment : PlayerEquipment)
 signal on_unequipped(old_equipment : PlayerEquipment)
+
+var equipment_holstered : bool  = true:
+	set = _holster
 
 var current_equipment : PlayerEquipment = null:
 	set = _change_equipment
@@ -52,8 +58,6 @@ var mouse_motion: Vector2
 # Player state values that are set by applying state
 var is_affected_by_gravity: bool = true
 var is_moving: bool = false
-# Values that are set 'false' if corresponding controls aren't mapped
-var can_move: bool   = true
 var can_jump: bool   = true
 var can_sprint: bool = true
 
@@ -61,22 +65,23 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
 	player_movement_input.connect(arms.arms_animation_bus._on_player_movement_input)
+	on_holster_changed.connect(arms.arms_animation_bus._on_holster_state_changed)
 	current_equipment = arms.pistol_equipment
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		mouse_motion = -event.relative * 0.001
+	on_movement_input_received.connect(_on_movement_input)
 		
-		
-func _physics_process(delta: float) -> void:
-	if can_move:
-		if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_FORWARD, MOVE_BACK):
-			input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_FORWARD, MOVE_BACK)
-		else:
-			input_direction = Vector2.ZERO
-		
-	#print("emit ", input_direction)	
+func _on_movement_input(event : InputEvent) -> void:	
+	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
+		input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD)
+	else:
+		input_direction = Vector2.ZERO
+	
 	player_movement_input.emit(input_direction)
+
+func _on_mouse_motion_input(event : InputEvent) -> void:
+	mouse_motion = -event.relative * 0.001
+
+
+func _physics_process(delta: float) -> void:
 
 	# Add the gravity.
 	if not is_on_floor() && is_affected_by_gravity:
@@ -133,7 +138,6 @@ func _handle_joy_camera_motion() -> void:
 
 func _change_equipment(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment == current_equipment):
-		print("trying to change to already equipped: ", new_equipment)
 		return
 		
 	_on_unequip(current_equipment)
@@ -154,6 +158,14 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 		new_equipment.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped()
 	on_equipped.emit(new_equipment)
-	print("EMIT")
+
+func _holster(new_value : bool) -> void:
+	if(new_value == equipment_holstered):
+		return
+
+	equipment_holstered = new_value
+	on_holster_changed.emit(equipment_holstered)
 	
-		
+func _can_use_equipment() -> bool:
+	return true
+	

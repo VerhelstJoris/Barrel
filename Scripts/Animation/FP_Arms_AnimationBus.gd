@@ -9,21 +9,25 @@ class_name FPArmsAnimationBus extends Node
 
 enum E_prop_bone_type{Left, Right, Global}
 
-const anim_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/FireOneShot/request"
-const anim_dry_fire_request : String = "parameters/SM_Colt/ReadyBlendTree/DryFireOneShot/request"
-const anim_hammer_request : String = "parameters/SM_Colt/ReadyBlendTree/HammerOneShot/request"
+const anim_colt_state_machine_path : String  = "parameters/SM_Player/SM_Colt/"
 
-const anim_enter_reload_condition : String = "parameters/SM_Colt/conditions/enter_reload"
-const anim_enter_reload_uncock_condition : String = "parameters/SM_Colt/conditions/enter_reload_uncock"
-const anim_exit_reload_condition : String = "parameters/SM_Colt/conditions/exit_reload"
+const anim_fire_request : String = "ReadyBlendTree/FireOneShot/request"
+const anim_dry_fire_request : String = "ReadyBlendTree/DryFireOneShot/request"
+const anim_hammer_request : String = "ReadyBlendTree/HammerOneShot/request"
 
-const anim_reload_next_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/NextChamberOneShot/request"
-const anim_reload_previous_chamber_request : String = "parameters/SM_Colt/ReloadingBlendTree/PreviousChamberOneShot/request"
-const anim_reload_insert_shell_request : String = "parameters/SM_Colt/ReloadingBlendTree/InsertShellOneShot/request"
-const anim_reload_eject_shell_request : String = "parameters/SM_Colt/ReloadingBlendTree/EjectShellOneShot/request"
+const anim_enter_reload_condition : String = "conditions/enter_reload"
+const anim_enter_reload_uncock_condition : String = "conditions/enter_reload_uncock"
+const anim_exit_reload_condition : String = "conditions/exit_reload"
 
-const anim_movement_blend : String = "parameters/SM_Colt/ReadyBlendTree/MoveBlendSpace/blend_position"
-const reload_movement_blend : String = "parameters/SM_Colt/ReloadingBlendTree/MoveBlendSpace/blend_position"
+const anim_reload_next_chamber_request : String = "ReloadingBlendTree/NextChamberOneShot/request"
+const anim_reload_previous_chamber_request : String = "ReloadingBlendTree/PreviousChamberOneShot/request"
+const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
+const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
+
+const anim_movement_blend : String = "ReadyBlendTree/MoveBlendSpace/blend_position"
+const reload_movement_blend : String = "ReloadingBlendTree/MoveBlendSpace/blend_position"
+
+var _holstered : bool = true
 
 # these 2 are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
@@ -32,6 +36,7 @@ var exit_reload_done : bool = false
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
 var movement_blend_value : Vector2 = Vector2.ZERO
+
 
 var prev_delta : float = 0
 #deltatime to forever blend towards the movement we're doing
@@ -46,7 +51,7 @@ func _ready() -> void:
 
 
 func _set_anim_tree_oneshot_request(request_name):
-	set(request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set( anim_colt_state_machine_path + request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_action_started(new_action : EPistolState.Actions) -> void:
 	match new_action:
@@ -118,14 +123,19 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	elif(exit):
 		exit_reload_done = false
 	
-	anim_tree[anim_enter_reload_condition] = enter
-	anim_tree[anim_enter_reload_uncock_condition] = enter_uncock
-	anim_tree[anim_exit_reload_condition] = exit
+	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter
+	anim_tree[anim_colt_state_machine_path + anim_enter_reload_uncock_condition] = enter_uncock
+	anim_tree[anim_colt_state_machine_path + anim_exit_reload_condition] = exit
 	
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 	
+	
+func _on_holster_state_changed(holstered : bool) -> void:
+	_holstered = holstered
+	pass
+
 func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
 	set(anim_movement_blend,movement_blend_value)

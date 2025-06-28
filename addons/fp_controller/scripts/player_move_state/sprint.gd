@@ -9,19 +9,20 @@ func enter(_msg := {}) -> void:
 		
 
 func handle_input(event: InputEvent) -> void:
-	if event.is_action_pressed(player.JUMP) && player.is_on_floor() && player.allow_jump:
-		state_machine.transition_to(
-			state_machine.movement_state[state_machine.JUMP], 
-			{ 
-				"player_velocity" : player.velocity, 
-				state_machine.TO : state_machine.SPRINT,
-			}
-		)
-	
-	if Input.is_action_just_pressed(player.SPRINT):
-		state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
-	elif event.is_action_released(player.SPRINT) && !player.sprint_toggle:
-		state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
+	#if event.is_action_pressed(player.JUMP) && player.is_on_floor() && player.allow_jump:
+	#	state_machine.transition_to(
+	#		state_machine.movement_state[state_machine.JUMP], 
+	#		{ 
+	#			"player_velocity" : player.velocity, 
+	#			state_machine.TO : state_machine.SPRINT,
+	#		}
+	#	)
+	#
+	#if Input.is_action_just_pressed(player.SPRINT):
+	#	state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
+	#elif event.is_action_released(player.SPRINT) && !player.sprint_toggle:
+	#	state_machine.transition_to(state_machine.movement_state[state_machine.WALK])
+	pass
 
 
 func physics_update(_delta: float) -> void:

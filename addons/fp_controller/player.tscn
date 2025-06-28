@@ -1,16 +1,24 @@
-[gd_scene load_steps=14 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=26 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
+[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="2_a8wmt"]
 [ext_resource type="Script" uid="uid://buakj47i2tl6l" path="res://addons/fp_controller/scripts/player_state_machine.gd" id="2_wwa58"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
+[ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="3_gd45c"]
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
 [ext_resource type="Script" uid="uid://bqkpvi0mpwdbn" path="res://addons/fp_controller/scripts/player_move_state/idle.gd" id="3_xe000"]
 [ext_resource type="Script" uid="uid://bp2x7jwedb83f" path="res://addons/fp_controller/scripts/player_move_state/jump.gd" id="4_1lr3q"]
+[ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="4_5af7x"]
+[ext_resource type="Resource" uid="uid://dpdcr67h4kfen" path="res://Data/Input/Movement/IA_Move_Left.tres" id="5_62dvf"]
 [ext_resource type="Script" uid="uid://bqwmfs2jhrpjv" path="res://addons/fp_controller/scripts/player_move_state/walk.gd" id="5_bwgwe"]
 [ext_resource type="Script" uid="uid://dbxg76wdmkrrl" path="res://addons/fp_controller/scripts/player_move_state/sprint.gd" id="6_b4xrx"]
+[ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
 [ext_resource type="Script" uid="uid://ct7aom5asadtr" path="res://addons/fp_controller/scripts/player_move_state/fall.gd" id="7_dv6ye"]
+[ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
+[ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="20_5af7x"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
 height = 1.8
@@ -18,8 +26,33 @@ height = 1.8
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
 height = 1.8
 
-[node name="Player" type="CharacterBody3D"]
+[sub_resource type="Resource" id="Resource_5af7x"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("..")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_62dvf"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("..")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_y16om"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("..")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_nycc1"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("..")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("1_5ras8")
+input_receiver = NodePath("InputReceiverComponent")
 
 [node name="Placeholder_Collider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.9, 2.08165e-12)
@@ -81,9 +114,23 @@ script = ExtResource("6_b4xrx")
 [node name="Fall" type="Node" parent="StateMachine"]
 script = ExtResource("7_dv6ye")
 
-[node name="BarrelPlayerSceneDebug" type="Node" parent="."]
+[node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
+ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode")]
 metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
+
+[node name="PlayerInputManagerComponent" parent="." node_paths=PackedStringArray("_player") instance=ExtResource("12_1y53x")]
+_player = NodePath("..")
+
+[node name="InputReceiverComponent" parent="." instance=ExtResource("19_gd45c")]
+input_dictionary = Dictionary[ExtResource("2_a8wmt"), ExtResource("20_5af7x")]({
+ExtResource("3_gd45c"): SubResource("Resource_5af7x"),
+ExtResource("4_5af7x"): SubResource("Resource_62dvf"),
+ExtResource("5_62dvf"): SubResource("Resource_y16om"),
+ExtResource("6_y16om"): SubResource("Resource_nycc1")
+})
 
 [connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/FP_Arms" method="_on_player_movement_input"]
 [connection signal="transitioned" from="StateMachine" to="." method="_on_state_machine_transitioned"]
+
+[editable path="PlayerInputManagerComponent"]
