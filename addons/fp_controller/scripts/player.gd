@@ -31,7 +31,7 @@ signal player_movement_input(direction)
 @export var allow_sprint: bool = true
 
 @export_group("Components")
-@export var input_receiver : InputReceiver = %InputReceiverComponent
+@export var input_receiver : InputReceiver
 @onready var sub_viewport: SubViewport = %SubViewport
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var state_machine: PlayerStateMachine = %StateMachine

@@ -1,13 +1,6 @@
 class_name PlayerEquipmentPistol extends PlayerEquipment 
 
 @export_group("Equipment Input Details")
-@export var reload_enter_input : EquipmentInputInfo
-@export var reload_exit_input : EquipmentInputInfo
-@export var reload_cycle_next_input : EquipmentInputInfo
-@export var reload_cycle_prev_input : EquipmentInputInfo
-@export var reload_insert_input : EquipmentInputInfo
-@export var reload_eject_input : EquipmentInputInfo
-
 @export var ready_state_input_details : Array[EquipmentInputInfo]
 @export var reload_state_input_details : Array[EquipmentInputInfo]
 
@@ -19,6 +12,13 @@ class_name PlayerEquipmentPistol extends PlayerEquipment
 @onready var bullet_reparent_point: Node3D = %BulletReparentPoint
 @onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
 
+signal on_try_insert_input(event: InputEvent)
+signal on_try_eject_input(event: InputEvent)
+signal on_try_cylinder_next_input(event : InputEvent)
+signal on_try_cylinder_prev_input(event : InputEvent)
+signal on_try_enter_reload_input(event : InputEvent)
+signal on_try_exit_reload_input(event : InputEvent)
+
 signal bullet_spawned_for_inserting(new_bullet)
 signal on_action_started(new_action)
 signal on_current_action_interrupted(current_action, new_action)
@@ -28,7 +28,6 @@ var current_action : EPistolState.Actions = EPistolState.Actions.None:
 	set(new):
 		on_action_started.emit(new)
 		current_action = new
-		
 
 var can_proceed_state: bool = true;
 var can_interrupt_into_next_state: bool = false;
@@ -45,10 +44,17 @@ var insert_chamber_id: int:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	super()
 	current_bullets.resize(chamber_amount)
 	current_bullets.fill(null)
 	current_state = EPistolState.State.HammerUncocked
-	_log_chamber_states()
+	
+	on_try_insert_input.connect(_try_insert_round)
+	on_try_eject_input.connect(_try_eject_round)
+	on_try_cylinder_next_input.connect(_try_cylinder_next)
+	on_try_cylinder_prev_input.connect(_try_cylinder_prev)
+	on_try_enter_reload_input.connect(_try_enter_reload)
+	on_try_exit_reload_input.connect(_try_exit_reload)
 	
 func _get_available_inputs() -> Array[EquipmentInputInfo]:
 	if(current_state == EPistolState.State.Reloading):
@@ -56,51 +62,55 @@ func _get_available_inputs() -> Array[EquipmentInputInfo]:
 	else:
 		return ready_state_input_details
 	
-func _input(event: InputEvent) -> void:
-	#super(event)
-	#if current_state == EPistolState.State.Reloading:
-	#	if event.is_action_pressed(reload_cycle_next_input.input_string):
-	#		_try_reload_move_cylinder(true)
-	#	elif event.is_action_pressed(reload_cycle_prev_input.input_string):
-	#		_try_reload_move_cylinder(false)
-	#	elif event.is_action_pressed(reload_exit_input.input_string):
-	#		_try_reload()
-	#else:	
-	#	if event.is_action_pressed(reload_enter_input.input_string):
-	#		_try_reload()
-	pass
-			
-func _try_use_equipment():
+func _try_insert_round(_event : InputEvent) -> void:
 	if(current_state == EPistolState.State.Reloading):
 		if(_can_insert_round()):
 			_start_new_action(EPistolState.Actions.Insert, current_state, 0)
-	else:
-		if _can_shoot():
-			if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
-				_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
-				current_bullets[current_chamber_id]._on_fired()
-			else:
-				_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
-		elif(_can_cock_hammer()):
-			_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
 			
-func _try_use_equipment_secondary():
+func _try_eject_round(_event : InputEvent) -> void:
 	if(current_state == EPistolState.State.Reloading):
-		if(_can_try_eject()):
+		if(_can_eject_round()):
 			_start_new_action( EPistolState.Actions.Eject, current_state, 0)
+		
+func _try_cylinder_next(_event : InputEvent) -> void:
+	if(_can_reload_rotate_cylinder()):
+		_start_new_action(EPistolState.Actions.CylinderNext, current_state, -1)
+		
+func _try_cylinder_prev(_event : InputEvent) -> void:
+	if(_can_reload_rotate_cylinder()):
+		_start_new_action(EPistolState.Actions.CylinderPrev, current_state, 1)
+		
+func _can_reload_rotate_cylinder() -> bool:
+	if(current_state != EPistolState.State.Reloading):
+		return false
+
+	if(!_can_proceed_state(true)):
+		return false
+		
+	return true	
+
+func _try_enter_reload(_event : InputEvent) -> void:
+	if(_can_enter_reload()):
+		_enter_reload_state()
+		
+func _try_exit_reload(_event : InputEvent) -> void:
+	if(_can_exit_reload()):
+		_exit_reload_state()	
+
+func _try_use_equipment(_event : InputEvent) -> void:
+	if _can_shoot():
+		if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
+			_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
+			current_bullets[current_chamber_id]._on_fired()
+		else:
+			_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
+	elif(_can_cock_hammer()):
+		_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
 		
 func _on_equipped():
 	super()
 	on_available_equipment_actions_changed.emit(ready_state_input_details)
-
-func _try_reload():
-	if(current_state != EPistolState.State.Reloading):
-		if(_can_enter_reload()):
-			_enter_reload_state()
-	else:
-		if(_can_exit_reload()):
-			_exit_reload_state()
-			
+	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
 		
@@ -113,23 +123,10 @@ func _enter_reload_state() -> void:
 
 	_start_new_action( action, EPistolState.State.Reloading ,1)
 	on_available_equipment_actions_cleared.emit()
-
 	
 func _exit_reload_state() -> void:
 	_start_new_action( EPistolState.Actions.ExitReload, EPistolState.State.ReadyToFire, 0)
 	on_available_equipment_actions_cleared.emit()
-
-func _try_reload_move_cylinder(next: bool) -> void:
-	if(current_state != EPistolState.State.Reloading):
-		return
-		
-	if(!_can_proceed_state(true)):
-		return
-		
-	#feels flipped	
-	var rotation : int =  -1 if next else 1
-	var action : EPistolState.Actions = EPistolState.Actions.CylinderNext if next else EPistolState.Actions.CylinderPrev
-	_start_new_action(action, current_state, rotation)
 	
 func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState.State, cylinder_rotations : int) -> void:
 	if(can_interrupt_into_next_state):
@@ -190,27 +187,21 @@ func _can_proceed_state(allow_interrupt : bool = false) -> bool:
 		return can_proceed_state
 	
 func _can_insert_round() -> bool:
-	print("Try inserting round in ", insert_chamber_id)
 	return current_state == EPistolState.State.Reloading && _can_proceed_state(true) && current_bullets[insert_chamber_id] == null
 
-func _can_try_eject() -> bool:
-	print("Try ejecting shell")
+func _can_eject_round() -> bool:
 	return current_state == EPistolState.State.Reloading && _can_proceed_state(true)
 
 func _can_enter_reload() -> bool:
-	print("Try enter reload")
-	return _can_proceed_state(true)
+	return _can_proceed_state(true) && current_state != EPistolState.State.Reloading
 	
 func _can_exit_reload() -> bool:
-	print("Try exit reload")
 	return _can_proceed_state(true) && current_state == EPistolState.State.Reloading
 	
 func _can_cock_hammer() -> bool:
-	print("Try cocking hammer")
 	return current_state == EPistolState.State.HammerUncocked && _can_proceed_state(true)
 
 func _can_shoot() -> bool:
-	print("Try shooting")
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
 	
 func _log_chamber_states() -> void:

@@ -13,25 +13,23 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @export var secondary_use_input : EquipmentInputInfo
 
 @onready var anim_tree : AnimationTree = %AnimationTree
-@onready var input_receiver : InputReceiver = %InputReceiverComponent
+@export var input_receiver : InputReceiver
+
+signal use_equipment_input(event: InputEvent)
 
 signal on_available_equipment_actions_changed
 signal on_available_equipment_actions_cleared
 
-func _input(event: InputEvent) -> void:
-	#if event.is_action_pressed(use_input.input_string):
-	#	_try_use_equipment()
-	#elif event.is_action_pressed(secondary_use_input.input_string):
-	#	_try_use_equipment_secondary()
-	pass
-	
+func _ready() -> void:
+	use_equipment_input.connect(_try_use_equipment)
+
 func _on_equipped():
 	pass
 	
 func _on_unequipped():
 	pass
 	
-func _try_use_equipment():
+func _try_use_equipment(_event : InputEvent):
 	# not implemented in base class
 	pass	
 	
