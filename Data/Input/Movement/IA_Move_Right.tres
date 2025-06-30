@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="EquipmentInputInfo" load_steps=2 format=3 uid="uid://cu3mcxv3qvrtf"]
+[gd_resource type="Resource" script_class="InputActionInfo" load_steps=2 format=3 uid="uid://cu3mcxv3qvrtf"]
 
-[ext_resource type="Script" uid="uid://b6c2jl5dxod1a" path="res://Scripts/UI/HUD/EquipmentInputInfo.gd" id="1_py22d"]
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="1_py22d"]
 
 [resource]
 script = ExtResource("1_py22d")
 input_string = "move_right"
 description_string = ""
+is_hold = false
+hold_time = 0.3
 metadata/_custom_type_script = "uid://b6c2jl5dxod1a"

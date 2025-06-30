@@ -9,8 +9,8 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @export var hold_type : Equipment_Hold = Equipment_Hold.MainHand
 
 @export_group("Equipment Input Details")
-@export var use_input : EquipmentInputInfo
-@export var secondary_use_input : EquipmentInputInfo
+@export var use_input : InputActionInfo
+@export var secondary_use_input : InputActionInfo
 
 @onready var anim_tree : AnimationTree = %AnimationTree
 @export var input_receiver : InputReceiver
@@ -38,5 +38,5 @@ func _try_use_equipment_secondary():
 	pass
 
 	
-func _get_available_inputs() -> Array[EquipmentInputInfo]:
+func _get_available_inputs() -> Array[InputActionInfo]:
 	return [use_input, secondary_use_input]

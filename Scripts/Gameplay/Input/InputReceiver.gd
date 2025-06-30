@@ -1,7 +1,7 @@
 class_name InputReceiver extends Node
 
 @export_group("Input Map")
-@export var input_dictionary : Dictionary[EquipmentInputInfo, ExposedSignalConnector]
+@export var input_dictionary : Dictionary[InputActionInfo, ExposedSignalConnector]
 
 var generated_dictionary : Dictionary[String, ExposedSignalConnector]
 

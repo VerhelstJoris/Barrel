@@ -14,7 +14,7 @@ func _clear_current_input_details() -> void:
 	for child in input_item_container.get_children():
 		input_item_container.remove_child(child)
 
-func _create_new_item(info: EquipmentInputInfo):
+func _create_new_item(info: InputActionInfo):
 	var new_item: HUDEquipmentInputItem = input_item_scene.instantiate()
 	input_item_container.add_child(new_item)
 	new_item.input_text = info.description_string
@@ -22,7 +22,7 @@ func _create_new_item(info: EquipmentInputInfo):
 
 	input_item_container.notification(NOTIFICATION_RESIZED)
 	
-func _on_equipment_input_actions_changed(new_inputs : Array[EquipmentInputInfo]) -> void:
+func _on_equipment_input_actions_changed(new_inputs : Array[InputActionInfo]) -> void:
 
 	_clear_current_input_details()
 	for info in new_inputs:

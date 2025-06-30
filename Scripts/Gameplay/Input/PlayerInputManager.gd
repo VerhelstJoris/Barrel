@@ -2,6 +2,8 @@ class_name PlayerInputManager extends Node
 
 @export var _player : Player
 
+var input_action_time_map : Dictionary[String, float]
+
 func _ready() -> void:
 	pass
 	
@@ -18,12 +20,22 @@ func _input(event: InputEvent) -> void:
 		
 func _process_input_receiver(receiver : InputReceiver, event : InputEvent) -> void:
 	for key in receiver.input_dictionary:
-			if(event.is_action(key.input_string)):
-				ExposedSignalConnector._try_send_signal(receiver,receiver.input_dictionary[key], event)
-			
-func _try_send_signal(event: InputEvent, starting_node : Node ,signal_to_emit : ExposedSignalConnector ):
-	var found_node : Node = starting_node.get_node(signal_to_emit.signal_node)
-	if found_node:
-		found_node.emit_signal(signal_to_emit.signal_name, event)
+		_process_single_input(key, event,receiver, receiver.input_dictionary[key])
+	
+func _process_single_input(input_action_info: InputActionInfo, event : InputEvent, node : Node, exposed_signal_connector: ExposedSignalConnector) -> void:
+	var action_to_check : String = input_action_info.input_string
+	
+	if(!event.is_action(action_to_check)):
+		return
+		
+	if(input_action_info.is_hold):
+		if(event.is_released() && input_action_time_map.has(action_to_check)):
+			var found : float = input_action_time_map.get(action_to_check)
+			if(found + input_action_info.hold_time < Time.get_unix_time_from_system()):
+				input_action_time_map.erase(action_to_check)
+				ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
+		elif (event.is_pressed() && !input_action_time_map.has(action_to_check)):
+			input_action_time_map[input_action_info.input_string] = Time.get_unix_time_from_system()
 	else:
-		printerr("Node or signal does not exist")	
+		ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
+		

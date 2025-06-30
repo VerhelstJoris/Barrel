@@ -1,8 +1,8 @@
 class_name PlayerEquipmentPistol extends PlayerEquipment 
 
 @export_group("Equipment Input Details")
-@export var ready_state_input_details : Array[EquipmentInputInfo]
-@export var reload_state_input_details : Array[EquipmentInputInfo]
+@export var ready_state_input_details : Array[InputActionInfo]
+@export var reload_state_input_details : Array[InputActionInfo]
 
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
@@ -56,7 +56,7 @@ func _ready() -> void:
 	on_try_enter_reload_input.connect(_try_enter_reload)
 	on_try_exit_reload_input.connect(_try_exit_reload)
 	
-func _get_available_inputs() -> Array[EquipmentInputInfo]:
+func _get_available_inputs() -> Array[InputActionInfo]:
 	if(current_state == EPistolState.State.Reloading):
 		return reload_state_input_details
 	else:

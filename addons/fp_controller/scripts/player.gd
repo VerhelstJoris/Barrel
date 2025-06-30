@@ -41,6 +41,7 @@ signal player_movement_input(direction)
 
 signal on_holster_changed(holstered : bool)
 signal on_movement_input_received(event: InputEvent)
+signal on_holster_input_received(event : InputEvent)
 
 signal on_equipped(new_equipment : PlayerEquipment)
 signal on_unequipped(old_equipment : PlayerEquipment)
@@ -68,7 +69,11 @@ func _ready() -> void:
 	on_holster_changed.connect(arms.arms_animation_bus._on_holster_state_changed)
 	current_equipment = arms.pistol_equipment
 	on_movement_input_received.connect(_on_movement_input)
-		
+	on_holster_input_received.connect(_on_holster_input)
+
+func _on_holster_input(event : InputEvent) -> void:
+	print("DO HOLSTER")
+
 func _on_movement_input(event : InputEvent) -> void:	
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
 		input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD)
