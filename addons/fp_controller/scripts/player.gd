@@ -72,7 +72,7 @@ func _ready() -> void:
 	on_holster_input_received.connect(_on_holster_input)
 
 func _on_holster_input(event : InputEvent) -> void:
-	print("DO HOLSTER")
+	pass
 
 func _on_movement_input(event : InputEvent) -> void:	
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
@@ -87,7 +87,6 @@ func _on_mouse_motion_input(event : InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-
 	# Add the gravity.
 	if not is_on_floor() && is_affected_by_gravity:
 		velocity.y -= gravity * delta
@@ -153,14 +152,14 @@ func _change_equipment(new_equipment : PlayerEquipment) -> void:
 	
 func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	if(old_equipment != null):
-		old_equipment.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
-		old_equipment.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._on_equipment_input_actions_cleared)
+		old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
+		old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._clear_current_input_details)
 	on_unequipped.emit(old_equipment)	
 	
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
-		new_equipment.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
-		new_equipment.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
+		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
+		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._clear_current_input_details)
 		new_equipment._on_equipped()
 	on_equipped.emit(new_equipment)
 

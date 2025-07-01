@@ -1,13 +1,11 @@
+@icon("res://DEBUG/Ico_Keyboard.png")
 class_name InputReceiver extends Node
 
 @export_group("Input Map")
 @export var input_dictionary : Dictionary[InputActionInfo, ExposedSignalConnector]
 
-var generated_dictionary : Dictionary[String, ExposedSignalConnector]
+signal on_available_equipment_actions_changed
+signal on_available_equipment_actions_cleared
 
-
-func _ready() -> void:
-	for key in input_dictionary:
-		generated_dictionary.get_or_add(key.input_string, input_dictionary[key])
-		
-	
+func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnector]:
+	return input_dictionary

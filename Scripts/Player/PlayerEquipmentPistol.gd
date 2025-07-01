@@ -1,9 +1,5 @@
 class_name PlayerEquipmentPistol extends PlayerEquipment 
 
-@export_group("Equipment Input Details")
-@export var ready_state_input_details : Array[InputActionInfo]
-@export var reload_state_input_details : Array[InputActionInfo]
-
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
@@ -56,12 +52,6 @@ func _ready() -> void:
 	on_try_enter_reload_input.connect(_try_enter_reload)
 	on_try_exit_reload_input.connect(_try_exit_reload)
 	
-func _get_available_inputs() -> Array[InputActionInfo]:
-	if(current_state == EPistolState.State.Reloading):
-		return reload_state_input_details
-	else:
-		return ready_state_input_details
-	
 func _try_insert_round(_event : InputEvent) -> void:
 	if(current_state == EPistolState.State.Reloading):
 		if(_can_insert_round()):
@@ -109,7 +99,6 @@ func _try_use_equipment(_event : InputEvent) -> void:
 		
 func _on_equipped():
 	super()
-	on_available_equipment_actions_changed.emit(ready_state_input_details)
 	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
@@ -122,11 +111,9 @@ func _enter_reload_state() -> void:
 		action = EPistolState.Actions.EnterReloadUncock
 
 	_start_new_action( action, EPistolState.State.Reloading ,1)
-	on_available_equipment_actions_cleared.emit()
 	
 func _exit_reload_state() -> void:
 	_start_new_action( EPistolState.Actions.ExitReload, EPistolState.State.ReadyToFire, 0)
-	on_available_equipment_actions_cleared.emit()
 	
 func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState.State, cylinder_rotations : int) -> void:
 	if(can_interrupt_into_next_state):

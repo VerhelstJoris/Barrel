@@ -4,6 +4,8 @@ class_name PlayerInputManager extends Node
 
 var input_action_time_map : Dictionary[String, float]
 
+signal on_input_held(input_action : String, start_time : float )
+
 func _ready() -> void:
 	pass
 	
@@ -19,8 +21,9 @@ func _input(event: InputEvent) -> void:
 		_process_input_receiver(_player.current_equipment.input_receiver, event)
 		
 func _process_input_receiver(receiver : InputReceiver, event : InputEvent) -> void:
-	for key in receiver.input_dictionary:
-		_process_single_input(key, event,receiver, receiver.input_dictionary[key])
+	var available_receiver_inputs = receiver._get_available_inputs()
+	for key : InputActionInfo in available_receiver_inputs:
+		_process_single_input(key, event,receiver, available_receiver_inputs[key])
 	
 func _process_single_input(input_action_info: InputActionInfo, event : InputEvent, node : Node, exposed_signal_connector: ExposedSignalConnector) -> void:
 	var action_to_check : String = input_action_info.input_string
@@ -39,3 +42,12 @@ func _process_single_input(input_action_info: InputActionInfo, event : InputEven
 	else:
 		ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
 		
+func _physics_process(_delta: float) -> void:
+	for input in input_action_time_map:
+		_process_held_input(input)
+		
+func _process_held_input(input : String) -> void:
+	if(Input.is_action_pressed(input)):
+		on_input_held.emit(input, input_action_time_map[input])
+	else:
+		input_action_time_map.erase(input)	

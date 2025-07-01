@@ -1,4 +1,4 @@
-@icon("res://DEBUG/Icon.png")
+@icon("res://DEBUG/Ico_Bug.png")
 class_name BarrelSceneDebugNode extends Node
 
 @export var ChildNodesToDisplay : Array[BarrelSceneDebugNode]

@@ -74,17 +74,5 @@ func _on_current_action_finished() -> void:
 		return
 		
 	cylinder_bone_modifier.increment_cylinder_rotations(colt_equipment.current_action_cylinder_rotations)
-		
-	match current_anim_request:
-		anim_enter_reload_request:
-			_on_enter_reload_finish()
-		anim_enter_reload_uncock_request:
-			_on_enter_reload_finish()
-		anim_exit_reload_request:
-			colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.ready_state_input_details)
 			
-	current_anim_request = ""		
-
-
-func _on_enter_reload_finish()->void:
-	colt_equipment.on_available_equipment_actions_changed.emit(colt_equipment.reload_state_input_details)	
+	current_anim_request = ""

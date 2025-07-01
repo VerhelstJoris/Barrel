@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8oxrvwv5gxo3"]
+
+[ext_resource type="Script" uid="uid://f8afy3pyt1jr" path="res://Scripts/Gameplay/Input/PistolInputReceiver.gd" id="1_7jwf2"]
+[ext_resource type="Script" uid="uid://bh4jyg37xvxq7" path="res://Scripts/Tools/ImGui Debug/Components/PistolInputReceiverDebugNode.gd" id="2_lufih"]
+
+[node name="PistolInputReceiverComponent" type="Node"]
+script = ExtResource("1_7jwf2")
+metadata/_custom_type_script = "uid://f8afy3pyt1jr"
+
+[node name="PistolInputReceiverDebugNode" type="Node" parent="."]
+script = ExtResource("2_lufih")
+metadata/_custom_type_script = "uid://bh4jyg37xvxq7"
