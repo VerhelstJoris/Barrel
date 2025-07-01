@@ -31,8 +31,8 @@
 [ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="29_n7a1r"]
 [ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="32_82rlu"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="32_sp6cv"]
-[ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="32_vp620"]
 [ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="33_sp6cv"]
+[ext_resource type="PackedScene" uid="uid://c8oxrvwv5gxo3" path="res://Scenes/Components/Input/Pistol/PistolInputReceiverComponent.tscn" id="34_sp6cv"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
@@ -72,54 +72,56 @@ bind/8/name = &"Spring End"
 bind/8/bone = -1
 bind/8/pose = Transform3D(-4.94731e-08, 1, 2.86386e-07, 1, -3.97233e-08, -1.50996e-07, -1.50996e-07, 2.86386e-07, -1, -0.00112173, -0.000240755, 0.00125099)
 
-[sub_resource type="Resource" id="Resource_3vw6q"]
-script = ExtResource("33_sp6cv")
-signal_node = NodePath("..")
-signal_name = "on_try_cylinder_next_input"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_b1r64"]
-script = ExtResource("33_sp6cv")
-signal_node = NodePath("..")
-signal_name = "on_try_cylinder_prev_input"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_n7a1r"]
-script = ExtResource("33_sp6cv")
-signal_node = NodePath("..")
-signal_name = "on_try_eject_input"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_sp6cv"]
+[sub_resource type="Resource" id="Resource_2hcnp"]
 script = ExtResource("33_sp6cv")
 signal_node = NodePath("..")
 signal_name = "on_try_insert_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
-[sub_resource type="Resource" id="Resource_p7lyl"]
+[sub_resource type="Resource" id="Resource_itbd8"]
 script = ExtResource("33_sp6cv")
 signal_node = NodePath("..")
-signal_name = "on_try_enter_reload_input"
+signal_name = "on_try_eject_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
-[sub_resource type="Resource" id="Resource_wwafq"]
+[sub_resource type="Resource" id="Resource_yq7b0"]
+script = ExtResource("33_sp6cv")
+signal_node = NodePath("..")
+signal_name = "on_try_cylinder_next_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_0tuoe"]
+script = ExtResource("33_sp6cv")
+signal_node = NodePath("..")
+signal_name = "on_try_cylinder_prev_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_8w4rf"]
 script = ExtResource("33_sp6cv")
 signal_node = NodePath("..")
 signal_name = "on_try_exit_reload_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
-[sub_resource type="Resource" id="Resource_ks8es"]
+[sub_resource type="Resource" id="Resource_78w3v"]
 script = ExtResource("33_sp6cv")
 signal_node = NodePath("..")
 signal_name = "use_equipment_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
+[sub_resource type="Resource" id="Resource_t2yuq"]
+script = ExtResource("33_sp6cv")
+signal_node = NodePath("..")
+signal_name = "on_try_enter_reload_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
 [node name="SK_Colt" type="Node3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("2_al4xy")
+ready_state_input_details = Array[ExtResource("32_sp6cv")]([ExtResource("4_rt7h3"), ExtResource("3_7yk7a")])
+reload_state_input_details = Array[ExtResource("32_sp6cv")]([ExtResource("6_i36na"), ExtResource("7_yeo0u"), ExtResource("6_yeo0u"), ExtResource("5_61tmk")])
 bullet_scene = ExtResource("3_xgxry")
 use_input = ExtResource("4_rt7h3")
 secondary_use_input = ExtResource("7_yeo0u")
-input_receiver = NodePath("InputReceiverComponent")
+input_receiver = NodePath("PistolInputReceiverComponent")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -188,14 +190,14 @@ bones/2/parent = 0
 bones/2/rest = Transform3D(0.999945, 0.0064272, 0.00823654, 0.010179, -0.421759, -0.906651, -0.0023534, 0.906685, -0.421801, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.843135, 0.00492396, 0.00174444, 0.537677)
+bones/2/rotation = Quaternion(0.81885, 0.00484306, 0.00195777, 0.573983)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.89672, 1.24527e-07, 1.15405e-09, 0.442599)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
@@ -244,7 +246,7 @@ revolver_bone = "Hammer"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 2.78325e-07, 6.47166e-06, 3.04345e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12428e-10, -0.000578005, 0.00118026)
+transform = Transform3D(1, 2.78326e-07, 6.47166e-06, 3.04346e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12429e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
 
@@ -284,7 +286,7 @@ cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(-0.923879, -1.27147e-07, -0.382684, 1.65764e-07, -1, -3.89022e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
+transform = Transform3D(-0.923879, -1.27146e-07, -0.382684, 1.65763e-07, -1, -3.89026e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 
@@ -368,20 +370,23 @@ skin = SubResource("Skin_upuq7")
 
 [node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("32_82rlu")
-ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode")]
+ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../PistolInputReceiverComponent/PistolInputReceiverDebugNode")]
 metadata/_custom_type_script = "uid://binu307e8ex3o"
 
-[node name="InputReceiverComponent" parent="." instance=ExtResource("32_vp620")]
+[node name="PistolInputReceiverComponent" parent="." instance=ExtResource("34_sp6cv")]
+input_reload_dictionary = Dictionary[ExtResource("32_sp6cv"), ExtResource("33_sp6cv")]({
+ExtResource("6_i36na"): SubResource("Resource_2hcnp"),
+ExtResource("7_yeo0u"): SubResource("Resource_itbd8"),
+ExtResource("6_yeo0u"): SubResource("Resource_yq7b0"),
+ExtResource("5_yeo0u"): SubResource("Resource_0tuoe"),
+ExtResource("5_61tmk"): SubResource("Resource_8w4rf")
+})
 input_dictionary = Dictionary[ExtResource("32_sp6cv"), ExtResource("33_sp6cv")]({
-ExtResource("6_yeo0u"): SubResource("Resource_3vw6q"),
-ExtResource("5_yeo0u"): SubResource("Resource_b1r64"),
-ExtResource("7_yeo0u"): SubResource("Resource_n7a1r"),
-ExtResource("6_i36na"): SubResource("Resource_sp6cv"),
-ExtResource("3_7yk7a"): SubResource("Resource_p7lyl"),
-ExtResource("5_61tmk"): SubResource("Resource_wwafq"),
-ExtResource("4_rt7h3"): SubResource("Resource_ks8es")
+ExtResource("4_rt7h3"): SubResource("Resource_78w3v"),
+ExtResource("3_7yk7a"): SubResource("Resource_t2yuq")
 })
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier"]
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier"]
+[editable path="PistolInputReceiverComponent"]

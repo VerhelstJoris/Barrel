@@ -31,9 +31,12 @@ tracks/3/path = NodePath("Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0.633333),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.633333),
+"transitions": PackedFloat32Array(1, 1),
 "values": [{
+"args": [false],
+"method": &"_cache_current_transform"
+}, {
 "args": [true],
 "method": &"_cache_current_transform"
 }]

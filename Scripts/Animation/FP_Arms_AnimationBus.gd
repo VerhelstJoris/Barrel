@@ -47,13 +47,13 @@ func _ready() -> void:
 	pistol.on_action_started.connect(_on_action_started)
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-	anim_tree.animation_finished.connect(_on_animation_finished)
 
 
 func _set_anim_tree_oneshot_request(request_name):
 	set( anim_colt_state_machine_path + request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_action_started(new_action : EPistolState.Actions) -> void:
+	_finish_prev_action()
 	match new_action:
 		EPistolState.Actions.Fire:
 			_set_anim_tree_oneshot_request(anim_fire_request)
@@ -79,6 +79,14 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 			pass
 	current_action = new_action
 
+func _finish_prev_action()->void:
+	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
+		enter_reload_done = true
+	elif (current_action == EPistolState.Actions.ExitReload):
+		exit_reload_done = true
+	else:
+		exit_reload_done = false
+		enter_reload_done = false
 
 func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
 	if (_prev == EPistolState.Actions.None):
@@ -102,16 +110,9 @@ func _on_enter_reload_interrupted() -> void:
 	enter_reload_done = true
 
 func _on_exit_reload_interrupted() -> void:
+	print("EXIT RELOAD DONE TRUE")
 	exit_reload_done = true
-
-func _on_animation_finished(_animation_name : String) -> void:
-	if(current_action == EPistolState.Actions.EnterReload || EPistolState.Actions.EnterReloadUncock):
-		enter_reload_done = true
-	elif (current_action == EPistolState.Actions.ExitReload):
-		exit_reload_done = true
-	else:
-		exit_reload_done = false
-		enter_reload_done = false
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -138,8 +139,8 @@ func _on_holster_state_changed(holstered : bool) -> void:
 
 func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
-	set(anim_movement_blend,movement_blend_value)
-	set(reload_movement_blend,movement_blend_value)
+	set(anim_colt_state_machine_path+anim_movement_blend,movement_blend_value)
+	set(anim_colt_state_machine_path+reload_movement_blend,movement_blend_value)
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
