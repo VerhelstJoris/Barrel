@@ -6,10 +6,10 @@
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
-animation = &"AL_FP_Character/A_FP_Holstered"
+animation = &"AL_FP_Character/A_FP_FullyHolstered"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_x8ke2"]
-graph_offset = Vector2(-300.528, -85.1685)
+graph_offset = Vector2(-317.528, -13.1685)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_x8ke2")
 nodes/Animation/position = Vector2(-80, 120)
 node_connections = [&"output", 0, &"Animation"]
@@ -19,6 +19,7 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_em04p"]
 advance_mode = 2
+advance_expression = "colt_unholstered"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_tmq1e"]
 switch_mode = 2
@@ -32,9 +33,10 @@ states/SM_Colt/node = ExtResource("1_x8ke2")
 states/SM_Colt/position = Vector2(410, 253)
 states/Start/position = Vector2(156, 124)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_g0oko"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_em04p"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_tmq1e")]
-graph_offset = Vector2(-124, 5)
+graph_offset = Vector2(-18, 70)
 
 [resource]
+graph_offset = Vector2(-256, 222)
 nodes/output/position = Vector2(280, 380)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-80, 360)

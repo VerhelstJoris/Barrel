@@ -11,8 +11,8 @@ var is_exiting_reload : bool = false
 func _ready() -> void:
 	colt_equipment = get_owner() as PlayerEquipmentPistol
 	colt_equipment.on_action_started.connect(_on_colt_action_started)
-	colt_equipment.on_equipped.connect(_on_equipped)
-	colt_equipment.on_unequipped.connect(_on_unequipped)
+	colt_equipment.on_unholstered.connect(_on_unholstered)
+	colt_equipment.on_holstered.connect(_on_holstered)
 	on_available_equipment_actions_changed.emit(input_dictionary.keys())
 	
 	
@@ -22,11 +22,14 @@ func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnect
 	else:
 		return input_dictionary
 		
-func _on_equipped() -> void:
+func _on_unholstered() -> void:
 	on_available_equipment_actions_changed.emit(input_dictionary.keys())
+	print("ON UNHOLSTERED EMIT")
 
-func _on_unequipped() -> void:
+
+func _on_holstered() -> void:
 	on_available_equipment_actions_cleared.emit()
+	print("CLEARED EMIT")
 
 
 func _on_colt_action_started(action : EPistolState.Actions) -> void:

@@ -27,16 +27,18 @@ const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellO
 const anim_movement_blend : String = "ReadyBlendTree/MoveBlendSpace/blend_position"
 const reload_movement_blend : String = "ReloadingBlendTree/MoveBlendSpace/blend_position"
 
-var _holstered : bool = true
 
 # these 2 are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
 var exit_reload_done : bool = false
+var colt_unholstered : bool = false
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
 var movement_blend_value : Vector2 = Vector2.ZERO
 
+signal on_unholster_anim_finish()
+signal on_holster_anim_finish()
 
 var prev_delta : float = 0
 #deltatime to forever blend towards the movement we're doing
@@ -47,7 +49,11 @@ func _ready() -> void:
 	pistol.on_action_started.connect(_on_action_started)
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-
+	
+func _init_player_data(player : Player) -> void:
+	player.player_movement_input.connect(_on_player_movement_input)
+	player.on_holster_started.connect(_on_player_holster_started)
+	player.on_unholster_started.connect(_on_player_unholster_started)
 
 func _set_anim_tree_oneshot_request(request_name):
 	set( anim_colt_state_machine_path + request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -104,16 +110,13 @@ func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Ac
 		
 	elif(_prev == EPistolState.Actions.ExitReload):
 		_on_exit_reload_interrupted()
-	
-
+		
 func _on_enter_reload_interrupted() -> void:
 	enter_reload_done = true
 
 func _on_exit_reload_interrupted() -> void:
-	print("EXIT RELOAD DONE TRUE")
 	exit_reload_done = true
 	
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	prev_delta = _delta
@@ -128,14 +131,23 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	anim_tree[anim_colt_state_machine_path + anim_enter_reload_uncock_condition] = enter_uncock
 	anim_tree[anim_colt_state_machine_path + anim_exit_reload_condition] = exit
 	
-	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 	
+func _on_player_holster_started():
+	colt_unholstered = false
+
+func _holster_anim_finished():
+	on_holster_anim_finish.emit()
 	
-func _on_holster_state_changed(holstered : bool) -> void:
-	_holstered = holstered
-	pass
+func _on_player_unholster_started():
+	colt_unholstered = true
+	
+func _toggle_equipment_visible(visible : bool) -> void:
+	pistol.visible = visible
+
+func _unholster_anim_finished():
+	on_unholster_anim_finish.emit()
 
 func _on_player_movement_input(direction:Vector2) -> void:
 	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);

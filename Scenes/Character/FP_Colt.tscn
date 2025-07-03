@@ -117,8 +117,6 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 [node name="SK_Colt" type="Node3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("2_al4xy")
 bullet_scene = ExtResource("3_xgxry")
-use_input = ExtResource("4_rt7h3")
-secondary_use_input = ExtResource("7_yeo0u")
 input_receiver = NodePath("PistolInputReceiverComponent")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

@@ -4,6 +4,13 @@ extends CharacterBody3D
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 signal player_movement_input(direction)
 
+signal on_holster_started()
+signal on_holster_finish()
+signal on_unholster_started()
+signal on_unholster_finished()
+enum Holster_State {Hidden , Unholstering, Ready, Holstering}
+
+
 @export_group("Controls map names")
 @export var MOVE_FORWARD: String = "move_forward"
 @export var MOVE_BACK: String = "move_back"
@@ -39,14 +46,13 @@ signal player_movement_input(direction)
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
-signal on_holster_changed(holstered : bool)
 signal on_movement_input_received(event: InputEvent)
 signal on_holster_input_received(event : InputEvent)
 
 signal on_equipped(new_equipment : PlayerEquipment)
 signal on_unequipped(old_equipment : PlayerEquipment)
 
-var equipment_holstered : bool  = true:
+var equipment_holster_state : Holster_State = Holster_State.Hidden:
 	set = _holster
 
 var current_equipment : PlayerEquipment = null:
@@ -65,14 +71,19 @@ var can_sprint: bool = true
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	sub_viewport.size = DisplayServer.window_get_size()
-	player_movement_input.connect(arms.arms_animation_bus._on_player_movement_input)
-	on_holster_changed.connect(arms.arms_animation_bus._on_holster_state_changed)
 	current_equipment = arms.pistol_equipment
+	_setup_input_signals()
+	_setup_animation_data()
+	_holster(Holster_State.Hidden)
+	
+func _setup_animation_data() -> void:
+	arms.arms_animation_bus._init_player_data(self)
+	arms.arms_animation_bus.on_holster_anim_finish.connect(_on_holster_anim_finish)
+	arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
+
+func _setup_input_signals() -> void:
 	on_movement_input_received.connect(_on_movement_input)
 	on_holster_input_received.connect(_on_holster_input)
-
-func _on_holster_input(event : InputEvent) -> void:
-	pass
 
 func _on_movement_input(event : InputEvent) -> void:	
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
@@ -84,8 +95,7 @@ func _on_movement_input(event : InputEvent) -> void:
 
 func _on_mouse_motion_input(event : InputEvent) -> void:
 	mouse_motion = -event.relative * 0.001
-
-
+	
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor() && is_affected_by_gravity:
@@ -158,18 +168,44 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
+		print("CONNECT INPUT")
 		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._clear_current_input_details)
 		new_equipment._on_equipped()
 	on_equipped.emit(new_equipment)
 
-func _holster(new_value : bool) -> void:
-	if(new_value == equipment_holstered):
-		return
-
-	equipment_holstered = new_value
-	on_holster_changed.emit(equipment_holstered)
+func _on_holster_input(event : InputEvent) -> void:
+	match equipment_holster_state:
+		Holster_State.Hidden:
+			_holster(Holster_State.Unholstering)
+		Holster_State.Ready:
+			_holster(Holster_State.Holstering)
+		_:
+			pass
 	
+func _holster(new_state : Holster_State) -> void:
+	if(current_equipment == null):
+		return
+		
+	equipment_holster_state = new_state	
+	match new_state:
+		Holster_State.Holstering:
+			on_holster_started.emit()
+			current_equipment._on_start_holster()
+		Holster_State.Unholstering:
+			on_unholster_started.emit()
+			current_equipment._on_start_unholster()
+		Holster_State.Hidden:
+			current_equipment.visible = false
+		_:
+			pass
+			
+func _on_holster_anim_finish() -> void:
+	equipment_holster_state = Holster_State.Hidden
+		
+func _on_unholster_anim_finish() -> void:
+	equipment_holster_state = Holster_State.Ready
+
 func _can_use_equipment() -> bool:
-	return true
+	return equipment_holster_state == Holster_State.Ready
 	
