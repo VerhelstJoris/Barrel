@@ -2,9 +2,11 @@ class_name PlayerInputManager extends Node
 
 @export var _player : Player
 
-var input_action_time_map : Dictionary[String, float]
+enum InputTrackData{ Node, SignalConnector , StartTime, StartInputEvent}
 
-signal on_input_held(input_action : String, start_time : float )
+var input_action_time_map : Dictionary
+
+signal on_input_held(input_action : InputActionInfo, start_time : float )
 
 func _ready() -> void:
 	pass
@@ -31,23 +33,34 @@ func _process_single_input(input_action_info: InputActionInfo, event : InputEven
 	if(!event.is_action(action_to_check)):
 		return
 		
+	var current_time : float = 	Time.get_unix_time_from_system()
 	if(input_action_info.is_hold):
-		if(event.is_released() && input_action_time_map.has(action_to_check)):
-			var found : float = input_action_time_map.get(action_to_check)
-			if(found + input_action_info.hold_time < Time.get_unix_time_from_system()):
-				input_action_time_map.erase(action_to_check)
-				ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
-		elif (event.is_pressed() && !input_action_time_map.has(action_to_check)):
-			input_action_time_map[input_action_info.input_string] = Time.get_unix_time_from_system()
+		if(event.is_released() && input_action_time_map.has(input_action_info)):
+			input_action_time_map.erase(input_action_info)
+		elif (Input.is_action_just_pressed(action_to_check) && !input_action_time_map.has(input_action_info)):
+			_add_new_map_entry(input_action_info, event, node, exposed_signal_connector, current_time)
 	else:
-		ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
-		
+		_on_input_succesful(node, exposed_signal_connector, event)
+
+func _on_input_succesful(node : Node, exposed_signal_connector: ExposedSignalConnector, event: InputEvent) -> void:
+	ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
+
+
+func _add_new_map_entry(input_action_info : InputActionInfo, event : InputEvent, node : Node, exposed_signal_connector: ExposedSignalConnector, start_time : float)	-> void:	
+	input_action_time_map[input_action_info] = {InputTrackData.StartTime:start_time, InputTrackData.SignalConnector: exposed_signal_connector, InputTrackData.Node: node , InputTrackData.StartInputEvent: event }
+
 func _physics_process(_delta: float) -> void:
+	var current_time : float =  Time.get_unix_time_from_system()
 	for input in input_action_time_map:
-		_process_held_input(input)
+		_process_held_input(input, current_time)
 		
-func _process_held_input(input : String) -> void:
-	if(Input.is_action_pressed(input)):
-		on_input_held.emit(input, input_action_time_map[input])
+		
+func _process_held_input(input : InputActionInfo, current_time : float) -> void:
+	if(Input.is_action_pressed(input.input_string)):
+		if(input_action_time_map[input][InputTrackData.StartTime] + input.hold_time < current_time):
+			_on_input_succesful(input_action_time_map[input][InputTrackData.Node], input_action_time_map[input][InputTrackData.SignalConnector], input_action_time_map[input][InputTrackData.StartInputEvent])
+			input_action_time_map.erase(input)
+		else:	
+			on_input_held.emit(input, input_action_time_map[input][InputTrackData.StartTime])
 	else:
 		input_action_time_map.erase(input)	

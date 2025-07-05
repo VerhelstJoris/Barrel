@@ -48,6 +48,7 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
 signal on_movement_input_received(event: InputEvent)
 signal on_holster_input_received(event : InputEvent)
+signal on_quick_unholster_input_received(event : InputEvent)
 
 signal on_equipped(new_equipment : PlayerEquipment)
 signal on_unequipped(old_equipment : PlayerEquipment)
@@ -84,6 +85,7 @@ func _setup_animation_data() -> void:
 func _setup_input_signals() -> void:
 	on_movement_input_received.connect(_on_movement_input)
 	on_holster_input_received.connect(_on_holster_input)
+	on_quick_unholster_input_received.connect(_on_quick_unholster_input)
 
 func _on_movement_input(event : InputEvent) -> void:	
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
@@ -173,6 +175,10 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._clear_current_input_details)
 		new_equipment._on_equipped()
 	on_equipped.emit(new_equipment)
+
+func _on_quick_unholster_input(event : InputEvent) -> void:
+	if(equipment_holster_state == Holster_State.Hidden):
+		_holster(Holster_State.Unholstering)
 
 func _on_holster_input(event : InputEvent) -> void:
 	match equipment_holster_state:

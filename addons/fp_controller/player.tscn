@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=30 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -19,7 +19,8 @@
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
 [ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
 [ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="20_5af7x"]
-[ext_resource type="Resource" uid="uid://dyfgw7gi8do1w" path="res://Data/Input/IA_Holster.tres" id="20_62dvf"]
+[ext_resource type="Resource" uid="uid://dyfgw7gi8do1w" path="res://Data/Input/Player/IA_Holster.tres" id="20_62dvf"]
+[ext_resource type="Resource" uid="uid://c74mnvf3pkusb" path="res://Data/Input/Player/IA_Quick_Unholster.tres" id="21_62dvf"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
 height = 1.8
@@ -55,6 +56,12 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 script = ExtResource("20_5af7x")
 signal_node = NodePath("..")
 signal_name = "on_holster_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_bjt1r"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("..")
+signal_name = "on_quick_unholster_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
@@ -135,7 +142,8 @@ ExtResource("3_gd45c"): SubResource("Resource_gd45c"),
 ExtResource("4_5af7x"): SubResource("Resource_5af7x"),
 ExtResource("5_62dvf"): SubResource("Resource_62dvf"),
 ExtResource("6_y16om"): SubResource("Resource_y16om"),
-ExtResource("20_62dvf"): SubResource("Resource_nycc1")
+ExtResource("20_62dvf"): SubResource("Resource_nycc1"),
+ExtResource("21_62dvf"): SubResource("Resource_bjt1r")
 })
 
 [connection signal="player_movement_input" from="." to="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport/FP_Arms" method="_on_player_movement_input"]
