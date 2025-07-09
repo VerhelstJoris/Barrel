@@ -24,9 +24,7 @@ const anim_reload_previous_chamber_request : String = "ReloadingBlendTree/Previo
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
-const anim_movement_blend : String = "ReadyBlendTree/MoveBlendSpace/blend_position"
-const reload_movement_blend : String = "ReloadingBlendTree/MoveBlendSpace/blend_position"
-
+const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
 
 # these 2 are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
@@ -35,7 +33,9 @@ var colt_unholstered : bool = false
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
+var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
+var prev_move_direction : Vector2 = Vector2.ZERO
 
 signal on_unholster_anim_finish()
 signal on_holster_anim_finish()
@@ -88,6 +88,7 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 func _finish_prev_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
+		_tween_move_blend_amount(0.1, 0.1)
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
 	else:
@@ -120,13 +121,19 @@ func _on_exit_reload_interrupted() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	prev_delta = _delta
+	movement_blend_value = movement_blend_value.lerp( prev_move_direction, movement_blend_rate * 0.5 * prev_delta);
+	_update_movement_blend_values()
+	
 	
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		enter_reload_done = false
+		_tween_move_blend_amount(0.1 , 0.1)
 	elif(exit):
 		exit_reload_done = false
-	
+		_tween_move_blend_amount(1 , 0.1)
+
+
 	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter
 	anim_tree[anim_colt_state_machine_path + anim_enter_reload_uncock_condition] = enter_uncock
 	anim_tree[anim_colt_state_machine_path + anim_exit_reload_condition] = exit
@@ -150,9 +157,10 @@ func _unholster_anim_finished():
 	on_unholster_anim_finish.emit()
 
 func _on_player_movement_input(direction:Vector2) -> void:
-	movement_blend_value = movement_blend_value.lerp(direction, movement_blend_rate * prev_delta);
-	set(anim_colt_state_machine_path+anim_movement_blend,movement_blend_value)
-	set(anim_colt_state_machine_path+reload_movement_blend,movement_blend_value)
+	prev_move_direction = direction
+	
+func _update_movement_blend_values() -> void:	
+	anim_tree[anim_movement_blend] = movement_blend_value
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
@@ -165,3 +173,8 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 			bone_to_reparent_to = global_prop_bone
 		
 	pistol.reparent(bone_to_reparent_to,true)
+	pistol.set_global_position(bone_to_reparent_to.get_global_position())
+
+func _tween_move_blend_amount(new_value : float, time : float) -> void:
+	var t = create_tween()
+	t.tween_property(anim_tree, anim_move_blend_add_amount, new_value,time)

@@ -1,9 +1,58 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=9 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=17 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nal1p"]
-animation = &"AL_FP_Character/A_FP_Idle_Pose"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_es4ed"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Pose"
+use_custom_timeline = true
+timeline_length = 0.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 0
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_x8ke2"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Idle"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_em04p"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Forward"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tmq1e"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Left"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hxvos"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Right"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_forti"]
+animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Backward"
+
+[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_x8ke2"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_g0oko")
+blend_point_0/pos = Vector2(0, 0)
+blend_point_1/node = SubResource("AnimationNodeAnimation_em04p")
+blend_point_1/pos = Vector2(0, 1)
+blend_point_2/node = SubResource("AnimationNodeAnimation_tmq1e")
+blend_point_2/pos = Vector2(-1, 0)
+blend_point_3/node = SubResource("AnimationNodeAnimation_hxvos")
+blend_point_3/pos = Vector2(1, 0)
+blend_point_4/node = SubResource("AnimationNodeAnimation_forti")
+blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
 animation = &"AL_FP_Character/A_FP_FullyHolstered"
@@ -33,13 +82,21 @@ states/SM_Colt/node = ExtResource("1_x8ke2")
 states/SM_Colt/position = Vector2(410, 253)
 states/Start/position = Vector2(156, 124)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_g0oko"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_em04p"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_tmq1e")]
-graph_offset = Vector2(-18, 70)
+graph_offset = Vector2(-163, -18)
+
+[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_ys0lo"]
 
 [resource]
-graph_offset = Vector2(-256, 222)
-nodes/output/position = Vector2(280, 380)
+graph_offset = Vector2(-785.566, 193.625)
+nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
-nodes/SM_Player/position = Vector2(-80, 360)
-nodes/Animation/node = SubResource("AnimationNodeAnimation_nal1p")
-nodes/Animation/position = Vector2(-320, 100)
-node_connections = [&"output", 0, &"SM_Player"]
+nodes/SM_Player/position = Vector2(-460, 120)
+nodes/Sub2/node = SubResource("AnimationNodeSub2_ys0lo")
+nodes/Sub2/position = Vector2(-180, 460)
+nodes/MoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_x8ke2")
+nodes/MoveBlendSpace/position = Vector2(-540, 400)
+"nodes/Move Blend Pose/node" = SubResource("AnimationNodeAnimation_es4ed")
+"nodes/Move Blend Pose/position" = Vector2(-660, 660)
+nodes/MoveBlendAdd/node = SubResource("AnimationNodeAdd2_x8ke2")
+nodes/MoveBlendAdd/position = Vector2(-20, 160)
+node_connections = [&"output", 0, &"MoveBlendAdd", &"Sub2", 0, &"MoveBlendSpace", &"Sub2", 1, &"Move Blend Pose", &"MoveBlendAdd", 0, &"SM_Player", &"MoveBlendAdd", 1, &"Sub2"]
