@@ -18,6 +18,7 @@ signal on_try_exit_reload_input(event : InputEvent)
 signal bullet_spawned_for_inserting(new_bullet)
 signal on_action_started(new_action)
 signal on_current_action_interrupted(current_action, new_action)
+signal on_fired()
 
 var current_state: EPistolState.State = EPistolState.State.HammerUncocked
 var current_action : EPistolState.Actions = EPistolState.Actions.None:
@@ -91,7 +92,6 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	if _can_shoot():
 		if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 			_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
-			current_bullets[current_chamber_id]._on_fired()
 		else:
 			_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
 	elif(_can_cock_hammer()):
@@ -103,6 +103,11 @@ func _on_equipped():
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
 		
+func _fire_current_bullet() -> void:
+	on_fired.emit()
+	current_bullets[current_chamber_id]._on_fired()
+
+
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None
 	if(current_state == EPistolState.State.HammerUncocked):

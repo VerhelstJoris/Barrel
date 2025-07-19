@@ -1,42 +1,51 @@
-[gd_scene load_steps=44 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=50 format=3 uid="uid://dnx078m804hk4"]
 
-[ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="2_al4xy"]
-[ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="2_u2pjc"]
-[ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="3_0cg5f"]
-[ext_resource type="Resource" uid="uid://bs0loyw07mm2d" path="res://Data/Input/IA_Enter_Reload.tres" id="3_7yk7a"]
-[ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Colt_Bullet.tscn" id="3_xgxry"]
-[ext_resource type="Resource" uid="uid://by15g85r6kgap" path="res://Data/Input/IA_Fire.tres" id="4_rt7h3"]
-[ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/Colt/SkeletonRevolverCylinderModifier.gd" id="5_1n876"]
-[ext_resource type="Resource" uid="uid://c4vgprx6fkfvx" path="res://Data/Input/IA_Exit_Reload.tres" id="5_61tmk"]
-[ext_resource type="AnimationNodeBlendTree" uid="uid://blsb7g0t5c8mx" path="res://Animations/Player/Colt_SAA/ABT_Colt_SAA.tres" id="5_hy8au"]
-[ext_resource type="Script" uid="uid://dw4df7mvaykwb" path="res://Scripts/Animation/Colt/Colt_AnimationBus.gd" id="5_troah"]
-[ext_resource type="Material" uid="uid://ca8of3f8f21yd" path="res://Materials/Metals/Mat_GunMetal.tres" id="5_y5nk3"]
-[ext_resource type="Resource" uid="uid://d2vsm1pv2xlr" path="res://Data/Input/IA_Cycle_Cylinder_Prev.tres" id="5_yeo0u"]
-[ext_resource type="Resource" uid="uid://dsm4d3qqcepjo" path="res://Data/Input/IA_Insert_Shell.tres" id="6_i36na"]
-[ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/IA_Cycle_Cylinder_Next.tres" id="6_yeo0u"]
-[ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="7_yeo0u"]
-[ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="8_1detw"]
-[ext_resource type="PackedScene" uid="uid://bp7nyfexdkbri" path="res://Scenes/Components/SkeletonBoneCacheModifier.tscn" id="15_vp620"]
-[ext_resource type="ArrayMesh" uid="uid://c6homiyfttq2k" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Barrel.res" id="17_yeo0u"]
-[ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/Mat_GunHandle.tres" id="18_61tmk"]
-[ext_resource type="ArrayMesh" uid="uid://cprfk4i0gru8b" path="res://Meshes/Weapons/Colt_SAA/M_Colt_BasePin.res" id="18_tjrp1"]
-[ext_resource type="ArrayMesh" uid="uid://c43cnx8c55r18" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Cylinder.res" id="20_j6i3l"]
-[ext_resource type="ArrayMesh" uid="uid://l2e0unx25v18" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Ejector_Rod.res" id="21_ahvtb"]
-[ext_resource type="Material" uid="uid://cw82q30kgrsub" path="res://Materials/Metals/Mat_GunMetal_Interior.tres" id="21_tjrp1"]
-[ext_resource type="ArrayMesh" uid="uid://c6a3piykabx0m" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Frame.res" id="22_82rlu"]
-[ext_resource type="ArrayMesh" uid="uid://otlbojfyw6ab" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Hammer.res" id="23_vp620"]
-[ext_resource type="ArrayMesh" uid="uid://5s80ggei8ir0" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Handles.res" id="24_sp6cv"]
-[ext_resource type="ArrayMesh" uid="uid://c2fvdldnfuxf1" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Hatch.res" id="26_3vw6q"]
-[ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="27_b1r64"]
-[ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="29_n7a1r"]
-[ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="32_82rlu"]
-[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="32_sp6cv"]
-[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="33_sp6cv"]
-[ext_resource type="PackedScene" uid="uid://c8oxrvwv5gxo3" path="res://Scenes/Components/Input/Pistol/PistolInputReceiverComponent.tscn" id="34_sp6cv"]
+[ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_ur76o"]
+[ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Equipment/Colt_Bullet.tscn" id="2_u1ese"]
+[ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="3_10y14"]
+[ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="4_nh4gv"]
+[ext_resource type="AnimationNodeBlendTree" uid="uid://blsb7g0t5c8mx" path="res://Animations/Player/Colt_SAA/ABT_Colt_SAA.tres" id="5_ytugg"]
+[ext_resource type="Script" uid="uid://dw4df7mvaykwb" path="res://Scripts/Animation/Colt/Colt_AnimationBus.gd" id="6_st1ay"]
+[ext_resource type="PackedScene" uid="uid://bp7nyfexdkbri" path="res://Scenes/Components/SkeletonBoneCacheModifier.tscn" id="7_gcca5"]
+[ext_resource type="Script" uid="uid://ctyhd1ka1bal7" path="res://Scripts/Animation/Colt/Colt_VFX_Manager.gd" id="7_nh4gv"]
+[ext_resource type="Script" uid="uid://jvremhx481l4" path="res://Scripts/Animation/Colt/SkeletonRevolverCylinderModifier.gd" id="8_3sg0a"]
+[ext_resource type="Material" uid="uid://ca8of3f8f21yd" path="res://Materials/Metals/Mat_GunMetal.tres" id="9_c6e7s"]
+[ext_resource type="ArrayMesh" uid="uid://c6homiyfttq2k" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Barrel.res" id="10_kiwjb"]
+[ext_resource type="ArrayMesh" uid="uid://cprfk4i0gru8b" path="res://Meshes/Weapons/Colt_SAA/M_Colt_BasePin.res" id="11_jkx1k"]
+[ext_resource type="ArrayMesh" uid="uid://c43cnx8c55r18" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Cylinder.res" id="12_uf43g"]
+[ext_resource type="Material" uid="uid://cw82q30kgrsub" path="res://Materials/Metals/Mat_GunMetal_Interior.tres" id="13_d6oc2"]
+[ext_resource type="ArrayMesh" uid="uid://l2e0unx25v18" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Ejector_Rod.res" id="14_t7f62"]
+[ext_resource type="ArrayMesh" uid="uid://c6a3piykabx0m" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Frame.res" id="15_r2dco"]
+[ext_resource type="ArrayMesh" uid="uid://otlbojfyw6ab" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Hammer.res" id="16_weol6"]
+[ext_resource type="Material" uid="uid://gqrywlql515b" path="res://Materials/Woods/Mat_GunHandle.tres" id="17_n1t4g"]
+[ext_resource type="ArrayMesh" uid="uid://5s80ggei8ir0" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Handles.res" id="18_px8xe"]
+[ext_resource type="ArrayMesh" uid="uid://c2fvdldnfuxf1" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Hatch.res" id="19_re0w5"]
+[ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="20_7x7dj"]
+[ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="21_74ptf"]
+[ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="22_1g454"]
+[ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="23_jksft"]
+[ext_resource type="ArrayMesh" uid="uid://ocevl004enin" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Small.res" id="23_u1ese"]
+[ext_resource type="PackedScene" uid="uid://c8oxrvwv5gxo3" path="res://Scenes/Components/Input/Pistol/PistolInputReceiverComponent.tscn" id="24_n2p3l"]
+[ext_resource type="ArrayMesh" uid="uid://bkah2xwd6udul" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Large.res" id="24_nh4gv"]
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="25_867eu"]
+[ext_resource type="ArrayMesh" uid="uid://cwkmktwwex0jv" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Muzzle_Main.res" id="25_ytugg"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="26_80r0m"]
+[ext_resource type="Material" uid="uid://dxfqdfd4t6fcr" path="res://Materials/VFX/MAT_VFX_GunFire_DarkRed.tres" id="26_st1ay"]
+[ext_resource type="Resource" uid="uid://dsm4d3qqcepjo" path="res://Data/Input/IA_Insert_Shell.tres" id="27_wm72f"]
+[ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="28_12fjp"]
+[ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/IA_Cycle_Cylinder_Next.tres" id="29_n56b4"]
+[ext_resource type="Resource" uid="uid://d2vsm1pv2xlr" path="res://Data/Input/IA_Cycle_Cylinder_Prev.tres" id="30_4x4sw"]
+[ext_resource type="Resource" uid="uid://c4vgprx6fkfvx" path="res://Data/Input/IA_Exit_Reload.tres" id="31_ljy0t"]
+[ext_resource type="Resource" uid="uid://by15g85r6kgap" path="res://Data/Input/IA_Fire.tres" id="32_fgv3w"]
+[ext_resource type="Resource" uid="uid://bs0loyw07mm2d" path="res://Data/Input/IA_Enter_Reload.tres" id="33_64bj7"]
+
+[sub_resource type="Animation" id="Animation_u1ese"]
+length = 0.001
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_1r5vu"]
 _data = {
-&"Scene": ExtResource("2_u2pjc")
+&"RESET": SubResource("Animation_u1ese"),
+&"Scene": ExtResource("3_10y14")
 }
 
 [sub_resource type="SphereMesh" id="SphereMesh_j6i3l"]
@@ -73,62 +82,62 @@ bind/8/bone = -1
 bind/8/pose = Transform3D(-4.94731e-08, 1, 2.86386e-07, 1, -3.97233e-08, -1.50996e-07, -1.50996e-07, 2.86386e-07, -1, -0.00112173, -0.000240755, 0.00125099)
 
 [sub_resource type="Resource" id="Resource_2hcnp"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_insert_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_itbd8"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_eject_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_yq7b0"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_cylinder_next_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_0tuoe"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_cylinder_prev_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_8w4rf"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_exit_reload_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_78w3v"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "use_equipment_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_t2yuq"]
-script = ExtResource("33_sp6cv")
+script = ExtResource("26_80r0m")
 signal_node = NodePath("..")
 signal_name = "on_try_enter_reload_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [node name="SK_Colt" type="Node3D" node_paths=PackedStringArray("input_receiver")]
-script = ExtResource("2_al4xy")
-bullet_scene = ExtResource("3_xgxry")
+script = ExtResource("1_ur76o")
+bullet_scene = ExtResource("2_u1ese")
 input_receiver = NodePath("PistolInputReceiverComponent")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_1r5vu"),
-&"AL_Colt_SAA": ExtResource("3_0cg5f")
+&"AL_Colt_SAA": ExtResource("4_nh4gv")
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
 unique_name_in_owner = true
 root_node = NodePath("%AnimationTree/..")
-tree_root = ExtResource("5_hy8au")
+tree_root = ExtResource("5_ytugg")
 anim_player = NodePath("../AnimationPlayer")
 parameters/EnterReloadOneShot/active = false
 parameters/EnterReloadOneShot/internal_active = false
@@ -160,7 +169,7 @@ parameters/DryFireOneShot/request = 0
 parameters/EnterReloadUncockOneShot/active = false
 parameters/EnterReloadUncockOneShot/internal_active = false
 parameters/EnterReloadUncockOneShot/request = 0
-script = ExtResource("5_troah")
+script = ExtResource("6_st1ay")
 
 [node name="Colt_Saa_Rig" type="Node3D" parent="."]
 transform = Transform3D(100, 0, 0, 0, -1.19209e-05, 100, 0, -100, -1.19209e-05, 0, 0, 0)
@@ -231,13 +240,13 @@ bones/8/position = Vector3(-0.000240755, 0.00112173, -0.00125099)
 bones/8/rotation = Quaternion(-1.32161e-07, 1.32161e-07, 0.707107, 0.707107)
 bones/8/scale = Vector3(1, 1, 1)
 
-[node name="SkeletonRevolverHatchModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
+[node name="SkeletonRevolverHatchModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("7_gcca5")]
 revolver_bone = "Hatch"
 
-[node name="SkeletonRevolverTriggerCacheModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
+[node name="SkeletonRevolverTriggerCacheModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("7_gcca5")]
 revolver_bone = "Trigger"
 
-[node name="SkeletonRevolverHammerModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("15_vp620")]
+[node name="SkeletonRevolverHammerModifier" parent="Colt_Saa_Rig/Skeleton3D" instance=ExtResource("7_gcca5")]
 revolver_bone = "Hammer"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
@@ -277,7 +286,7 @@ visible = true
 visibility_parent = NodePath("")
 active = true
 influence = 1.0
-script = ExtResource("5_1n876")
+script = ExtResource("8_3sg0a")
 cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
@@ -286,7 +295,7 @@ transform = Transform3D(-0.923879, -1.27147e-07, -0.382684, 1.65764e-07, -1, -3.
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 
-[node name="Colt_Bullet" parent="Colt_Saa_Rig/Skeleton3D/BulletAttachmentPoint" instance=ExtResource("3_xgxry")]
+[node name="Colt_Bullet" parent="Colt_Saa_Rig/Skeleton3D/BulletAttachmentPoint" instance=ExtResource("2_u1ese")]
 transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, 1.04787e-14, 7.10543e-15, 1, 0, 0, 0)
 visible = false
 
@@ -296,91 +305,155 @@ transform = Transform3D(1, 0, 0, 0, -1, -8.74228e-08, 0, 8.74228e-08, -1, -0.000
 
 [node name="Barrel" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("17_yeo0u")
+mesh = ExtResource("10_kiwjb")
 skin = SubResource("Skin_upuq7")
 
 [node name="Base Pin" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("18_tjrp1")
+mesh = ExtResource("11_jkx1k")
 skin = SubResource("Skin_upuq7")
 
 [node name="Cylinder2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("20_j6i3l")
+mesh = ExtResource("12_uf43g")
 skin = SubResource("Skin_upuq7")
 
 [node name="Ejector_Rod" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("21_tjrp1")
+material_override = ExtResource("13_d6oc2")
 gi_mode = 2
-mesh = ExtResource("21_ahvtb")
+mesh = ExtResource("14_t7f62")
 skin = SubResource("Skin_upuq7")
 
 [node name="GunFrame" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("22_82rlu")
+mesh = ExtResource("15_r2dco")
 skin = SubResource("Skin_upuq7")
 
 [node name="Hammer2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("23_vp620")
+mesh = ExtResource("16_weol6")
 skin = SubResource("Skin_upuq7")
 
 [node name="Handles" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("18_61tmk")
+material_override = ExtResource("17_n1t4g")
 gi_mode = 2
-mesh = ExtResource("24_sp6cv")
+mesh = ExtResource("18_px8xe")
 skin = SubResource("Skin_upuq7")
 
 [node name="Hatch2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("26_3vw6q")
+mesh = ExtResource("19_re0w5")
 skin = SubResource("Skin_upuq7")
 
 [node name="Spring" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("8_1detw")
+material_override = ExtResource("20_7x7dj")
 gi_mode = 2
-mesh = ExtResource("27_b1r64")
+mesh = ExtResource("21_74ptf")
 skin = SubResource("Skin_upuq7")
 
 [node name="Trigger2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
 layers = 2
-material_override = ExtResource("5_y5nk3")
+material_override = ExtResource("9_c6e7s")
 gi_mode = 2
-mesh = ExtResource("29_n7a1r")
+mesh = ExtResource("22_1g454")
 skin = SubResource("Skin_upuq7")
 
+[node name="MuzzleVFX" type="Node3D" parent="Colt_Saa_Rig/Skeleton3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00661575, 0.00146997)
+
+[node name="MuzzleFlash_1" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(1.92103, 0.489628, 0.264409, -0.493964, 1.93804, -1.01581e-07, -0.256218, -0.0653042, 1.98244, 0.000167782, 0.000115501, 0.000154363)
+layers = 2
+mesh = ExtResource("23_u1ese")
+skeleton = NodePath("../../../../Colt_VFX_Manager")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_1"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("24_nh4gv")
+
+[node name="MuzzleFlash_2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(-0.652885, -0.422638, -1.84258, -0.155195, 1.95478, -0.393382, 1.88405, 0.0145635, -0.670919, -0.000154952, 0.000106581, 0.000270913)
+layers = 2
+mesh = ExtResource("23_u1ese")
+skeleton = NodePath("../MuzzleFlash_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_2"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("24_nh4gv")
+
+[node name="MuzzleFlash_3" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(-1.48984, -0.288533, 1.30274, -0.4716, 1.94051, -0.109543, -1.24819, -0.388787, -1.51356, -6.38436e-05, 0.000110141, 1.51333e-05)
+layers = 2
+mesh = ExtResource("23_u1ese")
+skeleton = NodePath("../MuzzleFlash_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_3"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("24_nh4gv")
+
+[node name="MuzzleFlash_Main" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(-0.130074, -0.212392, 0.0216886, 0.168006, -0.117499, -0.143067, 0.131739, -0.0598615, 0.203867, 1.64431e-05, -0.000153971, 4.95508e-05)
+layers = 2
+mesh = ExtResource("25_ytugg")
+surface_material_override/0 = ExtResource("26_st1ay")
+
+[node name="CylinderFlash_1" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(1.34893, 0.605979, 0.251341, -0.61467, 1.36828, -5.05038e-09, -0.229269, -0.102994, 1.47879, 0.000332992, 0.00543467, 6.98492e-10)
+layers = 2
+mesh = ExtResource("23_u1ese")
+
+[node name="CylinderFlash_2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
+transform = Transform3D(-1.38848, 0.539026, -0.177724, -0.533092, -1.39976, -0.0805747, -0.194802, -0.0114218, 1.48725, -0.000397529, 0.00543467, 6.98492e-10)
+layers = 2
+mesh = ExtResource("23_u1ese")
+
 [node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
-script = ExtResource("32_82rlu")
+script = ExtResource("23_jksft")
 ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../PistolInputReceiverComponent/PistolInputReceiverDebugNode")]
 metadata/_custom_type_script = "uid://binu307e8ex3o"
 
-[node name="PistolInputReceiverComponent" parent="." instance=ExtResource("34_sp6cv")]
-input_reload_dictionary = Dictionary[ExtResource("32_sp6cv"), ExtResource("33_sp6cv")]({
-ExtResource("6_i36na"): SubResource("Resource_2hcnp"),
-ExtResource("7_yeo0u"): SubResource("Resource_itbd8"),
-ExtResource("6_yeo0u"): SubResource("Resource_yq7b0"),
-ExtResource("5_yeo0u"): SubResource("Resource_0tuoe"),
-ExtResource("5_61tmk"): SubResource("Resource_8w4rf")
+[node name="PistolInputReceiverComponent" parent="." instance=ExtResource("24_n2p3l")]
+input_reload_dictionary = Dictionary[ExtResource("25_867eu"), ExtResource("26_80r0m")]({
+ExtResource("27_wm72f"): SubResource("Resource_2hcnp"),
+ExtResource("28_12fjp"): SubResource("Resource_itbd8"),
+ExtResource("29_n56b4"): SubResource("Resource_yq7b0"),
+ExtResource("30_4x4sw"): SubResource("Resource_0tuoe"),
+ExtResource("31_ljy0t"): SubResource("Resource_8w4rf")
 })
-input_dictionary = Dictionary[ExtResource("32_sp6cv"), ExtResource("33_sp6cv")]({
-ExtResource("4_rt7h3"): SubResource("Resource_78w3v"),
-ExtResource("3_7yk7a"): SubResource("Resource_t2yuq")
+input_dictionary = Dictionary[ExtResource("25_867eu"), ExtResource("26_80r0m")]({
+ExtResource("32_fgv3w"): SubResource("Resource_78w3v"),
+ExtResource("33_64bj7"): SubResource("Resource_t2yuq")
 })
+
+[node name="Colt_VFX_Manager" type="Node3D" parent="." node_paths=PackedStringArray("barrel_muzzle_initial_vfx_parent", "barrel_muzzle_initial_vfx", "barrel_muzzle_main_vfx", "cylinder_fire_vfx")]
+transform = Transform3D(100, 0, 0, 0, -1.19209e-05, 100, 0, -100, -1.19209e-05, 0, 0, 0)
+script = ExtResource("7_nh4gv")
+barrel_muzzle_initial_vfx_parent = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX")
+barrel_muzzle_initial_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_2"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_3")]
+barrel_muzzle_flash_min_scale = 1.5
+barrel_muzzle_flash_max_scale = 3.6
+barrel_muzzle_main_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_Main")
+barrel_muzzle_main_delay = 0.04
+barrel_muzzle_main_active_time = 0.03
+cylinder_fire_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_2")]
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier"]

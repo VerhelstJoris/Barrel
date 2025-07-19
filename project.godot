@@ -36,6 +36,7 @@ BarrelDebugWindow="*res://Scripts/Tools/ImGui Debug/BarrelGlobalDebugWindow.gd"
 
 [debug]
 
+gdscript/warnings/unused_signal=0
 shader_language/warnings/unused_function=false
 
 [display]
