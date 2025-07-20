@@ -93,7 +93,7 @@ func _deactivate_muzzle_smoke() -> void:
 	muzzle_smoke_growth_tween = create_tween()
 	var decay_time : float = 1.0 / muzzle_smoke_decay_rate
 	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param,  0.0, 1.0, decay_time)
-	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, decay_time)
+	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, decay_time + 1)
 	await get_tree().create_timer(decay_time).timeout
 	muzzle_smoke_active = false
 
