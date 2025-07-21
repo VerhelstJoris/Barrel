@@ -469,8 +469,9 @@ barrel_muzzle_main_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFl
 barrel_muzzle_main_delay = 0.04
 barrel_muzzle_main_active_time = 0.03
 muzzle_smoke_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/Muzzle_Smoke")
+muzzle_smoke_grow_rate = 1.5
 muzzle_smoke_max_time = 4.0
-muzzle_smoke_decay_rate = 0.6
+muzzle_smoke_decay_rate = 0.4
 cylinder_fire_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_2")]
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]

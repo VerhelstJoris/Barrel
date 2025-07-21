@@ -64,8 +64,8 @@ output_port_for_preview = 0
 operator = 2
 
 [sub_resource type="Gradient" id="Gradient_ckggj"]
-offsets = PackedFloat32Array(0, 0.16, 0.524272, 0.84, 1)
-colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0.662452, 0.662452, 0.662452, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+offsets = PackedFloat32Array(0, 0.01, 0.2, 0.21, 0.5, 0.79, 0.8, 0.99, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0.180005, 0.180005, 0.180005, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_eis2o"]
 gradient = SubResource("Gradient_ckggj")
@@ -461,7 +461,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-1562.44, 1596.93)
+graph_offset = Vector2(-933.686, -197.38)
 modes/blend = 1
 modes/cull = 2
 flags/unshaded = true
