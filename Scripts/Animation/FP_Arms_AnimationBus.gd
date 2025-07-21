@@ -8,6 +8,8 @@ class_name FPArmsAnimationBus extends Node
 @onready var right_prop_bone : BoneAttachment3D = %RPropBone
 
 enum E_prop_bone_type{Left, Right, Global}
+var right_prop_bone_pos : Vector3 = Vector3.ZERO
+
 
 const anim_colt_state_machine_path : String  = "parameters/SM_Player/SM_Colt/"
 
@@ -25,6 +27,8 @@ const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShel
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
 const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
+const reload_movement_blend_value : float = 0.1
+
 
 # these 2 are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
@@ -49,6 +53,7 @@ func _ready() -> void:
 	pistol.on_action_started.connect(_on_action_started)
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
+	right_prop_bone_pos = pistol.get_position()
 	
 func _init_player_data(player : Player) -> void:
 	player.player_movement_input.connect(_on_player_movement_input)
@@ -88,7 +93,7 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 func _finish_prev_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
-		_tween_move_blend_amount(0.1, 0.1)
+		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
 	else:
@@ -128,10 +133,9 @@ func _process(_delta: float) -> void:
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		enter_reload_done = false
-		_tween_move_blend_amount(0.1 , 0.1)
+		_tween_move_blend_amount(reload_movement_blend_value , 0.1)
 	elif(exit):
 		exit_reload_done = false
-		_tween_move_blend_amount(1 , 0.1)
 
 
 	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter
@@ -164,16 +168,19 @@ func _update_movement_blend_values() -> void:
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
+	var new_pos : Vector3 = Vector3.ZERO;
+	
 	match (new_parent):
 		E_prop_bone_type.Left:
 			bone_to_reparent_to = left_prop_bone
 		E_prop_bone_type.Right:
 			bone_to_reparent_to = right_prop_bone
+			new_pos = right_prop_bone_pos
 		E_prop_bone_type.Global:
 			bone_to_reparent_to = global_prop_bone
 		
 	pistol.reparent(bone_to_reparent_to,true)
-	pistol.set_global_position(bone_to_reparent_to.get_global_position())
+	pistol.set_position(new_pos)
 
 func _tween_move_blend_amount(new_value : float, time : float) -> void:
 	var t = create_tween()
