@@ -127,6 +127,7 @@ func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState
 	current_action = new_action
 	can_interrupt_into_next_state = false
 	can_proceed_state = false
+	print("JORIS PROCEED STATE FALSE")
 	current_state = new_state
 	_update_action_cylinder_increment_amount(cylinder_rotations)
 
@@ -143,6 +144,7 @@ func _increase_cylinder_rotations(amount : int) -> void:
 
 func _enable_changing_states(enabled : bool) -> void:
 	can_proceed_state = enabled
+	print("JORIS CAN PROCEED STATE CHANGE ", can_proceed_state)
 	can_interrupt_into_next_state = false
 	current_action = EPistolState.Actions.None
 	

@@ -27,7 +27,11 @@ func _ready() -> void:
 	colt_equipment.on_action_started.connect(_on_action_started)
 	colt_equipment.on_current_action_interrupted.connect(_interrupt_current_action)
 	anim_tree.animation_finished.connect(_on_animation_finished)
+	anim_tree.animation_started.connect(_on_animation_started)
 	
+func _on_animation_started(_animation_name : String) -> void:
+	print("JORIS COLT ANIM STARTED ", _animation_name, " ", Time.get_unix_time_from_system())
+
 func _set_anim_tree_oneshot_request(request_name):
 	anim_tree.set(request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	current_anim_request = request_name
@@ -40,12 +44,12 @@ func _on_action_started(new_action : EPistolState.Actions)	-> void:
 			_set_anim_tree_oneshot_request(anim_dry_fire_request)
 		EPistolState.Actions.CockHammer:
 			_set_anim_tree_oneshot_request(anim_hammer_request)
-		EPistolState.Actions.EnterReload:
-			_set_anim_tree_oneshot_request(anim_enter_reload_request)
-		EPistolState.Actions.EnterReloadUncock:
-			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
-		EPistolState.Actions.ExitReload:
-			_set_anim_tree_oneshot_request(anim_exit_reload_request)
+		#EPistolState.Actions.EnterReload:
+		#	_set_anim_tree_oneshot_request(anim_enter_reload_request)
+		#EPistolState.Actions.EnterReloadUncock:
+		#	_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
+		#EPistolState.Actions.ExitReload:
+		#	_set_anim_tree_oneshot_request(anim_exit_reload_request)
 		EPistolState.Actions.CylinderNext:
 			_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
 		EPistolState.Actions.CylinderPrev:
@@ -56,6 +60,15 @@ func _on_action_started(new_action : EPistolState.Actions)	-> void:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
 		_:
 			pass
+
+func _on_arms_reload_started( uncock : bool) -> void:
+	if(uncock):
+		_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
+	else:
+		_set_anim_tree_oneshot_request(anim_enter_reload_request)
+
+func _on_arms_exit_reload() -> void:
+	_set_anim_tree_oneshot_request(anim_exit_reload_request)
 
 func _interrupt_current_action(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
 	if(current_anim_request != ""):

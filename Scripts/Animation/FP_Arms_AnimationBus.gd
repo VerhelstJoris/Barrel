@@ -49,7 +49,17 @@ func _ready() -> void:
 	pistol.on_action_started.connect(_on_action_started)
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-	
+	anim_tree.animation_started.connect(_on_animation_started)
+
+func _on_animation_started(_animation_name : String) -> void:
+	print("ARMS ANIM STARTED ", _animation_name)
+	if(_animation_name.contains("Enter_Reload")):
+		var uncock : bool = current_action == EPistolState.Actions.EnterReloadUncock 
+		pistol.animation_bus._on_arms_reload_started(uncock)
+	elif(_animation_name.contains("Exit_Reload")):
+		pistol.animation_bus._on_arms_exit_reload()
+
+
 func _init_player_data(player : Player) -> void:
 	player.player_movement_input.connect(_on_player_movement_input)
 	player.on_holster_started.connect(_on_player_holster_started)
@@ -69,8 +79,10 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 			_set_anim_tree_oneshot_request(anim_hammer_request)
 		EPistolState.Actions.EnterReload:
 			_on_reload_change(true,false,false)
+			print("JORIS ARMS ENTER")
 		EPistolState.Actions.EnterReloadUncock:
 			_on_reload_change(false,true,false)
+			print("JORIS ARMS ENTER 2")
 		EPistolState.Actions.ExitReload:
 			_on_reload_change(false,false,true)
 		EPistolState.Actions.CylinderNext:
@@ -90,8 +102,10 @@ func _finish_prev_action()->void:
 		enter_reload_done = true
 		_tween_move_blend_amount(0.1, 0.1)
 	elif (current_action == EPistolState.Actions.ExitReload):
+		print("JORIS EXIT TRUE 1")
 		exit_reload_done = true
 	else:
+		print("JORIS EXIT FALSE 1")
 		exit_reload_done = false
 		enter_reload_done = false
 
@@ -116,6 +130,7 @@ func _on_enter_reload_interrupted() -> void:
 	enter_reload_done = true
 
 func _on_exit_reload_interrupted() -> void:
+	print("JORIS EXIT TRUE 2")
 	exit_reload_done = true
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -130,6 +145,7 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 		enter_reload_done = false
 		_tween_move_blend_amount(0.1 , 0.1)
 	elif(exit):
+		print("JORIS EXIT FALSE 2")
 		exit_reload_done = false
 		_tween_move_blend_amount(1 , 0.1)
 
