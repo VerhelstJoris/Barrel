@@ -25,7 +25,10 @@ const muzzle_smoke_shrink_shader_param : String = "AlphaShrink"
 var muzzle_smoke_growth_tween : Tween
 var muzzle_smoke_decay_tween : Tween
 var muzzle_smoke_current_timer : float = 0.0
+var muzzle_smoke_decay_timer : float = 0.0
 var muzzle_smoke_active : bool = false
+var muzzle_smoke_decaying : bool = false
+var muzzle_smoke_decay_duration : float = 0.0
 
 @export_group("Fire Cylinder Flash")
 @export var cylinder_fire_vfx : Array[Node3D]
@@ -51,6 +54,12 @@ func _process_muzzle_smoke(delta : float) -> void:
 		if(muzzle_smoke_current_timer > muzzle_smoke_max_time):
 			_deactivate_muzzle_smoke()
 		
+	if(muzzle_smoke_decaying):
+		muzzle_smoke_decay_timer += delta
+		if(muzzle_smoke_decay_timer > muzzle_smoke_decay_duration):
+			muzzle_smoke_active = false
+			muzzle_smoke_decaying = false
+
 	
 func _on_bullet_fired() -> void:
 	_randomize_fire_vfx()
@@ -80,22 +89,37 @@ func _activate_main_muzzle_vfx() -> void:
 	
 func _activate_muzzle_smoke() -> void:
 	muzzle_smoke_current_timer = 0.0 #reset the timer before early out
-	if(muzzle_smoke_active):
+	muzzle_smoke_decay_timer = 0.0
+	var interrupting_already_active : bool = false
+	
+	if(muzzle_smoke_decaying):
+		#if we're already decaying back down to nothing
+		_interrupt_muzzle_smoke_decay()
+		interrupting_already_active = true
+	elif(muzzle_smoke_active):
 		return
 		
-	_reset_muzzle_smoke_vfx_shader_params()
+	if(!interrupting_already_active):
+		_reset_muzzle_smoke_vfx_shader_params()
+		
 	muzzle_smoke_growth_tween = create_tween()
-	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  0.0, 1.0, 1.0 / muzzle_smoke_grow_rate)
+	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  muzzle_smoke_vfx.get_instance_shader_parameter(muzzle_smoke_grow_shader_param), 1.0, 1.0 / muzzle_smoke_grow_rate)
 	muzzle_smoke_active = true
 
 func _deactivate_muzzle_smoke() -> void:
+	muzzle_smoke_current_timer = 0
+	muzzle_smoke_decaying = true
 	muzzle_smoke_decay_tween = create_tween()
 	muzzle_smoke_growth_tween = create_tween()
-	var decay_time : float = 1.0 / muzzle_smoke_decay_rate
-	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param,  0.0, 1.0, decay_time)
-	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, decay_time + 1)
-	await get_tree().create_timer(decay_time).timeout
-	muzzle_smoke_active = false
+	muzzle_smoke_decay_duration = 1.0 / muzzle_smoke_decay_rate
+	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param,  0.0, 1.0, muzzle_smoke_decay_duration)
+	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, muzzle_smoke_decay_duration)
+
+func _interrupt_muzzle_smoke_decay() -> void:
+	muzzle_smoke_decay_tween.stop()
+	muzzle_smoke_growth_tween.stop()
+	muzzle_smoke_decaying = false
+	_set_shrink_shader_param(0)
 
 
 func _set_grow_shader_param(value : float) -> void:
