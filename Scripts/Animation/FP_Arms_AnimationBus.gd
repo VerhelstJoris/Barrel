@@ -40,6 +40,7 @@ var current_action : EPistolState.Actions = EPistolState.Actions.None
 var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
 var prev_move_direction : Vector2 = Vector2.ZERO
+var move_blend_tween : Tween
 
 signal on_unholster_anim_finish()
 signal on_holster_anim_finish()
@@ -183,5 +184,8 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	pistol.set_position(new_pos)
 
 func _tween_move_blend_amount(new_value : float, time : float) -> void:
-	var t = create_tween()
-	t.tween_property(anim_tree, anim_move_blend_add_amount, new_value,time)
+	if(move_blend_tween && move_blend_tween.is_running()):
+		move_blend_tween.stop()
+		
+	move_blend_tween = create_tween()
+	move_blend_tween.tween_property(anim_tree, anim_move_blend_add_amount, new_value,time)
