@@ -380,7 +380,7 @@ mesh = ExtResource("22_1g454")
 skin = SubResource("Skin_upuq7")
 
 [node name="Muzzle_Smoke" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
-transform = Transform3D(1.1, 0, 0, 0, -2.62268e-07, 1, 0, -6, -4.37114e-08, -5.84976e-05, -0.00661575, 0.00146997)
+transform = Transform3D(1, 0, 0, 0, -2.62268e-07, 1, 0, -6, -4.37114e-08, -5.84976e-05, -0.00661575, 0.00146997)
 layers = 2
 instance_shader_parameters/AlphaGrow = 1.0
 instance_shader_parameters/AlphaShrink = 0.0
