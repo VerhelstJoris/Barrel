@@ -8,6 +8,7 @@ var colt_equipment : PlayerEquipmentPistol = null
 @export_range(1.5, 5, 0.01) var barrel_muzzle_flash_min_scale : float = 2
 @export_range(1.5, 5, 0.01) var barrel_muzzle_flash_max_scale : float = 3
 @export var barrel_vfx_initial_active_time : float = 0.04
+@export var barrel_muzzle_flash_light : Node3D
 
 @export var barrel_muzzle_main_vfx : Node3D
 @export var barrel_muzzle_main_delay : float = 0.02
@@ -149,6 +150,8 @@ func _toggle_main_muzzle_vfx(_visible : bool) -> void:
 	barrel_muzzle_main_vfx.visible = _visible
 
 func _toggle_initial_muzzle_vfx(_visible : bool) -> void:
+	if(barrel_muzzle_flash_light):
+		barrel_muzzle_flash_light.visible = _visible
 	for vfx_node in barrel_muzzle_initial_vfx:
 		vfx_node.visible = _visible
 
