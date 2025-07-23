@@ -1,20 +1,85 @@
-[gd_scene load_steps=4 format=3 uid="uid://chjljrc6muo85"]
+[gd_scene load_steps=6 format=3 uid="uid://chjljrc6muo85"]
 
 [ext_resource type="ArrayMesh" uid="uid://bkah2xwd6udul" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Large.res" id="1_3s4st"]
+[ext_resource type="Script" uid="uid://d040qkk1ohrdq" path="res://Scripts/Animation/Colt/Colt_Fire_VFX.gd" id="1_og1dj"]
 [ext_resource type="ArrayMesh" uid="uid://ocevl004enin" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Small.res" id="2_7qsqe"]
+[ext_resource type="ArrayMesh" uid="uid://cwkmktwwex0jv" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Muzzle_Main.res" id="3_og1dj"]
 [ext_resource type="Material" uid="uid://dxfqdfd4t6fcr" path="res://Materials/VFX/MAT_VFX_GunFire_DarkRed.tres" id="3_we7rs"]
 
-[node name="ColtCylinderVfxFire" type="Node3D"]
+[node name="MuzzleVFX" type="Node3D" node_paths=PackedStringArray("barrel_muzzle_initial_vfx", "barrel_muzzle_main_vfx", "cylinder_fire_vfx")]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+script = ExtResource("1_og1dj")
+barrel_muzzle_initial_vfx = [NodePath("Node3D/Muzzle_Flash_Light"), NodePath("Node3D/MuzzleFlash_1"), NodePath("Node3D/MuzzleFlash_2"), NodePath("Node3D/MuzzleFlash_3")]
+barrel_muzzle_main_vfx = [NodePath("Node3D/MuzzleFlash_Main")]
+cylinder_fire_vfx = [NodePath("Node3D/CylinderFlash_1"), NodePath("Node3D/CylinderFlash_2")]
 
-[node name="Outer" type="MeshInstance3D" parent="."]
-transform = Transform3D(2.16, 0, 0, 0, 0.72, 0, 0, 0, 2.16, 2.69998e-05, 0, 2.14902e-05)
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0, 0, 0)
+
+[node name="Muzzle_Flash_Light" type="OmniLight3D" parent="Node3D"]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, -0.000245621, 0.000713458)
 layers = 2
-mesh = ExtResource("1_3s4st")
-skeleton = NodePath("")
-surface_material_override/0 = ExtResource("3_we7rs")
+light_color = Color(1, 0.541176, 0.0784314, 1)
+light_energy = 8.0
+light_indirect_energy = 7.0
+light_size = 0.098
+light_cull_mask = 4293918722
+shadow_enabled = true
+shadow_caster_mask = 4293918722
+distance_fade_enabled = true
+distance_fade_begin = 1.0
+distance_fade_shadow = 2.0
+distance_fade_length = 1.0
+omni_range = 1.25443
 
-[node name="Yellow" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+[node name="MuzzleFlash_1" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(1.92103, 0.489628, 0.264409, -0.493964, 1.93804, -1.01581e-07, -0.256218, -0.0653042, 1.98244, 0.000167782, 0.000115501, 0.000154363)
 layers = 2
 mesh = ExtResource("2_7qsqe")
+skeleton = NodePath("../../../../Colt_VFX_Manager")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/MuzzleFlash_1"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("1_3s4st")
+
+[node name="MuzzleFlash_2" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(-0.652885, -0.422638, -1.84258, -0.155195, 1.95478, -0.393382, 1.88405, 0.0145635, -0.670919, -0.000154952, 0.000106581, 0.000270913)
+layers = 2
+mesh = ExtResource("2_7qsqe")
+skeleton = NodePath("../MuzzleFlash_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/MuzzleFlash_2"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("1_3s4st")
+
+[node name="MuzzleFlash_3" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(-1.48984, -0.288533, 1.30274, -0.4716, 1.94051, -0.109543, -1.24819, -0.388787, -1.51356, -6.38436e-05, 0.000110141, 1.51333e-05)
+layers = 2
+mesh = ExtResource("2_7qsqe")
+skeleton = NodePath("../MuzzleFlash_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/MuzzleFlash_3"]
+transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
+layers = 2
+mesh = ExtResource("1_3s4st")
+
+[node name="MuzzleFlash_Main" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(-0.104059, -0.169914, 0.0173507, 0.134404, -0.0939995, -0.114453, 0.105391, -0.0478894, 0.163093, 1.64431e-05, -0.000153971, 4.95508e-05)
+layers = 2
+mesh = ExtResource("3_og1dj")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("3_we7rs")
+
+[node name="CylinderFlash_1" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(1.34893, 0.605979, 0.251341, -0.61467, 1.36828, -5.05038e-09, -0.229269, -0.102994, 1.47879, 0.000332992, 0.00543467, 6.98492e-10)
+layers = 2
+mesh = ExtResource("2_7qsqe")
+skeleton = NodePath("../..")
+
+[node name="CylinderFlash_2" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(-1.38848, 0.539026, -0.177724, -0.533092, -1.39976, -0.0805747, -0.194802, -0.0114218, 1.48725, -0.000397529, 0.00543467, 6.98492e-10)
+layers = 2
+mesh = ExtResource("2_7qsqe")
+skeleton = NodePath("../..")

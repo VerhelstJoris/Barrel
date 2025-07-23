@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=50 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_ur76o"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Equipment/Colt_Bullet.tscn" id="2_u1ese"]
@@ -24,14 +24,11 @@
 [ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="21_74ptf"]
 [ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="22_1g454"]
 [ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="23_jksft"]
-[ext_resource type="ArrayMesh" uid="uid://ocevl004enin" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Small.res" id="23_u1ese"]
 [ext_resource type="Shader" uid="uid://ptkpnelb3y0f" path="res://Materials/Shaders/VFX/VFX_Muzzle_Smoke_Shader.tres" id="24_3sg0a"]
 [ext_resource type="PackedScene" uid="uid://c8oxrvwv5gxo3" path="res://Scenes/Components/Input/Pistol/PistolInputReceiverComponent.tscn" id="24_n2p3l"]
-[ext_resource type="ArrayMesh" uid="uid://bkah2xwd6udul" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Large.res" id="24_nh4gv"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="25_867eu"]
-[ext_resource type="ArrayMesh" uid="uid://cwkmktwwex0jv" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Muzzle_Main.res" id="25_ytugg"]
+[ext_resource type="PackedScene" uid="uid://chjljrc6muo85" path="res://Scenes/Character/Equipment/VFX/Colt_Cylinder_VFX_Fire.tscn" id="25_c6e7s"]
 [ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="26_80r0m"]
-[ext_resource type="Material" uid="uid://dxfqdfd4t6fcr" path="res://Materials/VFX/MAT_VFX_GunFire_DarkRed.tres" id="26_st1ay"]
 [ext_resource type="ArrayMesh" uid="uid://dcrufbx3vqscr" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Muzzle_Smoke.res" id="27_gcca5"]
 [ext_resource type="Resource" uid="uid://dsm4d3qqcepjo" path="res://Data/Input/IA_Insert_Shell.tres" id="27_wm72f"]
 [ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="28_12fjp"]
@@ -201,14 +198,14 @@ bones/2/parent = 0
 bones/2/rest = Transform3D(0.999945, 0.0064272, 0.00823654, 0.010179, -0.421759, -0.906651, -0.0023534, 0.906685, -0.421801, 7.4743e-07, -1.83778e-05, -0.000313815)
 bones/2/enabled = true
 bones/2/position = Vector3(7.4743e-07, -1.83778e-05, -0.000313815)
-bones/2/rotation = Quaternion(0.72762, 0.0045105, 0.00263505, 0.685961)
+bones/2/rotation = Quaternion(0.843135, 0.00492396, 0.00174444, 0.537677)
 bones/2/scale = Vector3(1, 1, 1)
 bones/3/name = "Hammer"
 bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.936682, 1.19935e-07, 1.19313e-08, 0.35018)
+bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
@@ -391,70 +388,7 @@ surface_material_override/0 = SubResource("ShaderMaterial_c6e7s")
 [node name="MuzzleVFX" type="Node3D" parent="Colt_Saa_Rig/Skeleton3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00661575, 0.00146997)
 
-[node name="Muzzle_Flash_Light" type="OmniLight3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.000245621, 0.000713458)
-layers = 2
-light_color = Color(1, 0.541176, 0.0784314, 1)
-light_energy = 8.0
-light_indirect_energy = 7.0
-light_size = 0.098
-light_cull_mask = 4293918722
-shadow_enabled = true
-shadow_caster_mask = 4293918722
-distance_fade_enabled = true
-distance_fade_begin = 1.0
-distance_fade_shadow = 2.0
-distance_fade_length = 1.0
-omni_range = 1.25443
-
-[node name="MuzzleFlash_1" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(1.92103, 0.489628, 0.264409, -0.493964, 1.93804, -1.01581e-07, -0.256218, -0.0653042, 1.98244, 0.000167782, 0.000115501, 0.000154363)
-layers = 2
-mesh = ExtResource("23_u1ese")
-skeleton = NodePath("../../../../Colt_VFX_Manager")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_1"]
-transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
-layers = 2
-mesh = ExtResource("24_nh4gv")
-
-[node name="MuzzleFlash_2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(-0.652885, -0.422638, -1.84258, -0.155195, 1.95478, -0.393382, 1.88405, 0.0145635, -0.670919, -0.000154952, 0.000106581, 0.000270913)
-layers = 2
-mesh = ExtResource("23_u1ese")
-skeleton = NodePath("../MuzzleFlash_1")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_2"]
-transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
-layers = 2
-mesh = ExtResource("24_nh4gv")
-
-[node name="MuzzleFlash_3" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(-1.48984, -0.288533, 1.30274, -0.4716, 1.94051, -0.109543, -1.24819, -0.388787, -1.51356, -6.38436e-05, 0.000110141, 1.51333e-05)
-layers = 2
-mesh = ExtResource("23_u1ese")
-skeleton = NodePath("../MuzzleFlash_1")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_3"]
-transform = Transform3D(1.5, -2.04782e-18, 1.19245e-09, 0, 1.1, 3.51269e-09, -1.19245e-09, -2.57597e-09, 1.5, 1.17776e-05, -4.62085e-05, 0)
-layers = 2
-mesh = ExtResource("24_nh4gv")
-
-[node name="MuzzleFlash_Main" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(-0.104059, -0.169914, 0.0173507, 0.134404, -0.0939995, -0.114453, 0.105391, -0.0478894, 0.163093, 1.64431e-05, -0.000153971, 4.95508e-05)
-layers = 2
-mesh = ExtResource("25_ytugg")
-surface_material_override/0 = ExtResource("26_st1ay")
-
-[node name="CylinderFlash_1" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(1.34893, 0.605979, 0.251341, -0.61467, 1.36828, -5.05038e-09, -0.229269, -0.102994, 1.47879, 0.000332992, 0.00543467, 6.98492e-10)
-layers = 2
-mesh = ExtResource("23_u1ese")
-
-[node name="CylinderFlash_2" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzleVFX"]
-transform = Transform3D(-1.38848, 0.539026, -0.177724, -0.533092, -1.39976, -0.0805747, -0.194802, -0.0114218, 1.48725, -0.000397529, 0.00543467, 6.98492e-10)
-layers = 2
-mesh = ExtResource("23_u1ese")
+[node name="VFX_Parent" type="Node" parent="Colt_Saa_Rig"]
 
 [node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("23_jksft")
@@ -474,22 +408,20 @@ ExtResource("32_fgv3w"): SubResource("Resource_78w3v"),
 ExtResource("33_64bj7"): SubResource("Resource_t2yuq")
 })
 
-[node name="Colt_VFX_Manager" type="Node3D" parent="." node_paths=PackedStringArray("barrel_muzzle_initial_vfx_parent", "barrel_muzzle_initial_vfx", "barrel_muzzle_flash_light", "barrel_muzzle_main_vfx", "muzzle_smoke_vfx", "cylinder_fire_vfx")]
+[node name="Colt_VFX_Manager" type="Node3D" parent="." node_paths=PackedStringArray("barrel_muzzle_initial_vfx_parent", "barrel_muzzle_flash_light", "fire_vfx_parent", "muzzle_smoke_vfx")]
 transform = Transform3D(100, 0, 0, 0, -1.19209e-05, 100, 0, -100, -1.19209e-05, 0, 0, 0)
 script = ExtResource("7_nh4gv")
 barrel_muzzle_initial_vfx_parent = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX")
-barrel_muzzle_initial_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_2"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_3")]
 barrel_muzzle_flash_min_scale = 1.5
 barrel_vfx_initial_active_time = 0.07
-barrel_muzzle_flash_light = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/Muzzle_Flash_Light")
-barrel_muzzle_main_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/MuzzleFlash_Main")
-barrel_muzzle_main_delay = 0.04
-barrel_muzzle_main_active_time = 0.07
+barrel_muzzle_flash_light = NodePath("")
+fire_vfx_parent = NodePath("../Colt_Saa_Rig/VFX_Parent")
+muzzle_fire_vfx_scene = ExtResource("25_c6e7s")
+barrel_muzzle_main_active_time = 0.04
 muzzle_smoke_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/Muzzle_Smoke")
 muzzle_smoke_grow_rate = 1.5
 muzzle_smoke_max_time = 4.0
 muzzle_smoke_decay_rate = 0.4
-cylinder_fire_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzleVFX/CylinderFlash_2")]
 cylinder_fire_vfx_active = 0.07
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]

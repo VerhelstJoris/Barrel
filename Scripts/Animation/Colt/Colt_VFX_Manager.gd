@@ -4,13 +4,15 @@ var colt_equipment : PlayerEquipmentPistol = null
 
 @export_group("Fire Muzzle Flash")
 @export var barrel_muzzle_initial_vfx_parent : Node3D
-@export var barrel_muzzle_initial_vfx : Array[Node3D]
 @export_range(1.5, 5, 0.01) var barrel_muzzle_flash_min_scale : float = 2
 @export_range(1.5, 5, 0.01) var barrel_muzzle_flash_max_scale : float = 3
 @export var barrel_vfx_initial_active_time : float = 0.04
 @export var barrel_muzzle_flash_light : Node3D
 
-@export var barrel_muzzle_main_vfx : Node3D
+@export var fire_vfx_parent : Node
+@export var muzzle_fire_vfx_scene : PackedScene
+var muzzle_fire_vfx : ColtFireVFX
+
 @export var barrel_muzzle_main_delay : float = 0.02
 @export var barrel_muzzle_main_active_time : float = 0.02
 
@@ -32,7 +34,6 @@ var muzzle_smoke_decaying : bool = false
 var muzzle_smoke_decay_duration : float = 0.0
 
 @export_group("Fire Cylinder Flash")
-@export var cylinder_fire_vfx : Array[Node3D]
 @export var cylinder_fire_vfx_active : float = 0.02
 @export_range(1, 3, 0.01) var cylinder_fire_min_scale : float = 1.5
 @export_range(1, 3, 0.01) var cylinder_fire_max_scale : float = 2
@@ -40,6 +41,11 @@ var muzzle_smoke_decay_duration : float = 0.0
 func _ready() -> void:
 	colt_equipment = get_owner() as PlayerEquipmentPistol
 	colt_equipment.on_fired.connect(_on_bullet_fired)
+	
+	if(muzzle_fire_vfx_scene):
+		muzzle_fire_vfx = muzzle_fire_vfx_scene.instantiate() as ColtFireVFX
+		muzzle_fire_vfx.visible = false
+		fire_vfx_parent.add_child.call_deferred(muzzle_fire_vfx)
 	
 	_toggle_initial_muzzle_vfx(false)
 	_toggle_main_muzzle_vfx(false)
@@ -63,11 +69,17 @@ func _process_muzzle_smoke(delta : float) -> void:
 
 	
 func _on_bullet_fired() -> void:
-	_randomize_fire_vfx()
+	muzzle_fire_vfx.scale = Vector3.ONE * 100
+	muzzle_fire_vfx.visible = true
+	muzzle_fire_vfx.set_global_position(barrel_muzzle_initial_vfx_parent.get_global_position())
+	#muzzle_fire_vfx.set_global_rotation(barrel_muzzle_initial_vfx_parent.get_global_rotation())
+	print("MUZZLE FIRE SCENE PARENT", muzzle_fire_vfx.get_parent())
+	
+	#_randomize_fire_vfx()
 	_activate_initial_muzzle_vfx()
 	_activate_main_muzzle_vfx()
 	_activate_fire_cylinder_vfx()
-	_activate_muzzle_smoke()
+	#_activate_muzzle_smoke()
 	
 
 func _activate_initial_muzzle_vfx() -> void:
@@ -131,11 +143,11 @@ func _set_shrink_shader_param(value : float) -> void:
 	
 func _randomize_fire_vfx() -> void:
 	barrel_muzzle_initial_vfx_parent.rotation.y = randf() * 360
-	for vfx_node in barrel_muzzle_initial_vfx:
-		_randomize_node_scale(vfx_node, barrel_muzzle_flash_min_scale, barrel_muzzle_flash_max_scale)
+	#for vfx_node in barrel_muzzle_initial_vfx:
+	#	_randomize_node_scale(vfx_node, barrel_muzzle_flash_min_scale, barrel_muzzle_flash_max_scale)
 		
-	for cyl_vfx_node in cylinder_fire_vfx:
-		_randomize_node_scale(cyl_vfx_node, cylinder_fire_min_scale, cylinder_fire_max_scale)
+	#for cyl_vfx_node in cylinder_fire_vfx:
+	#	_randomize_node_scale(cyl_vfx_node, cylinder_fire_min_scale, cylinder_fire_max_scale)
 		
 func _randomize_node_scale(node : Node3D, min_scale : float , max_scale : float) -> void:
 	randomize()
@@ -147,14 +159,13 @@ func _reset_muzzle_smoke_vfx_shader_params() -> void:
 	_set_shrink_shader_param(0)
 
 func _toggle_main_muzzle_vfx(_visible : bool) -> void:
-	barrel_muzzle_main_vfx.visible = _visible
+	if(muzzle_fire_vfx):
+		muzzle_fire_vfx._toggle_main_fire_vfx(_visible)
 
 func _toggle_initial_muzzle_vfx(_visible : bool) -> void:
-	if(barrel_muzzle_flash_light):
-		barrel_muzzle_flash_light.visible = _visible
-	for vfx_node in barrel_muzzle_initial_vfx:
-		vfx_node.visible = _visible
+	if(muzzle_fire_vfx):
+		muzzle_fire_vfx._toggle_initial_fire_vfx(_visible)
 
 func _toggle_cylinder_fire_vfx(_visible : bool) -> void:
-	for vfx_node in cylinder_fire_vfx:
-		vfx_node.visible = _visible
+	if(muzzle_fire_vfx):
+		muzzle_fire_vfx._toggle_cylinder_fire_vfx(_visible)
