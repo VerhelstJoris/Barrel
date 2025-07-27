@@ -41,8 +41,11 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 @export var input_receiver : InputReceiver
 @onready var sub_viewport: SubViewport = %SubViewport
 @onready var camera_pivot: Node3D = %CameraPivot
+@onready var smooth_camera: Camera3D = %SmoothCamera
 @onready var state_machine: PlayerStateMachine = %StateMachine
+
 @onready var arms: FPArms = %FP_Arms
+	
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
@@ -76,6 +79,7 @@ func _ready() -> void:
 	_setup_input_signals()
 	_setup_animation_data()
 	_holster(Holster_State.Hidden)
+
 	
 func _setup_animation_data() -> void:
 	arms.arms_animation_bus._init_player_data(self)
@@ -109,7 +113,10 @@ func _process(_delta: float):
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
-		
+
+	arms._align_to_world_camera(smooth_camera)
+	
+	
 func _handle_camera_motion() -> void:
 	rotate_y(mouse_motion.x * camera_sensitivity)
 	camera_pivot.rotate_x(mouse_motion.y  * camera_sensitivity)
@@ -144,14 +151,13 @@ func _handle_joy_camera_motion() -> void:
 	var resulting_vector: Vector2 = Vector2(x_axis, y_axis)
 	var normalized_resulting_vector: Vector2 = resulting_vector.normalized()
 	var action_strength: float = resulting_vector.length()
-	print(camera_sensitivity)
 	rotate_y(-deg_to_rad(camera_sensitivity * normalized_resulting_vector.x * action_strength))
 	camera_pivot.rotate_x(-deg_to_rad(camera_sensitivity * normalized_resulting_vector.y * action_strength))
 
 	camera_pivot.rotation_degrees.x = clampf(
 		camera_pivot.rotation_degrees.x, -89.0, 89.0
 	)
-
+	
 func _change_equipment(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment == current_equipment):
 		return
@@ -170,7 +176,6 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
-		print("CONNECT INPUT")
 		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._clear_current_input_details)
 		new_equipment._on_equipped()
