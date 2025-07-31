@@ -25,14 +25,18 @@ const muzzle_smoke_shrink_shader_param : String = "AlphaShrink"
 @export var smoke_renderer : LineRenderer
 @export var _point_amount : int = 75
 @export var _smoke_point_tracking_time : float = 4.0
+@export var _muzzle_smoke_start_width:float = 0.1
+@export var _point_thickness_growth_per_second : float = 0.5
 
 @export var min_muzzle_smoke_move_speed : Vector3 = Vector3(-0.1, 0.2, -0.1)
 @export var max_muzzle_smoke_move_speed : Vector3 = Vector3(0.1, 0.5, 0.1)
 
+@export_subgroup("length subdiv")
 @export var subdivide_long_polys : bool = true
 @export var long_poly_max_length : float = 0.2
 @export var debug_draw_length_subdiv : bool = true
 
+@export_subgroup("sharpness subdiv")
 @export var subdivide_sharp_polys : bool = true
 @export var min_subdiv_dist : float = 0.05
 @export var debug_draw_sharp_subdiv : bool = true
@@ -41,11 +45,10 @@ var max_sharp_angle_rad : float
 	set(new_value):
 		max_sharp_angle_degree = new_value
 		max_sharp_angle_rad = deg_to_rad(max_sharp_angle_degree)
-	
 
 var _smoke_add_point_timer : float = 0.0
 var muzzle_positions : Array[Vector3]
-var meshes : Array[SphereMesh]
+var muzzle_smoke_width_arr : Array[float]
 
 var muzzle_smoke_growth_tween : Tween
 var muzzle_smoke_decay_tween : Tween
@@ -75,7 +78,6 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_process_muzzle_smoke(delta)
 	_process_muzzle_smoke_points(delta)
-	_bezier_test()
 	
 func _bezier_test() -> void:
 	var A : Vector3 = Vector3(0,0,0)
@@ -97,25 +99,21 @@ func _process_muzzle_smoke(delta : float) -> void:
 		muzzle_smoke_decay_timer += delta
 		if(muzzle_smoke_decay_timer > muzzle_smoke_decay_duration):
 			muzzle_positions.clear()
+			muzzle_smoke_width_arr.clear()
 			muzzle_smoke_active = false
 			muzzle_smoke_decaying = false
 
 func _add_muzzle_smoke_point() -> void:
 	if(muzzle_positions.size() >= _point_amount):
 		muzzle_positions.pop_back()
+		muzzle_smoke_width_arr.pop_back()
 
 	muzzle_positions.push_front(smoke_renderer.get_global_position())
+	muzzle_smoke_width_arr.push_front(_muzzle_smoke_start_width)
 	
-func _insert_muzzle_point(id : int , new_pos: Vector3) -> void:
-	#still remove a point at the end to prevent growing out of control
-	if(muzzle_positions.size() >= _point_amount):
-		muzzle_positions.pop_back()
-		
-	muzzle_positions.insert(id, new_pos)	
-
 func _process_muzzle_smoke_points(_delta : float) -> void:
 	if muzzle_smoke_active:
-		_move_existing_muzzle_points(_delta)
+		_update_existing_muzzle_points(_delta)
 
 		_smoke_add_point_timer += _delta
 		if(_smoke_add_point_timer > _smoke_point_tracking_time / _point_amount):
@@ -124,16 +122,21 @@ func _process_muzzle_smoke_points(_delta : float) -> void:
 		
 		if(!muzzle_positions.is_empty()):
 			smoke_renderer.points = muzzle_positions
+			smoke_renderer.pre_computed_thickness_arr = muzzle_smoke_width_arr
 	
-func _move_existing_muzzle_points(_delta : float) -> void:
+func _update_existing_muzzle_points(_delta : float) -> void:
 	var added : Vector3= Vector3(randf_range(min_muzzle_smoke_move_speed.x, max_muzzle_smoke_move_speed.x) ,
 		randf_range(min_muzzle_smoke_move_speed.y, max_muzzle_smoke_move_speed.y),
 		randf_range(min_muzzle_smoke_move_speed.z, max_muzzle_smoke_move_speed.z)) * _delta
 
+	var thickness_delta_add : float = _delta * _point_thickness_growth_per_second
 	for id in muzzle_positions.size():
 		muzzle_positions[id] +=  added
-		
-	for id in (muzzle_positions.size() -1):
+		muzzle_smoke_width_arr[id] += thickness_delta_add
+
+	#only process the first X points if possible	
+	var points_to_process : int = min(15, muzzle_positions.size() -1)	
+	for id in points_to_process:
 		if( id < 1):	
 			continue
 			
@@ -160,6 +163,7 @@ func _check_subdivide_long_poly(current_id : int) -> int:
 			var new_pos : Vector3 = lerp(A, B,alpha)
 			current_id = current_id +1
 			muzzle_positions.insert(current_id, new_pos)
+			muzzle_smoke_width_arr.insert(current_id, lerp(muzzle_smoke_width_arr[current_id], muzzle_smoke_width_arr[current_id +1], alpha))
 			debug_points.push_back(new_pos)
 			
 
@@ -186,7 +190,7 @@ func _check_subdivide_sharp_poly(current_id : int) -> bool:
 				DebugDraw3D.draw_line_path(PackedVector3Array( [A,B,C,D]) , Color(1,0,0),1.5)
 				DebugDraw3D.draw_line_path(PackedVector3Array( [A,B,muzzle_positions[current_id],D]) , Color(0,1,0),1.5)
 
-		return true
+			return true
 	return false
 
 func _bezier_2( A : Vector3 , B : Vector3, alpha : float) -> Vector3:
@@ -198,7 +202,6 @@ func _bezier_3( A : Vector3 , B : Vector3, C : Vector3, alpha : float) -> Vector
 func _bezier_4( A: Vector3 , B : Vector3, C : Vector3, D : Vector3, alpha : float) -> Vector3:
 	return lerp(_bezier_3(A, B, C, alpha), _bezier_3(B, C, D, alpha), alpha)
 	
-
 func _on_bullet_fired() -> void:
 	_randomize_fire_vfx()
 	_activate_initial_muzzle_vfx()
