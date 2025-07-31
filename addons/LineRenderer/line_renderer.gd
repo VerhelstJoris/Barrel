@@ -1,10 +1,8 @@
 class_name LineRenderer extends MeshInstance3D
 
-@export var points: Array[Vector3] = [Vector3(0,0,0),Vector3(0,5,0)]
+@export var points: Array[Vector3]
 @export var start_thickness:float = 0.1
 @export var growth_rate_per_unit_length : float = 2
-@export var corner_resolution:int = 5
-@export var draw_corners:bool = true
 @export var use_global_coords:bool = true
 @export var connect_polys : bool = true
 @export var flip_y_uv : bool = true
@@ -33,8 +31,7 @@ func _enter_tree() -> void:
 	
 func _ready() -> void:
 	camera = get_tree().get_root().get_camera_3d()
-
-
+	
 func _process(_delta : float) -> void:
 	if points.size() < 2:
 		return
@@ -43,32 +40,19 @@ func _process(_delta : float) -> void:
 		return
 	cameraOrigin = to_local(camera.get_global_transform().origin) 
 	
-	_reset_vars_for_drawing()
+	_reset_vars_for_drawing(_delta)
 		
 	mesh.clear_surfaces()
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	mesh.surface_begin(Mesh.PrimitiveType.PRIMITIVE_TRIANGLES)
 	
 	for i in range(points.size() - 1):
 		var A:Vector3 = points[i]
 		var B:Vector3 = points[i+1]
-		
-		#should this poly be divided up into multiple due to the angle being too sharp
-		#if(i < points.size() -2):
-		#	var C : Vector3 = points[i+2]
-		#	if use_global_coords:
-		#		C = to_local(C)
-#
-		#	var angleDot : float =  (B-A).normalized().dot((B-C).normalized())
-		#	if(abs(angleDot) > 0.4):
-		#		print("POLY HAS TOO SHARP OF AN ANGLE TO NEXT, SHOULD SPLIT UP")
-		#	
-		#	continue
-		
-		_draw_next_poly(A,B, i ==0)
+		_draw_next_poly(A,B, i ==0, true)
 
 	mesh.surface_end()
-
-func _reset_vars_for_drawing()->void:
+	
+func _reset_vars_for_drawing(_delta : float)->void:
 	current_thickness = 0;
 	next_thickness =0
 	
@@ -78,18 +62,20 @@ func _reset_vars_for_drawing()->void:
 	else:
 		next_alpha = 0
 		
+	var prev_total_dist: float = total_dist
 	total_dist = 0
 	for i in range(points.size() - 1):
 		total_dist += points[i].distance_to(points[i + 1])
+		
+	total_dist = lerp(prev_total_dist, total_dist, 1 * _delta)	
 
 	current_dist = 0
 	next_dist = 0
 	
 	max_thickness = start_thickness + (start_thickness * (growth_rate_per_unit_length * total_dist))
-	print("START ", start_thickness, " MAX" , max_thickness)
 	global_scale = get_global_transform().basis.get_scale().length()
 	
-func _draw_next_poly(A: Vector3, B : Vector3, first : bool)	-> void:
+func _draw_next_poly(A: Vector3, B : Vector3, first : bool, actually_draw : bool)	-> void:
 	current_dist = next_dist
 	next_dist += A.distance_to(B)
 	current_alpha = next_alpha
@@ -121,13 +107,14 @@ func _draw_next_poly(A: Vector3, B : Vector3, first : bool)	-> void:
 	var BtoABEnd:Vector3  = B + orthogonalABEnd
 	var BfromABEnd:Vector3 = B - orthogonalABEnd
 	
-	_add_vertex(AtoABStart,Vector2(0,current_alpha))
-	_add_vertex(BtoABEnd,Vector2( 0, current_alpha))
-	_add_vertex(AfromABStart,Vector2(1, next_alpha))
-	
-	_add_vertex(BtoABEnd,Vector2(0 , current_alpha))
-	_add_vertex(BfromABEnd,Vector2(1, next_alpha))
-	_add_vertex(AfromABStart,Vector2(1,next_alpha))
+	if(actually_draw):
+		_add_vertex(AtoABStart,Vector2(0,current_alpha))
+		_add_vertex(BtoABEnd,Vector2( 0, current_alpha))
+		_add_vertex(AfromABStart,Vector2(1, next_alpha))
+		
+		_add_vertex(BtoABEnd,Vector2(0 , current_alpha))
+		_add_vertex(BfromABEnd,Vector2(1, next_alpha))
+		_add_vertex(AfromABStart,Vector2(1,next_alpha))
 	
 	PrevBToAB = BtoABEnd
 	PrevBFromAB = BfromABEnd
