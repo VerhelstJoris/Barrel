@@ -42,3 +42,6 @@ func _try_use_equipment_secondary():
 	# not implemented in base class
 	pass
 	
+func _can_be_holstered() -> bool:
+	return true
+	

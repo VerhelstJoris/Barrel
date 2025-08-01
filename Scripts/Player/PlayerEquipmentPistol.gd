@@ -195,7 +195,10 @@ func _can_cock_hammer() -> bool:
 
 func _can_shoot() -> bool:
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
-	
+
+func _can_be_holstered() -> bool:
+	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
+
 func _log_chamber_states() -> void:
 	var builtStr : String = ""
 	var index: int =  0

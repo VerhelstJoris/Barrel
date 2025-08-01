@@ -57,7 +57,7 @@ signal on_equipped(new_equipment : PlayerEquipment)
 signal on_unequipped(old_equipment : PlayerEquipment)
 
 var equipment_holster_state : Holster_State = Holster_State.Hidden:
-	set = _holster
+	set = _change_holster_state
 
 var current_equipment : PlayerEquipment = null:
 	set = _change_equipment
@@ -78,7 +78,7 @@ func _ready() -> void:
 	current_equipment = arms.pistol_equipment
 	_setup_input_signals()
 	_setup_animation_data()
-	_holster(Holster_State.Hidden)
+	_change_holster_state(Holster_State.Hidden)
 
 	
 func _setup_animation_data() -> void:
@@ -183,21 +183,25 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 
 func _on_quick_unholster_input(event : InputEvent) -> void:
 	if(equipment_holster_state == Holster_State.Hidden):
-		_holster(Holster_State.Unholstering)
+		_change_holster_state(Holster_State.Unholstering)
 
 func _on_holster_input(event : InputEvent) -> void:
 	match equipment_holster_state:
 		Holster_State.Hidden:
-			_holster(Holster_State.Unholstering)
+			_change_holster_state(Holster_State.Unholstering)
 		Holster_State.Ready:
-			_holster(Holster_State.Holstering)
+			if(_can_holster_equipment()):
+				_change_holster_state(Holster_State.Holstering)
 		_:
 			pass
-	
-func _holster(new_state : Holster_State) -> void:
+
+func _can_holster_equipment() -> bool:
+	return equipment_holster_state == Holster_State.Ready && current_equipment._can_be_holstered()			
+			
+func _change_holster_state(new_state : Holster_State) -> void:
 	if(current_equipment == null):
 		return
-		
+	
 	equipment_holster_state = new_state	
 	match new_state:
 		Holster_State.Holstering:
