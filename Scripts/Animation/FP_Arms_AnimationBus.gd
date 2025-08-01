@@ -107,10 +107,10 @@ func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Ac
 		
 	#specific edge cases to compensate for hand going forward/back
 	if(_prev == EPistolState.Actions.Insert && _new == EPistolState.Actions.Eject):
-		set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 
 	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
-		set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 			
 	elif(_prev == EPistolState.Actions.EnterReloadUncock || _prev == EPistolState.Actions.EnterReload):
 		_on_enter_reload_interrupted()

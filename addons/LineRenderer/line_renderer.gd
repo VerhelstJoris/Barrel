@@ -119,18 +119,20 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 	var BtoABEnd:Vector3  = B + orthogonalABEnd
 	var BfromABEnd:Vector3 = B - orthogonalABEnd
 	
-	_add_vertex(AtoABStart,Vector2(0,current_alpha))
-	_add_vertex(BtoABEnd,Vector2( 0, current_alpha))
-	_add_vertex(AfromABStart,Vector2(1, next_alpha))
+	var normal : Vector3 = - camera.get_global_transform().basis.z	#reverse forward
+	_add_vertex(AtoABStart,Vector2(0,current_alpha), normal)
+	_add_vertex(BtoABEnd,Vector2( 0, current_alpha),normal)
+	_add_vertex(AfromABStart,Vector2(1, next_alpha),normal)
 	
-	_add_vertex(BtoABEnd,Vector2(0 , current_alpha))
-	_add_vertex(BfromABEnd,Vector2(1, next_alpha))
-	_add_vertex(AfromABStart,Vector2(1,next_alpha))
+	_add_vertex(BtoABEnd,Vector2(0 , current_alpha),normal)
+	_add_vertex(BfromABEnd,Vector2(1, next_alpha),normal)
+	_add_vertex(AfromABStart,Vector2(1,next_alpha),normal)
 	
 	PrevBToAB = BtoABEnd
 	PrevBFromAB = BfromABEnd
 
-func _add_vertex(pos : Vector3,   uv : Vector2) -> void:
+func _add_vertex(pos : Vector3,   uv : Vector2, normal : Vector3) -> void:
+	mesh.surface_set_normal(normal)
 	mesh.surface_set_uv(uv)
 	mesh.surface_add_vertex(pos)
 	
