@@ -3,6 +3,7 @@ class_name LineRenderer extends MeshInstance3D
 @export var should_draw : bool = true
 @export var points: Array[Vector3]
 @export var use_global_coords:bool = true
+@export var billboard_polys : bool = true
 @export var connect_polys : bool = true
 @export var flip_y_uv : bool = true
 
@@ -103,8 +104,27 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 		next_thickness = lerp(max_thickness, start_thickness, next_alpha) / global_scale
 	
 	var AB:Vector3 = B - A;
-	var orthogonalABStart:Vector3 = (cameraOrigin - ((A + B) / 2)).cross(AB).normalized() * current_thickness;
-	var orthogonalABEnd:Vector3 = (cameraOrigin - ((A + B) / 2)).cross(AB).normalized() * next_thickness;
+	var dir : Vector3
+	var normal
+	var cam_transform :Transform3D = camera.get_global_transform()
+	
+	if(billboard_polys):
+		var forward : Vector3 = Vector3.FORWARD
+		dir = Vector3.RIGHT #right
+		
+		#project B onto the plane made by the  forward and A
+		var proj_B : Vector3 = B
+		proj_B.y = 0
+		#calculate angle between A and projected B
+		var dot :float = (A - forward).dot(A-proj_B)
+		
+		#rotate dir around forward
+		dir.rotated(forward, acos(dot))
+	else:
+		dir = (cameraOrigin - ((A + B) / 2)).cross(AB).normalized()
+	
+	var orthogonalABStart:Vector3 = dir * current_thickness
+	var orthogonalABEnd:Vector3 = dir * next_thickness
 	
 	var AtoABStart:Vector3
 	var AfromABStart:Vector3
@@ -119,7 +139,7 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 	var BtoABEnd:Vector3  = B + orthogonalABEnd
 	var BfromABEnd:Vector3 = B - orthogonalABEnd
 	
-	var normal : Vector3 = - camera.get_global_transform().basis.z	#reverse forward
+	normal = - cam_transform.basis.z	#reverse forward
 	_add_vertex(AtoABStart,Vector2(0,current_alpha), normal)
 	_add_vertex(BtoABEnd,Vector2( 0, current_alpha),normal)
 	_add_vertex(AfromABStart,Vector2(1, next_alpha),normal)
