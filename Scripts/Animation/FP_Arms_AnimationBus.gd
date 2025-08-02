@@ -10,7 +10,6 @@ class_name FPArmsAnimationBus extends Node
 enum E_prop_bone_type{Left, Right, Global}
 var right_prop_bone_pos : Vector3 = Vector3.ZERO
 
-
 const anim_colt_state_machine_path : String  = "parameters/SM_Player/SM_Colt/"
 
 const anim_fire_request : String = "ReadyBlendTree/FireOneShot/request"
@@ -22,7 +21,9 @@ const anim_enter_reload_uncock_condition : String = "conditions/enter_reload_unc
 const anim_exit_reload_condition : String = "conditions/exit_reload"
 
 const anim_reload_next_chamber_request : String = "ReloadingBlendTree/NextChamberOneShot/request"
+const anim_reload_next_chamber_cont_request : String = "ReloadingBlendTree/NextChamberContOneShot/request"
 const anim_reload_previous_chamber_request : String = "ReloadingBlendTree/PreviousChamberOneShot/request"
+const anim_reload_previous_chamber_cont_request : String = "ReloadingBlendTree/PreviousChamberContOneShot/request"
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
@@ -41,6 +42,9 @@ var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
 var prev_move_direction : Vector2 = Vector2.ZERO
 var move_blend_tween : Tween
+
+var next_cyl_cont : bool = false
+var prev_cyl_cont : bool = false
 
 signal on_unholster_anim_finish()
 signal on_holster_anim_finish()
@@ -80,9 +84,17 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 		EPistolState.Actions.ExitReload:
 			_on_reload_change(false,false,true)
 		EPistolState.Actions.CylinderNext:
-			_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
+			if(next_cyl_cont):
+				_set_anim_tree_oneshot_request(anim_reload_next_chamber_cont_request)
+				next_cyl_cont = false
+			else:		
+				_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
 		EPistolState.Actions.CylinderPrev:
-			_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
+			if(prev_cyl_cont):
+				_set_anim_tree_oneshot_request(anim_reload_previous_chamber_cont_request)
+				prev_cyl_cont = false
+			else:
+				_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
 		EPistolState.Actions.Insert:
 			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
 		EPistolState.Actions.Eject:
@@ -112,6 +124,17 @@ func _on_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Ac
 	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
 		set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 			
+	if(_prev == EPistolState.Actions.CylinderNext && _new == EPistolState.Actions.CylinderNext):
+		set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		set(anim_reload_next_chamber_cont_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		next_cyl_cont = true
+
+	if(_prev == EPistolState.Actions.CylinderPrev && _new == EPistolState.Actions.CylinderPrev):
+		set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		set(anim_reload_previous_chamber_cont_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		prev_cyl_cont = true
+
+
 	elif(_prev == EPistolState.Actions.EnterReloadUncock || _prev == EPistolState.Actions.EnterReload):
 		_on_enter_reload_interrupted()
 		

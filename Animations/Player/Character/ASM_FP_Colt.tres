@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeStateMachine" load_steps=57 format=3 uid="uid://1yjnhyqg3bh"]
+[gd_resource type="AnimationNodeStateMachine" load_steps=66 format=3 uid="uid://1yjnhyqg3bh"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_es4ed"]
 animation = &"AL_FP_Character/A_FP_Holster"
@@ -79,6 +79,9 @@ node_connections = [&"output", 0, &"HammerOneShot", &"FireOneShot", 0, &"Animati
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x4084"]
 animation = &"AL_FP_Character/A_FP_Reload_Pose"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_aank0"]
+animation = &"AL_FP_Character/A_FP_Reload_Chamber_Previous_Cont"
+
 [sub_resource type="Curve" id="Curve_forti"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
@@ -123,6 +126,26 @@ animation = &"AL_FP_Character/A_FP_Reload_Insert_Shell"
 
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_em04p"]
 
+[sub_resource type="Curve" id="Curve_3ewnr"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_nwbtk"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_nbwfs"]
+filter_enabled = true
+filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
+fadein_time = 0.05
+fadein_curve = SubResource("Curve_3ewnr")
+fadeout_time = 0.15
+fadeout_curve = SubResource("Curve_nwbtk")
+
+[sub_resource type="Curve" id="Curve_61hta"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="Curve" id="Curve_em04p"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
@@ -130,14 +153,35 @@ point_count = 2
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_f8lkl"]
 filter_enabled = true
 filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
+fadein_time = 0.05
+fadein_curve = SubResource("Curve_61hta")
 fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_em04p")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xvjal"]
 animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6xr2n"]
+animation = &"AL_FP_Character/A_FP_Reload_Chamber_Next_Cont"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_elkt0"]
 animation = &"AL_FP_Character/A_FP_Reload_Chamber_Previous"
+
+[sub_resource type="Curve" id="Curve_nbwfs"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_6xr2n"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_pi647"]
+filter_enabled = true
+filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
+fadein_time = 0.1
+fadein_curve = SubResource("Curve_nbwfs")
+fadeout_time = 0.05
+fadeout_curve = SubResource("Curve_6xr2n")
 
 [sub_resource type="Curve" id="Curve_tmq1e"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
@@ -156,31 +200,39 @@ fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_g0oko")
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-922.749, -83.8873)
+graph_offset = Vector2(-500.981, 7.8535)
 nodes/output/position = Vector2(1500, 660)
 nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
 nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
 nodes/Eject_Shell/node = SubResource("AnimationNodeAnimation_g0oko")
 nodes/Eject_Shell/position = Vector2(380, 1060)
 nodes/Idle/node = SubResource("AnimationNodeAnimation_20p65")
-nodes/Idle/position = Vector2(-560, 160)
+nodes/Idle/position = Vector2(-1800, -440)
 nodes/InsertShellOneShot/node = SubResource("AnimationNodeOneShot_kiv7u")
 nodes/InsertShellOneShot/position = Vector2(800, 600)
 nodes/Insert_Shell/node = SubResource("AnimationNodeAnimation_c06vg")
 nodes/Insert_Shell/position = Vector2(280, 820)
 nodes/PreviousChamberOneShot/node = SubResource("AnimationNodeOneShot_eu2xo")
-nodes/PreviousChamberOneShot/position = Vector2(360, 360)
+nodes/PreviousChamberOneShot/position = Vector2(-320, 0)
 nodes/MinusPose4/node = SubResource("AnimationNodeSub2_em04p")
 nodes/MinusPose4/position = Vector2(960, 1080)
 "nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_x4084")
 "nodes/Animation 3/position" = Vector2(420, 1240)
 nodes/Prev_Chamber/node = SubResource("AnimationNodeAnimation_elkt0")
-nodes/Prev_Chamber/position = Vector2(-200, 660)
+nodes/Prev_Chamber/position = Vector2(-880, 300)
 nodes/Next_Chamber/node = SubResource("AnimationNodeAnimation_xvjal")
-nodes/Next_Chamber/position = Vector2(-620, 360)
+nodes/Next_Chamber/position = Vector2(-1860, -240)
 nodes/NextChamberOneShot/node = SubResource("AnimationNodeOneShot_f8lkl")
-nodes/NextChamberOneShot/position = Vector2(-40, 240)
-node_connections = [&"output", 0, &"EjectShellOneShot", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"MinusPose4", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Insert_Shell", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Prev_Chamber", &"MinusPose4", 0, &"Eject_Shell", &"MinusPose4", 1, &"Animation 3", &"NextChamberOneShot", 0, &"Idle", &"NextChamberOneShot", 1, &"Next_Chamber"]
+nodes/NextChamberOneShot/position = Vector2(-1280, -360)
+nodes/NextChamberContOneShot/node = SubResource("AnimationNodeOneShot_nbwfs")
+nodes/NextChamberContOneShot/position = Vector2(-840, -100)
+nodes/Next_Chamber_Cont/node = SubResource("AnimationNodeAnimation_6xr2n")
+nodes/Next_Chamber_Cont/position = Vector2(-1460, 40)
+nodes/PreviousChamberContOneShot/node = SubResource("AnimationNodeOneShot_pi647")
+nodes/PreviousChamberContOneShot/position = Vector2(100, 240)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_aank0")
+nodes/Animation/position = Vector2(-420, 520)
+node_connections = [&"output", 0, &"EjectShellOneShot", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"MinusPose4", &"InsertShellOneShot", 0, &"PreviousChamberContOneShot", &"InsertShellOneShot", 1, &"Insert_Shell", &"PreviousChamberOneShot", 0, &"NextChamberContOneShot", &"PreviousChamberOneShot", 1, &"Prev_Chamber", &"MinusPose4", 0, &"Eject_Shell", &"MinusPose4", 1, &"Animation 3", &"NextChamberOneShot", 0, &"Idle", &"NextChamberOneShot", 1, &"Next_Chamber", &"NextChamberContOneShot", 0, &"NextChamberOneShot", &"NextChamberContOneShot", 1, &"Next_Chamber_Cont", &"PreviousChamberContOneShot", 0, &"PreviousChamberOneShot", &"PreviousChamberContOneShot", 1, &"Animation"]
 
 [sub_resource type="Curve" id="Curve_0l78c"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -303,4 +355,4 @@ states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(372, 481)
 states/Start/position = Vector2(-274, 80)
 transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "ReadyBlendTree", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_forti"), "Enter Reload Uncock", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_es4ed"), "Start", "AL_FP_Character_A_FP_Unholster", SubResource("AnimationNodeStateMachineTransition_ys0lo"), "AL_FP_Character_A_FP_Unholster", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_28pq6"), "ReadyBlendTree", "AL_FP_Character_A_FP_Holster", SubResource("AnimationNodeStateMachineTransition_jqlb3"), "AL_FP_Character_A_FP_Holster", "End", SubResource("AnimationNodeStateMachineTransition_yud83"), "Exit Reload", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_hgbq4"), "Exit Reload", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_n61xj"), "Enter Reload Uncock", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_aank0"), "Enter Reload", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_vbs3n")]
-graph_offset = Vector2(-150, -127)
+graph_offset = Vector2(-236, 164)
