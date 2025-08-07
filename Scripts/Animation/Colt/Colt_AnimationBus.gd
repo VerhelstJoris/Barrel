@@ -21,6 +21,7 @@ const anim_reload_next_chamber_request : String = "parameters/NextChamberOneShot
 const anim_reload_previous_chamber_request : String = "parameters/PreviousChamberOneShot/request"
 const anim_reload_insert_shell_request : String = "parameters/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/request"
+const anim_reload_fan_fire_request : String = "parameters/FanFireOneShot/request"
 
 func _ready() -> void:
 	colt_equipment = get_owner() as PlayerEquipmentPistol
@@ -54,6 +55,8 @@ func _on_action_started(new_action : EPistolState.Actions)	-> void:
 			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
 		EPistolState.Actions.Eject:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
+		EPistolState.Actions.FanFire:
+			_set_anim_tree_oneshot_request(anim_reload_fan_fire_request)	
 		_:
 			pass
 

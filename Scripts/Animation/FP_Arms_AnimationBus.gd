@@ -31,10 +31,11 @@ const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
 const reload_movement_blend_value : float = 0.1
 
 
-# these 2 are checked by the state machine itself as an expression
+# these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
 var exit_reload_done : bool = false
 var colt_unholstered : bool = false
+var colt_fan_hammer : bool = false
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
@@ -99,6 +100,8 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
 		EPistolState.Actions.Eject:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
+		EPistolState.Actions.FanFire:
+			colt_fan_hammer = true
 		_:
 			pass
 	current_action = new_action
@@ -152,7 +155,7 @@ func _process(_delta: float) -> void:
 	prev_delta = _delta
 	movement_blend_value = movement_blend_value.lerp( prev_move_direction, movement_blend_rate * 0.5 * prev_delta);
 	_update_movement_blend_values()
-	
+	colt_fan_hammer = false
 	
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):

@@ -87,7 +87,7 @@ graph_offset = Vector2(-163, -18)
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_ys0lo"]
 
 [resource]
-graph_offset = Vector2(-708.457, 31.8441)
+graph_offset = Vector2(-505.825, -38.0638)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)

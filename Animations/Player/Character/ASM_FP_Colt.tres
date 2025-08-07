@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeStateMachine" load_steps=66 format=3 uid="uid://1yjnhyqg3bh"]
+[gd_resource type="AnimationNodeStateMachine" load_steps=76 format=3 uid="uid://1yjnhyqg3bh"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_es4ed"]
 animation = &"AL_FP_Character/A_FP_Holster"
@@ -6,14 +6,28 @@ animation = &"AL_FP_Character/A_FP_Holster"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_forti"]
 animation = &"AL_FP_Character/A_FP_Unholster"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mvouq"]
+animation = &"AL_FP_Colt_FanHammer/A_FP_Colt_Exit_FanHammer"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hxvos"]
 animation = &"AL_FP_Character/A_FP_Enter_Reload_Uncock"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e1q05"]
 animation = &"AL_FP_Character/A_FP_Enter_Reload"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hgbq4"]
+animation = &"AL_FP_Colt_FanHammer/A_FP_Colt_Enter_FanHammer"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
 animation = &"AL_FP_Character/A_FP_Exit_Reload"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vbs3n"]
+animation = &"AL_FP_Colt_FanHammer/A_FP_Colt_FanHammer_Fire"
+use_custom_timeline = true
+timeline_length = 0.375
+stretch_time_scale = false
+start_offset = 0.0
+loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tmq1e"]
 animation = &"AL_FP_Character/A_FP_Dry_Fire"
@@ -180,7 +194,7 @@ filter_enabled = true
 filters = ["Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L"]
 fadein_time = 0.1
 fadein_curve = SubResource("Curve_nbwfs")
-fadeout_time = 0.05
+fadeout_time = 0.1
 fadeout_curve = SubResource("Curve_6xr2n")
 
 [sub_resource type="Curve" id="Curve_tmq1e"]
@@ -200,7 +214,7 @@ fadeout_time = 0.05
 fadeout_curve = SubResource("Curve_g0oko")
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7gfv3"]
-graph_offset = Vector2(-500.981, 7.8535)
+graph_offset = Vector2(-620.023, 118.166)
 nodes/output/position = Vector2(1500, 660)
 nodes/EjectShellOneShot/node = SubResource("AnimationNodeOneShot_x8ke2")
 nodes/EjectShellOneShot/position = Vector2(1164.25, 774.554)
@@ -337,22 +351,60 @@ xfade_curve = SubResource("Curve_n61xj")
 advance_mode = 2
 advance_condition = &"exit_reload"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mvouq"]
+advance_mode = 2
+advance_expression = "colt_fan_hammer"
+
+[sub_resource type="Curve" id="Curve_pi647"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_3ewnr"]
+xfade_time = 0.1
+xfade_curve = SubResource("Curve_pi647")
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="Curve" id="Curve_7matf"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nbwfs"]
+xfade_time = 0.2
+xfade_curve = SubResource("Curve_7matf")
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nwbtk"]
+xfade_time = 0.2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_61hta"]
+advance_mode = 2
+advance_expression = "colt_fan_hammer"
+
 [resource]
 states/AL_FP_Character_A_FP_Holster/node = SubResource("AnimationNodeAnimation_es4ed")
 states/AL_FP_Character_A_FP_Holster/position = Vector2(703, 92)
 states/AL_FP_Character_A_FP_Unholster/node = SubResource("AnimationNodeAnimation_forti")
 states/AL_FP_Character_A_FP_Unholster/position = Vector2(76, 80)
+states/AL_FP_Colt_FanHammer_A_FP_Colt_Exit_FanHammer/node = SubResource("AnimationNodeAnimation_mvouq")
+states/AL_FP_Colt_FanHammer_A_FP_Colt_Exit_FanHammer/position = Vector2(160, -90)
 states/End/position = Vector2(931, 92)
 "states/Enter Reload/node" = SubResource("AnimationNodeAnimation_e1q05")
 "states/Enter Reload/position" = Vector2(54, 300)
 "states/Enter Reload Uncock/node" = SubResource("AnimationNodeAnimation_hxvos")
 "states/Enter Reload Uncock/position" = Vector2(256, 331)
+states/Enter_Fanning/node = SubResource("AnimationNodeAnimation_hgbq4")
+states/Enter_Fanning/position = Vector2(552, -57)
 "states/Exit Reload/node" = SubResource("AnimationNodeAnimation_x8ke2")
 "states/Exit Reload/position" = Vector2(619, 205)
+states/Fanning/node = SubResource("AnimationNodeAnimation_vbs3n")
+states/Fanning/position = Vector2(356, -197)
 states/ReadyBlendTree/node = SubResource("AnimationNodeBlendTree_fbbjj")
 states/ReadyBlendTree/position = Vector2(358, 139)
 states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
-states/ReloadingBlendTree/position = Vector2(372, 481)
+states/ReloadingBlendTree/position = Vector2(374, 481)
 states/Start/position = Vector2(-274, 80)
-transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "ReadyBlendTree", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_forti"), "Enter Reload Uncock", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_es4ed"), "Start", "AL_FP_Character_A_FP_Unholster", SubResource("AnimationNodeStateMachineTransition_ys0lo"), "AL_FP_Character_A_FP_Unholster", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_28pq6"), "ReadyBlendTree", "AL_FP_Character_A_FP_Holster", SubResource("AnimationNodeStateMachineTransition_jqlb3"), "AL_FP_Character_A_FP_Holster", "End", SubResource("AnimationNodeStateMachineTransition_yud83"), "Exit Reload", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_hgbq4"), "Exit Reload", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_n61xj"), "Enter Reload Uncock", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_aank0"), "Enter Reload", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_vbs3n")]
-graph_offset = Vector2(-236, 164)
+transitions = ["Enter Reload", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_4m1l8"), "ReadyBlendTree", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_jqk1o"), "Exit Reload", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "ReadyBlendTree", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_forti"), "Enter Reload Uncock", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_es4ed"), "Start", "AL_FP_Character_A_FP_Unholster", SubResource("AnimationNodeStateMachineTransition_ys0lo"), "AL_FP_Character_A_FP_Unholster", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_28pq6"), "ReadyBlendTree", "AL_FP_Character_A_FP_Holster", SubResource("AnimationNodeStateMachineTransition_jqlb3"), "AL_FP_Character_A_FP_Holster", "End", SubResource("AnimationNodeStateMachineTransition_yud83"), "Exit Reload", "Enter Reload", SubResource("AnimationNodeStateMachineTransition_hgbq4"), "Exit Reload", "Enter Reload Uncock", SubResource("AnimationNodeStateMachineTransition_n61xj"), "Enter Reload Uncock", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_aank0"), "Enter Reload", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_vbs3n"), "ReadyBlendTree", "Enter_Fanning", SubResource("AnimationNodeStateMachineTransition_mvouq"), "Enter_Fanning", "Fanning", SubResource("AnimationNodeStateMachineTransition_3ewnr"), "AL_FP_Colt_FanHammer_A_FP_Colt_Exit_FanHammer", "ReadyBlendTree", SubResource("AnimationNodeStateMachineTransition_nbwfs"), "Fanning", "AL_FP_Colt_FanHammer_A_FP_Colt_Exit_FanHammer", SubResource("AnimationNodeStateMachineTransition_nwbtk"), "AL_FP_Colt_FanHammer_A_FP_Colt_Exit_FanHammer", "Fanning", SubResource("AnimationNodeStateMachineTransition_61hta")]
+graph_offset = Vector2(9, -254)

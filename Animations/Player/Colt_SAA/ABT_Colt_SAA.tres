@@ -1,7 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=27 format=3 uid="uid://blsb7g0t5c8mx"]
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1detw"]
-animation = &"AL_Colt_SAA/A_Colt_Cock_Hammer"
+[gd_resource type="AnimationNodeBlendTree" load_steps=28 format=3 uid="uid://blsb7g0t5c8mx"]
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_1detw"]
 mix_mode = 1
@@ -39,6 +36,11 @@ mix_mode = 1
 animation = &"AL_Colt_SAA/A_Colt_Exit_Reload"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_y5nk3"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_qq01v"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4j58a"]
+animation = &"AL_Colt_SAA/A_Colt_Fanning_Fire"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4geki"]
 animation = &"AL_Colt_SAA/A_Colt_Fire"
@@ -98,8 +100,8 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
-graph_offset = Vector2(-958.545, -382.364)
-nodes/output/position = Vector2(3040, 1140)
+graph_offset = Vector2(1975.25, 1076.72)
+nodes/output/position = Vector2(3440, 1220)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)
 nodes/EnterReloadOneShot/node = SubResource("AnimationNodeOneShot_2lov7")
@@ -134,14 +136,16 @@ nodes/ExitReloadOneShot/node = SubResource("AnimationNodeOneShot_y5nk3")
 nodes/ExitReloadOneShot/position = Vector2(1440, 700)
 nodes/ExitReload/node = SubResource("AnimationNodeAnimation_j3cck")
 nodes/ExitReload/position = Vector2(1020, 920)
-nodes/Animation/node = SubResource("AnimationNodeAnimation_1detw")
-nodes/Animation/position = Vector2(2680, 880)
+nodes/EnterReloadUncock/node = SubResource("AnimationNodeAnimation_qq01v")
+nodes/EnterReloadUncock/position = Vector2(480, 680)
 nodes/Dry_Fire/node = SubResource("AnimationNodeAnimation_troah")
 nodes/Dry_Fire/position = Vector2(-540, 260)
 nodes/DryFireOneShot/node = SubResource("AnimationNodeOneShot_1detw")
 nodes/DryFireOneShot/position = Vector2(-60, 0)
 nodes/EnterReloadUncockOneShot/node = SubResource("AnimationNodeOneShot_4j58a")
 nodes/EnterReloadUncockOneShot/position = Vector2(960, 480)
-nodes/EnterReloadUncock/node = SubResource("AnimationNodeAnimation_qq01v")
-nodes/EnterReloadUncock/position = Vector2(480, 680)
-node_connections = [&"output", 0, &"EjectShellOneShot", &"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOneShot", 1, &"EnterReload", &"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"DryFireOneShot", &"HammerOneShot", 1, &"Hammer", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Reload_Insert_Shell", &"NextChamberOneShot", 0, &"ExitReloadOneShot", &"NextChamberOneShot", 1, &"Reload_Next_Chamber", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Reload_Previous_Chamber", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"Reload_Eject_Shell", &"ExitReloadOneShot", 0, &"EnterReloadUncockOneShot", &"ExitReloadOneShot", 1, &"ExitReload", &"DryFireOneShot", 0, &"FireOneShot", &"DryFireOneShot", 1, &"Dry_Fire", &"EnterReloadUncockOneShot", 0, &"EnterReloadOneShot", &"EnterReloadUncockOneShot", 1, &"EnterReloadUncock"]
+nodes/FanFireOneShot/node = SubResource("AnimationNodeOneShot_qq01v")
+nodes/FanFireOneShot/position = Vector2(3120, 1240)
+nodes/Fan_Fire/node = SubResource("AnimationNodeAnimation_4j58a")
+nodes/Fan_Fire/position = Vector2(2680, 1600)
+node_connections = [&"output", 0, &"FanFireOneShot", &"EnterReloadOneShot", 0, &"HammerOneShot", &"EnterReloadOneShot", 1, &"EnterReload", &"FireOneShot", 0, &"Idle", &"FireOneShot", 1, &"Fire", &"HammerOneShot", 0, &"DryFireOneShot", &"HammerOneShot", 1, &"Hammer", &"InsertShellOneShot", 0, &"PreviousChamberOneShot", &"InsertShellOneShot", 1, &"Reload_Insert_Shell", &"NextChamberOneShot", 0, &"ExitReloadOneShot", &"NextChamberOneShot", 1, &"Reload_Next_Chamber", &"PreviousChamberOneShot", 0, &"NextChamberOneShot", &"PreviousChamberOneShot", 1, &"Reload_Previous_Chamber", &"EjectShellOneShot", 0, &"InsertShellOneShot", &"EjectShellOneShot", 1, &"Reload_Eject_Shell", &"ExitReloadOneShot", 0, &"EnterReloadUncockOneShot", &"ExitReloadOneShot", 1, &"ExitReload", &"DryFireOneShot", 0, &"FireOneShot", &"DryFireOneShot", 1, &"Dry_Fire", &"EnterReloadUncockOneShot", 0, &"EnterReloadOneShot", &"EnterReloadUncockOneShot", 1, &"EnterReloadUncock", &"FanFireOneShot", 0, &"EjectShellOneShot", &"FanFireOneShot", 1, &"Fan_Fire"]
