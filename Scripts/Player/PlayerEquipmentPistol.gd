@@ -94,19 +94,17 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	var current_time : float = Time.get_unix_time_from_system()
 	if(main_equipment_last_use_time + fan_hammer_max_delay >= current_time):
 		if(_can_fan_fire()):
-			_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 1)
-		main_equipment_last_use_time = current_time
+			_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
 
 	if _can_shoot():
 		if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 			_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
-			return
 		else:
 			_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
-			return
 	elif(_can_cock_hammer()):
 		_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
-		return
+
+	main_equipment_last_use_time = current_time
 
 
 

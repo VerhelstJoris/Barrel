@@ -30,6 +30,7 @@ const muzzle_smoke_shrink_shader_param : String = "AlphaShrink"
 
 @export var min_muzzle_smoke_move_speed : Vector3 = Vector3(-0.1, 0.2, -0.1)
 @export var max_muzzle_smoke_move_speed : Vector3 = Vector3(0.1, 0.5, 0.1)
+@export var muzzle_smoke_averaging_speed : float = 15
 
 @export_subgroup("length subdiv")
 @export var subdivide_long_polys : bool = true
@@ -133,6 +134,14 @@ func _update_existing_muzzle_points(_delta : float) -> void:
 	for id in muzzle_positions.size():
 		muzzle_positions[id] +=  added
 		muzzle_smoke_width_arr[id] += thickness_delta_add
+		
+	for id in range(1, muzzle_positions.size() -1):
+		#average x/z of position out to between previous and next point
+		var lerped_pos : Vector3 = lerp(muzzle_positions[id], (muzzle_positions[id -1] + muzzle_positions[id + 1]) /2, _delta * muzzle_smoke_averaging_speed)
+		muzzle_positions[id].x = lerped_pos.x
+		muzzle_positions[id].z = lerped_pos.z
+		pass
+			
 
 	#only process the first X points if possible	
 	var points_to_process : int = min(15, muzzle_positions.size() -1)	
