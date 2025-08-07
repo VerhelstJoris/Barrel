@@ -137,10 +137,7 @@ func _update_existing_muzzle_points(_delta : float) -> void:
 		
 	for id in range(1, muzzle_positions.size() -1):
 		#average x/z of position out to between previous and next point
-		var lerped_pos : Vector3 = lerp(muzzle_positions[id], (muzzle_positions[id -1] + muzzle_positions[id + 1]) /2, _delta * muzzle_smoke_averaging_speed)
-		muzzle_positions[id].x = lerped_pos.x
-		muzzle_positions[id].z = lerped_pos.z
-		pass
+		muzzle_positions[id] = lerp(muzzle_positions[id], (muzzle_positions[id -1] + muzzle_positions[id + 1]) /2, _delta * muzzle_smoke_averaging_speed)
 			
 
 	#only process the first X points if possible	

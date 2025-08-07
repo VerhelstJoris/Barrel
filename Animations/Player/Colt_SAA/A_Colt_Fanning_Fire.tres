@@ -48,7 +48,7 @@ tracks/3/keys = {
 "method": &"_fire_current_bullet"
 }, {
 "args": [],
-"method": &"_enable_interrupting_action"
+"method": &"_enable_interrupting_for_next_fire"
 }]
 }
 tracks/4/type = "method"

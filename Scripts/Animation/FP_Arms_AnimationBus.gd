@@ -17,9 +17,10 @@ const anim_dry_fire_request : String = "ReadyBlendTree/DryFireOneShot/request"
 const anim_hammer_request : String = "ReadyBlendTree/HammerOneShot/request"
 
 const anim_enter_reload_condition : String = "conditions/enter_reload"
-const anim_enter_reload_uncock_condition : String = "conditions/enter_reload_uncock"
 const anim_exit_reload_condition : String = "conditions/exit_reload"
 
+const anim_enter_reload_uncock_request : String = "EnterReloadBT/EnterUncockOneShot/request"
+const anim_enter_reload_request : String = "EnterReloadBT/EnterReloadOneShot/request"
 const anim_reload_next_chamber_request : String = "ReloadingBlendTree/NextChamberOneShot/request"
 const anim_reload_next_chamber_cont_request : String = "ReloadingBlendTree/NextChamberContOneShot/request"
 const anim_reload_previous_chamber_request : String = "ReloadingBlendTree/PreviousChamberOneShot/request"
@@ -159,14 +160,18 @@ func _process(_delta: float) -> void:
 	
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
+		if(enter):
+			_set_anim_tree_oneshot_request(anim_enter_reload_request)
+		elif(enter_uncock):
+			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
+
 		enter_reload_done = false
 		_tween_move_blend_amount(reload_movement_blend_value , 0.1)
 	elif(exit):
 		exit_reload_done = false
 
 
-	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter
-	anim_tree[anim_colt_state_machine_path + anim_enter_reload_uncock_condition] = enter_uncock
+	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter || enter_uncock
 	anim_tree[anim_colt_state_machine_path + anim_exit_reload_condition] = exit
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:

@@ -28,6 +28,7 @@ var current_action : EPistolState.Actions = EPistolState.Actions.None:
 
 var can_proceed_state: bool = true;
 var can_interrupt_into_next_state: bool = false;
+var can_interrupt_fire : bool = false;
 
 var current_bullets: Array[ColtBullet]
 const chamber_amount: int = 6
@@ -107,19 +108,23 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	main_equipment_last_use_time = current_time
 
 
-
 func _on_equipped():
 	super()
 	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
+	
+func _enable_interrupting_for_next_fire() -> void:
+	can_interrupt_fire = true
 		
 func _fire_current_bullet() -> void:
-	on_fired.emit()
 	if(current_bullets[current_chamber_id] != null):
-		current_bullets[current_chamber_id]._on_fired()
+		on_fired.emit()
+		if(current_bullets[current_chamber_id] != null):
+			current_bullets[current_chamber_id]._on_fired()
 	else:
-		printerr("Tried to properly fire when therer was no bullet at ID: ", current_chamber_id)
+		#do a dry fire
+		pass
 	
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None
@@ -139,6 +144,7 @@ func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState
 	
 	current_action = new_action
 	can_interrupt_into_next_state = false
+	can_interrupt_fire = false
 	can_proceed_state = false
 	current_state = new_state
 	_update_action_cylinder_increment_amount(cylinder_rotations)
@@ -157,6 +163,7 @@ func _increase_cylinder_rotations(amount : int) -> void:
 func _enable_changing_states(enabled : bool) -> void:
 	can_proceed_state = enabled
 	can_interrupt_into_next_state = false
+	can_interrupt_fire = false
 	current_action = EPistolState.Actions.None
 	
 func _spawn_bullet_for_chamber() -> void:
@@ -185,11 +192,16 @@ func _can_current_bullet_fire() -> bool:
 		return current_bullets[insert_chamber_id]._can_be_fired()
 	return false
 
-func _can_proceed_state(allow_interrupt : bool = false) -> bool:
-	if allow_interrupt:
-		return can_proceed_state || can_interrupt_into_next_state
-	else:
-		return can_proceed_state
+func _can_proceed_state(allow_general_interrupt : bool = false, allow_interrupt_fire : bool = false) -> bool:
+	var ret : bool = can_proceed_state
+	
+	if(allow_interrupt_fire):
+		ret = ret || can_interrupt_fire
+	if allow_general_interrupt:
+		ret = ret || can_interrupt_into_next_state
+		
+	return ret	
+		
 	
 func _can_insert_round() -> bool:
 	return current_state == EPistolState.State.Reloading && _can_proceed_state(true) && current_bullets[insert_chamber_id] == null
@@ -208,7 +220,7 @@ func _can_cock_hammer() -> bool:
 
 func _can_fan_fire() -> bool:
 	#can fan the hammer if we're in the ready state or already fanning
-	return _can_proceed_state(true) && current_state == EPistolState.State.ReadyToFire
+	return _can_proceed_state(true, true) && current_state == EPistolState.State.ReadyToFire
 
 func _can_shoot() -> bool:
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
