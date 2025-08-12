@@ -120,8 +120,7 @@ func _enable_interrupting_for_next_fire() -> void:
 func _fire_current_bullet() -> void:
 	if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 		on_fired.emit()
-		if(current_bullets[current_chamber_id] != null):
-			current_bullets[current_chamber_id]._on_fired()
+		current_bullets[current_chamber_id]._on_fired()
 	else:
 		#do a dry fire
 		pass
