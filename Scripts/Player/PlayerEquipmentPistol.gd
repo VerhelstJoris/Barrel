@@ -219,7 +219,7 @@ func _can_cock_hammer() -> bool:
 
 func _can_fan_fire() -> bool:
 	#can fan the hammer if we're in the ready state or already fanning
-	return _can_proceed_state(true, true) && current_state == EPistolState.State.ReadyToFire
+	return _can_proceed_state(true, true) && (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked)
 
 func _can_shoot() -> bool:
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
