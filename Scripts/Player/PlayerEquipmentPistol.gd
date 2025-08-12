@@ -118,7 +118,7 @@ func _enable_interrupting_for_next_fire() -> void:
 	can_interrupt_fire = true
 		
 func _fire_current_bullet() -> void:
-	if(current_bullets[current_chamber_id] != null):
+	if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 		on_fired.emit()
 		if(current_bullets[current_chamber_id] != null):
 			current_bullets[current_chamber_id]._on_fired()

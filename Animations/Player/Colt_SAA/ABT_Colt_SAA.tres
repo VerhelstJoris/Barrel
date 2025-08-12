@@ -42,7 +42,7 @@ animation = &"AL_Colt_SAA/A_Colt_Exit_Reload"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4j58a"]
 animation = &"AL_Colt_SAA/A_Colt_Fanning_Fire"
 use_custom_timeline = true
-timeline_length = 0.25
+timeline_length = 0.2
 stretch_time_scale = true
 start_offset = 0.0
 loop_mode = 0
@@ -105,7 +105,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
-graph_offset = Vector2(2276.95, 1353.3)
+graph_offset = Vector2(2187.94, 1093.77)
 nodes/output/position = Vector2(3440, 1220)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)

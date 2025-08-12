@@ -31,12 +31,16 @@ const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellO
 const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
 const reload_movement_blend_value : float = 0.1
 
+const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
+const anim_fanning_condition_2 : String = "FanningSM/conditions/fanning2"
+const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning2"
 
 # these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
 var exit_reload_done : bool = false
-var colt_unholstered : bool = false
-var colt_fan_hammer : bool = false
+var colt_unholstered : bool      = false
+var colt_fan_hammer : bool       = false
+var fanning_hammer_anim_id : int = 1
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
@@ -102,7 +106,7 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 		EPistolState.Actions.Eject:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
 		EPistolState.Actions.FanFire:
-			colt_fan_hammer = true
+			_on_fanning_entered()
 		_:
 			pass
 	current_action = new_action
@@ -158,6 +162,14 @@ func _process(_delta: float) -> void:
 	_update_movement_blend_values()
 	colt_fan_hammer = false
 	
+func _on_fanning_entered() -> void:
+	colt_fan_hammer = true
+
+	fanning_hammer_anim_id = ((fanning_hammer_anim_id +1) % 2)+1
+	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_1] = (fanning_hammer_anim_id == 1)
+	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_2] = (fanning_hammer_anim_id == 2)
+	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_3] = (fanning_hammer_anim_id == 3)
+
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		if(enter):

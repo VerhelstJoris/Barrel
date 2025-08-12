@@ -79,7 +79,7 @@ states/End/position = Vector2(806, 143)
 states/HOLSTERED/node = SubResource("AnimationNodeBlendTree_x8ke2")
 states/HOLSTERED/position = Vector2(402, 124)
 states/SM_Colt/node = ExtResource("1_x8ke2")
-states/SM_Colt/position = Vector2(413, 257)
+states/SM_Colt/position = Vector2(412, 257)
 states/Start/position = Vector2(156, 124)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_g0oko"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_em04p"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_tmq1e")]
 graph_offset = Vector2(-163, -18)
@@ -87,7 +87,7 @@ graph_offset = Vector2(-163, -18)
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_ys0lo"]
 
 [resource]
-graph_offset = Vector2(-884, 84)
+graph_offset = Vector2(-701.571, -33.7768)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)

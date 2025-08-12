@@ -200,7 +200,7 @@ bones/1/parent = 0
 bones/1/rest = Transform3D(1, -7.07549e-08, 6.31926e-06, 4.53439e-08, 0.999992, 0.00402112, -6.31949e-06, -0.00402112, 0.999992, 2.8852e-10, 0.000578005, -0.00118026)
 bones/1/enabled = true
 bones/1/position = Vector3(2.8852e-10, 0.000578005, -0.00118026)
-bones/1/rotation = Quaternion(-0.0017412, 0.500002, -0.00100526, 0.866022)
+bones/1/rotation = Quaternion(-0.00201056, 3.15969e-06, 2.90248e-08, 0.999998)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/name = "Trigger"
 bones/2/parent = 0
@@ -214,7 +214,7 @@ bones/3/parent = 0
 bones/3/rest = Transform3D(1, -9.35908e-08, 2.22641e-07, -2.20498e-07, 0.0223076, 0.999751, -9.85341e-08, -0.999751, 0.0223076, 7.38402e-10, -0.000451824, -0.000735234)
 bones/3/enabled = true
 bones/3/position = Vector3(7.38402e-10, -0.000451824, -0.000735234)
-bones/3/rotation = Quaternion(-0.699175, 1.14524e-07, -4.51687e-08, 0.71495)
+bones/3/rotation = Quaternion(-0.699175, 1.12307e-07, -4.43762e-08, 0.71495)
 bones/3/scale = Vector3(1, 1, 1)
 bones/4/name = "Hatch"
 bones/4/parent = 0
@@ -263,7 +263,7 @@ revolver_bone = "Hammer"
 
 [node name="CylinderAttachment" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(0.499994, 2.92154e-07, 0.866029, 0.00348241, -0.999992, -0.0020102, 0.866022, 0.00402095, -0.49999, 3.12429e-10, -0.000578005, 0.00118026)
+transform = Transform3D(1, 2.78325e-07, 6.47166e-06, 3.04345e-07, -0.999992, -0.00402097, 6.47049e-06, 0.00402097, -0.999992, 3.12428e-10, -0.000578005, 0.00118026)
 bone_name = "Cylinder"
 bone_idx = 1
 
@@ -303,7 +303,7 @@ cylinder_bone = "Cylinder"
 
 [node name="BulletAttachmentPoint" type="BoneAttachment3D" parent="Colt_Saa_Rig/Skeleton3D"]
 unique_name_in_owner = true
-transform = Transform3D(-0.923879, -1.27146e-07, -0.382684, 1.65763e-07, -1, -3.89026e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
+transform = Transform3D(-0.923879, -1.27147e-07, -0.382684, 1.65764e-07, -1, -3.89022e-08, -0.382684, -9.23733e-08, 0.923879, -0.00029166, -0.00110365, 0.00134992)
 bone_name = "Bullet_Attachment_Point"
 bone_idx = 7
 
