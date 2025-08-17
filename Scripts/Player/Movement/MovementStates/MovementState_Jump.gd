@@ -11,19 +11,19 @@ func enter(msg := {}) -> void:
 	if msg:
 		init_state = msg[state_machine.TO]
 	
-	move_speed = player.walk_back_speed
-	has_direction = player.input_direction != Vector2.ZERO
-	player.velocity.y = sqrt(player.jump_height * 2 * player.gravity)
+	move_speed = mov_comp.walk_back_speed
+	has_direction = mov_comp.input_direction != Vector2.ZERO
+	mov_comp.velocity.y = sqrt(mov_comp.jump_height * 2 * mov_comp.gravity)
 
 
 func physics_update(_delta: float) -> void:
-	if player.velocity.y < 0:
+	if mov_comp.velocity.y < 0:
 		state_machine.transition_to(
 			state_machine.movement_state[state_machine.FALL],
 			{ state_machine.TO : init_state }
 		)
 	
-	input_dir = player.input_direction
+	input_dir = mov_comp.input_direction
 	
 	if not input_dir:
 		init_state = state_machine.WALK
@@ -31,10 +31,10 @@ func physics_update(_delta: float) -> void:
 	var direction := (player.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# this gives some in-air control if jumping from standing still
-	if (has_direction && player.velocity.length() < player.walk_back_speed) || !has_direction:
+	if (has_direction && mov_comp.velocity.length() < mov_comp.walk_back_speed) || !has_direction:
 		if direction:
-			player.velocity.x = direction.x * move_speed
-			player.velocity.z = direction.z * move_speed
+			mov_comp.velocity.x = direction.x * move_speed
+			mov_comp.velocity.z = direction.z * move_speed
 		else:
-			player.velocity.x = move_toward(player.velocity.x, 0, move_speed)
-			player.velocity.z = move_toward(player.velocity.z, 0, move_speed)
+			mov_comp.velocity.x = move_toward(mov_comp.velocity.x, 0, move_speed)
+			mov_comp.velocity.z = move_toward(mov_comp.velocity.z, 0, move_speed)

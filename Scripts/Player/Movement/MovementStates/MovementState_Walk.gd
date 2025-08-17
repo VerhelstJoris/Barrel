@@ -1,32 +1,21 @@
 class_name Walk extends PlayerState
 
 var move_speed: float
+@export var walk_back_speed: float = 1.5
+@export var walk_speed: float = 2.5
 
 func enter(_msg := {}) -> void:
 	pass
 	
-func handle_input(event: InputEvent) -> void:
-	#if Input.is_action_just_pressed(player.SPRINT) && player.allow_sprint:
-	#	state_machine.transition_to(state_machine.movement_state[state_machine.SPRINT])
-	#
-	#if event.is_action_pressed(player.JUMP) && player.is_on_floor() && player.allow_jump:
-	#	state_machine.transition_to(
-	#		state_machine.movement_state[state_machine.JUMP], 
-	#		{ 
-	#			"player_velocity" : player.velocity, 
-	#			state_machine.TO : state_machine.WALK,
-	#		}
-	#	)
-	pass
-
-func physics_update(_delta: float) -> void:
-	var input_dir : Vector2 = player.input_direction
-	var direction := (player.transform.basis * Vector3(input_dir.x, 0, -input_dir.y)).normalized()
 	
+func physics_update(_delta: float) -> void:
+	var input_dir : Vector2 = mov_comp.input_direction
+	var direction := (player.transform.basis * Vector3(input_dir.x, 0, -input_dir.y)).normalized()
+
 	if input_dir.y < 0:
-		move_speed = player.walk_back_speed
+		move_speed = walk_back_speed
 	else:
-		move_speed = player.walk_speed
+		move_speed = walk_speed
 	
 	if direction:
 		player.velocity.x = direction.x * move_speed
@@ -37,6 +26,7 @@ func physics_update(_delta: float) -> void:
 		
 		state_machine.transition_to(state_machine.movement_state[state_machine.IDLE])
 	
+
 	if player.velocity.y < 0:
 		state_machine.transition_to(
 			state_machine.movement_state[state_machine.FALL],

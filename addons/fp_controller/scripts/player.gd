@@ -1,8 +1,6 @@
 class_name Player
 extends CharacterBody3D
 
-var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
-signal player_movement_input(direction)
 
 signal on_holster_started()
 signal on_holster_finish()
@@ -12,16 +10,11 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
 
 @export_group("Controls map names")
-@export var MOVE_FORWARD: String = "move_forward"
-@export var MOVE_BACK: String = "move_back"
-@export var MOVE_LEFT: String = "move_left"
-@export var MOVE_RIGHT: String = "move_right"
 @export var JUMP: String = "jump"
 @export var SPRINT: String = "sprint"
 @export var holster : String = "holster"
 @export_group("Customizable player stats")
-@export var walk_back_speed: float = 1.5
-@export var walk_speed: float = 2.5
+
 
 #Is Sprint a hold or toggle input?
 @export var sprint_toggle: bool = true
@@ -42,14 +35,12 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 @onready var sub_viewport: SubViewport = %SubViewport
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var smooth_camera: Camera3D = %SmoothCamera
-@onready var state_machine: PlayerStateMachine = %StateMachine
+@onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent
 
 @onready var arms: FPArms = %FP_Arms
-	
 
 @onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
 
-signal on_movement_input_received(event: InputEvent)
 signal on_holster_input_received(event : InputEvent)
 signal on_quick_unholster_input_received(event : InputEvent)
 
@@ -66,11 +57,6 @@ var current_equipment : PlayerEquipment = null:
 var input_direction: Vector2
 var ledge_position: Vector3 = Vector3.ZERO
 var mouse_motion: Vector2
-# Player state values that are set by applying state
-var is_affected_by_gravity: bool = true
-var is_moving: bool = false
-var can_jump: bool   = true
-var can_sprint: bool = true
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -87,27 +73,11 @@ func _setup_animation_data() -> void:
 	arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
 
 func _setup_input_signals() -> void:
-	on_movement_input_received.connect(_on_movement_input)
 	on_holster_input_received.connect(_on_holster_input)
 	on_quick_unholster_input_received.connect(_on_quick_unholster_input)
-
-func _on_movement_input(event : InputEvent) -> void:	
-	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
-		input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD)
-	else:
-		input_direction = Vector2.ZERO
 	
-	player_movement_input.emit(input_direction)
-
 func _on_mouse_motion_input(event : InputEvent) -> void:
 	mouse_motion = -event.relative * 0.001
-	
-func _physics_process(delta: float) -> void:
-	# Add the gravity.
-	if not is_on_floor() && is_affected_by_gravity:
-		velocity.y -= gravity * delta
-
-	move_and_slide()
 	
 func _process(_delta: float):
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -115,7 +85,6 @@ func _process(_delta: float):
 		_handle_camera_motion()
 
 	arms._align_to_world_camera(smooth_camera)
-	
 	
 func _handle_camera_motion() -> void:
 	rotate_y(mouse_motion.x * camera_sensitivity)
