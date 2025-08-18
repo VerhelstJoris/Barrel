@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=30 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -13,7 +13,6 @@
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
 [ext_resource type="Script" uid="uid://dgvffrq1m604v" path="res://Scripts/Player/Movement/PlayerMovementComponent.gd" id="16_y16om"]
-[ext_resource type="Script" uid="uid://b8qc4c2eystdt" path="res://Scripts/Player/Movement/MovementStates/MovementState_Idle.gd" id="17_y16om"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="18_nycc1"]
 [ext_resource type="Script" uid="uid://cpn2yvmmj6a2f" path="res://Scripts/Player/Movement/MovementStates/MovementState_Walk.gd" id="19_bjt1r"]
 [ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
@@ -136,10 +135,7 @@ script = ExtResource("16_y16om")
 [node name="StateMachine" type="Node" parent="PlayerMovementComponent"]
 unique_name_in_owner = true
 script = ExtResource("16_62dvf")
-initial_state = NodePath("Idle")
-
-[node name="Idle" type="Node" parent="PlayerMovementComponent/StateMachine"]
-script = ExtResource("17_y16om")
+initial_state = NodePath("Walk")
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/StateMachine"]
 script = ExtResource("18_nycc1")

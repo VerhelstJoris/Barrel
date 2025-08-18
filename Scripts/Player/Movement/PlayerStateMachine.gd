@@ -6,14 +6,12 @@ static var FROM = "from_state"
 static var TO = "to_state"
 
 # probably not the best way to store the state constants
-static var IDLE = 0
-static var WALK = 1
-static var SPRINT = 2
-static var JUMP = 3
-static var FALL = 4
+static var WALK = 0
+static var SPRINT = 1
+static var JUMP = 2
+static var FALL = 3
 
 static var movement_state : Dictionary = {
-	IDLE: "Idle",
 	WALK: "Walk",
 	SPRINT: "Sprint", 
 	JUMP: "Jump", 
