@@ -26,16 +26,17 @@ func _ready() -> void:
 	await owner.ready
 	for child in get_children():
 		child.state_machine = self
-		state.enter()
+		state._enter()
 		
 func _process(delta: float) -> void:
-	state.update(delta)
+	state._check_transitions()
+	state._update(delta)
 	
 func _physics_process(delta: float) -> void:
-	state.physics_update(delta)
+	state._physics_update(delta)
 
 
-func transition_to(target_state_name: String, msg: Dictionary = {}) -> void:
+func _transition_to(target_state_name: String) -> void:
 	if not has_node(str(target_state_name)):
 		push_error("No target node \"" + target_state_name + "\" found")
 		return
@@ -43,7 +44,9 @@ func transition_to(target_state_name: String, msg: Dictionary = {}) -> void:
 	if state == get_node(target_state_name):
 		return
 	
-	state.exit()
+	print("Exit ", state.name)
+	state._exit()
 	state = get_node(target_state_name)
-	state.enter(msg)
+	print("Enter ", state.name)
+	state._enter()
 	emit_signal("transitioned", state)

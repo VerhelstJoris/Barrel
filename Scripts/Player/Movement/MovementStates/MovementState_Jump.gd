@@ -7,10 +7,7 @@ var move_speed: float
 var has_direction: bool
 
 
-func enter(msg := {}) -> void:
-	if msg:
-		init_state = msg[state_machine.TO]
-	
+func enter() -> void:
 	move_speed = mov_comp.walk_back_speed
 	has_direction = mov_comp.input_direction != Vector2.ZERO
 	mov_comp.velocity.y = sqrt(mov_comp.jump_height * 2 * mov_comp.gravity)
@@ -18,9 +15,8 @@ func enter(msg := {}) -> void:
 
 func physics_update(_delta: float) -> void:
 	if mov_comp.velocity.y < 0:
-		state_machine.transition_to(
-			state_machine.movement_state[state_machine.FALL],
-			{ state_machine.TO : init_state }
+		state_machine._transition_to(
+			state_machine.movement_state[state_machine.FALL]
 		)
 	
 	input_dir = mov_comp.input_direction

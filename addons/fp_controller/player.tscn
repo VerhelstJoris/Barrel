@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=33 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -12,7 +12,9 @@
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
+[ext_resource type="Resource" uid="uid://coeb3qrcnhyj2" path="res://Data/Input/Movement/IA_Move_Sprint.tres" id="16_nycc1"]
 [ext_resource type="Script" uid="uid://dgvffrq1m604v" path="res://Scripts/Player/Movement/PlayerMovementComponent.gd" id="16_y16om"]
+[ext_resource type="Script" uid="uid://rflwqd4b4ayy" path="res://Scripts/Tools/ImGui Debug/Components/PlayerMovementComponentDebugNode.gd" id="17_y16om"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="18_nycc1"]
 [ext_resource type="Script" uid="uid://cpn2yvmmj6a2f" path="res://Scripts/Player/Movement/MovementStates/MovementState_Walk.gd" id="19_bjt1r"]
 [ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
@@ -64,6 +66,12 @@ signal_node = NodePath("..")
 signal_name = "on_quick_unholster_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
+[sub_resource type="Resource" id="Resource_jajtq"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("../PlayerMovementComponent")
+signal_name = "on_sprint_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
@@ -112,7 +120,7 @@ rotation_order = 0
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
-ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode")]
+ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode")]
 metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 
 [node name="PlayerInputManagerComponent" parent="." node_paths=PackedStringArray("_player") instance=ExtResource("12_1y53x")]
@@ -125,12 +133,16 @@ ExtResource("4_5af7x"): SubResource("Resource_5af7x"),
 ExtResource("5_62dvf"): SubResource("Resource_62dvf"),
 ExtResource("6_y16om"): SubResource("Resource_y16om"),
 ExtResource("20_62dvf"): SubResource("Resource_nycc1"),
-ExtResource("21_62dvf"): SubResource("Resource_bjt1r")
+ExtResource("21_62dvf"): SubResource("Resource_bjt1r"),
+ExtResource("16_nycc1"): SubResource("Resource_jajtq")
 })
 
 [node name="PlayerMovementComponent" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("16_y16om")
+
+[node name="Node" type="Node" parent="PlayerMovementComponent"]
+script = ExtResource("17_y16om")
 
 [node name="StateMachine" type="Node" parent="PlayerMovementComponent"]
 unique_name_in_owner = true
@@ -145,9 +157,15 @@ script = ExtResource("19_bjt1r")
 
 [node name="Sprint" type="Node" parent="PlayerMovementComponent/StateMachine"]
 script = ExtResource("20_jajtq")
+forward_movement_speed = 5.0
+backward_movement_speed = 2.5
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/StateMachine"]
 script = ExtResource("21_w7r7y")
+
+[node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
+script = ExtResource("17_y16om")
+metadata/_custom_type_script = "uid://rflwqd4b4ayy"
 
 [connection signal="transitioned" from="PlayerMovementComponent/StateMachine" to="." method="_on_state_machine_transitioned"]
 

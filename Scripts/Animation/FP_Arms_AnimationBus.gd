@@ -67,7 +67,7 @@ func _ready() -> void:
 	right_prop_bone_pos = pistol.get_position()
 	
 func _init_player_data(player : Player) -> void:
-	player.movement_component.player_movement_input.connect(_on_player_movement_input)
+	player.movement_component.on_player_movement.connect(_on_player_movement_input)
 	player.on_holster_started.connect(_on_player_holster_started)
 	player.on_unholster_started.connect(_on_player_unholster_started)
 
