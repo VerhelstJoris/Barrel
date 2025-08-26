@@ -17,7 +17,6 @@ func _draw(_delta: float) -> void:
 
 func _draw_contents(_delta : float) -> void:
 	super(_delta)
-	ImGui.Text("movement input: " + str(player.input_direction))
 	if(equipment_debug_node != null):
 		equipment_debug_node._draw(_delta)
 	else:
