@@ -1,52 +1,52 @@
+@icon("res://DEBUG/Icons/Ico_StateMachine.png")
 class_name PlayerStateMachine extends Node
 
 signal transitioned(state: PlayerState)
 
-static var FROM = "from_state"
-static var TO = "to_state"
+var owner_state : PlayerState = null
 
-# probably not the best way to store the state constants
-static var WALK = 0
-static var SPRINT = 1
-static var JUMP = 2
-static var FALL = 3
+enum E_StateName {None, Grounded, Walk, Sprint, Fall}
 
-static var movement_state : Dictionary = {
-	WALK: "Walk",
-	SPRINT: "Sprint", 
-	JUMP: "Jump", 
-	FALL: "Fall", 
-}
+@export var states_map : Dictionary[E_StateName, PlayerState]
 
-@export var initial_state := NodePath()
+@export var initial_state : E_StateName = E_StateName.None
 
-@onready var state: PlayerState = get_node(initial_state)
+var current_state: PlayerState
 
 func _ready() -> void:
 	await owner.ready
+	_init_child_states()
+			
+	if(initial_state != E_StateName.None):
+		if(states_map.has(initial_state)):
+			current_state = states_map[initial_state]
+		else:
+			push_error("State Machine  \"" + name + "\" has a starting state but this state does not appear in the map")
+	else:
+		push_error("State Machine  \"" + name + "\" has no starting state")
+			
+func _init_child_states()	 -> void:		
 	for child in get_children():
-		child.state_machine = self
-		state._enter()
-		
+		if(child is PlayerState):
+			child.state_machine = self
+
 func _process(delta: float) -> void:
-	state._check_transitions()
-	state._update(delta)
+	current_state._check_transitions()		
+	current_state._update(delta)
 	
 func _physics_process(delta: float) -> void:
-	state._physics_update(delta)
-
-
-func _transition_to(target_state_name: String) -> void:
-	if not has_node(str(target_state_name)):
-		push_error("No target node \"" + target_state_name + "\" found")
+	current_state._physics_update(delta)
+	
+func _transition_to(target_state: E_StateName) -> void:
+	var target_state_name : String = E_StateName.keys()[target_state]
+	print("TRY TO TRANSITION TO ", target_state_name, " ON ", name)
+	if(!states_map.has(initial_state)):
+		push_error("No target node \"" +target_state_name + "\" found")
 		return
 	
-	if state == get_node(target_state_name):
-		return
-	
-	print("Exit ", state.name)
-	state._exit()
-	state = get_node(target_state_name)
-	print("Enter ", state.name)
-	state._enter()
-	emit_signal("transitioned", state)
+	print("Exit ", current_state.name, " on ", name)
+	current_state._exit()
+	current_state = states_map[target_state]
+	print("Enter ", current_state.name, " on ", name)
+	current_state._enter_state()
+	emit_signal("transitioned", current_state)

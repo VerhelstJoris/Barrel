@@ -18,9 +18,9 @@ func _draw_contents(_delta : float) -> void:
 	ImGui.Text("Movement Input: " + str(mov_comp.input_direction))
 	ImGui.Text("Sprint Input: " + str(mov_comp.sprint_down))
 
-	ImGui.Text("Current Movement State: " + str(mov_comp.state_machine.state.name))
+	ImGui.Text("Current Movement State: " + str(mov_comp.state_machine.current_state.name))
 	ImGui.Indent()
-	_debug_draw_state(mov_comp.state_machine.state)
+	_debug_draw_state(mov_comp.state_machine.current_state)
 	ImGui.Unindent()
 	
 	

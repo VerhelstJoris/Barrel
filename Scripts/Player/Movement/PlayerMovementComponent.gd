@@ -32,6 +32,8 @@ func _ready() -> void:
 	player = owner as Player
 	on_movement_input_received.connect(_on_movement_input)
 	on_sprint_input_received.connect(_on_sprint_input)
+	#state_machine.set_physics_process(true)
+	#state_machine.set_process(true)
 	
 func _physics_process(_delta: float) -> void:
 	player.move_and_slide()

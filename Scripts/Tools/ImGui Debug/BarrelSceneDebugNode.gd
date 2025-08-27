@@ -25,11 +25,11 @@ func _draw(_delta: float) -> void:
 func _draw_banner(_delta : float) -> bool:
 	ImGui.SetNextItemAllowOverlap()
 	
-	var name : String = _get_name()
-	var header_open : bool = ImGui.CollapsingHeader(name)
+	var node_name : String = _get_name()
+	var header_open : bool = ImGui.CollapsingHeader(node_name)
 	
 	ImGui.SameLineEx(ImGui.GetWindowWidth() - 50)
-	ImGui.PushID(name + "favourite")
+	ImGui.PushID(node_name + "favourite")
 	if(ImGui.Checkbox("Fav", is_favourited)):
 		if(is_favourited[0] == true):
 			BarrelDebugWindow.draw_favourited_debug.connect(_draw)
