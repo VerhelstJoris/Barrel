@@ -1,4 +1,4 @@
-@icon("res://DEBUG/Ico_Jump.png")
+@icon("res://DEBUG/Icons/Ico_Jump.png")
 class_name PlayerMovementComponent extends Node
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")

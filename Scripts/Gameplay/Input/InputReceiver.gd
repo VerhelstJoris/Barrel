@@ -1,4 +1,4 @@
-@icon("res://DEBUG/Ico_Keyboard.png")
+@icon("res://DEBUG/Icons/Ico_Keyboard.png")
 class_name InputReceiver extends Node
 
 @export_group("Input Map")
