@@ -2,6 +2,7 @@
 class_name BarrelSceneDebugNode extends Node
 
 @export var ChildNodesToDisplay : Array[BarrelSceneDebugNode]
+@export var auto_expanded : bool = false
 
 var is_favourited : Array[bool] = [false]
 	
@@ -26,7 +27,10 @@ func _draw_banner(_delta : float) -> bool:
 	ImGui.SetNextItemAllowOverlap()
 	
 	var node_name : String = _get_name()
-	var header_open : bool = ImGui.CollapsingHeader(node_name)
+	var flags : int = 0
+	if(auto_expanded):
+		flags = ImGui.TreeNodeFlags_DefaultOpen
+	var header_open : bool = ImGui.CollapsingHeader(node_name, flags)
 	
 	ImGui.SameLineEx(ImGui.GetWindowWidth() - 50)
 	ImGui.PushID(node_name + "favourite")

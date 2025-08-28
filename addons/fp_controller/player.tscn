@@ -121,6 +121,7 @@ rotation_order = 0
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
 ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode")]
+auto_expanded = true
 metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 
 [node name="PlayerInputManagerComponent" parent="." node_paths=PackedStringArray("_player") instance=ExtResource("12_1y53x")]

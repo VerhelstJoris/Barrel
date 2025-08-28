@@ -17,12 +17,16 @@ func _draw(_delta: float) -> void:
 
 func _draw_contents(_delta : float) -> void:
 	super(_delta)
+		
+func _draw_children(_delta : float) -> void:
+	super(_delta)
+	ImGui.SeparatorText("Current Equipment")
 	if(equipment_debug_node != null):
 		equipment_debug_node._draw(_delta)
 	else:
 		_check_current_equipment()
 		ImGui.Text("No Equipment Equipped")
-		
+	
 
 func _on_new_equipped(new : PlayerEquipment):
 	if(new == null):
