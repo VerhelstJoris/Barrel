@@ -17,14 +17,17 @@ func _ready() -> void:
 	await owner.ready
 	_init_child_states()
 			
+	_enter_initial_state()
+			
+func _enter_initial_state() -> void:
 	if(initial_state != E_StateName.None):
 		if(states_map.has(initial_state)):
-			current_state = states_map[initial_state]
+			_transition_to(initial_state)
 		else:
 			push_error("State Machine  \"" + name + "\" has a starting state but this state does not appear in the map")
 	else:
 		push_error("State Machine  \"" + name + "\" has no starting state")
-			
+	
 func _init_child_states()	 -> void:		
 	for child in get_children():
 		if(child is PlayerState):
@@ -39,13 +42,13 @@ func _physics_process(delta: float) -> void:
 	
 func _transition_to(target_state: E_StateName) -> void:
 	var target_state_name : String = E_StateName.keys()[target_state]
-	print("TRY TO TRANSITION TO ", target_state_name, " ON ", name)
-	if(!states_map.has(initial_state)):
+	if(!states_map.has(target_state)):
 		push_error("No target node \"" +target_state_name + "\" found")
 		return
 	
-	print("Exit ", current_state.name, " on ", name)
-	current_state._exit()
+	if(current_state):
+		print("Exit ", current_state.name, " on ", name)
+		current_state._exit()
 	current_state = states_map[target_state]
 	print("Enter ", current_state.name, " on ", name)
 	current_state._enter_state()

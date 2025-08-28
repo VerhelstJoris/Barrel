@@ -63,6 +63,7 @@ func _handle_player_move() -> void:
 func _enter_state() -> void:
 	_on_enter()
 	if(child_state_machine):
+		child_state_machine._enter_initial_state()
 		pass
 		#child_state_machine.curren
 	

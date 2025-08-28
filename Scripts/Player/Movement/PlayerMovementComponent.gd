@@ -21,7 +21,7 @@ var sprint_down : bool = false
 var input_direction: Vector2
 var is_affected_by_gravity: bool = true
 
-@onready var state_machine: PlayerStateMachine = %StateMachine
+@onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
 var player: Player
 
 signal on_player_movement(direction)

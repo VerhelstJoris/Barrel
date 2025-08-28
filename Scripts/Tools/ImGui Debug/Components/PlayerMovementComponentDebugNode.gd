@@ -18,22 +18,30 @@ func _draw_contents(_delta : float) -> void:
 	ImGui.Text("Movement Input: " + str(mov_comp.input_direction))
 	ImGui.Text("Sprint Input: " + str(mov_comp.sprint_down))
 
-	ImGui.Text("Current Movement State: " + str(mov_comp.state_machine.current_state.name))
+	ImGui.Text("Current Movement State: " + str(_get_current_state(mov_comp.state_machine).name))
 	ImGui.Indent()
 	_debug_draw_state(mov_comp.state_machine.current_state)
 	ImGui.Unindent()
 	
 	
-	
 func _debug_draw_state(state : PlayerState) -> void:
-	if(ImGui.CollapsingHeader(state.name)):
-		ImGui.Text("Settings")
-		ImGui.BeginDisabled()
-		var can_move : Array[bool] = [state.can_move]
-		ImGui.Checkbox("Can Move?", can_move)
-		ImGui.EndDisabled()
-		ImGui.Text("FWD Speed: " + str(state.forward_movement_speed))
-		ImGui.Text("BWD Speed: " + str(state.backward_movement_speed))
-		ImGui.Text("SID Speed: " + str(state.sideways_movement_speed))
-		
-		ImGui.Separator()
+	if(ImGui.CollapsingHeader(state.name, ImGui.TreeNodeFlags_DefaultOpen)):
+		if(state.child_state_machine != null):
+			ImGui.Indent()
+			_debug_draw_state(state.child_state_machine.current_state)
+			ImGui.Unindent()
+		else:
+			ImGui.Text("Settings")
+			ImGui.BeginDisabled()
+			var can_move : Array[bool] = [state.can_move]
+			ImGui.Checkbox("Can Move?", can_move)
+			ImGui.EndDisabled()
+			ImGui.Text("FWD Speed: " + str(state.forward_movement_speed))
+			ImGui.Text("BWD Speed: " + str(state.backward_movement_speed))
+			ImGui.Text("SID Speed: " + str(state.sideways_movement_speed))
+			ImGui.Separator()
+
+func _get_current_state(sm : PlayerStateMachine) -> PlayerState:
+	while(sm.current_state.child_state_machine != null):
+		sm = sm.current_state.child_state_machine
+	return sm.current_state

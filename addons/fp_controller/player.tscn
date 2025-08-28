@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=33 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -21,6 +21,7 @@
 [ext_resource type="Resource" uid="uid://dyfgw7gi8do1w" path="res://Data/Input/Player/IA_Holster.tres" id="20_62dvf"]
 [ext_resource type="Script" uid="uid://dyjuhb41dawo7" path="res://Scripts/Player/Movement/MovementStates/MovementState_Sprint.gd" id="20_jajtq"]
 [ext_resource type="Resource" uid="uid://c74mnvf3pkusb" path="res://Data/Input/Player/IA_Quick_Unholster.tres" id="21_62dvf"]
+[ext_resource type="Script" uid="uid://ck5a5wfg6fqxy" path="res://Scripts/Player/Movement/MovementStates/MovementState_Fall.gd" id="23_nycc1"]
 [ext_resource type="Script" uid="uid://dkwfkuralqxts" path="res://Scripts/Player/Movement/MovementStates/Grounded/MovementState_Grounded.gd" id="24_bjt1r"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
@@ -143,20 +144,21 @@ script = ExtResource("16_y16om")
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
 
-[node name="StateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
+[node name="BaseMovementStateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
 unique_name_in_owner = true
 script = ExtResource("16_62dvf")
 states_map = {
-1: NodePath("GroundedState")
+1: NodePath("GroundedState"),
+4: NodePath("Fall")
 }
-initial_state = 1
+initial_state = 4
 
-[node name="GroundedState" type="Node" parent="PlayerMovementComponent/StateMachine" node_paths=PackedStringArray("child_state_machine")]
+[node name="GroundedState" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine" node_paths=PackedStringArray("child_state_machine")]
 script = ExtResource("24_bjt1r")
 child_state_machine = NodePath("GroundedStateMachine")
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
-[node name="GroundedStateMachine" type="Node" parent="PlayerMovementComponent/StateMachine/GroundedState" node_paths=PackedStringArray("states_map")]
+[node name="GroundedStateMachine" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState" node_paths=PackedStringArray("states_map")]
 script = ExtResource("16_62dvf")
 states_map = {
 2: NodePath("Walk"),
@@ -165,18 +167,23 @@ states_map = {
 initial_state = 2
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
-[node name="Walk" type="Node" parent="PlayerMovementComponent/StateMachine/GroundedState/GroundedStateMachine"]
+[node name="Walk" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("19_bjt1r")
 
-[node name="Sprint" type="Node" parent="PlayerMovementComponent/StateMachine/GroundedState/GroundedStateMachine"]
+[node name="Sprint" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("20_jajtq")
 forward_movement_speed = 5.0
 backward_movement_speed = 2.5
+
+[node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
+script = ExtResource("23_nycc1")
+can_move = false
+metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
 metadata/_custom_type_script = "uid://rflwqd4b4ayy"
 
-[connection signal="transitioned" from="PlayerMovementComponent/StateMachine" to="." method="_on_state_machine_transitioned"]
+[connection signal="transitioned" from="PlayerMovementComponent/BaseMovementStateMachine" to="." method="_on_state_machine_transitioned"]
 
 [editable path="PlayerInputManagerComponent"]
