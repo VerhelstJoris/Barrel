@@ -73,6 +73,7 @@ signal_name = "on_sprint_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
+floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
 

@@ -74,10 +74,60 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -6)
 [node name="BasicBlock4" parent="Obstacles" instance=ExtResource("4_1esxm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -12)
 
-[node name="CSGPolygon3D" type="CSGPolygon3D" parent="Obstacles"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 2)
+[node name="High Slopes" type="Node" parent="Obstacles"]
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 11, 0, 1)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 2.08165e-12, 2, 6, 2, 10, 2.08165e-12)
+
+[node name="CSGPolygon3D2" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
+transform = Transform3D(-2, 0, 1.50996e-07, 0, 2, 0, -3.01992e-07, 0, -1, 21, 0, 3)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 2.08165e-12, 2, 6, 2, 10, 2.08165e-12)
+
+[node name="CSGPolygon3D3" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
+transform = Transform3D(-1.5, 0, 1.50996e-07, 0, 1.5, 0, -2.26494e-07, 0, -1, 16, 0, 2)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 2.08165e-12, 2, 6, 2, 10, 2.08165e-12)
+
+[node name="AngledSlopes" type="Node3D" parent="Obstacles"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="26_6" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 4.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 2, 2, 6, 0)
+
+[node name="29_7" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 5.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 2.5, 2, 6, 0)
+
+[node name="33_7" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 6.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 3, 2, 6, 0)
+
+[node name="37_5" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 7.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 3.5, 2, 6, 0)
+
+[node name="45" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 8.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 4, 2, 6, 0)
+
+[node name="52_5" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 9.77263)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 4.5, 2, 6, 0)
+
+[node name="63_4" type="CSGPolygon3D" parent="Obstacles/AngledSlopes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 10.7726)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 2, 5, 2, 6, 0)
 
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)
