@@ -2,6 +2,7 @@
 class_name PlayerMovementComponent extends Node
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var current_gravity_velocity : Vector3 = Vector3.ZERO
 
 signal on_movement_input_received(event: InputEvent)
 signal on_sprint_input_received(event: InputEvent)
@@ -17,9 +18,9 @@ signal on_sprint_input_received(event: InputEvent)
 @export_group("General Control Settings")
 @export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
 
+
 var sprint_down : bool = false
 var input_direction: Vector2
-var is_affected_by_gravity: bool = true
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
 var player: Player
@@ -37,9 +38,7 @@ func _ready() -> void:
 	
 func _physics_process(_delta: float) -> void:
 	player.move_and_slide()
-	if not player.is_on_floor() && is_affected_by_gravity:
-		player.velocity.y -= gravity * _delta
-	
+
 func _on_movement_input(_event : InputEvent) -> void:
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
 		input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD)
@@ -61,3 +60,10 @@ func _set_velocity(new_vel : Vector3) -> void:
 	
 func _add_velocity(added_vel : Vector3) -> void:
 	player.velocity += added_vel
+	
+func _add_gravity(_delta : float)	-> void:
+	current_gravity_velocity = current_gravity_velocity.move_toward(Vector3(0, player.velocity.y - gravity, 0), gravity * _delta)
+	_add_velocity(current_gravity_velocity)
+	
+func _reset_gravity_vel() -> void:
+	current_gravity_velocity = Vector3.ZERO

@@ -12,6 +12,9 @@ var player: Player
 @export var sideways_movement_speed : float = 2.5
 @export var backward_movement_speed : float = 1.5
 
+
+@export var is_affected_by_gravity : bool = true
+
 @export_group("Capsule Settings")
 
 
@@ -45,7 +48,12 @@ func _physics_update(_delta: float) -> void:
 #to be overriden by child classes to perform their physics update
 func _on_physics_update(_delta: float) -> void:
 	_handle_player_move()
-	
+	if not player.is_on_floor() && is_affected_by_gravity:
+		mov_comp._add_gravity(_delta)
+	else:
+		mov_comp._reset_gravity_vel()
+
+
 func _handle_player_move() -> void:
 	var input_dir : Vector2 = mov_comp.input_direction
 	var horizontal_target : Vector2 = Vector2.ZERO

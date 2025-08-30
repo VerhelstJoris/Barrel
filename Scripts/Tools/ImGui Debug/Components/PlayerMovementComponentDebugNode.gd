@@ -37,9 +37,10 @@ func _debug_draw_state(state : PlayerState) -> void:
 			var can_move : Array[bool] = [state.can_move]
 			ImGui.Checkbox("Can Move?", can_move)
 			ImGui.EndDisabled()
-			ImGui.Text("FWD Speed: " + str(state.forward_movement_speed))
-			ImGui.Text("BWD Speed: " + str(state.backward_movement_speed))
-			ImGui.Text("SID Speed: " + str(state.sideways_movement_speed))
+			if(state.can_move):
+				ImGui.Text("FWD Speed: " + str(state.forward_movement_speed))
+				ImGui.Text("BWD Speed: " + str(state.backward_movement_speed))
+				ImGui.Text("SID Speed: " + str(state.sideways_movement_speed))
 			ImGui.Separator()
 
 func _get_current_state(sm : PlayerStateMachine) -> PlayerState:
