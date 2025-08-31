@@ -5,7 +5,7 @@ signal transitioned(state: PlayerState)
 
 var owner_state : PlayerState = null
 
-enum E_StateName {None, Grounded, Walk, Sprint, Fall}
+enum E_StateName {None, Grounded, Walk, Sprint, Fall, Jump}
 
 @export var states_map : Dictionary[E_StateName, PlayerState]
 
@@ -35,10 +35,10 @@ func _init_child_states()	 -> void:
 
 func _process(delta: float) -> void:
 	current_state._check_transitions()		
-	current_state._update(delta)
+	current_state._update_internal(delta)
 	
 func _physics_process(delta: float) -> void:
-	current_state._physics_update(delta)
+	current_state._physics_update_internal(delta)
 	
 func _transition_to(target_state: E_StateName) -> void:
 	var target_state_name : String = E_StateName.keys()[target_state]
@@ -48,7 +48,7 @@ func _transition_to(target_state: E_StateName) -> void:
 	
 	if(current_state):
 		print("Exit ", current_state.name, " on ", name)
-		current_state._exit()
+		current_state._exit_state()
 	current_state = states_map[target_state]
 	print("Enter ", current_state.name, " on ", name)
 	current_state._enter_state()

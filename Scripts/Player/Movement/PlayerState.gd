@@ -28,10 +28,10 @@ func _ready() -> void:
 	assert(mov_comp != null)
 	
 
-func _update(_delta: float) -> void:
+func _update_internal(_delta: float) -> void:
 	if(child_state_machine != null):
 		child_state_machine.current_state._check_transitions()
-		child_state_machine.current_state._update(_delta)
+		child_state_machine.current_state._update_internal(_delta)
 	else:
 		_on_update(_delta)
 		
@@ -39,9 +39,9 @@ func _update(_delta: float) -> void:
 func _on_update(_delta : float)	-> void:
 	pass
 	
-func _physics_update(_delta: float) -> void:
+func _physics_update_internal(_delta: float) -> void:
 	if(child_state_machine != null):
-		child_state_machine.current_state._physics_update(_delta)
+		child_state_machine.current_state._physics_update_internal(_delta)
 	else:
 		_on_physics_update(_delta)
 
@@ -52,8 +52,7 @@ func _on_physics_update(_delta: float) -> void:
 		mov_comp._add_gravity(_delta)
 	else:
 		mov_comp._reset_gravity_vel()
-
-
+		
 func _handle_player_move() -> void:
 	var input_dir : Vector2 = mov_comp.input_direction
 	var horizontal_target : Vector2 = Vector2.ZERO
@@ -69,16 +68,21 @@ func _handle_player_move() -> void:
 	mov_comp._set_velocity(target_vel)		
 	
 func _enter_state() -> void:
-	_on_enter()
+	_on_enter_internal()
 	if(child_state_machine):
 		child_state_machine._enter_initial_state()
-		pass
-		#child_state_machine.curren
 	
-func _on_enter() -> void:
+func _on_enter_internal() -> void:
 	pass
+
 	
-func _exit() -> void:
+func _exit_state() -> void:
+	if(child_state_machine):
+		child_state_machine.current_state._exit_state()
+	
+	_on_exit_internal()	
+
+func _on_exit_internal() -> void:
 	pass
 	
 func _check_transitions() -> void:

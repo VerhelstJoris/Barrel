@@ -6,20 +6,22 @@ var current_gravity_velocity : Vector3 = Vector3.ZERO
 
 signal on_movement_input_received(event: InputEvent)
 signal on_sprint_input_received(event: InputEvent)
+signal on_crouch_input_received(event : InputEvent)
+signal on_jump_input_received(event : InputEvent)
 
 @export_group("Controls map names")
 @export var MOVE_FORWARD: String = "move_forward"
 @export var MOVE_BACK: String = "move_back"
 @export var MOVE_LEFT: String = "move_left"
 @export var MOVE_RIGHT: String = "move_right"
-@export var JUMP: String = "jump"
-@export var SPRINT: String = "sprint"
 
 @export_group("General Control Settings")
 @export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
 
 
 var sprint_down : bool = false
+var crouch_down : bool = false
+var jump_down : bool = false
 var input_direction: Vector2
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
@@ -27,15 +29,22 @@ var player: Player
 
 signal on_player_movement(direction)
 signal on_player_sprint_toggle(new_val)
+signal on_player_crouch_toggle(new_val)
+signal on_player_jump_down(new_val)
 
 func _ready() -> void:
 	await owner.ready
 	player = owner as Player
-	on_movement_input_received.connect(_on_movement_input)
-	on_sprint_input_received.connect(_on_sprint_input)
+	_connect_input_events()
 	#state_machine.set_physics_process(true)
 	#state_machine.set_process(true)
 	
+func _connect_input_events():
+	on_movement_input_received.connect(_on_movement_input)
+	on_sprint_input_received.connect(_on_sprint_input)
+	on_crouch_input_received.connect(_on_crouch_input)
+	on_jump_input_received.connect(_on_jump_input)
+
 func _physics_process(_delta: float) -> void:
 	player.move_and_slide()
 
@@ -54,6 +63,14 @@ func _on_movement_input(_event : InputEvent) -> void:
 func _on_sprint_input(_event: InputEvent) -> void:
 	sprint_down = _event.is_pressed()
 	on_player_sprint_toggle.emit(sprint_down)
+	
+func _on_crouch_input(_event : InputEvent) -> void:
+	crouch_down = _event.is_pressed()
+	on_player_crouch_toggle.emit(crouch_down)
+
+func _on_jump_input(_event : InputEvent) -> void:
+	jump_down = _event.is_pressed()
+	on_player_jump_down.emit(jump_down)
 
 func _set_velocity(new_vel : Vector3) -> void:
 	player.velocity = new_vel
