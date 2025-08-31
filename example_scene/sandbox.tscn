@@ -62,17 +62,35 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -8)
 [node name="BasicBlock8" parent="Obstacles" instance=ExtResource("4_1esxm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 6, -8)
 
-[node name="BasicBlock5" parent="Obstacles" instance=ExtResource("4_1esxm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -8)
-
-[node name="BasicBlock6" parent="Obstacles" instance=ExtResource("4_1esxm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -7)
-
-[node name="BasicBlock7" parent="Obstacles" instance=ExtResource("4_1esxm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -6)
-
 [node name="BasicBlock4" parent="Obstacles" instance=ExtResource("4_1esxm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -12)
+
+[node name="Crouch_Test" type="Node3D" parent="Obstacles"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0.522189, 0, -4)
+
+[node name="Floor" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2)
+
+[node name="1m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -5)
+
+[node name="1_25m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.25, -6)
+
+[node name="1_5m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.5, -7)
+
+[node name="1_75m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.75, -8)
+
+[node name="2m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 2, -9)
+
+[node name="0_5m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.5, -3)
+
+[node name="0_75m" parent="Obstacles/Crouch_Test" instance=ExtResource("4_1esxm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.75, -4)
 
 [node name="High Slopes" type="Node" parent="Obstacles"]
 
