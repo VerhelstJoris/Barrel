@@ -3,6 +3,7 @@ class_name PlayerMovementComponent extends Node
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var current_gravity_velocity : Vector3 = Vector3.ZERO
+var current_queued_velocity : Vector3 = Vector3.ZERO
 
 signal on_movement_input_received(event: InputEvent)
 signal on_sprint_input_received(event: InputEvent)
@@ -17,7 +18,6 @@ signal on_jump_input_received(event : InputEvent)
 
 @export_group("General Control Settings")
 @export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
-
 
 var sprint_down : bool = false
 var crouch_down : bool = false
@@ -44,8 +44,10 @@ func _connect_input_events():
 	on_sprint_input_received.connect(_on_sprint_input)
 	on_crouch_input_received.connect(_on_crouch_input)
 	on_jump_input_received.connect(_on_jump_input)
-
+	
 func _physics_process(_delta: float) -> void:
+	player.velocity += current_queued_velocity
+	current_queued_velocity = Vector3.ZERO
 	player.move_and_slide()
 
 func _on_movement_input(_event : InputEvent) -> void:
@@ -76,11 +78,12 @@ func _set_velocity(new_vel : Vector3) -> void:
 	player.velocity = new_vel
 	
 func _add_velocity(added_vel : Vector3) -> void:
-	player.velocity += added_vel
+	current_queued_velocity += added_vel
 	
 func _add_gravity(_delta : float)	-> void:
-	current_gravity_velocity = current_gravity_velocity.move_toward(Vector3(0, player.velocity.y - gravity, 0), gravity * _delta)
+	current_gravity_velocity = Vector3(0, -gravity * _delta * 20, 0)
 	_add_velocity(current_gravity_velocity)
+	pass
 	
 func _reset_gravity_vel() -> void:
 	current_gravity_velocity = Vector3.ZERO

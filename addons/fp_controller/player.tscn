@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=39 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -86,6 +86,10 @@ script = ExtResource("20_5af7x")
 signal_node = NodePath("../PlayerMovementComponent")
 signal_name = "on_jump_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Curve" id="Curve_w7r7y"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.48561, 0.0, 0, 0]
+point_count = 2
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
 floor_max_angle = 0.698132
@@ -202,7 +206,7 @@ metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("25_jajtq")
-can_move = false
+jump_add_multiplier_curve = SubResource("Curve_w7r7y")
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]

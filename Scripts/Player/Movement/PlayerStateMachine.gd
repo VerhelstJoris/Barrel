@@ -34,10 +34,10 @@ func _init_child_states()	 -> void:
 			child.state_machine = self
 
 func _process(delta: float) -> void:
-	current_state._check_transitions()		
 	current_state._update_internal(delta)
 	
 func _physics_process(delta: float) -> void:
+	current_state._check_transitions()
 	current_state._physics_update_internal(delta)
 	
 func _transition_to(target_state: E_StateName) -> void:
