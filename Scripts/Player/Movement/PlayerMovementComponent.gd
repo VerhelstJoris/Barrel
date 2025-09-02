@@ -2,13 +2,16 @@
 class_name PlayerMovementComponent extends Node
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
-var current_gravity_velocity : Vector3 = Vector3.ZERO
+var current_gravity_velocity : float = 0
 var current_queued_velocity : Vector3 = Vector3.ZERO
 
 signal on_movement_input_received(event: InputEvent)
 signal on_sprint_input_received(event: InputEvent)
 signal on_crouch_input_received(event : InputEvent)
 signal on_jump_input_received(event : InputEvent)
+
+@export var max_gravity_velocity : float = -18
+
 
 @export_group("Controls map names")
 @export var MOVE_FORWARD: String = "move_forward"
@@ -81,9 +84,11 @@ func _add_velocity(added_vel : Vector3) -> void:
 	current_queued_velocity += added_vel
 	
 func _add_gravity(_delta : float)	-> void:
-	current_gravity_velocity = Vector3(0, -gravity * _delta * 20, 0)
-	_add_velocity(current_gravity_velocity)
+	if(current_gravity_velocity > max_gravity_velocity):
+		current_gravity_velocity = lerp(current_gravity_velocity, current_gravity_velocity - gravity, _delta)
+		current_gravity_velocity = max(current_gravity_velocity, max_gravity_velocity)
+	_add_velocity( Vector3(0,current_gravity_velocity,0))
 	pass
 	
 func _reset_gravity_vel() -> void:
-	current_gravity_velocity = Vector3.ZERO
+	current_gravity_velocity = 0

@@ -42,6 +42,10 @@ shadow_enabled = true
 mesh = SubResource("PlaneMesh_n6tjd")
 skeleton = NodePath("../..")
 
+[node name="FloorMesh2" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("PlaneMesh_n6tjd")
+skeleton = NodePath("../..")
+
 [node name="FloorCollision" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("ConvexPolygonShape3D_h1lgg")
 
@@ -104,6 +108,16 @@ transform = Transform3D(-2, 0, 1.50996e-07, 0, 2, 0, -3.01992e-07, 0, -1, 21, 0,
 use_collision = true
 polygon = PackedVector2Array(0, 0, 2.08165e-12, 2, 6, 2, 10, 2.08165e-12)
 
+[node name="CSGPolygon3D4" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
+transform = Transform3D(-2, 0, 1.50996e-07, 0, 2, 0, -3.01992e-07, 0, -1, 21, 0, 3)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 2.08165e-12, 2, 6, 2, 10, 2.08165e-12)
+
+[node name="CSGPolygon3D5" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
+transform = Transform3D(-2, 0, 1.50996e-07, 0, 2, 0, -3.01992e-07, 0, -1, 21, 0, 4)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 0, 8, 10, 2.08165e-12)
+
 [node name="CSGPolygon3D3" type="CSGPolygon3D" parent="Obstacles/High Slopes"]
 transform = Transform3D(-1.5, 0, 1.50996e-07, 0, 1.5, 0, -2.26494e-07, 0, -1, 16, 0, 2)
 use_collision = true
@@ -146,6 +160,44 @@ polygon = PackedVector2Array(0, 0, 0, 2, 4.5, 2, 6, 0)
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 8, 0, 10.7726)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 2, 5, 2, 6, 0)
+
+[node name="Jump Blocks" type="Node3D" parent="Obstacles"]
+
+[node name="BasicBlock5" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -0.75, -4)
+
+[node name="BasicBlock6" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, -0.5, -4)
+
+[node name="BasicBlock7" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -7, -0.25, -4)
+
+[node name="BasicBlock8" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -8, 0, -4)
+
+[node name="BasicBlock9" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.25, -4)
+
+[node name="BasicBlock10" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0.5, -4)
+
+[node name="BasicBlock11" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -12, 0.75, -4)
+
+[node name="BasicBlock12" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -13, 1, -4)
+
+[node name="BasicBlock13" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 1.25, -4)
+
+[node name="BasicBlock14" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.5, -4)
+
+[node name="BasicBlock15" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 1.75, -4)
+
+[node name="BasicBlock16" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -18, 2, -4)
 
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)
