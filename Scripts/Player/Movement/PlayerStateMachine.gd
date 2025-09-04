@@ -16,8 +16,9 @@ var current_state: PlayerState
 func _ready() -> void:
 	await owner.ready
 	_init_child_states()
-			
 	_enter_initial_state()
+	set_physics_process(false)
+	set_process(false)
 			
 func _enter_initial_state() -> void:
 	if(initial_state != E_StateName.None):
@@ -33,12 +34,16 @@ func _init_child_states()	 -> void:
 		if(child is PlayerState):
 			child.state_machine = self
 
-func _process(delta: float) -> void:
-	current_state._update_internal(delta)
-	
-func _physics_process(delta: float) -> void:
-	current_state._check_transitions()
-	current_state._physics_update_internal(delta)
+#called externally			
+func _update(delta: float) -> void:
+	current_state._update(delta)
+
+#called externally				
+func _physics_update(delta: float) -> void:
+	current_state.current_time_in_state += delta
+	if(current_state.current_time_in_state > current_state.minimum_time_in_state):
+		current_state._check_transitions()
+	current_state._physics_update(delta)
 	
 func _transition_to(target_state: E_StateName) -> void:
 	var target_state_name : String = E_StateName.keys()[target_state]

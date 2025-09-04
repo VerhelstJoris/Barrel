@@ -89,8 +89,8 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Curve" id="Curve_w7r7y"]
 _limits = [0.0, 4.0, 0.0, 1.0]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0449927, 1.33158), 9.15774, 9.15774, 0, 0, Vector2(0.328012, 2.75866), 0.0, 0.0, 0, 0, Vector2(0.998549, 0.19937), -3.48561, 0.0, 0, 0]
-point_count = 4
+_data = [Vector2(0.00145138, 1.724), 0.0, 0.0, 0, 0, Vector2(0.330914, 2.56768), 0.0, 0.0, 0, 0, Vector2(0.997097, 0.853759), -3.48561, 0.0, 0, 0]
+point_count = 3
 metadata/_snap_count = 16
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
@@ -203,7 +203,6 @@ backward_movement_speed = 2.5
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("23_nycc1")
-can_move = false
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
@@ -211,8 +210,10 @@ script = ExtResource("25_jajtq")
 max_jump_down_time = 0.35
 target_jump_velocity = 180.0
 jump_add_multiplier_curve = SubResource("Curve_w7r7y")
-post_hold_taper_time = 0.15
-forward_movement_speed = 4.0
+post_hold_taper_time = 0.3
+forward_movement_speed = 3.0
+sideways_movement_speed = 3.0
+minimum_time_in_state = 0.05
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]

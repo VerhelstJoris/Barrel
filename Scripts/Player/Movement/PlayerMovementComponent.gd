@@ -33,7 +33,7 @@ var player: Player
 signal on_player_movement(direction)
 signal on_player_sprint_toggle(new_val)
 signal on_player_crouch_toggle(new_val)
-signal on_player_jump_down(new_val)
+signal on_player_jump_toggle(new_val)
 
 func _ready() -> void:
 	await owner.ready
@@ -48,9 +48,13 @@ func _connect_input_events():
 	on_crouch_input_received.connect(_on_crouch_input)
 	on_jump_input_received.connect(_on_jump_input)
 	
+func _process(delta: float) -> void:
+	state_machine._update(delta)	
+
 func _physics_process(_delta: float) -> void:
-	player.velocity += current_queued_velocity
+	player.velocity = current_queued_velocity
 	current_queued_velocity = Vector3.ZERO
+	state_machine._physics_update(_delta)
 	player.move_and_slide()
 
 func _on_movement_input(_event : InputEvent) -> void:
@@ -74,11 +78,10 @@ func _on_crouch_input(_event : InputEvent) -> void:
 	on_player_crouch_toggle.emit(crouch_down)
 
 func _on_jump_input(_event : InputEvent) -> void:
-	jump_down = _event.is_pressed()
-	on_player_jump_down.emit(jump_down)
-
-func _set_velocity(new_vel : Vector3) -> void:
-	player.velocity = new_vel
+	var new_state : bool = _event.is_pressed()
+	if(new_state != jump_down):
+		jump_down = new_state
+		on_player_jump_toggle.emit(jump_down)
 	
 func _add_velocity(added_vel : Vector3) -> void:
 	current_queued_velocity += added_vel
