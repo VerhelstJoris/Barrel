@@ -42,16 +42,23 @@ func _update(_delta : float)	-> void:
 func _on_update_internal(_delta: float) -> void:
 	pass
 	
+func _get_affected_by_gravity() -> bool:
+	return is_affected_by_gravity
+
 func _physics_update(_delta: float) -> void:
 	if(child_state_machine != null):
 		child_state_machine.current_state._physics_update(_delta)
 	else:
 		_on_physics_update_internal(_delta)
+		_handle_movement_and_gravity(_delta)
 
 #to be overriden by child classes to perform their physics update
 func _on_physics_update_internal(_delta: float) -> void:
+	pass
+	
+func _handle_movement_and_gravity(_delta : float):	
 	_handle_player_move()
-	if not player.is_on_floor() && is_affected_by_gravity:
+	if not player.is_on_floor() && _get_affected_by_gravity():
 		mov_comp._add_gravity(_delta)
 	else:
 		mov_comp._reset_gravity_vel()
@@ -75,7 +82,8 @@ func _enter_state() -> void:
 	_on_enter_internal()
 	if(child_state_machine):
 		child_state_machine._enter_initial_state()
-	
+
+#to be overriden by child classes to perform enter logic
 func _on_enter_internal() -> void:
 	pass
 	
@@ -85,8 +93,10 @@ func _exit_state() -> void:
 	
 	_on_exit_internal()	
 
+#to be overriden by child classes to perform exit logic
 func _on_exit_internal() -> void:
 	pass
-	
+
+#to be overriden by child classes to check which states to transition to
 func _check_transitions() -> void:
 	pass

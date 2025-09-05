@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=40 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -87,10 +87,14 @@ signal_node = NodePath("../PlayerMovementComponent")
 signal_name = "on_jump_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
+[sub_resource type="Curve" id="Curve_hwrxm"]
+_data = [Vector2(0, 0), 0.0, 2.93445, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="Curve" id="Curve_w7r7y"]
 _limits = [0.0, 4.0, 0.0, 1.0]
-_data = [Vector2(0.00145138, 1.724), 0.0, 0.0, 0, 0, Vector2(0.330914, 2.56768), 0.0, 0.0, 0, 0, Vector2(0.997097, 0.853759), -3.48561, 0.0, 0, 0]
-point_count = 3
+_data = [Vector2(0.00435414, 3.93306), 0.0, 6.41705, 0, 0, Vector2(0.998549, 0), -3.48561, 0.0, 0, 0]
+point_count = 2
 metadata/_snap_count = 16
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
@@ -165,6 +169,8 @@ ExtResource("18_w7r7y"): SubResource("Resource_hwrxm")
 [node name="PlayerMovementComponent" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("16_y16om")
+max_gravity_velocity = -32.0
+gravity_growth_curve = SubResource("Curve_hwrxm")
 
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
@@ -203,15 +209,17 @@ backward_movement_speed = 2.5
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("23_nycc1")
+forward_movement_speed = 3.0
+backward_movement_speed = 2.5
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("25_jajtq")
 max_jump_down_time = 0.35
-target_jump_velocity = 180.0
+target_jump_velocity = 87.0
 jump_add_multiplier_curve = SubResource("Curve_w7r7y")
-post_hold_taper_time = 0.3
-forward_movement_speed = 3.0
+post_hold_taper_time = 0.0
+forward_movement_speed = 3.5
 sideways_movement_speed = 3.0
 minimum_time_in_state = 0.05
 metadata/_custom_type_script = "uid://dualuy1631ivy"

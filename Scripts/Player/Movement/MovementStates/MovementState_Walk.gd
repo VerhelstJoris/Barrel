@@ -7,4 +7,3 @@ func _check_transitions() -> void:
 
 func _on_physics_update_internal(_delta: float) -> void:
 	super(_delta)
-	print("WALK PHYSICS UPDATE")		

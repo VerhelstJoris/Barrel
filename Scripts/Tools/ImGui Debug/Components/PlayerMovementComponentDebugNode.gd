@@ -35,7 +35,7 @@ func _debug_draw_state(state : PlayerState) -> void:
 			ImGui.Text("Settings")
 			ImGui.BeginDisabled()
 			var can_move : Array[bool] = [state.can_move]
-			var affected_by_grav : Array[bool] = [state.is_affected_by_gravity]
+			var affected_by_grav : Array[bool] = [state._get_affected_by_gravity()]
 			ImGui.Checkbox("Affected by Grav?", affected_by_grav)
 			ImGui.Checkbox("Can Move?", can_move)
 			ImGui.EndDisabled()
