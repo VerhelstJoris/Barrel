@@ -43,7 +43,6 @@ func _ready() -> void:
 	await owner.ready
 	player = owner as Player
 	_connect_input_events()
-
 	
 func _connect_input_events():
 	on_movement_input_received.connect(_on_movement_input)
@@ -58,6 +57,9 @@ func _physics_process(_delta: float) -> void:
 	player.velocity = current_queued_velocity
 	current_queued_velocity = Vector3.ZERO
 	state_machine._physics_update(_delta)
+	var current_active_state : PlayerState = state_machine._get_current_active_state()
+	_handle_player_move(_delta,current_active_state)
+	_handle_gravity(_delta, current_active_state)
 	player.move_and_slide()
 
 func _on_movement_input(_event : InputEvent) -> void:
@@ -86,9 +88,29 @@ func _on_jump_input(_event : InputEvent) -> void:
 		jump_down = new_state
 		on_player_jump_toggle.emit(jump_down)
 	
+func _handle_player_move(_delta : float, current_active_state : PlayerState):
+
+	var horizontal_target : Vector2 = Vector2.ZERO
+	if(current_active_state.can_move):
+		horizontal_target.x = input_direction.x * current_active_state.sideways_movement_speed
+		if(input_direction.y < 0):
+			horizontal_target.y = input_direction.y * current_active_state.backward_movement_speed
+		else:
+			horizontal_target.y = input_direction.y * current_active_state.forward_movement_speed
+
+	var target_vel : Vector3 = (player.transform.basis * Vector3(horizontal_target.x, 0, -horizontal_target.y))
+	_add_velocity(target_vel)
+	
+func _handle_gravity(_delta : float, current_active_state : PlayerState):
+	if not player.is_on_floor() && current_active_state._get_affected_by_gravity():
+		_add_gravity(_delta)
+	else:
+		_reset_gravity_vel()
+		
 func _add_velocity(added_vel : Vector3) -> void:
 	current_queued_velocity += added_vel
 	
+
 func _add_gravity(_delta : float)	-> void:
 	if(player.velocity.y <= 0):
 		current_gravity_time += _delta

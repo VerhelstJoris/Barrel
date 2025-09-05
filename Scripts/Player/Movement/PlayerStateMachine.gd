@@ -58,3 +58,9 @@ func _transition_to(target_state: E_StateName) -> void:
 	print("Enter ", current_state.name, " on ", name)
 	current_state._enter_state()
 	emit_signal("transitioned", current_state)
+	
+func _get_current_active_state() -> PlayerState:
+	if(current_state.child_state_machine):
+		return current_state.child_state_machine._get_current_active_state()
+	
+	return current_state	

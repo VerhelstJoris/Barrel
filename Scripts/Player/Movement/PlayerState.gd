@@ -50,32 +50,10 @@ func _physics_update(_delta: float) -> void:
 		child_state_machine.current_state._physics_update(_delta)
 	else:
 		_on_physics_update_internal(_delta)
-		_handle_movement_and_gravity(_delta)
 
 #to be overriden by child classes to perform their physics update
 func _on_physics_update_internal(_delta: float) -> void:
 	pass
-	
-func _handle_movement_and_gravity(_delta : float):	
-	_handle_player_move()
-	if not player.is_on_floor() && _get_affected_by_gravity():
-		mov_comp._add_gravity(_delta)
-	else:
-		mov_comp._reset_gravity_vel()
-		
-func _handle_player_move() -> void:
-	var input_dir : Vector2 = mov_comp.input_direction
-	var horizontal_target : Vector2 = Vector2.ZERO
-	
-	if(can_move):
-		horizontal_target.x = input_dir.x * sideways_movement_speed
-		if(input_dir.y < 0):
-			horizontal_target.y = input_dir.y * backward_movement_speed
-		else:
-			horizontal_target.y = input_dir.y * forward_movement_speed
-
-	var target_vel : Vector3 = (player.transform.basis * Vector3(horizontal_target.x, 0, -horizontal_target.y))
-	mov_comp._add_velocity(target_vel)		
 	
 func _enter_state() -> void:
 	current_time_in_state =0
