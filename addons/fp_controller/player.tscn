@@ -229,6 +229,7 @@ post_hold_taper_time = 0.0
 forward_movement_speed = 3.5
 sideways_movement_speed = 3.0
 minimum_time_in_state = 0.05
+velocity_decay_to_current_state_time = 1.5
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]

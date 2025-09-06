@@ -32,6 +32,8 @@ var jump_down : bool = false
 var input_direction: Vector2
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
+var previous_state : PlayerState = null
+
 var player: Player
 
 signal on_player_movement(direction)
@@ -89,7 +91,13 @@ func _on_jump_input(_event : InputEvent) -> void:
 		on_player_jump_toggle.emit(jump_down)
 	
 func _handle_player_move(_delta : float, current_active_state : PlayerState):
+	var horizontal_target : Vector2 = _calculate_target_velocity_for_state(current_active_state)
+	var final_target : Vector2 = _calculate_potential_lerped_target_velocity(current_active_state, horizontal_target)
+	var target_vel : Vector3 = (player.transform.basis * Vector3(final_target.x, 0, -final_target.y))
 
+	_add_velocity(target_vel)
+	
+func _calculate_target_velocity_for_state(current_active_state : PlayerState) -> Vector2:
 	var horizontal_target : Vector2 = Vector2.ZERO
 	if(current_active_state.can_move):
 		horizontal_target.x = input_direction.x * current_active_state.sideways_movement_speed
@@ -97,10 +105,17 @@ func _handle_player_move(_delta : float, current_active_state : PlayerState):
 			horizontal_target.y = input_direction.y * current_active_state.backward_movement_speed
 		else:
 			horizontal_target.y = input_direction.y * current_active_state.forward_movement_speed
+			
+	return horizontal_target		
 
-	var target_vel : Vector3 = (player.transform.basis * Vector3(horizontal_target.x, 0, -horizontal_target.y))
-	_add_velocity(target_vel)
+func _calculate_potential_lerped_target_velocity(current_active_state : PlayerState, new_target_velocity : Vector2) -> Vector2:
+	if(current_active_state.velocity_decay_to_current_state_time <= 0 || previous_state == null || current_active_state.current_time_in_state > current_active_state.velocity_decay_to_current_state_time):
+		return new_target_velocity
+
+	var prev_state_target : Vector2 = _calculate_target_velocity_for_state(previous_state)
 	
+	return lerp(prev_state_target, new_target_velocity, current_active_state.current_time_in_state / current_active_state.velocity_decay_to_current_state_time)
+
 func _handle_gravity(_delta : float, current_active_state : PlayerState):
 	if not player.is_on_floor() && current_active_state._get_affected_by_gravity():
 		_add_gravity(_delta)

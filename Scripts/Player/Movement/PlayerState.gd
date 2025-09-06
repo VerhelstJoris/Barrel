@@ -12,7 +12,11 @@ var player: Player
 @export var sideways_movement_speed : float = 2.5
 @export var backward_movement_speed : float = 1.5
 
+@export_group("General Settings")
 @export var minimum_time_in_state : float = 0.0
+
+#if we enter this state with more velocity than this state allows, how long should we take to decay down
+@export var velocity_decay_to_current_state_time : float = 0.0
 var current_time_in_state : float = 0.0
 
 @export var is_affected_by_gravity : bool = true
@@ -68,7 +72,8 @@ func _on_enter_internal() -> void:
 func _exit_state() -> void:
 	if(child_state_machine):
 		child_state_machine.current_state._exit_state()
-	
+	else:
+		mov_comp.previous_state = self
 	_on_exit_internal()	
 
 #to be overriden by child classes to perform exit logic
