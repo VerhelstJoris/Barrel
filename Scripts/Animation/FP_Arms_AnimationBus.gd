@@ -28,12 +28,12 @@ const anim_reload_previous_chamber_cont_request : String = "ReloadingBlendTree/P
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
-const anim_movement_blend : String = "parameters/MoveBlendSpace/blend_position"
+const anim_movement_blend : String = "parameters/SM_Movement/BlendTree/GroundMoveBlendSpace/blend_position"
 const reload_movement_blend_value : float = 0.1
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
 const anim_fanning_condition_2 : String = "FanningSM/conditions/fanning2"
-const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning2"
+const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning3"
 
 # these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false

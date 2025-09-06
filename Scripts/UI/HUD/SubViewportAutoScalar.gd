@@ -5,7 +5,6 @@ class_name SubViewportAutoScalar extends SubViewportContainer
 func _ready() -> void:
 	resized.connect(_on_resized)
 	_on_resized()
-	pass
 	
 func _on_resized() -> void:
 	if(sub_viewport):

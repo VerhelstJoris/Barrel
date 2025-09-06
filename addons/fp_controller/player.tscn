@@ -1,11 +1,10 @@
-[gd_scene load_steps=41 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=40 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
 [ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="3_gd45c"]
-[ext_resource type="Script" uid="uid://bpxq8l2qi3agx" path="res://Scripts/UI/HUD/SubViewportAutoScalar.gd" id="3_hwrxm"]
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
 [ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="4_5af7x"]
 [ext_resource type="Resource" uid="uid://dpdcr67h4kfen" path="res://Data/Input/Movement/IA_Move_Left.tres" id="5_62dvf"]
@@ -120,7 +119,7 @@ unique_name_in_owner = true
 cull_mask = 1048573
 script = ExtResource("2_1py82")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera" node_paths=PackedStringArray("sub_viewport")]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
 custom_minimum_size = Vector2(1280, 720)
 anchors_preset = 15
 anchor_right = 1.0
@@ -130,8 +129,6 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 stretch = true
-script = ExtResource("3_hwrxm")
-sub_viewport = NodePath("SubViewport")
 
 [node name="HUDEquipment" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
 unique_name_in_owner = true
@@ -228,7 +225,7 @@ jump_add_multiplier_curve = SubResource("Curve_w7r7y")
 post_hold_taper_time = 0.0
 forward_movement_speed = 3.5
 sideways_movement_speed = 3.0
-minimum_time_in_state = 0.05
+minimum_time_in_state = 0.15
 velocity_decay_to_current_state_time = 1.5
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
