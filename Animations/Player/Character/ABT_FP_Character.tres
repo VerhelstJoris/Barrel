@@ -3,6 +3,8 @@
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_x8ke2"]
+filter_enabled = true
+filters = ["", "AnimationTree", "Arms_Rig/Skeleton3D:Hand_L", "Arms_Rig/Skeleton3D:Hand_R", "Arms_Rig/Skeleton3D:Index_1_L", "Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_L", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_L", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Lower_L", "Arms_Rig/Skeleton3D:Lower_R", "Arms_Rig/Skeleton3D:Lower_Twist_1_L", "Arms_Rig/Skeleton3D:Lower_Twist_1_R", "Arms_Rig/Skeleton3D:Lower_Twist_2_L", "Arms_Rig/Skeleton3D:Lower_Twist_2_R", "Arms_Rig/Skeleton3D:Lower_Twist_3_L", "Arms_Rig/Skeleton3D:Lower_Twist_3_R", "Arms_Rig/Skeleton3D:Lower_Twist_4_L", "Arms_Rig/Skeleton3D:Lower_Twist_4_R", "Arms_Rig/Skeleton3D:Middle_1_L", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_L", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_L", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_L", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_L", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_L", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Ring_1_L", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_L", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_L", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_L", "Arms_Rig/Skeleton3D:Thumb_3_R", "Arms_Rig/Skeleton3D:Upper_L", "Arms_Rig/Skeleton3D:Upper_R"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
@@ -18,7 +20,7 @@ loop_mode = 1
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_te7e3"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-359.75, -92.2063)
+graph_offset = Vector2(-564.981, -39.1268)
 nodes/Sub2/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/Sub2/position = Vector2(80, 100)
 nodes/BasePose/node = SubResource("AnimationNodeAnimation_g0oko")
@@ -68,7 +70,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-163, -18)
 
 [resource]
-graph_offset = Vector2(-536, 142.645)
+graph_offset = Vector2(-754.12, 86.8396)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)
