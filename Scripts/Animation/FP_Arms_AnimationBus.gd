@@ -1,6 +1,5 @@
-class_name FPArmsAnimationBus extends Node
+class_name FPArmsAnimationBus extends AnimationTree
 
-@onready var anim_tree : AnimationTree = %AnimationTree
 @onready var pistol : PlayerEquipmentPistol = %FP_Colt
 
 @onready var global_prop_bone : BoneAttachment3D = %GlobalPropBone
@@ -166,9 +165,9 @@ func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
 
 	fanning_hammer_anim_id = ((fanning_hammer_anim_id +1) % 2)+1
-	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_1] = (fanning_hammer_anim_id == 1)
-	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_2] = (fanning_hammer_anim_id == 2)
-	anim_tree[anim_colt_state_machine_path + anim_fanning_condition_3] = (fanning_hammer_anim_id == 3)
+	set(anim_colt_state_machine_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1)
+	set(anim_colt_state_machine_path + anim_fanning_condition_2,fanning_hammer_anim_id == 2)
+	set(anim_colt_state_machine_path + anim_fanning_condition_3,fanning_hammer_anim_id == 3)
 
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
@@ -183,8 +182,8 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 		exit_reload_done = false
 
 
-	anim_tree[anim_colt_state_machine_path + anim_enter_reload_condition] = enter || enter_uncock
-	anim_tree[anim_colt_state_machine_path + anim_exit_reload_condition] = exit
+	set(anim_colt_state_machine_path + anim_enter_reload_condition, enter || enter_uncock)
+	set(anim_colt_state_machine_path + anim_exit_reload_condition,  exit)
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
@@ -208,7 +207,7 @@ func _on_player_movement_input(direction:Vector2) -> void:
 	prev_move_direction = direction
 	
 func _update_movement_blend_values() -> void:	
-	anim_tree[anim_movement_blend] = movement_blend_value
+	set(anim_movement_blend, movement_blend_value)
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
@@ -231,4 +230,4 @@ func _tween_move_blend_amount(new_value : float, time : float) -> void:
 		move_blend_tween.stop()
 		
 	move_blend_tween = create_tween()
-	move_blend_tween.tween_property(anim_tree, anim_move_blend_add_amount, new_value,time)
+	move_blend_tween.tween_property(self, anim_move_blend_add_amount, new_value,time)

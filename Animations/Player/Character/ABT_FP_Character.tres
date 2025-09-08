@@ -1,51 +1,31 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=20 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=15 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_x8ke2"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ys0lo"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Idle"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
+animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_28pq6"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Left"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jqlb3"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Right"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yud83"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Forward"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3wpmr"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Backward"
-
-[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_kmnmh"]
-blend_point_0/node = SubResource("AnimationNodeAnimation_ys0lo")
-blend_point_0/pos = Vector2(0, 0)
-blend_point_1/node = SubResource("AnimationNodeAnimation_28pq6")
-blend_point_1/pos = Vector2(-1, 0)
-blend_point_2/node = SubResource("AnimationNodeAnimation_jqlb3")
-blend_point_2/pos = Vector2(1, 0)
-blend_point_3/node = SubResource("AnimationNodeAnimation_yud83")
-blend_point_3/pos = Vector2(0, 1)
-blend_point_4/node = SubResource("AnimationNodeAnimation_3wpmr")
-blend_point_4/pos = Vector2(0, -1)
-snap = Vector2(0.1, 0.01)
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yws3a"]
-animation = &"AL_FP_Character_Movement/A_FP_MoveBlend_Pose"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_em04p"]
+animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = false
+start_offset = 0.0
+loop_mode = 1
 
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_te7e3"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-558.929, -225.65)
-nodes/MoveBlendPose/node = SubResource("AnimationNodeAnimation_yws3a")
-nodes/MoveBlendPose/position = Vector2(-500, 240)
+graph_offset = Vector2(-359.75, -92.2063)
 nodes/Sub2/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/Sub2/position = Vector2(80, 100)
-nodes/GroundMoveBlendSpace/node = SubResource("AnimationNodeBlendSpace2D_kmnmh")
-nodes/GroundMoveBlendSpace/position = Vector2(-300, -100)
-node_connections = [&"output", 0, &"Sub2", &"Sub2", 0, &"GroundMoveBlendSpace", &"Sub2", 1, &"MoveBlendPose"]
+nodes/BasePose/node = SubResource("AnimationNodeAnimation_g0oko")
+nodes/BasePose/position = Vector2(-400, 220)
+nodes/Idle/node = SubResource("AnimationNodeAnimation_em04p")
+nodes/Idle/position = Vector2(-380, -20)
+node_connections = [&"output", 0, &"Sub2", &"Sub2", 0, &"Idle", &"Sub2", 1, &"BasePose"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_aax62"]
 advance_mode = 2
@@ -55,7 +35,7 @@ states/BlendTree/node = SubResource("AnimationNodeBlendTree_sq2n5")
 states/BlendTree/position = Vector2(431, 71)
 states/Start/position = Vector2(73, 67)
 transitions = ["Start", "BlendTree", SubResource("AnimationNodeStateMachineTransition_aax62")]
-graph_offset = Vector2(-119, -200)
+graph_offset = Vector2(-104, -180)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
 animation = &"AL_FP_Character/A_FP_FullyHolstered"
@@ -88,7 +68,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-163, -18)
 
 [resource]
-graph_offset = Vector2(-629.443, 53.6861)
+graph_offset = Vector2(-536, 142.645)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)

@@ -215,6 +215,7 @@ backward_movement_speed = 2.5
 script = ExtResource("23_nycc1")
 forward_movement_speed = 3.0
 backward_movement_speed = 2.5
+velocity_decay_to_current_state_time = 1.0
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
@@ -223,7 +224,7 @@ max_jump_down_time = 0.35
 target_jump_velocity = 87.0
 jump_add_multiplier_curve = SubResource("Curve_w7r7y")
 post_hold_taper_time = 0.0
-forward_movement_speed = 3.5
+forward_movement_speed = 4.0
 sideways_movement_speed = 3.0
 minimum_time_in_state = 0.15
 velocity_decay_to_current_state_time = 1.5

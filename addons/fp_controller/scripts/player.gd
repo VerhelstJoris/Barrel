@@ -15,7 +15,6 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 @export var holster : String = "holster"
 @export_group("Customizable player stats")
 
-
 #Is Sprint a hold or toggle input?
 @export var sprint_toggle: bool = true
 @export var sprint_speed: float = 5.0
@@ -32,7 +31,6 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
 @export_group("Components")
 @export var input_receiver : InputReceiver
-@onready var sub_viewport: SubViewport = %SubViewport
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var smooth_camera: Camera3D = %SmoothCamera
 @onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent
@@ -60,7 +58,6 @@ var mouse_motion: Vector2
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	sub_viewport.size = DisplayServer.window_get_size()
 	current_equipment = arms.pistol_equipment
 	_setup_input_signals()
 	_setup_animation_data()
