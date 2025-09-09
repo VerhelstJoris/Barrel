@@ -27,7 +27,7 @@ const anim_reload_previous_chamber_cont_request : String = "ReloadingBlendTree/P
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
-const anim_movement_blend : String = "parameters/SM_Movement/BlendTree/GroundMoveBlendSpace/blend_position"
+const anim_movement_blend : String = "parameters/SM_Movement/BlendTree/MovementBlendSpace/blend_position"
 const reload_movement_blend_value : float = 0.1
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
