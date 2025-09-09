@@ -26,7 +26,7 @@ start_offset = 0.0
 loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_forti"]
-animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
+animation = &"AL_FP_Character_Movement/A_FP_Move_Left"
 use_custom_timeline = true
 timeline_length = 2.0
 stretch_time_scale = true
@@ -34,7 +34,7 @@ start_offset = 0.0
 loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_es4ed"]
-animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
+animation = &"AL_FP_Character_Movement/A_FP_Move_Right"
 use_custom_timeline = true
 timeline_length = 2.0
 stretch_time_scale = true
@@ -114,7 +114,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-163, -18)
 
 [resource]
-graph_offset = Vector2(-534.388, -38.2653)
+graph_offset = Vector2(-547.28, 25.8055)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)
