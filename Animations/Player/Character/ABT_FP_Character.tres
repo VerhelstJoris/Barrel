@@ -42,7 +42,7 @@ start_offset = 0.0
 loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ys0lo"]
-animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
+animation = &"AL_FP_Character_Movement/A_FP_Move_Backward"
 use_custom_timeline = true
 timeline_length = 2.0
 stretch_time_scale = true
