@@ -30,9 +30,10 @@ func _enter_initial_state() -> void:
 		push_error("State Machine  \"" + name + "\" has no starting state")
 	
 func _init_child_states()	 -> void:		
-	for child in get_children():
-		if(child is PlayerState):
-			child.state_machine = self
+	for key in states_map:
+		if(states_map[key] is PlayerState):
+			states_map[key].state_machine = self
+			states_map[key].state_type = key
 
 #called externally			
 func _update(delta: float) -> void:
@@ -64,3 +65,9 @@ func _get_current_active_state() -> PlayerState:
 		return current_state.child_state_machine._get_current_active_state()
 	
 	return current_state	
+
+func _get_current_state_machine() -> PlayerStateMachine:
+	if(current_state.child_state_machine):
+		return current_state.child_state_machine._get_current_state_machine()
+
+	return self	

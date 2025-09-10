@@ -9,6 +9,9 @@ signal on_sprint_input_received(event: InputEvent)
 signal on_crouch_input_received(event : InputEvent)
 signal on_jump_input_received(event : InputEvent)
 
+signal on_player_movement_state_enter(new_state : PlayerStateMachine.E_StateName)
+signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName)
+
 @export_group("Gravity Settings")
 @export var max_gravity_velocity : float = -18
 @export var gravity_growth_curve : Curve
@@ -125,7 +128,6 @@ func _handle_gravity(_delta : float, current_active_state : PlayerState):
 func _add_velocity(added_vel : Vector3) -> void:
 	current_queued_velocity += added_vel
 	
-
 func _add_gravity(_delta : float)	-> void:
 	if(player.velocity.y <= 0):
 		current_gravity_time += _delta
@@ -140,3 +142,10 @@ func _add_gravity(_delta : float)	-> void:
 func _reset_gravity_vel() -> void:
 	current_gravity_velocity = 0
 	current_gravity_time = 0
+	
+func _is_current_movement_state(state : PlayerStateMachine.E_StateName) -> bool:
+	var current_sm : PlayerStateMachine = state_machine._get_current_state_machine()
+	if(current_sm.states_map.has(state)):
+		return current_sm.states_map[state] == current_sm._get_current_active_state()
+		
+	return false	

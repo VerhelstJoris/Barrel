@@ -19,6 +19,8 @@ var player: Player
 @export var velocity_decay_to_current_state_time : float = 0.0
 var current_time_in_state : float = 0.0
 
+var state_type : PlayerStateMachine.E_StateName = PlayerStateMachine.E_StateName.None
+
 @export var is_affected_by_gravity : bool = true
 
 @export_group("Capsule Settings")
@@ -61,6 +63,7 @@ func _on_physics_update_internal(_delta: float) -> void:
 	
 func _enter_state() -> void:
 	current_time_in_state =0
+	mov_comp.on_player_movement_state_enter.emit(state_type)
 	_on_enter_internal()
 	if(child_state_machine):
 		child_state_machine._enter_initial_state()
@@ -74,6 +77,8 @@ func _exit_state() -> void:
 		child_state_machine.current_state._exit_state()
 	else:
 		mov_comp.previous_state = self
+	
+	mov_comp.on_player_movement_state_leave.emit(state_type)
 	_on_exit_internal()	
 
 #to be overriden by child classes to perform exit logic
