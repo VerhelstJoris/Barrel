@@ -8,26 +8,11 @@ signal on_unholster_started()
 signal on_unholster_finished()
 enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
-
-@export_group("Controls map names")
-@export var JUMP: String = "jump"
-@export var SPRINT: String = "sprint"
-@export var holster : String = "holster"
-@export_group("Customizable player stats")
-
-#Is Sprint a hold or toggle input?
-@export var sprint_toggle: bool = true
-@export var sprint_speed: float = 5.0
-@export var jump_height: float = 1.0
-@export var acceleration: float = 10.0
-
 @export_range(1.0, 10.0) var camera_sensitivity: float = 2.0
 
 @export_range(0.0, 0.5) var camera_start_deadzone: float = .2
 
 @export_range(0.0, 0.5) var camera_end_deadzone: float = .1
-@export_group("Feature toggles")
-@export var allow_sprint: bool = true
 
 @export_group("Components")
 @export var input_receiver : InputReceiver
@@ -51,9 +36,6 @@ var equipment_holster_state : Holster_State = Holster_State.Hidden:
 var current_equipment : PlayerEquipment = null:
 	set = _change_equipment
 
-# Dynamic values used for calculation
-var input_direction: Vector2
-var ledge_position: Vector3 = Vector3.ZERO
 var mouse_motion: Vector2
 
 func _ready() -> void:

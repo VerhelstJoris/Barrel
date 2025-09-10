@@ -175,6 +175,12 @@ unique_name_in_owner = true
 script = ExtResource("16_y16om")
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
+time_reach_max_gravity_velocity = null
+MOVE_FORWARD = null
+MOVE_BACK = null
+MOVE_LEFT = null
+MOVE_RIGHT = null
+movement_deadzone = null
 
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
