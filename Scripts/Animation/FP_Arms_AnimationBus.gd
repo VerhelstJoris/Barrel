@@ -1,6 +1,7 @@
 class_name FPArmsAnimationBus extends AnimationTree
 
 @onready var pistol : PlayerEquipmentPistol = %FP_Colt
+var mov_comp : PlayerMovementComponent 
 
 @onready var global_prop_bone : BoneAttachment3D = %GlobalPropBone
 @onready var left_prop_bone : BoneAttachment3D = %LPropBone
@@ -27,7 +28,9 @@ const anim_reload_previous_chamber_cont_request : String = "ReloadingBlendTree/P
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
-const anim_movement_blend : String = "parameters/SM_Movement/BlendTree/MovementBlendSpace/blend_position"
+const anim_move_state_machine_path : String = "parameters/SM_Movement/"
+const anim_movement_blend_property : String = "BlendTree/MovementBlendSpace/blend_position"
+const anim_move_sprint_blend_property : String = "BlendTree/WalkSprintBlend/blend_amount"
 const reload_movement_blend_value : float = 0.1
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
@@ -47,6 +50,7 @@ var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
 var prev_move_direction : Vector2 = Vector2.ZERO
 var move_blend_tween : Tween
+var sprint_move_blend_tween : Tween
 
 var next_cyl_cont : bool = false
 var prev_cyl_cont : bool = false
@@ -66,7 +70,11 @@ func _ready() -> void:
 	right_prop_bone_pos = pistol.get_position()
 	
 func _init_player_data(player : Player) -> void:
-	player.movement_component.on_player_movement.connect(_on_player_movement_input)
+	mov_comp = player.movement_component
+	mov_comp.on_player_movement.connect(_on_player_movement_input)
+	mov_comp.on_player_movement_state_leave.connect(_on_player_exit_movement_state)
+	mov_comp.on_player_movement_state_enter.connect(_on_player_enter_movement_state)
+	
 	player.on_holster_started.connect(_on_player_holster_started)
 	player.on_unholster_started.connect(_on_player_unholster_started)
 
@@ -113,7 +121,7 @@ func _on_action_started(new_action : EPistolState.Actions) -> void:
 func _finish_prev_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
-		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
+		_tween_anim_property(move_blend_tween, anim_move_state_machine_path + anim_movement_blend_property, reload_movement_blend_value, 0.1)
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
 	else:
@@ -177,7 +185,7 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
 
 		enter_reload_done = false
-		_tween_move_blend_amount(reload_movement_blend_value , 0.1)
+		_tween_anim_property(move_blend_tween, anim_move_state_machine_path + anim_movement_blend_property, reload_movement_blend_value , 0.1)
 	elif(exit):
 		exit_reload_done = false
 
@@ -207,7 +215,16 @@ func _on_player_movement_input(direction:Vector2) -> void:
 	prev_move_direction = direction
 	
 func _update_movement_blend_values() -> void:	
-	set(anim_movement_blend, movement_blend_value)
+	set(anim_move_state_machine_path + anim_movement_blend_property, movement_blend_value)
+
+	
+func _on_player_enter_movement_state(state_entered: PlayerStateMachine.E_StateName) -> void:
+	if(state_entered == PlayerStateMachine.E_StateName.Sprint):
+		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,0.25)
+
+func _on_player_exit_movement_state(state_exited: PlayerStateMachine.E_StateName) -> void:
+	if(state_exited == PlayerStateMachine.E_StateName.Sprint):
+		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,0.25)
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
@@ -225,9 +242,9 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	pistol.reparent(bone_to_reparent_to,true)
 	pistol.set_position(new_pos)
 
-func _tween_move_blend_amount(new_value : float, time : float) -> void:
-	if(move_blend_tween && move_blend_tween.is_running()):
-		move_blend_tween.stop()
+func _tween_anim_property(tween: Tween, blend_property : String ,new_value : float, time : float) -> void:
+	if(tween && tween.is_running()):
+		tween.stop()
 		
-	move_blend_tween = create_tween()
-	move_blend_tween.tween_property(self, anim_move_blend_add_amount, new_value,time)
+	tween = create_tween()
+	tween.tween_property(self, blend_property, new_value,time)
