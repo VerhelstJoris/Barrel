@@ -175,7 +175,6 @@ unique_name_in_owner = true
 script = ExtResource("16_y16om")
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
-time_reach_max_gravity_velocity = null
 MOVE_FORWARD = null
 MOVE_BACK = null
 MOVE_LEFT = null
@@ -211,6 +210,9 @@ metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Walk" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("19_bjt1r")
+forward_movement_speed = 2.75
+sideways_movement_speed = 2.75
+backward_movement_speed = 2.0
 
 [node name="Sprint" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("20_jajtq")
@@ -228,8 +230,8 @@ script = ExtResource("25_jajtq")
 max_jump_down_time = 0.35
 target_jump_velocity = 87.0
 jump_add_multiplier_curve = SubResource("Curve_w7r7y")
-post_hold_taper_time = 0.0
-forward_movement_speed = 4.0
+post_hold_taper_time = 0.15
+forward_movement_speed = 4.5
 sideways_movement_speed = 3.0
 minimum_time_in_state = 0.15
 velocity_decay_to_current_state_time = 1.5

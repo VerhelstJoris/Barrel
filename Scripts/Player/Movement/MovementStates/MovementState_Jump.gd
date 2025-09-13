@@ -20,7 +20,7 @@ func _on_exit_internal() -> void:
 func _check_transitions() -> void:
 	if(player.is_on_floor()):
 		state_machine._transition_to(state_machine.E_StateName.Grounded)
-	elif (player.velocity.y < 0 && current_taper_timer <= post_hold_taper_time):
+	elif (player.velocity.y < 0 && current_taper_timer >= post_hold_taper_time):
 		state_machine._transition_to(state_machine.E_StateName.Fall)
 
 func _on_physics_update_internal(_delta: float) -> void:
