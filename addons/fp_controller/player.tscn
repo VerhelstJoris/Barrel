@@ -214,8 +214,7 @@ script = ExtResource("19_bjt1r")
 
 [node name="Sprint" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("20_jajtq")
-forward_movement_speed = 5.0
-backward_movement_speed = 2.5
+forward_movement_speed = 5.5
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("23_nycc1")

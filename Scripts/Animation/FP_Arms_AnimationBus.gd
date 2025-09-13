@@ -40,8 +40,8 @@ const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning3"
 # these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
 var exit_reload_done : bool = false
-var colt_unholstered : bool      = false
-var colt_fan_hammer : bool       = false
+var colt_unholstered : bool = false
+var colt_fan_hammer : bool = false
 var fanning_hammer_anim_id : int = 1
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
@@ -220,11 +220,11 @@ func _update_movement_blend_values() -> void:
 	
 func _on_player_enter_movement_state(state_entered: PlayerStateMachine.E_StateName) -> void:
 	if(state_entered == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,0.25)
+		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,0.1)
 
 func _on_player_exit_movement_state(state_exited: PlayerStateMachine.E_StateName) -> void:
 	if(state_exited == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,0.25)
+		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,0.1)
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
