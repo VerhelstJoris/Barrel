@@ -28,9 +28,10 @@ const anim_reload_previous_chamber_cont_request : String = "ReloadingBlendTree/P
 const anim_reload_insert_shell_request : String = "ReloadingBlendTree/InsertShellOneShot/request"
 const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellOneShot/request"
 
-const anim_move_state_machine_path : String = "parameters/SM_Movement/"
-const anim_movement_blend_property : String = "BlendTree/MovementBlendSpace/blend_position"
-const anim_move_sprint_blend_property : String = "BlendTree/WalkSprintBlend/blend_amount"
+const anim_move_state_machine_path : String = "parameters/SM_Movement/BlendTree"
+const anim_movement_blend_property : String = "/MovementBlendSpace/blend_position"
+const anim_move_sprint_blend_property : String = "/WalkSprintBlend/blend_amount"
+const anim_move_vertical_blend_property : String = "/VerticalMovementBlendSpace/blend_position"
 const reload_movement_blend_value : float = 0.1
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
@@ -48,6 +49,7 @@ var current_action : EPistolState.Actions = EPistolState.Actions.None
 
 var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
+var movement_vertical_blend_value : float = 0
 var prev_move_direction : Vector2 = Vector2.ZERO
 var move_blend_tween : Tween
 var sprint_move_blend_tween : Tween
@@ -59,8 +61,13 @@ signal on_unholster_anim_finish()
 signal on_holster_anim_finish()
 
 var prev_delta : float = 0
-#deltatime to forever blend towards the movement we're doing
-const movement_blend_rate : float = 4
+@export_group("movement animation values")
+@export var horizontal_movement_blend_rate : float = 2
+@export var vertical_movement_blend_rate : float = 4
+@export var vertical_movement_bounds : Vector2
+
+@export_group("sprint settings")
+const sprint_blend_speed : float = 0.15
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -164,11 +171,10 @@ func _on_exit_reload_interrupted() -> void:
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	prev_delta = _delta
-	movement_blend_value = movement_blend_value.lerp( prev_move_direction, movement_blend_rate * 0.5 * prev_delta);
-	_update_movement_blend_values()
+	_update_movement_blend_values(_delta)
 	colt_fan_hammer = false
-	
+	prev_delta = _delta
+
 func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
 
@@ -214,17 +220,33 @@ func _unholster_anim_finished():
 func _on_player_movement_input(direction:Vector2) -> void:
 	prev_move_direction = direction
 	
-func _update_movement_blend_values() -> void:	
+func _update_movement_blend_values(delta : float) -> void:
+	_update_horizontal_move_blend(delta)
+	_update_vertical_move_blend(delta)
+
+func _update_horizontal_move_blend(delta : float) -> void:
+	movement_blend_value = movement_blend_value.lerp( prev_move_direction, horizontal_movement_blend_rate * delta);
 	set(anim_move_state_machine_path + anim_movement_blend_property, movement_blend_value)
 
+func _update_vertical_move_blend(delta : float) -> void:
+	var yvel : float = mov_comp.player.velocity.y
+	var target_val : float =0
+	if(yvel > 0):
+		target_val = remap(yvel,vertical_movement_bounds.x,0.0,-1,0.0)
+	else:
+		target_val = remap(yvel,0.0,vertical_movement_bounds.y,0.0,1.0)
+
+	target_val = clamp(target_val, -1 , 1)
+	movement_vertical_blend_value = lerpf(movement_vertical_blend_value, target_val ,vertical_movement_blend_rate * delta )
+	set(anim_move_state_machine_path + anim_move_vertical_blend_property, movement_vertical_blend_value)
 	
 func _on_player_enter_movement_state(state_entered: PlayerStateMachine.E_StateName) -> void:
 	if(state_entered == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,0.1)
+		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,sprint_blend_speed)
 
 func _on_player_exit_movement_state(state_exited: PlayerStateMachine.E_StateName) -> void:
 	if(state_exited == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,0.1)
+		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,sprint_blend_speed)
 	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
