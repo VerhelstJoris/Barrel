@@ -618,6 +618,7 @@ parameters/SM_Movement/BlendTree/Add2/add_amount = 1.0
 "parameters/SM_Movement/BlendTree/Sub2 2/sub_amount" = 1.0
 parameters/MoveBlendAdd/add_amount = 0.0
 script = ExtResource("1_24ex7")
+vertical_movement_blend_rate = 6.0
 vertical_movement_bounds = Vector2(-10, 10)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
