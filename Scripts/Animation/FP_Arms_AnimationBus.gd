@@ -78,6 +78,8 @@ func _ready() -> void:
 	pistol.on_current_action_interrupted.connect(_on_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
 	right_prop_bone_pos = pistol.get_position()
+	var starting_anim_player : AnimationPlayer= get_node(anim_player)
+	starting_anim_player.active = true
 	
 func _init_player_data(player : Player) -> void:
 	mov_comp = player.movement_component
