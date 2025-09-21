@@ -135,7 +135,7 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 func _finish_prev_pistol_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
-		_tween_anim_property(move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property, reload_movement_blend_value, 0.1)
+		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
 	else:
@@ -198,7 +198,7 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
 
 		enter_reload_done = false
-		_tween_anim_property(move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property, reload_movement_blend_value , 0.1)
+		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
 	elif(exit):
 		exit_reload_done = false
 
@@ -285,7 +285,7 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 
 	#called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:
-	_tween_anim_property(move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,new_val, duration )
+	_tween_anim_property(move_blend_tween, anim_move_blend_add_amount,new_val, duration )
 
 func _tween_anim_property(tween: Tween, blend_property : String ,new_value : float, time : float) -> void:
 	if(tween && tween.is_running()):
