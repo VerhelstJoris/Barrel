@@ -12,6 +12,11 @@ signal on_jump_input_received(event : InputEvent)
 signal on_player_movement_state_enter(new_state : PlayerStateMachine.E_StateName)
 signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName)
 
+@export_group("Movement Acceleration Settings")
+@export var horizontal_velocity_acceleration : float = 6.0
+var current_horizontal_velocity : Vector2 = Vector2.ZERO
+
+
 @export_group("Gravity Settings")
 @export var max_gravity_velocity : float = -18
 @export var gravity_growth_curve : Curve
@@ -20,11 +25,11 @@ signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName
 var current_gravity_velocity : float = 0
 var current_gravity_time : float = 0
 
-@export_group("Controls map names")
-@export var MOVE_FORWARD: String = "move_forward"
-@export var MOVE_BACK: String = "move_back"
-@export var MOVE_LEFT: String = "move_left"
-@export var MOVE_RIGHT: String = "move_right"
+
+const MOVE_FORWARD: String = "move_forward"
+const MOVE_BACK: String = "move_back"
+const MOVE_LEFT: String = "move_left"
+const MOVE_RIGHT: String = "move_right"
 
 @export_group("General Control Settings")
 @export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
@@ -94,10 +99,22 @@ func _on_jump_input(_event : InputEvent) -> void:
 		on_player_jump_toggle.emit(jump_down)
 	
 func _handle_player_move(_delta : float, current_active_state : PlayerState):
-	var horizontal_target : Vector2 = _calculate_target_velocity_for_state(current_active_state)
-	var final_target : Vector2 = _calculate_potential_lerped_target_velocity(current_active_state, horizontal_target)
-	var target_vel : Vector3 = (player.transform.basis * Vector3(final_target.x, 0, -final_target.y))
-
+	var new_horizontal_target :Vector2 = _calculate_target_velocity_for_state(current_active_state)
+	if(current_active_state.accelerate_to_target_velocity):
+		var velocity_acceleration : float = horizontal_velocity_acceleration
+		if(current_active_state.override_velocity_acceleration):
+			velocity_acceleration = current_active_state.override_velocity_acceleration
+			
+		var vel_this_frame : float = velocity_acceleration * _delta
+		var vel_difference : float = current_horizontal_velocity.distance_to(new_horizontal_target)
+		if(vel_difference != 0):
+			current_horizontal_velocity = lerp(current_horizontal_velocity, new_horizontal_target, min(vel_this_frame/ vel_difference,1))
+		else:
+			current_horizontal_velocity = new_horizontal_target
+	else:
+		current_horizontal_velocity = new_horizontal_target
+	
+	var target_vel : Vector3 = (player.transform.basis * Vector3(current_horizontal_velocity.x, 0, -current_horizontal_velocity.y))
 	_add_velocity(target_vel)
 	
 func _calculate_target_velocity_for_state(current_active_state : PlayerState) -> Vector2:
@@ -110,15 +127,7 @@ func _calculate_target_velocity_for_state(current_active_state : PlayerState) ->
 			horizontal_target.y = input_direction.y * current_active_state.forward_movement_speed
 			
 	return horizontal_target		
-
-func _calculate_potential_lerped_target_velocity(current_active_state : PlayerState, new_target_velocity : Vector2) -> Vector2:
-	if(current_active_state.velocity_decay_to_current_state_time <= 0 || previous_state == null || current_active_state.current_time_in_state > current_active_state.velocity_decay_to_current_state_time):
-		return new_target_velocity
-
-	var prev_state_target : Vector2 = _calculate_target_velocity_for_state(previous_state)
 	
-	return lerp(prev_state_target, new_target_velocity, current_active_state.current_time_in_state / current_active_state.velocity_decay_to_current_state_time)
-
 func _handle_gravity(_delta : float, current_active_state : PlayerState):
 	if not player.is_on_floor() && current_active_state._get_affected_by_gravity():
 		_add_gravity(_delta)

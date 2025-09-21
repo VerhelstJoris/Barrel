@@ -15,8 +15,10 @@ var player: Player
 @export_group("General Settings")
 @export var minimum_time_in_state : float = 0.0
 
-#if we enter this state with more velocity than this state allows, how long should we take to decay down
-@export var velocity_decay_to_current_state_time : float = 0.0
+@export_group("Movement Velocity")
+@export var accelerate_to_target_velocity : bool = true
+@export var override_velocity_acceleration : bool = false
+@export var override_velocity_acceleration_speed : float = 0.0
 var current_time_in_state : float = 0.0
 
 var state_type : PlayerStateMachine.E_StateName = PlayerStateMachine.E_StateName.None

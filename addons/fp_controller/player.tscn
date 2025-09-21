@@ -174,14 +174,10 @@ ExtResource("18_w7r7y"): SubResource("Resource_hwrxm")
 [node name="PlayerMovementComponent" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("16_y16om")
+horizontal_velocity_acceleration = 25.0
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
-MOVE_FORWARD = null
-MOVE_BACK = null
-MOVE_LEFT = null
-MOVE_RIGHT = null
-movement_deadzone = null
 
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
@@ -224,7 +220,8 @@ forward_movement_speed = 5.5
 script = ExtResource("23_nycc1")
 forward_movement_speed = 3.0
 backward_movement_speed = 2.5
-velocity_decay_to_current_state_time = 1.0
+override_velocity_acceleration = true
+override_velocity_acceleration_speed = 10.0
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="Jump" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
@@ -236,7 +233,8 @@ post_hold_taper_time = 0.0
 forward_movement_speed = 4.5
 sideways_movement_speed = 3.0
 minimum_time_in_state = 0.15
-velocity_decay_to_current_state_time = 1.5
+override_velocity_acceleration = true
+override_velocity_acceleration_speed = 10.0
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
 [node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
