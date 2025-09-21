@@ -67,7 +67,10 @@ var prev_delta : float = 0
 @export var vertical_movement_bounds : Vector2
 
 @export_group("sprint settings")
-const sprint_blend_speed : float = 0.15
+@export var sprint_blend_speed : float = 0.15
+@export var sprint_speed_anim_threshold : float = 4
+var sprint_blend_target : float = 0
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -221,7 +224,13 @@ func _on_player_movement_input(direction:Vector2) -> void:
 	prev_move_direction = direction
 	
 func _update_movement_blend_values(delta : float) -> void:
-	_update_horizontal_move_blend(delta)
+	var horizontal_move : float = mov_comp.current_horizontal_velocity.length()
+	if horizontal_move > sprint_speed_anim_threshold:
+		_check_transition_sprint(true)
+	else:
+		_check_transition_sprint(false)
+		_update_horizontal_move_blend(delta)
+
 	_update_vertical_move_blend(delta)
 
 func _update_horizontal_move_blend(delta : float) -> void:
@@ -240,14 +249,20 @@ func _update_vertical_move_blend(delta : float) -> void:
 	movement_vertical_blend_value = lerpf(movement_vertical_blend_value, target_val ,vertical_movement_blend_rate * delta )
 	set(anim_move_state_machine_path + anim_move_vertical_blend_property, movement_vertical_blend_value)
 	
-func _on_player_enter_movement_state(state_entered: PlayerStateMachine.E_StateName) -> void:
-	if(state_entered == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween, anim_move_state_machine_path + anim_move_sprint_blend_property,1,sprint_blend_speed)
+func _on_player_enter_movement_state(_state_entered: PlayerStateMachine.E_StateName) -> void:
+	pass
 
-func _on_player_exit_movement_state(state_exited: PlayerStateMachine.E_StateName) -> void:
-	if(state_exited == PlayerStateMachine.E_StateName.Sprint):
-		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,0,sprint_blend_speed)
+func _on_player_exit_movement_state(_state_exited: PlayerStateMachine.E_StateName) -> void:
+	pass
 	
+func _check_transition_sprint(try_enter : bool) -> void:
+	var target_blend : float = try_enter
+	
+	
+	if(sprint_blend_target != target_blend):
+		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,target_blend,sprint_blend_speed)
+		sprint_blend_target = target_blend
+		
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D
 	var new_pos : Vector3 = Vector3.ZERO;
