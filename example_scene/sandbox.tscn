@@ -50,7 +50,6 @@ skeleton = NodePath("../..")
 shape = SubResource("ConvexPolygonShape3D_h1lgg")
 
 [node name="Player" parent="." instance=ExtResource("2_l16tt")]
-sprint_toggle = false
 
 [node name="Obstacles" type="Node" parent="."]
 

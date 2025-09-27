@@ -16,6 +16,8 @@ signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName
 @export var horizontal_velocity_acceleration : float = 6.0
 var current_horizontal_velocity : Vector2 = Vector2.ZERO
 
+@export_group("Step Height Settings")
+var max_step_up_height : float = 0.5
 
 @export_group("Gravity Settings")
 @export var max_gravity_velocity : float = -18
@@ -40,6 +42,8 @@ var jump_down : bool = false
 var input_direction: Vector2
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
+@onready var collision_shape: CollisionShape3D = %CollisionShape
+
 var previous_state : PlayerState = null
 
 var player: Player
@@ -64,13 +68,25 @@ func _process(delta: float) -> void:
 	state_machine._update(delta)	
 
 func _physics_process(_delta: float) -> void:
-	player.velocity = current_queued_velocity
-	current_queued_velocity = Vector3.ZERO
 	state_machine._physics_update(_delta)
 	var current_active_state : PlayerState = state_machine._get_current_active_state()
 	_handle_player_move(_delta,current_active_state)
 	_handle_gravity(_delta, current_active_state)
+	
+	if(input_direction != Vector2.ZERO):
+		_try_step_up()
+		
+	player.velocity = current_queued_velocity
+	current_queued_velocity = Vector3.ZERO
+	
 	player.move_and_slide()
+	
+func _try_step_up() -> bool:
+	var step : Dictionary = PlayerCharacterStep.step_up(player.get_rid(), player.global_transform, max_step_up_height, Vector3(player.velocity.x, 0.0, player.velocity.z).normalized(), collision_shape.shape.radius * 0.5, 0.25)
+	if !step.is_empty() and step["normal"].angle_to(Vector3.UP) <= player.floor_max_angle:
+		player.global_position.y = step["point"].y
+		return true
+	return false	
 
 func _on_movement_input(_event : InputEvent) -> void:
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
