@@ -162,6 +162,18 @@ polygon = PackedVector2Array(0, 0, 0, 2, 5, 2, 6, 0)
 
 [node name="Jump Blocks" type="Node3D" parent="Obstacles"]
 
+[node name="BasicBlock21" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 3.74513e-07, 0, 1, 0, -3.74513e-07, 0, 1, -5, 1.75, -5)
+
+[node name="BasicBlock22" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 3.74513e-07, 0, 1, 0, -3.74513e-07, 0, 1, -6, 1.75, -5)
+
+[node name="BasicBlock23" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -4.78821e-07, 0, 1, 0, 4.78821e-07, 0, -1, -7, 1.75, -6)
+
+[node name="BasicBlock24" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -4.78821e-07, 0, 1, 0, 4.78821e-07, 0, -1, -8, 1.75, -6)
+
 [node name="BasicBlock5" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, -0.75, -4)
 
@@ -197,6 +209,18 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 1
 
 [node name="BasicBlock16" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -18, 2, -4)
+
+[node name="BasicBlock17" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 1.78814e-07, 0, 1, 0, -1.78814e-07, 0, 1, -5, -0.75, -5)
+
+[node name="BasicBlock18" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 1.78814e-07, 0, 1, 0, -1.78814e-07, 0, 1, -6, -0.5, -5)
+
+[node name="BasicBlock19" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -7, -0.25, -5)
+
+[node name="BasicBlock20" parent="Obstacles/Jump Blocks" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0, -5)
 
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)

@@ -28,6 +28,7 @@
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="25_jajtq"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
+margin = 0.0
 radius = 0.45
 height = 1.8
 
@@ -102,6 +103,7 @@ metadata/_snap_count = 16
 floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
+metadata/_custom_type_script = "uid://dur6370kpmrxi"
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
 unique_name_in_owner = true
@@ -119,6 +121,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 [node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
 cull_mask = 1048573
+current = true
 script = ExtResource("2_1py82")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
@@ -179,6 +182,7 @@ horizontal_velocity_acceleration = 25.0
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
+movement_deadzone = null
 
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
@@ -242,6 +246,14 @@ metadata/_custom_type_script = "uid://dualuy1631ivy"
 script = ExtResource("17_y16om")
 metadata/_custom_type_script = "uid://rflwqd4b4ayy"
 
-[connection signal="transitioned" from="PlayerMovementComponent/BaseMovementStateMachine" to="." method="_on_state_machine_transitioned"]
+[node name="StepDownRay" type="RayCast3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(0.998662, 0.0517085, 0, -0.0517085, 0.998662, 0, 0, 0, 1, 0, 0.55, -0.7)
+target_position = Vector3(0, -0.5, 0)
+
+[node name="StepForwardRay" type="RayCast3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(0.998662, 0.0517085, 0, -0.0517085, 0.998662, 0, 0, 0, 1, 0, 0.05, 0)
+target_position = Vector3(0, 0, -0.7)
 
 [editable path="PlayerInputManagerComponent"]
