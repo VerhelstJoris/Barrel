@@ -18,8 +18,8 @@ var current_horizontal_velocity : Vector2 = Vector2.ZERO
 
 @export_group("Step Height Settings")
 @export var max_step_up_height : float = 0.26
-@onready var step_ray_forward : RayCast3D = %StepForwardRay
-@onready var step_ray_down : RayCast3D = %StepDownRay
+@onready var step_below_ray : RayCast3D = %StepBelowRay
+@onready var step_in_front_ray : RayCast3D = %StepInFrontRay
 var _stepped_last_frame : bool = false
 
 var _draw_step_debug : bool = true
@@ -79,11 +79,13 @@ func _physics_process(_delta: float) -> void:
 	_handle_gravity(_delta, current_active_state)
 
 	var stepped_up : bool = _try_stair_step_up(_delta)
+	var stepped_down : bool = false
 	if(!stepped_up):
 		player.velocity = current_queued_velocity
 		player.move_and_slide()
+		stepped_down = _try_stair_step_down(_delta)
 	
-	_stepped_last_frame = stepped_up
+	_stepped_last_frame = stepped_up || stepped_down
 
 func _is_surface_too_steep(normal : Vector3) -> bool:
 	return normal.angle_to(Vector3.UP) > player.floor_max_angle
@@ -123,19 +125,44 @@ func _try_stair_step_up(_delta : float) -> bool:
 		return false
 
 	#check if the surface we are went to step on is too step	
-	step_ray_down.global_position = down_check_result.get_position() + Vector3(0,max_step_up_height,0) + (expected_move_motion.normalized() *0.05)
+	step_in_front_ray.global_position = down_check_result.get_position() + Vector3(0,max_step_up_height,0) + (expected_move_motion.normalized() *0.05)
 	if(_draw_step_debug):
-		DebugDraw3D.draw_sphere(step_ray_down.global_position,0.05,Color(1,0,1))
-		DebugDraw3D.draw_line(step_ray_down.global_position , step_ray_down.global_position + (down_check_result.get_normal() * 0.25),Color(1,0,1),0.05)
+		DebugDraw3D.draw_sphere(step_in_front_ray.global_position,0.05,Color(1,0,1))
+		DebugDraw3D.draw_line(step_in_front_ray.global_position , step_in_front_ray.global_position + (down_check_result.get_normal() * 0.25),Color(1,0,1),0.05)
 
-	step_ray_down.force_raycast_update()
-	if(step_ray_down.is_colliding() and !_is_surface_too_steep(step_ray_down.get_collision_normal())):
+	step_in_front_ray.force_raycast_update()
+	if(step_in_front_ray.is_colliding() and !_is_surface_too_steep(step_in_front_ray.get_collision_normal())):
 		if(_draw_step_debug):
 			DebugDraw3D.draw_sphere(step_transform_with_clearance.origin + down_check_result.get_travel(),0.05,Color(1,0,0))
 		player.global_position = step_transform_with_clearance.origin + down_check_result.get_travel()
 		player.apply_floor_snap()
 		return true
 	return false
+	
+func _try_stair_step_down(_delta : float) -> bool:
+	if(!player.is_on_floor() && !_stepped_last_frame):
+		return false
+		
+	#we are moving up, do not snap us down	
+	if(player.velocity.y > 0):
+		return false
+		
+	if (current_queued_velocity.is_zero_approx() && input_direction.is_zero_approx()):
+		return false
+		
+	#move and slide was already called so ray needs updating
+	step_below_ray.force_update_transform()
+	var floor_below : bool = step_below_ray.is_colliding() && !_is_surface_too_steep(step_below_ray.get_collision_normal())
+	if(!floor_below):
+		return false
+	
+	var body_test_result = KinematicCollision3D.new()
+	if !player.test_move(player.global_transform, Vector3(0,-max_step_up_height,0), body_test_result):
+		return false
+		
+	player.position.y += body_test_result.get_travel().y
+	player.apply_floor_snap()
+	return true
 	
 func _on_movement_input(_event : InputEvent) -> void:
 	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):

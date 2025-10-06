@@ -179,6 +179,7 @@ ExtResource("18_w7r7y"): SubResource("Resource_hwrxm")
 unique_name_in_owner = true
 script = ExtResource("16_y16om")
 horizontal_velocity_acceleration = 25.0
+max_step_up_height = null
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
@@ -246,14 +247,14 @@ metadata/_custom_type_script = "uid://dualuy1631ivy"
 script = ExtResource("17_y16om")
 metadata/_custom_type_script = "uid://rflwqd4b4ayy"
 
-[node name="StepDownRay" type="RayCast3D" parent="."]
+[node name="StepInFrontRay" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(0.998662, 0.0517085, 0, -0.0517085, 0.998662, 0, 0, 0, 1, 0, 0.55, -0.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -0.7)
 target_position = Vector3(0, -0.5, 0)
 
-[node name="StepForwardRay" type="RayCast3D" parent="."]
+[node name="StepBelowRay" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(0.998662, 0.0517085, 0, -0.0517085, 0.998662, 0, 0, 0, 1, 0, 0.05, 0)
-target_position = Vector3(0, 0, -0.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+target_position = Vector3(0, -0.3, 0)
 
 [editable path="PlayerInputManagerComponent"]
