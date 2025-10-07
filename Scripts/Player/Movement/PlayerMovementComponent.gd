@@ -71,6 +71,9 @@ func _connect_input_events():
 func _process(delta: float) -> void:
 	state_machine._update(delta)	
 
+func _is_on_floor() -> bool:
+	return player.is_on_floor() || _stepped_last_frame
+
 func _physics_process(_delta: float) -> void:
 	current_queued_velocity = Vector3.ZERO
 	state_machine._physics_update(_delta)
@@ -91,7 +94,7 @@ func _is_surface_too_steep(normal : Vector3) -> bool:
 	return normal.angle_to(Vector3.UP) > player.floor_max_angle
 
 func _try_stair_step_up(_delta : float) -> bool:
-	if (!player.is_on_floor() && !_stepped_last_frame):
+	if (!_is_on_floor()):
 		return false
 
 	if(player.velocity.y > 0):
@@ -140,7 +143,7 @@ func _try_stair_step_up(_delta : float) -> bool:
 	return false
 	
 func _try_stair_step_down(_delta : float) -> bool:
-	if(!player.is_on_floor() && !_stepped_last_frame):
+	if(!_is_on_floor()):
 		return false
 		
 	#we are moving up, do not snap us down	
@@ -222,7 +225,7 @@ func _calculate_target_velocity_for_state(current_active_state : PlayerState) ->
 	return horizontal_target		
 	
 func _handle_gravity(_delta : float, current_active_state : PlayerState):
-	if not player.is_on_floor() && current_active_state._get_affected_by_gravity():
+	if !_is_on_floor() && current_active_state._get_affected_by_gravity():
 		_add_gravity(_delta)
 	else:
 		_reset_gravity_vel()
