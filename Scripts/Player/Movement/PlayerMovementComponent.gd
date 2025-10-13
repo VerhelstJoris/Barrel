@@ -46,7 +46,6 @@ var jump_down : bool = false
 var input_direction: Vector2
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
-@onready var collision_shape: CollisionShape3D = %CollisionShape
 
 var previous_state : PlayerState = null
 

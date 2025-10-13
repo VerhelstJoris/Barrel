@@ -5,7 +5,7 @@ signal transitioned(state: PlayerState)
 
 var owner_state : PlayerState = null
 
-enum E_StateName {None, Grounded, Walk, Sprint, Fall, Jump}
+enum E_StateName {None, Grounded, Walk, Sprint, Fall, Jump, Crouch}
 
 @export var states_map : Dictionary[E_StateName, PlayerState]
 
@@ -34,6 +34,8 @@ func _init_child_states()	 -> void:
 		if(states_map[key] is PlayerState):
 			states_map[key].state_machine = self
 			states_map[key].state_type = key
+		else:
+			push_error("State \"" + states_map[key].name + "\" Is not a valid state!")
 
 #called externally			
 func _update(delta: float) -> void:

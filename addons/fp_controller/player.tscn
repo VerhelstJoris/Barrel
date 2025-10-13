@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=42 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -25,15 +25,21 @@
 [ext_resource type="Resource" uid="uid://c74mnvf3pkusb" path="res://Data/Input/Player/IA_Quick_Unholster.tres" id="21_62dvf"]
 [ext_resource type="Script" uid="uid://ck5a5wfg6fqxy" path="res://Scripts/Player/Movement/MovementStates/MovementState_Fall.gd" id="23_nycc1"]
 [ext_resource type="Script" uid="uid://dkwfkuralqxts" path="res://Scripts/Player/Movement/MovementStates/Grounded/MovementState_Grounded.gd" id="24_bjt1r"]
+[ext_resource type="Script" uid="uid://y04e5atcb2bu" path="res://Scripts/Player/Movement/MovementStates/MovementState_Crouch.gd" id="25_hwrxm"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="25_jajtq"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
+height = 1.8
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_irl70"]
 margin = 0.0
 radius = 0.45
 height = 1.8
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
-height = 1.8
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hwrxm"]
+margin = 0.0
+radius = 0.45
+height = 1.1
 
 [sub_resource type="Resource" id="Resource_gd45c"]
 script = ExtResource("20_5af7x")
@@ -103,16 +109,27 @@ metadata/_snap_count = 16
 floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
-metadata/_custom_type_script = "uid://dur6370kpmrxi"
 
-[node name="CollisionShape" type="CollisionShape3D" parent="."]
+[node name="Placeholder_BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.9, 2.08165e-12)
+visible = false
+mesh = SubResource("CapsuleMesh_aufvi")
+
+[node name="StandingCollisionShape" type="CollisionShape3D" parent="."]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.9, 2.08165e-12)
 shape = SubResource("CapsuleShape3D_irl70")
 
-[node name="Placeholder_BodyMesh" type="MeshInstance3D" parent="CollisionShape"]
-mesh = SubResource("CapsuleMesh_aufvi")
-skeleton = NodePath("../..")
+[node name="CrouchingCollisionShape" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("CapsuleShape3D_hwrxm")
+
+[node name="CrouchingCameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+
+[node name="StandingCameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 unique_name_in_owner = true
@@ -179,11 +196,9 @@ ExtResource("18_w7r7y"): SubResource("Resource_hwrxm")
 unique_name_in_owner = true
 script = ExtResource("16_y16om")
 horizontal_velocity_acceleration = 25.0
-max_step_up_height = null
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
-movement_deadzone = null
 
 [node name="Node" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
@@ -207,7 +222,8 @@ metadata/_custom_type_script = "uid://dualuy1631ivy"
 script = ExtResource("16_62dvf")
 states_map = {
 2: NodePath("Walk"),
-3: NodePath("Sprint")
+3: NodePath("Sprint"),
+6: NodePath("Crouch")
 }
 initial_state = 2
 metadata/_custom_type_script = "uid://dualuy1631ivy"
@@ -221,6 +237,19 @@ backward_movement_speed = 2.0
 [node name="Sprint" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine"]
 script = ExtResource("20_jajtq")
 forward_movement_speed = 5.5
+
+[node name="Crouch" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine" node_paths=PackedStringArray("standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot", "camera_attach_node")]
+script = ExtResource("25_hwrxm")
+standing_shape = NodePath("../../../../../StandingCollisionShape")
+standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
+crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
+crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
+camera_attach_node = NodePath("../../../../../CameraPivot")
+standing_to_crouch_transition_time = 0.06
+crouch_to_standing_transition_time = 0.06
+forward_movement_speed = 1.75
+sideways_movement_speed = 1.75
+backward_movement_speed = 1.25
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("23_nycc1")
