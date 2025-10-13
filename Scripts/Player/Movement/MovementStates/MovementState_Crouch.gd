@@ -7,9 +7,10 @@ class_name Crouch extends PlayerState
 @export var crouching_shape : CollisionShape3D
 @export var crouching_camera_pivot : Node3D
 
+var height_diff : float = 0
 @export var camera_attach_node : Node3D
 
-@export_group("Transitiion settings")
+@export_group("Transition Settings")
 @export var standing_to_crouch_transition_time : float = 0.05
 @export var crouch_to_standing_transition_time : float = 0.05
 
@@ -19,11 +20,11 @@ var entering : bool = false
 func _ready() -> void:
 	super()
 	crouching_shape.disabled = true
+	height_diff = (standing_shape.shape as CapsuleShape3D).height - (crouching_shape.shape as CapsuleShape3D).height
 
 func _check_transitions() -> void:
-	if(!mov_comp.crouch_down):
+	if(!mov_comp.crouch_down && _can_currently_exit()):
 		state_machine._transition_to(state_machine.E_StateName.Walk)
-	pass
 	
 func _on_enter_internal() -> void:
 	crouching_shape.disabled = false
@@ -32,13 +33,20 @@ func _on_enter_internal() -> void:
 
 	_start_transition(true)
 
-
 func _on_exit_internal() -> void:
 	crouching_shape.disabled = true
 	standing_shape.disabled = false
 	entering = false
 
 	_start_transition(false)
+
+func _can_currently_exit() -> bool:
+	var translation_needed : Vector3 = Vector3(0,height_diff,0)
+
+	if (!player.test_move(player.global_transform,translation_needed)):
+		return true
+
+	return false	
 
 func _start_transition(to_crouch : bool) -> void:
 	var current_time : float

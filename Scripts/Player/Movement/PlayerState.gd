@@ -41,7 +41,6 @@ func _ready() -> void:
 
 func _update(_delta : float)	-> void:
 	if(child_state_machine != null):
-		child_state_machine.current_state._check_transitions()
 		child_state_machine.current_state._update(_delta)
 	else:
 		_on_update_internal(_delta)
@@ -55,6 +54,7 @@ func _get_affected_by_gravity() -> bool:
 
 func _physics_update(_delta: float) -> void:
 	if(child_state_machine != null):
+		child_state_machine.current_state._check_transitions()
 		child_state_machine.current_state._physics_update(_delta)
 	else:
 		_on_physics_update_internal(_delta)
