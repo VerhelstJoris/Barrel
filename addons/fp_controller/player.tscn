@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=45 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
 [ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="4_5af7x"]
 [ext_resource type="Resource" uid="uid://dpdcr67h4kfen" path="res://Data/Input/Movement/IA_Move_Left.tres" id="5_62dvf"]
+[ext_resource type="Shader" uid="uid://cuppwen4i4k7j" path="res://Materials/Shaders/UI/Screen_Vignette.gdshader" id="5_bn61v"]
+[ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
 [ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
@@ -40,6 +42,12 @@ height = 1.8
 margin = 0.0
 radius = 0.45
 height = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i7lip"]
+shader = ExtResource("5_bn61v")
+shader_parameter/alpha = 0.0
+shader_parameter/inner_radius = 0.8
+shader_parameter/outer_radius = 1.0
 
 [sub_resource type="Resource" id="Resource_gd45c"]
 script = ExtResource("20_5af7x")
@@ -170,6 +178,15 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 0.5, 2.08165e-12)
 rotation_order = 0
 
+[node name="HUDVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
+material = SubResource("ShaderMaterial_i7lip")
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 2
+script = ExtResource("6_i7lip")
+default_alpha = 0.025
+crouched_alpha = 0.1
+transition_time = 0.13
+
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
 ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode")]
@@ -245,8 +262,8 @@ standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
 crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
 crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
 camera_attach_node = NodePath("../../../../../CameraPivot")
-standing_to_crouch_transition_time = 0.06
-crouch_to_standing_transition_time = 0.06
+standing_to_crouch_transition_time = 0.12
+crouch_to_standing_transition_time = 0.12
 forward_movement_speed = 1.75
 sideways_movement_speed = 1.75
 backward_movement_speed = 1.25
