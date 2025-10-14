@@ -45,9 +45,11 @@ height = 1.1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i7lip"]
 shader = ExtResource("5_bn61v")
-shader_parameter/alpha = 0.0
-shader_parameter/inner_radius = 0.8
+shader_parameter/alpha = 1.0
+shader_parameter/inner_radius = 0.72
 shader_parameter/outer_radius = 1.0
+shader_parameter/edge_mult = 0.735
+shader_parameter/uv_offset = Vector2(0, 0.1)
 
 [sub_resource type="Resource" id="Resource_gd45c"]
 script = ExtResource("20_5af7x")
@@ -184,8 +186,8 @@ custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
 script = ExtResource("6_i7lip")
 default_alpha = 0.025
-crouched_alpha = 0.1
-transition_time = 0.13
+crouched_alpha = 0.4
+transition_time = 0.14
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
