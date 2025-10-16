@@ -69,7 +69,4 @@ func _start_transition(to_crouch : bool) -> void:
 		camera_transition_tween.stop()
 		
 	camera_transition_tween = create_tween()
-	camera_transition_tween.tween_property(camera_attach_node,"position",node_to_lerp_to.position,next_time * (1-transition_start_alpha))
-	
-
-			
+	camera_transition_tween.tween_property(camera_attach_node,"position",node_to_lerp_to.position,next_time * (1-transition_start_alpha)).set_ease(Tween.EASE_OUT)

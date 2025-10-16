@@ -40,6 +40,4 @@ func _start_transition(to_crouch: bool) -> void:
 		vignette_crouch_tween.stop()
 
 	vignette_crouch_tween = create_tween()
-	vignette_crouch_tween.tween_property(material,shader_alpha,target_alpha,transition_time * (1-transition_start_alpha))
-	
-		
+	vignette_crouch_tween.tween_property(material,shader_alpha,target_alpha,transition_time * (1-transition_start_alpha)).set_ease(Tween.EASE_OUT)

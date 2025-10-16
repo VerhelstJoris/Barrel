@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=48 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -45,11 +45,12 @@ height = 1.1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i7lip"]
 shader = ExtResource("5_bn61v")
-shader_parameter/alpha = 1.0
+shader_parameter/alpha = 0.4
 shader_parameter/inner_radius = 0.72
 shader_parameter/outer_radius = 1.0
 shader_parameter/edge_mult = 0.735
-shader_parameter/uv_offset = Vector2(0, 0.1)
+shader_parameter/uv_offset = Vector2(0, 0.15)
+shader_parameter/vignette_colour = Vector3(0.08, 0.03, 0)
 
 [sub_resource type="Resource" id="Resource_gd45c"]
 script = ExtResource("20_5af7x")
@@ -115,6 +116,34 @@ _data = [Vector2(0.00435414, 3.93306), 0.0, 6.41705, 0, 0, Vector2(0.998549, 0),
 point_count = 2
 metadata/_snap_count = 16
 
+[sub_resource type="Animation" id="Animation_i7lip"]
+resource_name = "Crouch"
+length = 0.233335
+step = 0.0166667
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CameraPivot/SmoothCamera")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.0666667, 1, 0.0122148, -0.000234535, 0.019196, 0.999741, 0.0833333, 1, 0.0130876, -0.000228445, 0.0174509, 0.999762, 0.166667, 1, -0.00959917, 0, 0, 0.999954, 0.183333, 1, -0.00872621, -7.61524e-05, -0.0087262, 0.999924, 0.233333, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_p7if2"]
+length = 0.001
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CameraPivot/SmoothCamera")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.0131002, 0.00238043, 0.0628848, 0.997932)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_krggn"]
+_data = {
+&"Crouch": SubResource("Animation_i7lip"),
+&"RESET": SubResource("Animation_p7if2")
+}
+
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
 floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
@@ -143,13 +172,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695, 0, 1.65, 0)
 
-[node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
+[node name="SmoothCamera" type="Camera3D" parent="CameraPivot" node_paths=PackedStringArray("anim_player")]
 unique_name_in_owner = true
+transform = Transform3D(0.99208, -0.125447, 0.00639862, 0.125572, 0.991748, -0.0258468, -0.00310341, 0.0264456, 0.999646, 0, 0, 0)
 cull_mask = 1048573
 current = true
 script = ExtResource("2_1py82")
+anim_player = NodePath("../../AnimationPlayer")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
 custom_minimum_size = Vector2(1280, 720)
@@ -177,7 +208,7 @@ render_target_update_mode = 4
 
 [node name="FP_Arms" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 0.5, 2.08165e-12)
+transform = Transform3D(-0.75, 0, -1.13247e-07, 0, 0.75, 0, 1.13247e-07, 0, -0.75, 2.08165e-12, 0.897339, 2.08165e-12)
 rotation_order = 0
 
 [node name="HUDVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
@@ -186,7 +217,7 @@ custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
 script = ExtResource("6_i7lip")
 default_alpha = 0.025
-crouched_alpha = 0.4
+crouched_alpha = 0.45
 transition_time = 0.14
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
@@ -303,5 +334,10 @@ target_position = Vector3(0, -0.5, 0)
 [node name="StepBelowRay" type="RayCast3D" parent="."]
 unique_name_in_owner = true
 target_position = Vector3(0, -0.3, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_krggn")
+}
 
 [editable path="PlayerInputManagerComponent"]
