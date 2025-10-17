@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=51 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -29,6 +29,10 @@
 [ext_resource type="Script" uid="uid://dkwfkuralqxts" path="res://Scripts/Player/Movement/MovementStates/Grounded/MovementState_Grounded.gd" id="24_bjt1r"]
 [ext_resource type="Script" uid="uid://y04e5atcb2bu" path="res://Scripts/Player/Movement/MovementStates/MovementState_Crouch.gd" id="25_hwrxm"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="25_jajtq"]
+[ext_resource type="Animation" uid="uid://dlgu11excnqap" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Crouch.res" id="30_2707o"]
+[ext_resource type="Script" uid="uid://bt31heev5y0mu" path="res://Scripts/Animation/FP_AnimationBus.gd" id="30_p7if2"]
+[ext_resource type="Animation" uid="uid://7pl5p8vtrqwe" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Uncrouch.res" id="31_tvmyk"]
+[ext_resource type="AnimationNodeBlendTree" uid="uid://duun6khj30hj5" path="res://Animations/Player/Character/WorldCamera/ABT_FP_Camera.tres" id="32_2fqq0"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
 height = 1.8
@@ -116,18 +120,6 @@ _data = [Vector2(0.00435414, 3.93306), 0.0, 6.41705, 0, 0, Vector2(0.998549, 0),
 point_count = 2
 metadata/_snap_count = 16
 
-[sub_resource type="Animation" id="Animation_i7lip"]
-resource_name = "Crouch"
-length = 0.233335
-step = 0.0166667
-tracks/0/type = "rotation_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("CameraPivot/SmoothCamera")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.0666667, 1, 0.0122148, -0.000234535, 0.019196, 0.999741, 0.0833333, 1, 0.0130876, -0.000228445, 0.0174509, 0.999762, 0.166667, 1, -0.00959917, 0, 0, 0.999954, 0.183333, 1, -0.00872621, -7.61524e-05, -0.0087262, 0.999924, 0.233333, 1, 0, 0, 0, 1)
-
 [sub_resource type="Animation" id="Animation_p7if2"]
 length = 0.001
 tracks/0/type = "rotation_3d"
@@ -136,12 +128,13 @@ tracks/0/enabled = true
 tracks/0/path = NodePath("CameraPivot/SmoothCamera")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0.0131002, 0.00238043, 0.0628848, 0.997932)
+tracks/0/keys = PackedFloat32Array()
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_krggn"]
 _data = {
-&"Crouch": SubResource("Animation_i7lip"),
-&"RESET": SubResource("Animation_p7if2")
+&"Crouch": ExtResource("30_2707o"),
+&"RESET": SubResource("Animation_p7if2"),
+&"Uncrouch": ExtResource("31_tvmyk")
 }
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
@@ -174,13 +167,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695, 0, 1.65, 0)
 
-[node name="SmoothCamera" type="Camera3D" parent="CameraPivot" node_paths=PackedStringArray("anim_player")]
+[node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
-transform = Transform3D(0.99208, -0.125447, 0.00639862, 0.125572, 0.991748, -0.0258468, -0.00310341, 0.0264456, 0.999646, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 cull_mask = 1048573
 current = true
 script = ExtResource("2_1py82")
-anim_player = NodePath("../../AnimationPlayer")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
 custom_minimum_size = Vector2(1280, 720)
@@ -339,5 +331,16 @@ target_position = Vector3(0, -0.3, 0)
 libraries = {
 &"": SubResource("AnimationLibrary_krggn")
 }
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = ExtResource("32_2fqq0")
+anim_player = NodePath("../AnimationPlayer")
+parameters/CrouchOneShot/active = false
+parameters/CrouchOneShot/internal_active = false
+parameters/CrouchOneShot/request = 0
+parameters/UnCrouchOneShot/active = false
+parameters/UnCrouchOneShot/internal_active = false
+parameters/UnCrouchOneShot/request = 0
+script = ExtResource("30_p7if2")
 
 [editable path="PlayerInputManagerComponent"]
