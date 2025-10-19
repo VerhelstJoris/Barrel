@@ -35,7 +35,6 @@ const anim_move_state_machine_path : String = "parameters/SM_Movement/BlendTree"
 const anim_movement_blend_property : String = "/MovementBlendSpace/blend_position"
 const anim_move_sprint_blend_property : String = "/WalkSprintBlend/blend_amount"
 const anim_move_vertical_blend_property : String = "/VerticalMovementBlendSpace/blend_position"
-const reload_movement_blend_value : float = 0.1
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
 const anim_fanning_condition_2 : String = "FanningSM/conditions/fanning2"
@@ -50,7 +49,6 @@ var fanning_hammer_anim_id : int = 1
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
-var anim_move_blend_add_amount : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
 var movement_vertical_blend_value : float = 0
 var prev_move_direction : Vector2 = Vector2.ZERO
@@ -68,6 +66,11 @@ var prev_delta : float = 0
 @export var horizontal_movement_blend_rate : float = 2
 @export var vertical_movement_blend_rate : float = 4
 @export var vertical_movement_bounds : Vector2
+@export var reload_movement_blend_value : float = 0.5
+@export var reload_movement_blend_tween_time : float = 1.0
+@export var reload_transition_movement_blend_value : float = 0.0
+@export var reload_transition_movement_blend_tween_time : float = 0.2
+
 
 @export_group("sprint settings")
 @export var sprint_blend_speed : float = 0.15
@@ -81,7 +84,7 @@ func _ready() -> void:
 	pistol.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
 	right_prop_bone_pos = pistol.get_position()
-	set(anim_move_blend_add_amount, 1)
+	set(anim_move_blend_add_amount_property, 1.0)
 	
 func _init_player_data(player : Player) -> void:
 	mov_comp = player.movement_component
@@ -135,7 +138,7 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 func _finish_prev_pistol_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
-		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
+		_tween_move_blend_amount(reload_movement_blend_value, reload_movement_blend_tween_time)
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
 	else:
@@ -198,11 +201,10 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
 
 		enter_reload_done = false
-		_tween_move_blend_amount(reload_movement_blend_value, 0.1)
 	elif(exit):
 		exit_reload_done = false
 
-
+	_tween_move_blend_amount(reload_transition_movement_blend_value, reload_transition_movement_blend_tween_time)
 	set(anim_colt_state_machine_path + anim_enter_reload_condition, enter || enter_uncock)
 	set(anim_colt_state_machine_path + anim_exit_reload_condition,  exit)
 	
@@ -283,9 +285,10 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	pistol.reparent(bone_to_reparent_to,true)
 	pistol.set_position(new_pos)
 
-	#called by some anim notifies
+#called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:
-	_tween_anim_property(move_blend_tween, anim_move_blend_add_amount,new_val, duration )
+	_tween_anim_property(move_blend_tween, anim_move_blend_add_amount_property, new_val, duration)
+	
 
 func _tween_anim_property(tween: Tween, blend_property : String ,new_value : float, time : float) -> void:
 	if(tween && tween.is_running()):

@@ -620,6 +620,8 @@ parameters/MoveBlendAdd/add_amount = 0.0
 script = ExtResource("1_24ex7")
 vertical_movement_blend_rate = 6.0
 vertical_movement_bounds = Vector2(-10, 10)
+reload_movement_blend_value = 0.05
+reload_movement_blend_tween_time = 0.5
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
