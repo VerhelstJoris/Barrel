@@ -107,7 +107,7 @@ states/AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_3/node = SubResource("AnimationNo
 states/AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_3/position = Vector2(551, 203)
 states/Start/position = Vector2(65, 100)
 transitions = ["AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire", "End", SubResource("AnimationNodeStateMachineTransition_7matf"), "AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_2", "End", SubResource("AnimationNodeStateMachineTransition_hfdqa"), "AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_3", "End", SubResource("AnimationNodeStateMachineTransition_nu6gb"), "Start", "AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire", SubResource("AnimationNodeStateMachineTransition_4cgqs"), "Start", "AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_2", SubResource("AnimationNodeStateMachineTransition_iwyss"), "Start", "AL_FP_Colt_FanHammer_A_FP_Colt_Fan_Fire_3", SubResource("AnimationNodeStateMachineTransition_ysco4")]
-graph_offset = Vector2(-60, -266)
+graph_offset = Vector2(-142, -57)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tmq1e"]
 animation = &"AL_FP_Character/A_FP_Dry_Fire"

@@ -135,6 +135,7 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 script = ExtResource("1_ur76o")
 bullet_scene = ExtResource("2_u1ese")
+fan_hammer_max_delay = 0.22
 input_receiver = NodePath("PistolInputReceiverComponent")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

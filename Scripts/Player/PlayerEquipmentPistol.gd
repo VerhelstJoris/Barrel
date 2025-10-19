@@ -26,9 +26,10 @@ var current_action : EPistolState.Actions = EPistolState.Actions.None:
 		on_action_started.emit(new)
 		current_action = new
 
-var can_proceed_state: bool = true;
-var can_interrupt_into_next_state: bool = false;
-var can_interrupt_fire : bool = false;
+var can_proceed_state: bool = true
+var can_interrupt_into_next_state: bool = false
+var can_interrupt_fire : bool = false
+var queued_fire : bool = false
 
 var current_bullets: Array[ColtBullet]
 const chamber_amount: int = 6
@@ -92,38 +93,53 @@ func _try_exit_reload(_event : InputEvent) -> void:
 		_exit_reload_state()	
 
 func _try_use_equipment(_event : InputEvent) -> void:
+	# only care about the press, not the release
+	if(_event.is_released()):
+		return
+		
+	var started_action : bool = false
 	var current_time : float = Time.get_unix_time_from_system()
-	if(main_equipment_last_use_time + fan_hammer_max_delay >= current_time):
+	if( current_time - main_equipment_last_use_time <= fan_hammer_max_delay):
 		if(_can_fan_fire()):
 			_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+			started_action = true
+	
+	if(!started_action):
+		if _can_shoot():
+			if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
+				_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
+			else:
+				_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
+			started_action = true
+		elif(_can_cock_hammer()):
+			_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
+			started_action = true
 
-	if _can_shoot():
-		if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
-			_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
-		else:
-			_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
-	elif(_can_cock_hammer()):
-		_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
-
-	main_equipment_last_use_time = current_time
+	if(!started_action):
+		queued_fire = true
+	else:
+		main_equipment_last_use_time = current_time
 
 
 func _on_equipped():
 	super()
 	
+#used as anim notify	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
-	
+	if(queued_fire):
+		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+
+#used as anim notify		
 func _enable_interrupting_for_next_fire() -> void:
 	can_interrupt_fire = true
-		
+	if(queued_fire):
+		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+
 func _fire_current_bullet() -> void:
 	if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 		on_fired.emit()
 		current_bullets[current_chamber_id]._on_fired()
-	else:
-		#do a dry fire
-		pass
 	
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None
@@ -145,6 +161,7 @@ func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState
 	can_interrupt_into_next_state = false
 	can_interrupt_fire = false
 	can_proceed_state = false
+	queued_fire = false
 	current_state = new_state
 	_update_action_cylinder_increment_amount(cylinder_rotations)
 
@@ -200,7 +217,6 @@ func _can_proceed_state(allow_general_interrupt : bool = false, allow_interrupt_
 		ret = ret || can_interrupt_into_next_state
 		
 	return ret	
-		
 	
 func _can_insert_round() -> bool:
 	return current_state == EPistolState.State.Reloading && _can_proceed_state(true) && current_bullets[insert_chamber_id] == null
@@ -219,7 +235,7 @@ func _can_cock_hammer() -> bool:
 
 func _can_fan_fire() -> bool:
 	#can fan the hammer if we're in the ready state or already fanning
-	return _can_proceed_state(true, true) && current_state == EPistolState.State.ReadyToFire
+	return _can_proceed_state(true, true) && (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked)
 
 func _can_shoot() -> bool:
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
@@ -250,4 +266,7 @@ func _log_chamber_states() -> void:
 		else:
 			builtStr+="]"
 		index +=1
-	print(builtStr, " ", current_chamber_id)
+
+	builtStr += " "	+ EPistolState.State.keys()[current_state]
+	builtStr += " Current Chamber: "
+	print(builtStr, current_chamber_id)
