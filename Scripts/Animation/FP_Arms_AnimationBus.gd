@@ -49,6 +49,7 @@ var fanning_hammer_anim_id : int = 1
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
+var anim_move_blend_add_amount_property : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
 var movement_vertical_blend_value : float = 0
 var prev_move_direction : Vector2 = Vector2.ZERO
