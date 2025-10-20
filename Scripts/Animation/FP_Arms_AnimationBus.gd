@@ -189,7 +189,7 @@ func _process(_delta: float) -> void:
 func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
 
-	fanning_hammer_anim_id = ((fanning_hammer_anim_id +1) % 2)+1
+	fanning_hammer_anim_id = randi() %3 +1
 	set(anim_colt_state_machine_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1)
 	set(anim_colt_state_machine_path + anim_fanning_condition_2,fanning_hammer_anim_id == 2)
 	set(anim_colt_state_machine_path + anim_fanning_condition_3,fanning_hammer_anim_id == 3)
