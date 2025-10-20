@@ -36,6 +36,8 @@ const anim_movement_blend_property : String = "/MovementBlendSpace/blend_positio
 const anim_move_sprint_blend_property : String = "/WalkSprintBlend/blend_amount"
 const anim_move_vertical_blend_property : String = "/VerticalMovementBlendSpace/blend_position"
 
+const anim_crouch_enter_request: String = "/EnterCrouchOneShot/request"
+
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
 const anim_fanning_condition_2 : String = "FanningSM/conditions/fanning2"
 const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning3"
@@ -97,17 +99,17 @@ func _init_player_data(player : Player) -> void:
 	player.on_unholster_started.connect(_on_player_unholster_started)
 
 func _set_anim_tree_oneshot_request(request_name):
-	set( anim_colt_state_machine_path + request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	set( request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
 	match new_action:
 		EPistolState.Actions.Fire:
-			_set_anim_tree_oneshot_request(anim_fire_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request)
 		EPistolState.Actions.DryFire:
-			_set_anim_tree_oneshot_request(anim_dry_fire_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_dry_fire_request)
 		EPistolState.Actions.CockHammer:
-			_set_anim_tree_oneshot_request(anim_hammer_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_hammer_request)
 		EPistolState.Actions.EnterReload:
 			_on_reload_change(true,false,false)
 		EPistolState.Actions.EnterReloadUncock:
@@ -116,20 +118,20 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 			_on_reload_change(false,false,true)
 		EPistolState.Actions.CylinderNext:
 			if(next_cyl_cont):
-				_set_anim_tree_oneshot_request(anim_reload_next_chamber_cont_request)
+				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_next_chamber_cont_request)
 				next_cyl_cont = false
 			else:		
-				_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
+				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_next_chamber_request)
 		EPistolState.Actions.CylinderPrev:
 			if(prev_cyl_cont):
-				_set_anim_tree_oneshot_request(anim_reload_previous_chamber_cont_request)
+				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_previous_chamber_cont_request)
 				prev_cyl_cont = false
 			else:
-				_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
+				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_previous_chamber_request)
 		EPistolState.Actions.Insert:
-			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_insert_shell_request)
 		EPistolState.Actions.Eject:
-			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_eject_shell_request)
 		EPistolState.Actions.FanFire:
 			_on_fanning_entered()
 		_:
@@ -197,9 +199,9 @@ func _on_fanning_entered() -> void:
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		if(enter):
-			_set_anim_tree_oneshot_request(anim_enter_reload_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+anim_enter_reload_request)
 		elif(enter_uncock):
-			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
+			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_enter_reload_uncock_request)
 
 		enter_reload_done = false
 	elif(exit):
@@ -257,6 +259,8 @@ func _update_vertical_move_blend(delta : float) -> void:
 	set(anim_move_state_machine_path + anim_move_vertical_blend_property, movement_vertical_blend_value)
 	
 func _on_player_enter_movement_state(_state_entered: PlayerStateMachine.E_StateName) -> void:
+	if(_state_entered == PlayerStateMachine.E_StateName.Crouch):
+		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_enter_request)
 	pass
 
 func _on_player_exit_movement_state(_state_exited: PlayerStateMachine.E_StateName) -> void:
