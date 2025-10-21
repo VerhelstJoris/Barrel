@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=33 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=37 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
 
@@ -8,10 +8,13 @@ filters = ["", "AnimationTree", "Arms_Rig/Skeleton3D:Hand_L", "Arms_Rig/Skeleton
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_g0oko"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yws3a"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3wpmr"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3wpmr"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_te7e3"]
+animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yws3a"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g0oko"]
@@ -19,8 +22,21 @@ animation = &"AL_FP_Character_Movement/A_FP_Move_Base_Pose"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kmnmh"]
 animation = &"AL_FP_Character_Movement/A_FP_Enter_Crouch"
+use_custom_timeline = true
+timeline_length = 0.35
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 0
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_yws3a"]
+mix_mode = 1
+fadein_time = 0.02
+fadeout_time = 0.03
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sq2n5"]
+animation = &"AL_FP_Character_Movement/A_FP_Exit_Crouch"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_aax62"]
 mix_mode = 1
 fadein_time = 0.02
 fadeout_time = 0.03
@@ -89,6 +105,8 @@ loop_mode = 1
 
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_sq2n5"]
 
+[sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_ioi4e"]
+
 [sub_resource type="AnimationNodeSub2" id="AnimationNodeSub2_te7e3"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_28pq6"]
@@ -111,8 +129,8 @@ blend_point_2/pos = -1.0
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_x8ke2"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-631.414, 53.1066)
-nodes/output/position = Vector2(380, 240)
+graph_offset = Vector2(-328.621, 109.694)
+nodes/output/position = Vector2(880, 400)
 nodes/Sub2/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/Sub2/position = Vector2(-620, -160)
 nodes/BasePose/node = SubResource("AnimationNodeAnimation_g0oko")
@@ -137,9 +155,17 @@ nodes/EnterCrouchOneShot/node = SubResource("AnimationNodeOneShot_yws3a")
 nodes/EnterCrouchOneShot/position = Vector2(80, 240)
 "nodes/Sub2 3/node" = SubResource("AnimationNodeSub2_sq2n5")
 "nodes/Sub2 3/position" = Vector2(-260, 720)
-"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_yws3a")
-"nodes/Animation 2/position" = Vector2(-780, 840)
-node_connections = [&"output", 0, &"EnterCrouchOneShot", &"Sub2", 0, &"WalkSprintBlend", &"Sub2", 1, &"BasePose", &"WalkSprintBlend", 0, &"MovementBlendSpace", &"WalkSprintBlend", 1, &"MovementSprint", &"Add2", 0, &"Sub2", &"Add2", 1, &"Sub2 2", &"Sub2 2", 0, &"VerticalMovementBlendSpace", &"Sub2 2", 1, &"Animation", &"EnterCrouchOneShot", 0, &"Add2", &"EnterCrouchOneShot", 1, &"Sub2 3", &"Sub2 3", 0, &"EnterCrouch", &"Sub2 3", 1, &"Animation 2"]
+"nodes/BasePose 3/node" = SubResource("AnimationNodeAnimation_yws3a")
+"nodes/BasePose 3/position" = Vector2(-780, 840)
+nodes/ExitCrouchOneShot/node = SubResource("AnimationNodeOneShot_aax62")
+nodes/ExitCrouchOneShot/position = Vector2(543.829, 379.442)
+"nodes/Sub2 4/node" = SubResource("AnimationNodeSub2_ioi4e")
+"nodes/Sub2 4/position" = Vector2(380, 840)
+"nodes/BasePose 2/node" = SubResource("AnimationNodeAnimation_te7e3")
+"nodes/BasePose 2/position" = Vector2(-80, 1000)
+"nodes/Exit Crouch/node" = SubResource("AnimationNodeAnimation_sq2n5")
+"nodes/Exit Crouch/position" = Vector2(-40, 840)
+node_connections = [&"output", 0, &"ExitCrouchOneShot", &"Sub2", 0, &"WalkSprintBlend", &"Sub2", 1, &"BasePose", &"WalkSprintBlend", 0, &"MovementBlendSpace", &"WalkSprintBlend", 1, &"MovementSprint", &"Add2", 0, &"Sub2", &"Add2", 1, &"Sub2 2", &"Sub2 2", 0, &"VerticalMovementBlendSpace", &"Sub2 2", 1, &"Animation", &"EnterCrouchOneShot", 0, &"Add2", &"EnterCrouchOneShot", 1, &"Sub2 3", &"Sub2 3", 0, &"EnterCrouch", &"Sub2 3", 1, &"BasePose 3", &"ExitCrouchOneShot", 0, &"EnterCrouchOneShot", &"ExitCrouchOneShot", 1, &"Sub2 4", &"Sub2 4", 0, &"Exit Crouch", &"Sub2 4", 1, &"BasePose 2"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_aax62"]
 advance_mode = 2
@@ -149,7 +175,7 @@ states/BlendTree/node = SubResource("AnimationNodeBlendTree_sq2n5")
 states/BlendTree/position = Vector2(431, 71)
 states/Start/position = Vector2(73, 67)
 transitions = ["Start", "BlendTree", SubResource("AnimationNodeStateMachineTransition_aax62")]
-graph_offset = Vector2(-222, -146)
+graph_offset = Vector2(-266, -99)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x8ke2"]
 animation = &"AL_FP_Character/A_FP_FullyHolstered"
@@ -182,7 +208,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-163, -18)
 
 [resource]
-graph_offset = Vector2(-751.289, 68.9504)
+graph_offset = Vector2(-583.992, 167.19)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)

@@ -37,6 +37,7 @@ const anim_move_sprint_blend_property : String = "/WalkSprintBlend/blend_amount"
 const anim_move_vertical_blend_property : String = "/VerticalMovementBlendSpace/blend_position"
 
 const anim_crouch_enter_request: String = "/EnterCrouchOneShot/request"
+const anim_crouch_exit_request: String = "/ExitCrouchOneShot/request"
 
 const anim_fanning_condition_1 : String = "FanningSM/conditions/fanning1"
 const anim_fanning_condition_2 : String = "FanningSM/conditions/fanning2"
@@ -264,6 +265,8 @@ func _on_player_enter_movement_state(_state_entered: PlayerStateMachine.E_StateN
 	pass
 
 func _on_player_exit_movement_state(_state_exited: PlayerStateMachine.E_StateName) -> void:
+	if(_state_exited == PlayerStateMachine.E_StateName.Crouch):
+		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_exit_request)
 	pass
 	
 

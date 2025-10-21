@@ -26,7 +26,7 @@ fadeout_time = 0.1
 fadeout_curve = SubResource("Curve_cgvhg")
 
 [resource]
-graph_offset = Vector2(-702.712, -49.6194)
+graph_offset = Vector2(-495.25, 178)
 nodes/CrouchOneShot/node = SubResource("AnimationNodeOneShot_aj01c")
 nodes/CrouchOneShot/position = Vector2(-360, -60)
 nodes/FP_Uncrouch/node = SubResource("AnimationNodeAnimation_pva62")
