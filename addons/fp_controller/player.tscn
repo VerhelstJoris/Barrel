@@ -208,8 +208,6 @@ custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
 script = ExtResource("6_i7lip")
 default_alpha = 0.025
-crouched_alpha = 0.45
-transition_time = 0.14
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
@@ -279,13 +277,17 @@ backward_movement_speed = 2.0
 script = ExtResource("20_jajtq")
 forward_movement_speed = 5.5
 
-[node name="Crouch" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine" node_paths=PackedStringArray("standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot", "camera_attach_node")]
+[node name="Crouch" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine" node_paths=PackedStringArray("standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot", "camera_attach_node", "vignette", "first_person_anim_bus")]
 script = ExtResource("25_hwrxm")
 standing_shape = NodePath("../../../../../StandingCollisionShape")
 standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
 crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
 crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
 camera_attach_node = NodePath("../../../../../CameraPivot")
+vignette = NodePath("../../../../../CameraPivot/SmoothCamera/SubViewportContainer/HUDVignette")
+crouch_vignette_alpha = 0.45
+crouch_vignette_transition_time = 0.14
+first_person_anim_bus = NodePath("../../../../../AnimationTree")
 standing_to_crouch_transition_time = 0.12
 crouch_to_standing_transition_time = 0.12
 forward_movement_speed = 1.75

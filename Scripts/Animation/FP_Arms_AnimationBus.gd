@@ -93,14 +93,12 @@ func _ready() -> void:
 func _init_player_data(player : Player) -> void:
 	mov_comp = player.movement_component
 	mov_comp.on_player_movement.connect(_on_player_movement_input)
-	mov_comp.on_player_movement_state_leave.connect(_on_player_exit_movement_state)
-	mov_comp.on_player_movement_state_enter.connect(_on_player_enter_movement_state)
 	
 	player.on_holster_started.connect(_on_player_holster_started)
 	player.on_unholster_started.connect(_on_player_unholster_started)
 
-func _set_anim_tree_oneshot_request(request_name):
-	set( request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
+	set( request_name, request_type)
 
 func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
@@ -259,17 +257,14 @@ func _update_vertical_move_blend(delta : float) -> void:
 	movement_vertical_blend_value = lerpf(movement_vertical_blend_value, target_val ,vertical_movement_blend_rate * delta )
 	set(anim_move_state_machine_path + anim_move_vertical_blend_property, movement_vertical_blend_value)
 	
-func _on_player_enter_movement_state(_state_entered: PlayerStateMachine.E_StateName) -> void:
-	if(_state_entered == PlayerStateMachine.E_StateName.Crouch):
+func _fire_crouch_oneshot(enter : bool) -> void:
+	if(enter):
 		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_enter_request)
-	pass
-
-func _on_player_exit_movement_state(_state_exited: PlayerStateMachine.E_StateName) -> void:
-	if(_state_exited == PlayerStateMachine.E_StateName.Crouch):
+		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_exit_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+	else:
 		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_exit_request)
-	pass
-	
-
+		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_enter_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		
 func _check_transition_sprint(try_enter : bool) -> void:
 	var target_blend : float = try_enter
 	

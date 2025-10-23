@@ -32,7 +32,11 @@ func _ready() -> void:
 	await owner.ready
 	if(child_state_machine != null):
 		child_state_machine.owner_state = self
-	player = owner as Player
+	_init_player_data(owner as Player)	
+	
+	
+func _init_player_data(in_player : Player) -> void:
+	player = in_player
 	assert(player != null)
 	mov_comp = player.movement_component
 	assert(mov_comp != null)
