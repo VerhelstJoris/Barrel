@@ -1,17 +1,17 @@
 @icon("res://DEBUG/Icons/Ico_StateMachine.png")
 class_name PlayerStateMachine extends Node
 
-signal transitioned(state: PlayerState)
+signal transitioned(state: MovementState_Base)
 
-var owner_state : PlayerState = null
+var owner_state : MovementState_Base = null
 
 enum E_StateName {None, Grounded, Walk, Sprint, Fall, Jump, Crouch}
 
-@export var states_map : Dictionary[E_StateName, PlayerState]
+@export var states_map : Dictionary[E_StateName, MovementState_Base]
 
 @export var initial_state : E_StateName = E_StateName.None
 
-var current_state: PlayerState
+var current_state: MovementState_Base
 
 func _ready() -> void:
 	await owner.ready
@@ -31,7 +31,7 @@ func _enter_initial_state() -> void:
 	
 func _init_child_states()	 -> void:		
 	for key in states_map:
-		if(states_map[key] is PlayerState):
+		if(states_map[key] is MovementState_Base):
 			states_map[key].state_machine = self
 			states_map[key].state_type = key
 		else:
@@ -62,7 +62,7 @@ func _transition_to(target_state: E_StateName) -> void:
 	current_state._enter_state()
 	emit_signal("transitioned", current_state)
 	
-func _get_current_active_state() -> PlayerState:
+func _get_current_active_state() -> MovementState_Base:
 	if(current_state.child_state_machine):
 		return current_state.child_state_machine._get_current_active_state()
 	

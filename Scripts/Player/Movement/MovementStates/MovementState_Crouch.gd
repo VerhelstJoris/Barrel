@@ -1,4 +1,4 @@
-class_name Crouch extends PlayerState
+class_name Crouch extends MovementState_Base
 
 @export_group("Shape Components")
 @export var standing_shape : CollisionShape3D
@@ -47,7 +47,7 @@ func _init_player_data(in_player : Player) -> void:
 		push_error("No Arms Anim Bus set on crouch state")
 	
 func _check_transitions() -> void:
-	if(!mov_comp.crouch_down && _can_currently_exit()):
+	if(!input_comp.crouch_down && _can_currently_exit()):
 		state_machine._transition_to(state_machine.E_StateName.Walk)
 	
 func _on_enter_internal() -> void:

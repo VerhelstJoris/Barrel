@@ -1,8 +1,9 @@
-class_name PlayerState extends Node
+class_name MovementState_Base extends Node
 
 var state_machine: PlayerStateMachine = null
 var mov_comp: PlayerMovementComponent
 var player: Player
+var input_comp : PlayerInputReceiver
 
 @export var child_state_machine : PlayerStateMachine = null
 
@@ -25,8 +26,6 @@ var state_type : PlayerStateMachine.E_StateName = PlayerStateMachine.E_StateName
 
 @export var is_affected_by_gravity : bool = true
 
-@export_group("Capsule Settings")
-
 
 func _ready() -> void:
 	await owner.ready
@@ -40,6 +39,8 @@ func _init_player_data(in_player : Player) -> void:
 	assert(player != null)
 	mov_comp = player.movement_component
 	assert(mov_comp != null)
+	input_comp = player.input_receiver as PlayerInputReceiver
+	
 	set_physics_process(false)
 	set_process(false)
 

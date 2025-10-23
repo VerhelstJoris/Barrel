@@ -5,9 +5,6 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var current_queued_velocity : Vector3 = Vector3.ZERO
 
 signal on_movement_input_received(event: InputEvent)
-signal on_sprint_input_received(event: InputEvent)
-signal on_crouch_input_received(event : InputEvent)
-signal on_jump_input_received(event : InputEvent)
 
 signal on_player_movement_state_enter(new_state : PlayerStateMachine.E_StateName)
 signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName)
@@ -40,21 +37,15 @@ const MOVE_RIGHT: String = "move_right"
 @export_group("General Control Settings")
 @export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
 
-var sprint_down : bool = false
-var crouch_down : bool = false
-var jump_down : bool = false
 var input_direction: Vector2
 
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
 
-var previous_state : PlayerState = null
+var previous_state : MovementState_Base = null
 
 var player: Player
 
 signal on_player_movement(direction)
-signal on_player_sprint_toggle(new_val)
-signal on_player_crouch_toggle(new_val)
-signal on_player_jump_toggle(new_val)
 
 func _ready() -> void:
 	await owner.ready
@@ -63,9 +54,6 @@ func _ready() -> void:
 	
 func _connect_input_events():
 	on_movement_input_received.connect(_on_movement_input)
-	on_sprint_input_received.connect(_on_sprint_input)
-	on_crouch_input_received.connect(_on_crouch_input)
-	on_jump_input_received.connect(_on_jump_input)
 	
 func _process(delta: float) -> void:
 	state_machine._update(delta)	
@@ -76,7 +64,7 @@ func _is_on_floor() -> bool:
 func _physics_process(_delta: float) -> void:
 	current_queued_velocity = Vector3.ZERO
 	state_machine._physics_update(_delta)
-	var current_active_state : PlayerState = state_machine._get_current_active_state()
+	var current_active_state : MovementState_Base = state_machine._get_current_active_state()
 	_handle_player_move(_delta,current_active_state)
 	_handle_gravity(_delta, current_active_state)
 
@@ -178,21 +166,9 @@ func _on_movement_input(_event : InputEvent) -> void:
 
 	on_player_movement.emit(input_direction)
 	
-func _on_sprint_input(_event: InputEvent) -> void:
-	sprint_down = _event.is_pressed()
-	on_player_sprint_toggle.emit(sprint_down)
-	
-func _on_crouch_input(_event : InputEvent) -> void:
-	crouch_down = _event.is_pressed()
-	on_player_crouch_toggle.emit(crouch_down)
 
-func _on_jump_input(_event : InputEvent) -> void:
-	var new_state : bool = _event.is_pressed()
-	if(new_state != jump_down):
-		jump_down = new_state
-		on_player_jump_toggle.emit(jump_down)
 	
-func _handle_player_move(_delta : float, current_active_state : PlayerState):
+func _handle_player_move(_delta : float, current_active_state : MovementState_Base):
 	var new_horizontal_target :Vector2 = _calculate_target_velocity_for_state(current_active_state)
 	if(current_active_state.accelerate_to_target_velocity):
 		var velocity_acceleration : float = horizontal_velocity_acceleration
@@ -212,7 +188,7 @@ func _handle_player_move(_delta : float, current_active_state : PlayerState):
 	var target_vel : Vector3 = (player.transform.basis * Vector3(current_horizontal_velocity.x, 0, -current_horizontal_velocity.y))
 	_add_velocity(target_vel)
 	
-func _calculate_target_velocity_for_state(current_active_state : PlayerState) -> Vector2:
+func _calculate_target_velocity_for_state(current_active_state : MovementState_Base) -> Vector2:
 	var horizontal_target : Vector2 = Vector2.ZERO
 	if(current_active_state.can_move):
 		horizontal_target.x = input_direction.x * current_active_state.sideways_movement_speed
@@ -223,7 +199,7 @@ func _calculate_target_velocity_for_state(current_active_state : PlayerState) ->
 			
 	return horizontal_target		
 	
-func _handle_gravity(_delta : float, current_active_state : PlayerState):
+func _handle_gravity(_delta : float, current_active_state : MovementState_Base):
 	if !_is_on_floor() && current_active_state._get_affected_by_gravity():
 		_add_gravity(_delta)
 	else:

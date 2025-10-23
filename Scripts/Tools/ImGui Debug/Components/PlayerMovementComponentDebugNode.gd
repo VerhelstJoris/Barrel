@@ -25,7 +25,7 @@ func _draw_contents(_delta : float) -> void:
 	ImGui.Unindent()
 	
 	
-func _debug_draw_state(state : PlayerState) -> void:
+func _debug_draw_state(state : MovementState_Base) -> void:
 	if(ImGui.CollapsingHeader(state.name, ImGui.TreeNodeFlags_DefaultOpen)):
 		if(state.child_state_machine != null):
 			ImGui.Indent()
@@ -45,7 +45,7 @@ func _debug_draw_state(state : PlayerState) -> void:
 				ImGui.Text("SID Speed: " + str(state.sideways_movement_speed))
 			ImGui.Separator()
 
-func _get_current_state(sm : PlayerStateMachine) -> PlayerState:
+func _get_current_state(sm : PlayerStateMachine) -> MovementState_Base:
 	while(sm.current_state.child_state_machine != null):
 		sm = sm.current_state.child_state_machine
 	return sm.current_state

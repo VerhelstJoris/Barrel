@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=52 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -11,6 +11,7 @@
 [ext_resource type="Shader" uid="uid://cuppwen4i4k7j" path="res://Materials/Shaders/UI/Screen_Vignette.gdshader" id="5_bn61v"]
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
 [ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
+[ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
@@ -94,19 +95,19 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_jajtq"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_sprint_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_w7r7y"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_crouch_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_hwrxm"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_jump_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
@@ -219,6 +220,7 @@ metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 _player = NodePath("..")
 
 [node name="InputReceiverComponent" parent="." instance=ExtResource("19_gd45c")]
+script = ExtResource("10_tvmyk")
 input_dictionary = Dictionary[ExtResource("14_a8wmt"), ExtResource("20_5af7x")]({
 ExtResource("3_gd45c"): SubResource("Resource_gd45c"),
 ExtResource("4_5af7x"): SubResource("Resource_5af7x"),

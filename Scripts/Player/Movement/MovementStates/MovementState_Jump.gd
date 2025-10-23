@@ -1,4 +1,4 @@
-class_name Jump extends PlayerState
+class_name Jump extends MovementState_Base
 
 @export var max_jump_down_time : float = 0.5
 var current_jump_down_time : float     = 0
@@ -29,7 +29,7 @@ func _on_physics_update_internal(_delta: float) -> void:
 	in_upward_jump_movement = false
 
 	var added_force : float
-	if(mov_comp.jump_down && current_alpha < 1):
+	if(input_comp.jump_down && current_alpha < 1):
 		in_upward_jump_movement = true
 		added_force = target_jump_velocity * current_mult * _delta
 		current_jump_down_time += _delta
