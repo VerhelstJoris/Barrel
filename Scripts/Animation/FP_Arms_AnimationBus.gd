@@ -1,7 +1,8 @@
 class_name FPArmsAnimationBus extends AnimationTree
 
 @onready var pistol : PlayerEquipmentPistol = %FP_Colt
-var mov_comp : PlayerMovementComponent 
+var mov_comp : PlayerMovementComponent
+var input_receiver : PlayerInputReceiver
 
 @onready var global_prop_bone : BoneAttachment3D = %GlobalPropBone
 @onready var left_prop_bone : BoneAttachment3D = %LPropBone
@@ -92,8 +93,11 @@ func _ready() -> void:
 	
 func _init_player_data(player : Player) -> void:
 	mov_comp = player.movement_component
-	mov_comp.on_player_movement.connect(_on_player_movement_input)
-	
+	if(!mov_comp):
+		push_error("No Movement component set on the FP Arms Anim Bus")
+	input_receiver = player.input_receiver
+	if(!input_receiver):
+		push_error("No Input Receiver set on the FP Arms Anim Bus")
 	player.on_holster_started.connect(_on_player_holster_started)
 	player.on_unholster_started.connect(_on_player_unholster_started)
 
@@ -227,9 +231,6 @@ func _toggle_equipment_visible(visible : bool) -> void:
 
 func _unholster_anim_finished():
 	on_unholster_anim_finish.emit()
-
-func _on_player_movement_input(direction:Vector2) -> void:
-	prev_move_direction = direction
 	
 func _update_movement_blend_values(delta : float) -> void:
 	var horizontal_move : float = mov_comp.current_horizontal_velocity.length()
@@ -240,6 +241,7 @@ func _update_movement_blend_values(delta : float) -> void:
 		_update_horizontal_move_blend(delta)
 
 	_update_vertical_move_blend(delta)
+	prev_move_direction = input_receiver.input_direction
 
 func _update_horizontal_move_blend(delta : float) -> void:
 	movement_blend_value = movement_blend_value.lerp( prev_move_direction, horizontal_movement_blend_rate * delta);

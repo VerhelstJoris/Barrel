@@ -14,7 +14,7 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 @export_range(0.0, 0.5) var camera_end_deadzone: float = .1
 
 @export_group("Components")
-@export var input_receiver : InputReceiver
+@export var input_receiver : PlayerInputReceiver
 @onready var camera_pivot: Node3D = %CameraPivot
 @onready var smooth_camera: Camera3D = %SmoothCamera
 @onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent

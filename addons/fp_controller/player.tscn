@@ -59,25 +59,25 @@ shader_parameter/vignette_colour = Vector3(0.08, 0.03, 0)
 
 [sub_resource type="Resource" id="Resource_gd45c"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_movement_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_5af7x"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_movement_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_62dvf"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_movement_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_y16om"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("../PlayerMovementComponent")
+signal_node = NodePath(".")
 signal_name = "on_movement_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
@@ -221,6 +221,7 @@ _player = NodePath("..")
 
 [node name="InputReceiverComponent" parent="." instance=ExtResource("19_gd45c")]
 script = ExtResource("10_tvmyk")
+movement_deadzone = Vector2(0.1, 0.1)
 input_dictionary = Dictionary[ExtResource("14_a8wmt"), ExtResource("20_5af7x")]({
 ExtResource("3_gd45c"): SubResource("Resource_gd45c"),
 ExtResource("4_5af7x"): SubResource("Resource_5af7x"),

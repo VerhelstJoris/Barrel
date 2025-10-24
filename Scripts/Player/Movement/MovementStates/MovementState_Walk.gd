@@ -2,7 +2,7 @@ class_name Walk extends MovementState_Base
 
 
 func _check_transitions() -> void:
-	if(input_comp.sprint_down && mov_comp.input_direction.y > 0):
+	if(input_comp.sprint_down && input_comp.input_direction.y > 0):
 		state_machine._transition_to(state_machine.E_StateName.Sprint)
 	elif(input_comp.crouch_down):
 		state_machine._transition_to(state_machine.E_StateName.Crouch)

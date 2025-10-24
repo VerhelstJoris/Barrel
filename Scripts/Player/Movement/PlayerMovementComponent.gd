@@ -4,8 +4,6 @@ class_name PlayerMovementComponent extends Node
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var current_queued_velocity : Vector3 = Vector3.ZERO
 
-signal on_movement_input_received(event: InputEvent)
-
 signal on_player_movement_state_enter(new_state : PlayerStateMachine.E_StateName)
 signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName)
 
@@ -29,31 +27,15 @@ var _draw_step_debug : bool = true
 var current_gravity_velocity : float = 0
 var current_gravity_time : float = 0
 
-const MOVE_FORWARD: String = "move_forward"
-const MOVE_BACK: String = "move_back"
-const MOVE_LEFT: String = "move_left"
-const MOVE_RIGHT: String = "move_right"
-
-@export_group("General Control Settings")
-@export var movement_deadzone : Vector2 = Vector2(0.1,0.1)
-
-var input_direction: Vector2
-
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
 
 var previous_state : MovementState_Base = null
 
 var player: Player
 
-signal on_player_movement(direction)
-
 func _ready() -> void:
 	await owner.ready
 	player = owner as Player
-	_connect_input_events()
-	
-func _connect_input_events():
-	on_movement_input_received.connect(_on_movement_input)
 	
 func _process(delta: float) -> void:
 	state_machine._update(delta)	
@@ -88,7 +70,7 @@ func _try_stair_step_up(_delta : float) -> bool:
 		return false
 		
 	# Not moving or attempting to move, skip stair check
-	if (current_queued_velocity.is_zero_approx() && input_direction.is_zero_approx()):
+	if (current_queued_velocity.is_zero_approx() && player.input_receiver.input_direction.is_zero_approx()):
 		return false
 		
 	var expected_move_motion : Vector3 = Vector3(current_queued_velocity.x, 0, current_queued_velocity.z) * _delta
@@ -137,7 +119,7 @@ func _try_stair_step_down(_delta : float) -> bool:
 	if(player.velocity.y > 0):
 		return false
 		
-	if (current_queued_velocity.is_zero_approx() && input_direction.is_zero_approx()):
+	if (current_queued_velocity.is_zero_approx() && player.input_receiver.input_direction.is_zero_approx()):
 		return false
 		
 	#move and slide was already called so ray needs updating
@@ -153,18 +135,6 @@ func _try_stair_step_down(_delta : float) -> bool:
 	player.position.y += body_test_result.get_travel().y
 	player.apply_floor_snap()
 	return true
-	
-func _on_movement_input(_event : InputEvent) -> void:
-	if Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD):
-		input_direction = Input.get_vector(MOVE_LEFT, MOVE_RIGHT, MOVE_BACK, MOVE_FORWARD)
-		if(abs(input_direction.x) < movement_deadzone.x):
-			input_direction.x = 0
-		if(abs(input_direction.y) < movement_deadzone.y):
-			input_direction.y = 0
-	else:
-		input_direction = Vector2.ZERO
-
-	on_player_movement.emit(input_direction)
 	
 
 	
@@ -190,12 +160,13 @@ func _handle_player_move(_delta : float, current_active_state : MovementState_Ba
 	
 func _calculate_target_velocity_for_state(current_active_state : MovementState_Base) -> Vector2:
 	var horizontal_target : Vector2 = Vector2.ZERO
+	var input_dir : Vector2 = player.input_receiver.input_direction
 	if(current_active_state.can_move):
-		horizontal_target.x = input_direction.x * current_active_state.sideways_movement_speed
-		if(input_direction.y < 0):
-			horizontal_target.y = input_direction.y * current_active_state.backward_movement_speed
+		horizontal_target.x = input_dir.x * current_active_state.sideways_movement_speed
+		if(input_dir.y < 0):
+			horizontal_target.y = input_dir.y * current_active_state.backward_movement_speed
 		else:
-			horizontal_target.y = input_direction.y * current_active_state.forward_movement_speed
+			horizontal_target.y = input_dir.y * current_active_state.forward_movement_speed
 			
 	return horizontal_target		
 	
