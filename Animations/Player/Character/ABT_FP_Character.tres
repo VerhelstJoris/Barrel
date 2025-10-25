@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=51 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=52 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
 
@@ -43,30 +43,18 @@ fadeout_time = 0.03
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_em04p"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
-use_custom_timeline = true
-timeline_length = 2.0
-stretch_time_scale = true
-start_offset = 0.0
-loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tmq1e"]
 animation = &"AL_FP_Character_Movement/A_FP_Crouch_Forward"
-use_custom_timeline = true
-timeline_length = 3.0
-stretch_time_scale = true
-start_offset = 0.0
-loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hxvos"]
 animation = &"AL_FP_Character_Movement/A_FP_Crouch_Backward"
-use_custom_timeline = true
-timeline_length = 3.0
-stretch_time_scale = true
-start_offset = 0.0
-loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_forti"]
-animation = &"AL_FP_Character_Movement/A_FP_Move_Left"
+animation = &"AL_FP_Character_Movement/A_FP_Crouch_Left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_es4ed"]
+animation = &"AL_FP_Character_Movement/A_FP_Crouch_Right"
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_x8ke2"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_em04p")
@@ -77,7 +65,9 @@ blend_point_2/node = SubResource("AnimationNodeAnimation_hxvos")
 blend_point_2/pos = Vector2(0, -1)
 blend_point_3/node = SubResource("AnimationNodeAnimation_forti")
 blend_point_3/pos = Vector2(-1, 0)
-snap = Vector2(0.1, 0.01)
+blend_point_4/node = SubResource("AnimationNodeAnimation_es4ed")
+blend_point_4/pos = Vector2(1, -0.02)
+snap = Vector2(0.5, 0.5)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_aax62"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
@@ -219,7 +209,7 @@ blend_point_2/node = SubResource("AnimationNodeAnimation_yud83")
 blend_point_2/pos = -1.0
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-1036.35, -209.57)
+graph_offset = Vector2(-1056.35, -199.57)
 nodes/output/position = Vector2(880, 400)
 nodes/SubBasePoseFromHorizontalMove/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/SubBasePoseFromHorizontalMove/position = Vector2(-620, -160)
