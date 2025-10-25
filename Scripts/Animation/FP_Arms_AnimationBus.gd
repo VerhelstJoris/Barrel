@@ -33,7 +33,9 @@ const anim_reload_eject_shell_request : String = "ReloadingBlendTree/EjectShellO
 
 #movement related
 const anim_move_state_machine_path : String = "parameters/SM_Movement/BlendTree"
-const anim_movement_blend_property : String = "/MovementBlendSpace/blend_position"
+const anim_default_movement_blend_property : String = "/MoveSM/DefaultMoveSpace/blend_position"
+const anim_crouch_movement_blend_property : String = "/MoveSM/CrouchMoveSpace/blend_position"
+
 const anim_move_sprint_blend_property : String = "/WalkSprintBlend/blend_amount"
 const anim_move_vertical_blend_property : String = "/VerticalMovementBlendSpace/blend_position"
 
@@ -50,6 +52,9 @@ var exit_reload_done : bool = false
 var colt_unholstered : bool = false
 var colt_fan_hammer : bool = false
 var fanning_hammer_anim_id : int = 1
+
+var sprinting : bool = false
+var crouching : bool = false
 
 var current_action : EPistolState.Actions = EPistolState.Actions.None
 
@@ -78,9 +83,7 @@ var prev_delta : float = 0
 
 
 @export_group("sprint settings")
-@export var sprint_blend_speed : float = 0.15
 @export var sprint_speed_anim_threshold : float = 4
-var sprint_blend_target : float = 0
 
 
 # Called when the node enters the scene tree for the first time.
@@ -234,18 +237,15 @@ func _unholster_anim_finished():
 	
 func _update_movement_blend_values(delta : float) -> void:
 	var horizontal_move : float = mov_comp.current_horizontal_velocity.length()
-	if horizontal_move > sprint_speed_anim_threshold:
-		_check_transition_sprint(true)
-	else:
-		_check_transition_sprint(false)
-		_update_horizontal_move_blend(delta)
-
+	sprinting = horizontal_move > sprint_speed_anim_threshold
+	_update_horizontal_move_blend(delta)
 	_update_vertical_move_blend(delta)
 	prev_move_direction = input_receiver.input_direction
 
 func _update_horizontal_move_blend(delta : float) -> void:
 	movement_blend_value = movement_blend_value.lerp( prev_move_direction, horizontal_movement_blend_rate * delta);
-	set(anim_move_state_machine_path + anim_movement_blend_property, movement_blend_value)
+	set(anim_move_state_machine_path + anim_default_movement_blend_property, movement_blend_value)
+	set(anim_move_state_machine_path + anim_crouch_movement_blend_property, movement_blend_value)
 
 func _update_vertical_move_blend(delta : float) -> void:
 	var yvel : float = mov_comp.player.velocity.y
@@ -266,13 +266,8 @@ func _fire_crouch_oneshot(enter : bool) -> void:
 	else:
 		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_exit_request)
 		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_enter_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-		
-func _check_transition_sprint(try_enter : bool) -> void:
-	var target_blend : float = try_enter
 	
-	if(sprint_blend_target != target_blend):
-		_tween_anim_property(sprint_move_blend_tween,  anim_move_state_machine_path+ anim_move_sprint_blend_property,target_blend,sprint_blend_speed)
-		sprint_blend_target = target_blend
+	crouching = enter	
 		
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 	var bone_to_reparent_to : BoneAttachment3D

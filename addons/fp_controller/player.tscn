@@ -293,9 +293,9 @@ crouch_vignette_transition_time = 0.14
 first_person_anim_bus = NodePath("../../../../../AnimationTree")
 standing_to_crouch_transition_time = 0.12
 crouch_to_standing_transition_time = 0.12
-forward_movement_speed = 1.75
-sideways_movement_speed = 1.75
-backward_movement_speed = 1.25
+forward_movement_speed = 1.3
+sideways_movement_speed = 1.3
+backward_movement_speed = 1.0
 
 [node name="Fall" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine"]
 script = ExtResource("23_nycc1")
