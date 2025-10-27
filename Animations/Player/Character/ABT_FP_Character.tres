@@ -46,6 +46,11 @@ animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tmq1e"]
 animation = &"AL_FP_Character_Movement/A_FP_Crouch_Forward"
+use_custom_timeline = true
+timeline_length = 2.0
+stretch_time_scale = true
+start_offset = 0.0
+loop_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hxvos"]
 animation = &"AL_FP_Character_Movement/A_FP_Crouch_Backward"
@@ -209,7 +214,7 @@ blend_point_2/node = SubResource("AnimationNodeAnimation_yud83")
 blend_point_2/pos = -1.0
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-1056.35, -199.57)
+graph_offset = Vector2(-1164.35, -266.57)
 nodes/output/position = Vector2(880, 400)
 nodes/SubBasePoseFromHorizontalMove/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/SubBasePoseFromHorizontalMove/position = Vector2(-620, -160)
@@ -284,7 +289,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-163, -18)
 
 [resource]
-graph_offset = Vector2(-659.712, 212.111)
+graph_offset = Vector2(-876.711, 114.497)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Player/position = Vector2(-460, 120)
