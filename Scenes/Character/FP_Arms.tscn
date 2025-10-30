@@ -611,7 +611,7 @@ parameters/SM_Player/SM_Colt/ReloadingBlendTree/PreviousChamberContOneShot/activ
 parameters/SM_Player/SM_Colt/ReloadingBlendTree/PreviousChamberContOneShot/internal_active = false
 parameters/SM_Player/SM_Colt/ReloadingBlendTree/PreviousChamberContOneShot/request = 0
 parameters/SM_Movement/BlendTree/SubBasePoseFromHorizontalMove/sub_amount = 1.0
-parameters/SM_Movement/BlendTree/MoveSM/CrouchMoveSpace/blend_position = Vector2(0.00378501, 0.979058)
+parameters/SM_Movement/BlendTree/MoveSM/CrouchMoveSpace/blend_position = Vector2(-0.000756979, 0.00523567)
 parameters/SM_Movement/BlendTree/MoveSM/DefaultMoveSpace/blend_position = Vector2(-0.464931, 0.660793)
 parameters/SM_Movement/BlendTree/VerticalMovementBlendSpace/blend_position = 0.0
 parameters/SM_Movement/BlendTree/Add2/add_amount = 1.0
