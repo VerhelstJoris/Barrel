@@ -39,6 +39,8 @@ var current_chamber_id :int = 0
 @export var fan_hammer_max_delay : float = 0.2
 var main_equipment_last_use_time : float = 0
 
+@export var raycast_dist : float = 1500
+
 var insert_chamber_id: int:
 	get:
 		return (current_chamber_id - 1 % chamber_amount)
@@ -174,7 +176,6 @@ func _increase_cylinder_rotations(amount : int) -> void:
 	current_chamber_id = (current_chamber_id + to_add) % chamber_amount
 	if(current_chamber_id < 0):
 		current_chamber_id = chamber_amount + current_chamber_id
-	_log_chamber_states()
 
 func _enable_changing_states(enabled : bool) -> void:
 	can_proceed_state = enabled
@@ -242,31 +243,4 @@ func _can_shoot() -> bool:
 
 func _can_be_holstered() -> bool:
 	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
-
-func _log_chamber_states() -> void:
-	var builtStr : String = ""
-	var index: int =  0
-	for bullet in current_bullets:
-		var bcurrent : bool = (index == current_chamber_id)
-		if bcurrent:
-			builtStr+="(" 
-		else:
-			builtStr+="["
-		
-		if(bullet == null):
-			builtStr+="0"
-		else:
-			if(bullet._can_be_fired()):
-				builtStr+="1"
-			else:
-				builtStr+="X"
-		
-		if bcurrent:
-			builtStr+=")"
-		else:
-			builtStr+="]"
-		index +=1
-
-	builtStr += " "	+ EPistolState.State.keys()[current_state]
-	builtStr += " Current Chamber: "
-	print(builtStr, current_chamber_id)
+	

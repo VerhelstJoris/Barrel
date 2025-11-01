@@ -23,7 +23,6 @@
 [ext_resource type="Material" uid="uid://bpc8jqh2cnm1w" path="res://Materials/Metals/Mat_Steel.tres" id="20_7x7dj"]
 [ext_resource type="ArrayMesh" uid="uid://c3kbfvjeq4ayr" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Spring.res" id="21_74ptf"]
 [ext_resource type="ArrayMesh" uid="uid://co7ly3wmsmw76" path="res://Meshes/Weapons/Colt_SAA/M_Colt_Trigger.res" id="22_1g454"]
-[ext_resource type="Script" uid="uid://binu307e8ex3o" path="res://Scripts/Tools/ImGui Debug/BarrelEquipmentSceneDebug.gd" id="23_jksft"]
 [ext_resource type="ArrayMesh" uid="uid://ocevl004enin" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Small.res" id="23_u1ese"]
 [ext_resource type="Shader" uid="uid://ptkpnelb3y0f" path="res://Materials/Shaders/VFX/VFX_Muzzle_Smoke_Shader.tres" id="24_3sg0a"]
 [ext_resource type="PackedScene" uid="uid://c8oxrvwv5gxo3" path="res://Scenes/Components/Input/Pistol/PistolInputReceiverComponent.tscn" id="24_n2p3l"]
@@ -34,6 +33,7 @@
 [ext_resource type="Material" uid="uid://dxfqdfd4t6fcr" path="res://Materials/VFX/MAT_VFX_GunFire_DarkRed.tres" id="26_st1ay"]
 [ext_resource type="Resource" uid="uid://dsm4d3qqcepjo" path="res://Data/Input/IA_Insert_Shell.tres" id="27_wm72f"]
 [ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/IA_Eject_Shell.tres" id="28_12fjp"]
+[ext_resource type="Script" uid="uid://dviemwohmmc7j" path="res://Scripts/Tools/ImGui Debug/Components/Equipment/BarrelEquipmentPistolDebug.gd" id="29_3sg0a"]
 [ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/IA_Cycle_Cylinder_Next.tres" id="29_n56b4"]
 [ext_resource type="Resource" uid="uid://d2vsm1pv2xlr" path="res://Data/Input/IA_Cycle_Cylinder_Prev.tres" id="30_4x4sw"]
 [ext_resource type="Script" uid="uid://cmmjaefpx7esy" path="res://addons/LineRenderer/line_renderer.gd" id="30_kiwjb"]
@@ -466,9 +466,11 @@ transform = Transform3D(-1.38848, 0.539026, -0.177724, -0.533092, -1.39976, -0.0
 layers = 2
 mesh = ExtResource("23_u1ese")
 
-[node name="BarrelEquipmentSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
-script = ExtResource("23_jksft")
+[node name="BarrelEquipmentPistolDebug" type="Node" parent="." node_paths=PackedStringArray("pistol", "ChildNodesToDisplay")]
+script = ExtResource("29_3sg0a")
+pistol = NodePath("..")
 ChildNodesToDisplay = [NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../PistolInputReceiverComponent/PistolInputReceiverDebugNode")]
+auto_expanded = true
 metadata/_custom_type_script = "uid://binu307e8ex3o"
 
 [node name="PistolInputReceiverComponent" parent="." instance=ExtResource("24_n2p3l")]
