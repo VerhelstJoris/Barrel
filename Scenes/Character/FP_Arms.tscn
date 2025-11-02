@@ -170,7 +170,7 @@ albedo_color = Color(1, 1, 0, 1)
 script = ExtResource("1_1ioya")
 
 [node name="Arms_Rig" type="Node3D" parent="."]
-transform = Transform3D(100, 0, 0, 0, -4.37114e-06, 100, 0, -100, -4.37114e-06, 0, 0, 0)
+transform = Transform3D(25, 0, 0, 0, -1.09278e-06, 25, 0, -25, -1.09278e-06, 0, 0, 0)
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Arms_Rig"]
 animate_physical_bones = false
@@ -546,6 +546,7 @@ bone_idx = 23
 [node name="FP_Colt" parent="Arms_Rig/Skeleton3D/RPropBone" instance=ExtResource("3_j67vm")]
 unique_name_in_owner = true
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 4.82555e-05, 9.48738e-05, 7.02897e-05)
+raycast_dist = 1500.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Arms_Rig/Skeleton3D/RPropBone"]
 transform = Transform3D(0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.001, 0, 0, 0)

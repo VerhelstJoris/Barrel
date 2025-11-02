@@ -11,6 +11,8 @@ enum Equipment_Hold {MainHand, OffHand, Both}
 @onready var anim_tree : AnimationTree = %AnimationTree
 @export var input_receiver : InputReceiver
 
+var player : Player = null
+
 signal on_equipped
 signal on_unequipped
 
@@ -22,13 +24,15 @@ signal use_equipment_input(event: InputEvent)
 func _ready() -> void:
 	use_equipment_input.connect(_try_use_equipment)
 	
+	
 func _on_start_holster():
 	on_holstered.emit()
 
 func _on_start_unholster():
 	on_unholstered.emit()
 
-func _on_equipped():
+func _on_equipped(in_player : Player):
+	player = in_player
 	on_equipped.emit()
 	
 func _on_unequipped():

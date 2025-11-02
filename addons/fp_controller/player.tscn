@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=53 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -11,6 +11,7 @@
 [ext_resource type="Shader" uid="uid://cuppwen4i4k7j" path="res://Materials/Shaders/UI/Screen_Vignette.gdshader" id="5_bn61v"]
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
 [ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
+[ext_resource type="PackedScene" uid="uid://cooy44h1jqbd2" path="res://Scenes/UI/HUD/HUD_Reticle.tscn" id="7_2fqq0"]
 [ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
@@ -200,7 +201,7 @@ render_target_update_mode = 4
 
 [node name="FP_Arms" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
-transform = Transform3D(-0.75, 0, -1.13247e-07, 0, 0.75, 0, 1.13247e-07, 0, -0.75, 2.08165e-12, 0.897339, 2.08165e-12)
+transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 2.08165e-12, 1.20468, 2.08165e-12)
 rotation_order = 0
 
 [node name="HUDVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
@@ -209,6 +210,9 @@ custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
 script = ExtResource("6_i7lip")
 default_alpha = 0.025
+
+[node name="CenterContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
+layout_mode = 2
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")

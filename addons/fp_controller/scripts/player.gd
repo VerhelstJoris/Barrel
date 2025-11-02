@@ -16,7 +16,7 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 @export_group("Components")
 @export var input_receiver : PlayerInputReceiver
 @onready var camera_pivot: Node3D = %CameraPivot
-@onready var smooth_camera: Camera3D = %SmoothCamera
+@onready var player_cam: Camera3D = %SmoothCamera
 @onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent
 
 @onready var arms: FPArms = %FP_Arms
@@ -62,7 +62,7 @@ func _process(_delta: float):
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
 
-	arms._align_to_world_camera(smooth_camera)
+	arms._align_to_world_camera(player_cam)
 	
 func _handle_camera_motion() -> void:
 	rotate_y(mouse_motion.x * camera_sensitivity)
@@ -125,7 +125,7 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 	if(new_equipment != null):
 		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._clear_current_input_details)
-		new_equipment._on_equipped()
+		new_equipment._on_equipped(self)
 	on_equipped.emit(new_equipment)
 
 func _on_quick_unholster_input(event : InputEvent) -> void:

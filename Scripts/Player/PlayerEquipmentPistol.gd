@@ -3,10 +3,12 @@ class_name PlayerEquipmentPistol extends PlayerEquipment
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
-@onready var animation_bus : ColtAnimationBus = %AnimationTree
-@onready var bullet_attachment_point: Node3D = %BulletAttachmentPoint
-@onready var bullet_reparent_point: Node3D = %BulletReparentPoint
-@onready var cylinder_attachment: BoneAttachment3D = %CylinderAttachment
+@export var animation_bus : ColtAnimationBus
+@export var bullet_attachment_point: Node3D
+@export var bullet_reparent_point: Node3D
+@export var cylinder_attachment: BoneAttachment3D 
+@export var muzzle_point : Node3D
+
 
 signal on_try_insert_input(event: InputEvent)
 signal on_try_eject_input(event: InputEvent)
@@ -30,6 +32,8 @@ var can_proceed_state: bool = true
 var can_interrupt_into_next_state: bool = false
 var can_interrupt_fire : bool = false
 var queued_fire : bool = false
+
+var fire_next_physics_frame : bool = false
 
 var current_bullets: Array[ColtBullet]
 const chamber_amount: int = 6
@@ -58,7 +62,12 @@ func _ready() -> void:
 	on_try_cylinder_prev_input.connect(_try_cylinder_prev)
 	on_try_enter_reload_input.connect(_try_enter_reload)
 	on_try_exit_reload_input.connect(_try_exit_reload)
-	
+
+func _physics_process(_delta: float) -> void:
+	if(fire_next_physics_frame):
+		fire_next_physics_frame = false
+		_physics_fire_current_bullet()
+
 func _try_insert_round(_event : InputEvent) -> void:
 	if(current_state == EPistolState.State.Reloading):
 		if(_can_insert_round()):
@@ -101,7 +110,8 @@ func _try_use_equipment(_event : InputEvent) -> void:
 		
 	var started_action : bool = false
 	var current_time : float = Time.get_unix_time_from_system()
-	if( current_time - main_equipment_last_use_time <= fan_hammer_max_delay):
+	var within_fan_time_margin : bool = current_time - main_equipment_last_use_time <= fan_hammer_max_delay
+	if( within_fan_time_margin):
 		if(_can_fan_fire()):
 			_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
 			started_action = true
@@ -117,15 +127,11 @@ func _try_use_equipment(_event : InputEvent) -> void:
 			_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
 			started_action = true
 
-	if(!started_action):
+	if(!started_action && within_fan_time_margin):
 		queued_fire = true
 	else:
 		main_equipment_last_use_time = current_time
-
-
-func _on_equipped():
-	super()
-	
+		
 #used as anim notify	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
@@ -138,10 +144,56 @@ func _enable_interrupting_for_next_fire() -> void:
 	if(queued_fire):
 		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
 
+#used as anim notify
 func _fire_current_bullet() -> void:
+	fire_next_physics_frame = true
+	
+func _physics_fire_current_bullet() -> void:
 	if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
 		on_fired.emit()
 		current_bullets[current_chamber_id]._on_fired()
+
+	_damage_target(_find_target_hit())
+	
+
+
+func _find_target_hit() -> Dictionary:
+	var world_cam : Camera3D = player.player_cam
+	var cam_pos : Vector3 = world_cam.get_global_position()
+	var dir : Vector3 = -world_cam.get_global_basis().z
+	var end : Vector3 = cam_pos + (dir.normalized() * raycast_dist)
+
+	#first perform a raycast from the camera center straight forward
+	var inital_hit : Dictionary = _ray_for_hit_target(cam_pos, end)
+
+	if inital_hit:
+		end = inital_hit.position
+
+	# now perform a ray from the muzzle position towards that position
+	var second_hit : Dictionary = _ray_for_hit_target(muzzle_point.global_position, end)
+	if second_hit:
+		return second_hit
+		
+	if(inital_hit):
+		return inital_hit
+	
+	var dict : Dictionary	
+	return dict	
+
+func _ray_for_hit_target(origin :Vector3 , end :Vector3 ) -> Dictionary:
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().get_direct_space_state()
+
+	var query := PhysicsRayQueryParameters3D.create(origin, end)
+	query.collide_with_bodies = true
+
+	return space_state.intersect_ray(query)	
+
+func _damage_target(hit : Dictionary) -> void:
+	if(!hit):
+		return
+		
+	print("DAMAGE ", hit.collider)	
+	
 	
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None

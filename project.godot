@@ -67,6 +67,7 @@ folder_colors={
 "res://Meshes/": "teal",
 "res://Scenes/": "purple",
 "res://Scripts/": "pink",
+"res://Textures/": "gray",
 "res://addons/": "red"
 }
 
