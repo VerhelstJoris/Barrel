@@ -44,6 +44,7 @@ var current_chamber_id :int = 0
 var main_equipment_last_use_time : float = 0
 
 @export var raycast_dist : float = 1500
+@export var base_damage : float = 100
 
 var insert_chamber_id: int:
 	get:
@@ -155,8 +156,6 @@ func _physics_fire_current_bullet() -> void:
 
 	_damage_target(_find_target_hit())
 	
-
-
 func _find_target_hit() -> Dictionary:
 	var world_cam : Camera3D = player.player_cam
 	var cam_pos : Vector3 = world_cam.get_global_position()
@@ -178,7 +177,7 @@ func _find_target_hit() -> Dictionary:
 		return inital_hit
 	
 	var dict : Dictionary	
-	return dict	
+	return dict
 
 func _ray_for_hit_target(origin :Vector3 , end :Vector3 ) -> Dictionary:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().get_direct_space_state()
@@ -192,8 +191,11 @@ func _damage_target(hit : Dictionary) -> void:
 	if(!hit):
 		return
 		
-	print("DAMAGE ", hit.collider)	
-	
+	if hit.collider.has_user_signal(DamageComponent.damaged_signal_name):
+		hit.collider.emit_signal(DamageComponent.damaged_signal_name, hit, _calculate_damage(hit))
+
+func _calculate_damage(_hit : Dictionary) -> float:
+	return base_damage
 	
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None
