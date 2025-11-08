@@ -3,6 +3,8 @@ class_name PlayerEquipmentPistol extends PlayerEquipment
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
+@export var on_hit_effect : PackedScene
+
 @export var animation_bus : ColtAnimationBus
 @export var bullet_attachment_point: Node3D
 @export var bullet_reparent_point: Node3D
@@ -156,6 +158,7 @@ func _physics_fire_current_bullet() -> void:
 
 	_damage_target(_find_target_hit())
 	
+	
 func _find_target_hit() -> Dictionary:
 	var world_cam : Camera3D = player.player_cam
 	var cam_pos : Vector3 = world_cam.get_global_position()
@@ -191,8 +194,14 @@ func _damage_target(hit : Dictionary) -> void:
 	if(!hit):
 		return
 		
-	if hit.collider.has_user_signal(DamageComponent.damaged_signal_name):
-		hit.collider.emit_signal(DamageComponent.damaged_signal_name, hit, _calculate_damage(hit))
+	if hit.collider.has_user_signal(HitboxComponent.damaged_signal_name):
+		hit.collider.emit_signal(HitboxComponent.damaged_signal_name, hit, _calculate_damage(hit))
+		
+	if(on_hit_effect.can_instantiate()):
+		var created_effect : VFXInstance = on_hit_effect.instantiate()
+		player.get_parent().add_child(created_effect)
+		created_effect.set_global_position(hit.position)
+		created_effect.quaternion = Quaternion(Vector3.UP, hit.normal)
 
 func _calculate_damage(_hit : Dictionary) -> float:
 	return base_damage

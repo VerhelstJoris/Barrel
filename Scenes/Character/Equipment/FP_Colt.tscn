@@ -1,8 +1,9 @@
-[gd_scene load_steps=54 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=55 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_ur76o"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Equipment/Colt_Bullet.tscn" id="2_u1ese"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="3_10y14"]
+[ext_resource type="PackedScene" uid="uid://bcoj47sn0g6ns" path="res://Scenes/VFX/Damage/VFX_Prop_OnHit.tscn" id="3_c6e7s"]
 [ext_resource type="AnimationLibrary" uid="uid://biamfttxrnmpa" path="res://Animations/Player/Colt_SAA/AL_Colt_SAA.res" id="4_nh4gv"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://blsb7g0t5c8mx" path="res://Animations/Player/Colt_SAA/ABT_Colt_SAA.tres" id="5_ytugg"]
 [ext_resource type="Script" uid="uid://dw4df7mvaykwb" path="res://Scripts/Animation/Colt/Colt_AnimationBus.gd" id="6_st1ay"]
@@ -135,6 +136,7 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 script = ExtResource("1_ur76o")
 bullet_scene = ExtResource("2_u1ese")
+on_hit_effect = ExtResource("3_c6e7s")
 animation_bus = NodePath("AnimationTree")
 bullet_attachment_point = NodePath("Colt_Saa_Rig/Skeleton3D/BulletAttachmentPoint")
 bullet_reparent_point = NodePath("Colt_Saa_Rig/Skeleton3D/BulletReparentPoint")
