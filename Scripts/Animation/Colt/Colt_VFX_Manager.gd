@@ -18,6 +18,7 @@ var colt_equipment : PlayerEquipmentPistol = null
 @export var muzzle_smoke_grow_rate : float = 2.5 
 @export var muzzle_smoke_max_time : float = 1
 @export var muzzle_smoke_decay_rate : float = 4
+@export var muzzle_smoke_instant_decay_rate : float = 8
 const muzzle_smoke_grow_shader_param : String = "AlphaGrow"
 const muzzle_smoke_shrink_shader_param : String = "AlphaShrink"
 
@@ -68,6 +69,7 @@ var muzzle_smoke_decay_duration : float = 0.0
 func _ready() -> void:
 	colt_equipment = get_owner() as PlayerEquipmentPistol
 	colt_equipment.on_fired.connect(_on_bullet_fired)
+	colt_equipment.on_holstered.connect(_on_start_holstering)
 
 	max_sharp_angle_degree = max_sharp_angle_degree
 	
@@ -79,22 +81,15 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_process_muzzle_smoke(delta)
 	_process_muzzle_smoke_points(delta)
-	
-func _bezier_test() -> void:
-	var A : Vector3 = Vector3(0,0,0)
-	var B : Vector3 = Vector3(1,1,0)
-	var C : Vector3 = Vector3(2,1,0)
-	var D : Vector3 = Vector3(1.5,2.5,0)
-	DebugDraw3D.draw_line_path(PackedVector3Array( [A,B,C,D] ) , Color(0,1,0),1.5)
-	var Bez : Vector3 = _bezier_4(A,B,C,D, 0.5)
-	DebugDraw3D.draw_line_path(PackedVector3Array( [A,B,Bez,D]) , Color(1,0,0),1.5)
 
+func _on_start_holstering() -> void:
+	_deactivate_muzzle_smoke(muzzle_smoke_instant_decay_rate)
 
 func _process_muzzle_smoke(delta : float) -> void:
 	if muzzle_smoke_active:
 		muzzle_smoke_current_timer += delta
 		if(muzzle_smoke_current_timer > muzzle_smoke_max_time):
-			_deactivate_muzzle_smoke()
+			_deactivate_muzzle_smoke(muzzle_smoke_decay_rate)
 		
 	if(muzzle_smoke_decaying):
 		muzzle_smoke_decay_timer += delta
@@ -122,8 +117,14 @@ func _process_muzzle_smoke_points(_delta : float) -> void:
 			_smoke_add_point_timer = 0
 		
 		if(!muzzle_positions.is_empty()):
-			smoke_renderer.points = muzzle_positions
+			var pos_copy : Array[Vector3] = muzzle_positions
+			pos_copy[0] = (smoke_renderer.get_global_position())
+			if(pos_copy.size() > 2):
+				pos_copy[1] = lerp(pos_copy[1], (pos_copy[0] + pos_copy[2]) /2, 0.5)
+
+			smoke_renderer.points = pos_copy
 			smoke_renderer.pre_computed_thickness_arr = muzzle_smoke_width_arr
+			smoke_renderer.pre_computed_thickness_arr[0] = _muzzle_smoke_start_width
 	
 func _update_existing_muzzle_points(_delta : float) -> void:
 	var added : Vector3= Vector3(randf_range(min_muzzle_smoke_move_speed.x, max_muzzle_smoke_move_speed.x) ,
@@ -250,12 +251,12 @@ func _activate_muzzle_smoke() -> void:
 	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  smoke_renderer.get_instance_shader_parameter(muzzle_smoke_grow_shader_param), 1.0, 1.0 / muzzle_smoke_grow_rate)
 	muzzle_smoke_active = true
 
-func _deactivate_muzzle_smoke() -> void:
+func _deactivate_muzzle_smoke(decay_rate : float) -> void:
 	muzzle_smoke_current_timer = 0
 	muzzle_smoke_decaying = true
 	muzzle_smoke_decay_tween = create_tween()
 	muzzle_smoke_growth_tween = create_tween()
-	muzzle_smoke_decay_duration = 1.0 / muzzle_smoke_decay_rate
+	muzzle_smoke_decay_duration = 1.0 / decay_rate
 	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param,  0.0, 1.0, muzzle_smoke_decay_duration)
 	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, muzzle_smoke_decay_duration)
 

@@ -3,7 +3,7 @@ class_name PlayerEquipmentPistol extends PlayerEquipment
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
-@export var on_hit_effect : PackedScene
+@export var on_hit_effect_dictionary : PhysicsMatDictionary
 
 @export var animation_bus : ColtAnimationBus
 @export var bullet_attachment_point: Node3D
@@ -67,6 +67,12 @@ func _ready() -> void:
 	on_try_cylinder_prev_input.connect(_try_cylinder_prev)
 	on_try_enter_reload_input.connect(_try_enter_reload)
 	on_try_exit_reload_input.connect(_try_exit_reload)
+	
+	if(bullet_scene == null):
+		push_error("No Bullet Scene Assigned on Colt!")
+
+	if(on_hit_effect_dictionary == null):
+		push_error("No Hit VFX Dictionary Assigned on Colt!")
 
 func _physics_process(_delta: float) -> void:
 	if(fire_next_physics_frame):
@@ -200,9 +206,20 @@ func _damage_target(hit : Dictionary) -> void:
 		
 	if hit.collider.has_user_signal(HitboxComponent.damaged_signal_name):
 		hit.collider.emit_signal(HitboxComponent.damaged_signal_name, hit, _calculate_damage(hit))
-		
-	if(on_hit_effect.can_instantiate()):
-		var created_effect : VFXInstance = on_hit_effect.instantiate()
+	
+	print(hit.collider.physics_material_override)	
+	#var physics_body : PhysicsBody3D = hit.collider as PhysicsBody3D	
+	#if(physics_body):
+	#	physics_body.get_physics
+
+	var scene_found : PackedScene = null
+	if(hit.collider.physics_material_override && on_hit_effect_dictionary.physics_material_map.has(hit.collider.physics_material_override)):
+		scene_found = on_hit_effect_dictionary.physics_material_map[hit.collider.physics_material_override]
+	else:
+		scene_found = on_hit_effect_dictionary.fallback
+	
+	if(scene_found):
+		var created_effect : VFXInstance = scene_found.instantiate()
 		player.get_parent().add_child(created_effect)
 		created_effect.set_global_position(hit.position)
 		created_effect.quaternion = Quaternion(Vector3.UP, hit.normal)
