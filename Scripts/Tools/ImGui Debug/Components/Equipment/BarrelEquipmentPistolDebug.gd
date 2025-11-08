@@ -3,6 +3,7 @@ class_name BarrelEquipmentPistolDebug extends BarrelEquipmentSceneDebug
 @export var pistol : PlayerEquipmentPistol
 
 @export var log_debug_info : bool = true
+@export var shoot_with_invalid_bullets : bool = false
 
 func _ready() -> void:
 	super()
@@ -19,6 +20,10 @@ func _draw_contents(_delta: float) -> void:
 	if(ImGui.Checkbox("Log Debug?", log_info)):
 		log_debug_info = log_info[0]
 		
+	var invalid_allowed : Array[bool] = [pistol.debug_shot_valid]
+	if(ImGui.Checkbox("Always Fire?", invalid_allowed)):
+		pistol.debug_shot_valid = invalid_allowed[0]	
+
 	ImGui.SeparatorText("Components")
 	super(_delta)
 	
@@ -31,8 +36,6 @@ func _draw_pistol_debug(_delta : float) -> void:
 	ImGui.TextColored(draw_col,(String("Time since last action : %f" % time_since_last_action)))
 	ImGui.Text("Max Fan Hammer Delay %f" % pistol.fan_hammer_max_delay)
 	
-
-
 
 
 func _on_pistol_action_started(_new_action: int) -> void:

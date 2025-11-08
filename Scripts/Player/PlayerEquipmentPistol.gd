@@ -48,6 +48,8 @@ var main_equipment_last_use_time : float = 0
 @export var raycast_dist : float = 1500
 @export var base_damage : float = 100
 
+var debug_shot_valid : bool = false
+
 var insert_chamber_id: int:
 	get:
 		return (current_chamber_id - 1 % chamber_amount)
@@ -121,7 +123,7 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	
 	if(!started_action):
 		if _can_shoot():
-			if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
+			if((current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired())|| debug_shot_valid):
 				_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
 			else:
 				_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
@@ -152,13 +154,15 @@ func _fire_current_bullet() -> void:
 	fire_next_physics_frame = true
 	
 func _physics_fire_current_bullet() -> void:
-	if(current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()):
+	var valid_bullet : bool = current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()
+	if(valid_bullet || debug_shot_valid):
+		if(valid_bullet):
+			current_bullets[current_chamber_id]._on_fired()
 		on_fired.emit()
-		current_bullets[current_chamber_id]._on_fired()
+		_damage_target(_find_target_hit())
+		
 
-	_damage_target(_find_target_hit())
-	
-	
+
 func _find_target_hit() -> Dictionary:
 	var world_cam : Camera3D = player.player_cam
 	var cam_pos : Vector3 = world_cam.get_global_position()
