@@ -1,7 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://bcoj47sn0g6ns"]
+[gd_scene load_steps=16 format=3 uid="uid://bcoj47sn0g6ns"]
 
 [ext_resource type="Script" uid="uid://bk7a3qhcp1ymh" path="res://Scripts/VFX/VFX_Instance.gd" id="1_ffrpg"]
-[ext_resource type="ArrayMesh" uid="uid://bkah2xwd6udul" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Large.res" id="3_axupb"]
 
 [sub_resource type="Curve" id="Curve_ffrpg"]
 _limits = [0.0267016, 10.0, 0.0, 1.0]
@@ -53,11 +52,51 @@ radial_segments = 4
 rings = 0
 cap_bottom = false
 
-[node name="Node3D" type="Node3D" node_paths=PackedStringArray("particles_emit_on_spawn")]
-script = ExtResource("1_ffrpg")
-particles_emit_on_spawn = [NodePath("VfxPropOnHit")]
+[sub_resource type="Curve" id="Curve_eh48o"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.733766, 0.539974), 0.0, 0.0, 0, 0, Vector2(0.996753, 0), -0.678898, 0.0, 0, 0]
+point_count = 3
 
-[node name="VfxPropOnHit" type="GPUParticles3D" parent="."]
+[sub_resource type="CurveTexture" id="CurveTexture_iotmn"]
+curve = SubResource("Curve_eh48o")
+
+[sub_resource type="Curve" id="Curve_axupb"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.321429, 1), 0.0, 0.0, 0, 0, Vector2(0.983766, 0.00327647), -0.897634, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_eh48o"]
+curve = SubResource("Curve_axupb")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ffrpg"]
+particle_flag_align_y = true
+emission_shape = 1
+emission_sphere_radius = 0.2
+direction = Vector3(0, 1, 0)
+initial_velocity_min = 0.2
+initial_velocity_max = 0.5
+gravity = Vector3(0, 1.5, 0)
+scale_min = 0.2
+scale_max = 0.6
+scale_curve = SubResource("CurveTexture_eh48o")
+color = Color(0.7, 0.7, 0.7, 1)
+alpha_curve = SubResource("CurveTexture_iotmn")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_63m68"]
+transparency = 1
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_axupb"]
+material = SubResource("StandardMaterial3D_63m68")
+radius = 0.1
+height = 0.2
+radial_segments = 12
+rings = 12
+
+[node name="VFX_Prop_Hit_Generic" type="Node3D" node_paths=PackedStringArray("particles_emit_on_spawn")]
+script = ExtResource("1_ffrpg")
+lifetime = 1.5
+particles_emit_on_spawn = [NodePath("SparksVFX"), NodePath("SmokeVFX")]
+
+[node name="SparksVFX" type="GPUParticles3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.05, 0)
 emitting = false
 amount = 2
@@ -69,17 +108,12 @@ fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_63m68")
 draw_pass_1 = SubResource("CylinderMesh_ffrpg")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-transform = Transform3D(300, 0, 0, 0, 300, 0, 0, 0, 300, 0, 0, 0)
-visible = false
-mesh = ExtResource("3_axupb")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
-transform = Transform3D(-150, 0, 259.808, 0, 300, 0, -259.808, 0, -150, 0, 0, 0)
-visible = false
-mesh = ExtResource("3_axupb")
-
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
-transform = Transform3D(-150, 0, -259.808, 0, 300, 0, 259.808, 0, -150, 0, 0, 0)
-visible = false
-mesh = ExtResource("3_axupb")
+[node name="SmokeVFX" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 3
+lifetime = 0.3
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_ffrpg")
+draw_pass_1 = SubResource("SphereMesh_axupb")
