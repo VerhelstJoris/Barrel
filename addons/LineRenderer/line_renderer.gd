@@ -1,6 +1,7 @@
 class_name LineRenderer extends MeshInstance3D
 
 @export var should_draw : bool = true
+@export var replace_start_point : Node3D
 @export var points: Array[Vector3]
 @export var use_global_coords:bool = true
 @export var billboard_polys : bool = true
@@ -36,7 +37,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	camera = get_tree().get_root().get_camera_3d()
 	
-func _process(_delta : float) -> void:
+func _process(_delta: float) -> void:
 	if(!should_draw):
 		return
 	
@@ -57,9 +58,17 @@ func _process(_delta : float) -> void:
 	mesh.clear_surfaces()
 	mesh.surface_begin(Mesh.PrimitiveType.PRIMITIVE_TRIANGLES)
 	
+	if(replace_start_point != null):
+		var additional_pos : Vector3
+		if(use_global_coords):
+			additional_pos = replace_start_point.get_global_position()
+		else:
+			additional_pos = replace_start_point.get_position()
+		points[0] = additional_pos
+		
 	for i in range(points.size() - 1):
 		_draw_next_poly(points[i],points[i+1], i)
-
+		
 	mesh.surface_end()
 	
 func _reset_vars_for_drawing(_delta : float)->void:

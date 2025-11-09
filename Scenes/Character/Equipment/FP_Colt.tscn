@@ -394,7 +394,7 @@ gi_mode = 2
 mesh = ExtResource("22_1g454")
 skin = SubResource("Skin_upuq7")
 
-[node name="Muzzle_Smoke_Trail" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D"]
+[node name="Muzzle_Smoke_Trail" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D" node_paths=PackedStringArray("replace_start_point")]
 transform = Transform3D(-1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -0.00656354, 0.00148007)
 layers = 2
 material_override = SubResource("ShaderMaterial_kiwjb")
@@ -403,6 +403,7 @@ lod_bias = 0.001
 gi_mode = 0
 mesh = SubResource("ImmediateMesh_kiwjb")
 script = ExtResource("30_kiwjb")
+replace_start_point = NodePath("../MuzzlePoint")
 start_thickness = 0.0
 metadata/_custom_type_script = "uid://cmmjaefpx7esy"
 

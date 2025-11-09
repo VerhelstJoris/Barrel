@@ -1,4 +1,4 @@
-class_name ColtVFXManager extends Node3D
+class_name ColtVFXManager extends Node
 
 var colt_equipment : PlayerEquipmentPistol = null
 
@@ -78,7 +78,7 @@ func _ready() -> void:
 	_toggle_cylinder_fire_vfx(false)
 	_reset_muzzle_smoke_vfx_shader_params()
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_process_muzzle_smoke(delta)
 	_process_muzzle_smoke_points(delta)
 
@@ -117,14 +117,8 @@ func _process_muzzle_smoke_points(_delta : float) -> void:
 			_smoke_add_point_timer = 0
 		
 		if(!muzzle_positions.is_empty()):
-			var pos_copy : Array[Vector3] = muzzle_positions
-			pos_copy[0] = (smoke_renderer.get_global_position())
-			if(pos_copy.size() > 2):
-				pos_copy[1] = lerp(pos_copy[1], (pos_copy[0] + pos_copy[2]) /2, 0.5)
-
-			smoke_renderer.points = pos_copy
+			smoke_renderer.points = muzzle_positions
 			smoke_renderer.pre_computed_thickness_arr = muzzle_smoke_width_arr
-			smoke_renderer.pre_computed_thickness_arr[0] = _muzzle_smoke_start_width
 	
 func _update_existing_muzzle_points(_delta : float) -> void:
 	var added : Vector3= Vector3(randf_range(min_muzzle_smoke_move_speed.x, max_muzzle_smoke_move_speed.x) ,
