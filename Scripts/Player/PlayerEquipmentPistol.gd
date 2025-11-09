@@ -206,24 +206,20 @@ func _damage_target(hit : Dictionary) -> void:
 		
 	if hit.collider.has_user_signal(HitboxComponent.damaged_signal_name):
 		hit.collider.emit_signal(HitboxComponent.damaged_signal_name, hit, _calculate_damage(hit))
-	
-	print(hit.collider.physics_material_override)	
-	#var physics_body : PhysicsBody3D = hit.collider as PhysicsBody3D	
-	#if(physics_body):
-	#	physics_body.get_physics
+		
+	_spawn_on_hit_vfx(hit)
+		
+func _spawn_on_hit_vfx(hit : Dictionary) -> void:
+	var hit_body : PhysicsBody3D = hit.collider as PhysicsBody3D
+	var scene_found : PackedScene = on_hit_effect_dictionary._find_scene_from_physicsbody(hit_body)
 
-	var scene_found : PackedScene = null
-	if(hit.collider.physics_material_override && on_hit_effect_dictionary.physics_material_map.has(hit.collider.physics_material_override)):
-		scene_found = on_hit_effect_dictionary.physics_material_map[hit.collider.physics_material_override]
-	else:
-		scene_found = on_hit_effect_dictionary.fallback
-	
 	if(scene_found):
 		var created_effect : VFXInstance = scene_found.instantiate()
 		player.get_parent().add_child(created_effect)
 		created_effect.set_global_position(hit.position)
 		created_effect.quaternion = Quaternion(Vector3.UP, hit.normal)
-
+		
+	
 func _calculate_damage(_hit : Dictionary) -> float:
 	return base_damage
 	
