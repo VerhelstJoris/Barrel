@@ -70,6 +70,7 @@ func _ready() -> void:
 	colt_equipment = get_owner() as PlayerEquipmentPistol
 	colt_equipment.on_fired.connect(_on_bullet_fired)
 	colt_equipment.on_holstered.connect(_on_start_holstering)
+	colt_equipment.on_unholstered.connect(_on_start_unholstering)
 
 	max_sharp_angle_degree = max_sharp_angle_degree
 	
@@ -83,21 +84,30 @@ func _physics_process(delta: float) -> void:
 	_process_muzzle_smoke_points(delta)
 
 func _on_start_holstering() -> void:
-	_deactivate_muzzle_smoke(muzzle_smoke_instant_decay_rate)
+	_start_muzzle_smoke_decay(muzzle_smoke_instant_decay_rate)
 
+func _on_start_unholstering() -> void:
+	_reset_vars()
+	
 func _process_muzzle_smoke(delta : float) -> void:
 	if muzzle_smoke_active:
 		muzzle_smoke_current_timer += delta
 		if(muzzle_smoke_current_timer > muzzle_smoke_max_time):
-			_deactivate_muzzle_smoke(muzzle_smoke_decay_rate)
+			_start_muzzle_smoke_decay(muzzle_smoke_decay_rate)
 		
 	if(muzzle_smoke_decaying):
 		muzzle_smoke_decay_timer += delta
 		if(muzzle_smoke_decay_timer > muzzle_smoke_decay_duration):
-			muzzle_positions.clear()
-			muzzle_smoke_width_arr.clear()
-			muzzle_smoke_active = false
-			muzzle_smoke_decaying = false
+			_reset_vars()
+			
+func _reset_vars() -> void:
+	muzzle_positions.clear()
+	muzzle_smoke_width_arr.clear()
+	muzzle_smoke_active = false
+	muzzle_smoke_decaying = false
+	smoke_renderer.points.clear()
+	smoke_renderer.pre_computed_thickness_arr.clear()
+	
 
 func _add_muzzle_smoke_point() -> void:
 	if(muzzle_positions.size() >= _point_amount):
@@ -245,7 +255,7 @@ func _activate_muzzle_smoke() -> void:
 	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  smoke_renderer.get_instance_shader_parameter(muzzle_smoke_grow_shader_param), 1.0, 1.0 / muzzle_smoke_grow_rate)
 	muzzle_smoke_active = true
 
-func _deactivate_muzzle_smoke(decay_rate : float) -> void:
+func _start_muzzle_smoke_decay(decay_rate : float) -> void:
 	muzzle_smoke_current_timer = 0
 	muzzle_smoke_decaying = true
 	muzzle_smoke_decay_tween = create_tween()
