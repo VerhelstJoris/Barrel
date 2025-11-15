@@ -111,7 +111,6 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
 	match new_action:
 		EPistolState.Actions.Fire:
-			print("SET FIRE REQUEST")
 			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request)
 		EPistolState.Actions.DryFire:
 			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_dry_fire_request)
