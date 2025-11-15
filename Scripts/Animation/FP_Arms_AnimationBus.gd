@@ -111,6 +111,7 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
 	match new_action:
 		EPistolState.Actions.Fire:
+			print("SET FIRE REQUEST")
 			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request)
 		EPistolState.Actions.DryFire:
 			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_dry_fire_request)
@@ -196,6 +197,8 @@ func _process(_delta: float) -> void:
 
 func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
+	_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
+
 
 	fanning_hammer_anim_id = randi() %3 +1
 	set(anim_colt_state_machine_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1)
