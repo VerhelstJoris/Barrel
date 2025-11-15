@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cooy44h1jqbd2"]
 
-[ext_resource type="Texture2D" uid="uid://f87xjebe7yrj" path="res://Textures/UI/HUD/HUD_Reticle_backdrop.png" id="2_sgm2s"]
+[ext_resource type="Texture2D" uid="uid://bquxwbstlpgay" path="res://Textures/UI/HUD/HUD_Reticle_backdrop.png" id="2_sgm2s"]
 
 [node name="CenterContainer" type="CenterContainer"]
 clip_contents = true

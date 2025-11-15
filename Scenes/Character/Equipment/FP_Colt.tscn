@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://dnx078m804hk4"]
+[gd_scene load_steps=56 format=3 uid="uid://dnx078m804hk4"]
 
 [ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_ur76o"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Equipment/Colt_Bullet.tscn" id="2_u1ese"]
@@ -41,6 +41,7 @@
 [ext_resource type="Resource" uid="uid://c4vgprx6fkfvx" path="res://Data/Input/IA_Exit_Reload.tres" id="31_ljy0t"]
 [ext_resource type="Resource" uid="uid://by15g85r6kgap" path="res://Data/Input/IA_Fire.tres" id="32_fgv3w"]
 [ext_resource type="Resource" uid="uid://bs0loyw07mm2d" path="res://Data/Input/IA_Enter_Reload.tres" id="33_64bj7"]
+[ext_resource type="PackedScene" uid="uid://c8jivw6o1bk2k" path="res://Scenes/VFX/Damage/VFX_Colt_Muzzle_Smoke.tscn" id="42_kiwjb"]
 
 [sub_resource type="Animation" id="Animation_u1ese"]
 length = 0.001
@@ -460,7 +461,7 @@ layers = 2
 mesh = ExtResource("24_nh4gv")
 
 [node name="MuzzleFlash_Main" type="MeshInstance3D" parent="Colt_Saa_Rig/Skeleton3D/MuzzlePoint"]
-transform = Transform3D(-0.104059, -0.169914, 0.0173507, 0.134404, -0.0939995, -0.114453, 0.105391, -0.0478894, 0.163093, 1.64431e-05, -0.000153971, 4.95508e-05)
+transform = Transform3D(-0.260148, -0.424784, 0.0433771, 0.33601, -0.234999, -0.286134, 0.263478, -0.119724, 0.407732, 0, 0, 0)
 layers = 2
 mesh = ExtResource("25_ytugg")
 surface_material_override/0 = ExtResource("26_st1ay")
@@ -503,6 +504,7 @@ barrel_muzzle_initial_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint/Mu
 barrel_muzzle_flash_min_scale = 1.5
 barrel_vfx_initial_active_time = 0.06
 barrel_muzzle_flash_light = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint/Muzzle_Flash_Light")
+barrel_flash_vfx = ExtResource("42_kiwjb")
 barrel_muzzle_main_vfx = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint/MuzzleFlash_Main")
 barrel_muzzle_main_delay = 0.03
 barrel_muzzle_main_active_time = 0.04

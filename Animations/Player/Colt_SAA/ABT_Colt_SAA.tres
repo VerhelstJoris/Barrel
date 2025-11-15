@@ -50,7 +50,7 @@ loop_mode = 0
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4geki"]
 animation = &"AL_Colt_SAA/A_Colt_Fire"
 use_custom_timeline = true
-timeline_length = 0.6
+timeline_length = 0.567
 stretch_time_scale = true
 start_offset = 0.0
 loop_mode = 0
@@ -105,7 +105,7 @@ animation = &"AL_Colt_SAA/A_Colt_Reload_Next_Chamber"
 animation = &"AL_Colt_SAA/A_Colt_Reload_Previous_Chamber"
 
 [resource]
-graph_offset = Vector2(2187.94, 1093.77)
+graph_offset = Vector2(-461.199, -47.9625)
 nodes/output/position = Vector2(3440, 1220)
 nodes/EnterReload/node = SubResource("AnimationNodeAnimation_1yo05")
 nodes/EnterReload/position = Vector2(240, 500)
