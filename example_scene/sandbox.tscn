@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://d1mhk3prnqywk"]
+[gd_scene load_steps=12 format=3 uid="uid://d1mhk3prnqywk"]
 
 [ext_resource type="Material" uid="uid://brpu7xylrg2l2" path="res://example_scene/materials/material_basic_blue.tres" id="1_fb2x7"]
 [ext_resource type="PackedScene" uid="uid://dlbkch6iuy8gn" path="res://addons/fp_controller/player.tscn" id="2_l16tt"]
 [ext_resource type="PackedScene" uid="uid://nswkrnyepieq" path="res://example_scene/scenes/basic_block.tscn" id="3_nm1m6"]
 [ext_resource type="PackedScene" uid="uid://kqmbae0l4ewu" path="res://example_scene/scenes/basic_block_2.tscn" id="4_1esxm"]
 [ext_resource type="PackedScene" uid="uid://bj8psqyju3l0k" path="res://Scenes/Props/Barrel/Prop_Barrel.tscn" id="5_fd0ol"]
+[ext_resource type="PackedScene" uid="uid://dl55tndc0qxky" path="res://Scenes/Interactables/Interactable_Bottle.tscn" id="6_bypyv"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_r6mis"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -55,6 +56,9 @@ shape = SubResource("ConvexPolygonShape3D_h1lgg")
 
 [node name="BasicBlock" parent="Obstacles" instance=ExtResource("3_nm1m6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, -8)
+
+[node name="BasicBlock" parent="Obstacles/BasicBlock" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 3)
 
 [node name="BasicBlock2" parent="Obstacles" instance=ExtResource("3_nm1m6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, -8)
@@ -224,3 +228,9 @@ transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0,
 
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)
+
+[node name="InteractableBottle2" parent="." instance=ExtResource("6_bypyv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1491, 1.08242, -4.61486)
+
+[node name="InteractableBottle3" parent="." instance=ExtResource("6_bypyv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.31414, 1.29678, -4.61486)
