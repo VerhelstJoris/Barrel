@@ -1,6 +1,5 @@
 shader_type spatial;
 
-
 uniform float Refraction_Strength = 0.05;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture;
 uniform float Fresnel_Power = 1.0;
@@ -15,7 +14,8 @@ void fragment() {
 	vec3 view_normal = normalize((VIEW * vec3(NORMAL)).xyz);
 	float fresnel = pow(1.0 - dot(NORMAL, VIEW), Fresnel_Power);
 	vec2 offset = view_normal.xy * Refraction_Strength * fresnel;
-	ALBEDO = texture(SCREEN_TEXTURE, SCREEN_UV + offset,Blur).rgb * Taint * Alpha;
+	ALBEDO = mix(texture(SCREEN_TEXTURE, SCREEN_UV + offset,Blur).rgb * Taint, Taint.rgb, Alpha);
+	//ALBEDO = texture(SCREEN_TEXTURE, SCREEN_UV + offset,Blur).rgb *  Taint * Alpha;
 	EMISSION = texture(SCREEN_TEXTURE, SCREEN_UV + offset).rgb * Taint * Emission_Power;
 
 

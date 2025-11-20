@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://baheit7pwnuql"]
+
+[ext_resource type="Shader" uid="uid://yq0l8fpfo1nm" path="res://Materials/Shaders/Physical/Glass_Colored.gdshader" id="1_n5c8m"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_n5c8m")
+shader_parameter/albedo = Color(0, 0.66, 0.143, 0.843137)
+shader_parameter/roughness = 0.15
+shader_parameter/refraction = 0.100001
+shader_parameter/refraction_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/normal_strength = 0.500001
+shader_parameter/edge_color = Color(0.6, 0.4318, 0.252, 1)
+shader_parameter/surface_contribution = 0.2
+shader_parameter/specular_contribution = 0.3
+shader_parameter/refraction_contribution = 0.5
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)

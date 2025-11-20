@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://crrvxvbhoy5oy"]
+
+[ext_resource type="Shader" uid="uid://c4wsmihtfgrma" path="res://Materials/Shaders/Physical/Glass.gdshader" id="1_rtlu5"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_rtlu5")
+shader_parameter/Refraction_Strength = 0.05
+shader_parameter/Fresnel_Power = 1.0
+shader_parameter/Alpha = 0.95
+shader_parameter/Emission_Power = 1.0
+shader_parameter/Specular_Power = 1.0
+shader_parameter/Roughness_Power = 0.4
+shader_parameter/Rim_Power = 0.05
+shader_parameter/Blur = 0.25
+shader_parameter/Taint = Color(0.429073, 0.318094, 0.153875, 1)
