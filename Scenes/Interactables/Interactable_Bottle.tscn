@@ -1,36 +1,33 @@
 [gd_scene load_steps=7 format=3 uid="uid://dl55tndc0qxky"]
 
-[ext_resource type="ArrayMesh" uid="uid://d3b8qqorbdmou" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
+[ext_resource type="ArrayMesh" uid="uid://pj74qjalyai0" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
 [ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="1_xweuc"]
 [ext_resource type="Script" uid="uid://b6ll43e7dibhk" path="res://Scripts/Gameplay/Components/Damage/HitBoxComponent.gd" id="2_vfrhl"]
 [ext_resource type="Script" uid="uid://dbxmaejdon3hv" path="res://Scripts/Gameplay/Components/Damage/ExplodeComponent.gd" id="3_f24x0"]
 [ext_resource type="PhysicsMaterial" uid="uid://cjx2112xkeh4h" path="res://Data/PhysicsMaterials/PM_Glass.tres" id="3_xweuc"]
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_bt6bh"]
-points = PackedVector3Array(0.000412013, 0, 0.00107645, 0.000291265, -0.000291345, 0.00107645, 0.000275455, -0.000275536, 6.93465e-05, 0.000389509, 0, 6.97681e-05, 0.000275455, 0.000275455, 6.97681e-05, 0.000291265, 0.000291265, 0.00107645, 7.82405e-05, 7.82405e-05, 0.00212761, 0.000110666, 0, 0.00212761, 7.82405e-05, -7.83212e-05, 0.00212761, 0, -0.000412013, 0.00107645, 0, -0.000110747, 0.00212761, 0, -0.00038959, 6.97681e-05, 0, -0.000377007, 0, 0.000266502, -0.000266583, 0, 0.000376926, 0, 0, 0.000266502, 0.000266502, 0, 0, 0.000376926, 0, 0, 0.000389509, 6.97681e-05, 0, 0.000412013, 0.00107645, 0, 0.000110666, 0.00212761, 6.70287e-05, 6.70287e-05, 0.00215333, 9.47759e-05, 0, 0.00215333, 6.70287e-05, -6.71094e-05, 0.00215333, -0.000291345, -0.000291345, 0.00107645, -0.000275536, -0.000275536, 6.97681e-05, -7.83212e-05, -7.83212e-05, 0.00212761, 0, -9.48566e-05, 0.00215333, -6.71094e-05, -6.71094e-05, 0.00215333, -0.000266583, -0.000266583, 0, -0.000266583, 0.000266502, 0, -0.000275536, 0.000275455, 6.97681e-05, -0.000291345, 0.000291265, 0.00107645, -7.83212e-05, 7.82405e-05, 0.00212761, -6.71094e-05, 6.70287e-05, 0.00215333, 0, 9.47759e-05, 0.00215333, -0.000412013, 0, 0.00107645, -0.00038959, 0, 6.97681e-05, -0.000377007, 0, 0, -0.000110747, 0, 0.00212761, -9.48566e-05, 0, 0.00215333)
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xweuc"]
+points = PackedVector3Array(0.0412013, -8.06525e-06, 0.107645, 0.0291265, -0.0291345, 0.107645, 0.0275455, -0.0275536, 0.00697681, 0.0389509, -8.06525e-06, 0.00697681, 0.0275455, 0.0275455, 0.00693465, 0.0291265, 0.0291265, 0.107645, 0.00782406, 0.00782406, 0.212761, 0.0110666, 0, 0.212761, 0.00782406, -0.00783212, 0.212761, 0, -0.0412013, 0.107645, 0, -0.0110747, 0.212761, 0, -0.038959, 0.00697681, 0, -0.0377007, 0, 0.0266502, -0.0266583, 0, 0.0376926, 0, 0, 0.0266502, 0.0266502, 0, 0, 0.0376926, 0, 0, 0.0389509, 0.00697681, 0, 0.0412013, 0.107645, 0, 0.0110666, 0.212761, 0.00670287, 0.00670287, 0.215333, 0.00947759, 0, 0.215333, 0.00670287, -0.00671094, 0.215333, -0.0291345, -0.0291345, 0.107645, -0.0275536, -0.0275536, 0.00697681, -0.00783212, -0.00783212, 0.212761, 0, -0.00948566, 0.215333, -0.00671094, -0.00671094, 0.215333, -0.0266583, -0.0266583, 0, -0.0266583, 0.0266502, 0, -0.0275536, 0.0275455, 0.00697681, -0.0291345, 0.0291265, 0.107645, -0.00783212, 0.00782406, 0.212761, -0.00671094, 0.00670287, 0.215333, 0, 0.00947759, 0.215333, -0.0412013, -8.06525e-06, 0.107645, -0.038959, -8.06525e-06, 0.00697681, -0.0377007, 0, 0, -0.0110747, 0, 0.212761, -0.00948566, 0, 0.215333)
 
 [node name="InteractableBottle" type="Node3D"]
-transform = Transform3D(3.5, 0, 0, 0, 4, 0, 0, 0, 3.5, 0, 0, 0)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(100, 0, 0, 0, -4.37114e-06, 100, 0, -100, -4.37114e-06, 0, 0, 0)
-material_override = ExtResource("1_xweuc")
-mesh = ExtResource("1_bt6bh")
-
-[node name="RigidBody3D" type="RigidBody3D" parent="."]
-physics_material_override = ExtResource("3_xweuc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
-transform = Transform3D(100, 0, 0, 0, -4.37114e-06, 100, 0, -100, -4.37114e-06, 0, 0, 0)
-visible = false
-shape = SubResource("ConvexPolygonShape3D_bt6bh")
 
 [node name="HitboxComponent" type="Node" parent="." node_paths=PackedStringArray("shapes_to_register_hits_from")]
 script = ExtResource("2_vfrhl")
-shapes_to_register_hits_from = [NodePath("../RigidBody3D")]
+shapes_to_register_hits_from = [NodePath("../MeshInstance3D/RigidBody3D")]
 metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 
 [node name="ExplodeComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
 script = ExtResource("3_f24x0")
 hitbox = NodePath("../HitboxComponent")
 metadata/_custom_type_script = "uid://dbxmaejdon3hv"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = ExtResource("1_bt6bh")
+surface_material_override/0 = ExtResource("1_xweuc")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="MeshInstance3D"]
+physics_material_override = ExtResource("3_xweuc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/RigidBody3D"]
+shape = SubResource("ConvexPolygonShape3D_xweuc")

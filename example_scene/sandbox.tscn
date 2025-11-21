@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://nswkrnyepieq" path="res://example_scene/scenes/basic_block.tscn" id="3_nm1m6"]
 [ext_resource type="PackedScene" uid="uid://kqmbae0l4ewu" path="res://example_scene/scenes/basic_block_2.tscn" id="4_1esxm"]
 [ext_resource type="PackedScene" uid="uid://bj8psqyju3l0k" path="res://Scenes/Props/Barrel/Prop_Barrel.tscn" id="5_fd0ol"]
-[ext_resource type="PackedScene" uid="uid://dl55tndc0qxky" path="res://Scenes/Interactables/Interactable_Bottle.tscn" id="6_bypyv"]
+[ext_resource type="PackedScene" uid="uid://dl55tndc0qxky" path="res://Scenes/Interactables/Interactable_Bottle.tscn" id="7_f3jw6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_r6mis"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -229,8 +229,5 @@ transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0,
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)
 
-[node name="InteractableBottle2" parent="." instance=ExtResource("6_bypyv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1491, 1.08242, -4.61486)
-
-[node name="InteractableBottle3" parent="." instance=ExtResource("6_bypyv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.31414, 1.29678, -4.61486)
+[node name="InteractableBottle" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.28027, 1, -4.85529)

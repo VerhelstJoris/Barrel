@@ -204,6 +204,8 @@ func _damage_target(hit : Dictionary) -> void:
 	if(!hit):
 		return
 		
+	print("HIT " , hit.collider.name)	
+		
 	if hit.collider.has_user_signal(HitboxComponent.damaged_signal_name):
 		hit.collider.emit_signal(HitboxComponent.damaged_signal_name, hit, _calculate_damage(hit))
 		
