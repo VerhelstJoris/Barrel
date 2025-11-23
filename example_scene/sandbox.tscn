@@ -230,4 +230,10 @@ transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0,
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -0.358362, 0.991762, -3.7304)
 
 [node name="InteractableBottle" parent="." instance=ExtResource("7_f3jw6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.28027, 1, -4.85529)
+transform = Transform3D(1, 0, 0, 0, 1, 1.06581e-14, 0, -1.06581e-14, 1, 1.28027, 1, -4.85529)
+
+[node name="InteractableBottle2" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, 1, 1.06581e-14, 0, -1.06581e-14, 1, 1.03295, 3.14237, -4.85529)
+
+[node name="InteractableBottle4" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, 1, 1.06581e-14, 0, -1.06581e-14, 1, 0.65972, 1, -4.85529)

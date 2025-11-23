@@ -8,7 +8,6 @@ class_name ExplodeComponent extends Node
 func _ready() -> void:
 	if(hitbox):
 		hitbox.on_shape_hit.connect(_on_owner_health_change)	
-
 		
 func _on_owner_health_change(_new_health : float, _old_health : float) -> void:
 	if(on_explode_effect):
