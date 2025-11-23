@@ -531,9 +531,8 @@ max_sharp_angle_degree = 45.0
 cylinder_fire_vfx = [NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint/CylinderFlash_1"), NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint/CylinderFlash_2")]
 cylinder_fire_vfx_active = 0.07
 
-[node name="ColtVFXManagerDebugNode" type="Node" parent="Colt_VFX_Manager" node_paths=PackedStringArray("manager")]
+[node name="ColtVFXManagerDebugNode" type="Node" parent="Colt_VFX_Manager"]
 script = ExtResource("43_jkx1k")
-manager = NodePath("..")
 metadata/_custom_type_script = "uid://c5fa5647lnqpr"
 
 [editable path="Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier"]
