@@ -107,6 +107,7 @@ func _reset_vars() -> void:
 	muzzle_smoke_decaying = false
 	smoke_renderer.points.clear()
 	smoke_renderer.pre_computed_thickness_arr.clear()
+	_reset_muzzle_smoke_vfx_shader_params()
 	
 
 func _add_muzzle_smoke_point() -> void:
@@ -261,8 +262,10 @@ func _start_muzzle_smoke_decay(decay_rate : float) -> void:
 	muzzle_smoke_decay_tween = create_tween()
 	muzzle_smoke_growth_tween = create_tween()
 	muzzle_smoke_decay_duration = 1.0 / decay_rate
-	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param,  0.0, 1.0, muzzle_smoke_decay_duration)
-	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  1.0, 0.0, muzzle_smoke_decay_duration)
+	var current_growth : float = smoke_renderer.get_instance_shader_parameter(muzzle_smoke_grow_shader_param)
+	var current_decay : float = smoke_renderer.get_instance_shader_parameter(muzzle_smoke_shrink_shader_param)
+	muzzle_smoke_decay_tween.tween_method(_set_shrink_shader_param, current_decay, 1.0, muzzle_smoke_decay_duration)
+	muzzle_smoke_growth_tween.tween_method(_set_grow_shader_param,  current_growth, 0.0, muzzle_smoke_decay_duration)
 
 func _interrupt_muzzle_smoke_decay() -> void:
 	muzzle_smoke_decay_tween.stop()
@@ -271,11 +274,9 @@ func _interrupt_muzzle_smoke_decay() -> void:
 	_set_shrink_shader_param(0)
 	
 func _set_grow_shader_param(value : float) -> void:
-	pass
 	smoke_renderer.set_instance_shader_parameter(muzzle_smoke_grow_shader_param, value)
 
 func _set_shrink_shader_param(value : float) -> void:
-	pass
 	smoke_renderer.set_instance_shader_parameter(muzzle_smoke_shrink_shader_param, value)
 	
 func _randomize_fire_vfx() -> void:

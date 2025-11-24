@@ -38,6 +38,8 @@ func _ready() -> void:
 	camera = get_tree().get_root().get_camera_3d()
 	
 func _process(_delta: float) -> void:
+	mesh.clear_surfaces()
+
 	if(!should_draw):
 		return
 	
@@ -55,7 +57,6 @@ func _process(_delta: float) -> void:
 	
 	_reset_vars_for_drawing(_delta)
 	
-	mesh.clear_surfaces()
 	mesh.surface_begin(Mesh.PrimitiveType.PRIMITIVE_TRIANGLES)
 	
 	if(replace_start_point != null):
