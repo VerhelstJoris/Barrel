@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://bj8psqyju3l0k"]
 
-[ext_resource type="Script" uid="uid://dbxmaejdon3hv" path="res://Scripts/Gameplay/Components/Damage/ExplodeComponent.gd" id="1_k6gu1"]
 [ext_resource type="ArrayMesh" uid="uid://d4ltbs78vbayq" path="res://Meshes/Props/Barrel/M_Body_LowPoly.res" id="1_knnlx"]
 [ext_resource type="ArrayMesh" uid="uid://bqv6p5iywbfx5" path="res://Meshes/Props/Barrel/M_Top_Lid.res" id="4_pep00"]
 [ext_resource type="ArrayMesh" uid="uid://c5ci2icuuvegy" path="res://Meshes/Props/Barrel/M_Middle_Rings.res" id="6_k6gu1"]
+[ext_resource type="Script" uid="uid://bu4bc7atpf70e" path="res://Scripts/Gameplay/Components/Damage/DeathComponent.gd" id="6_tpvaf"]
 [ext_resource type="ArrayMesh" uid="uid://ylsvh4okq0bm" path="res://Meshes/Props/Barrel/M_Outer_Rings.res" id="7_o2jcc"]
 [ext_resource type="Script" uid="uid://b6ll43e7dibhk" path="res://Scripts/Gameplay/Components/Damage/HitBoxComponent.gd" id="8_k6gu1"]
 
@@ -42,7 +42,7 @@ shape = SubResource("ConvexPolygonShape3D_tpvaf")
 script = ExtResource("8_k6gu1")
 shapes_to_register_hits_from = [NodePath("../Body_Low/StaticBody3D")]
 
-[node name="ExplodeComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
-script = ExtResource("1_k6gu1")
+[node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
+script = ExtResource("6_tpvaf")
 hitbox = NodePath("../HitBoxComponent")
-metadata/_custom_type_script = "uid://dbxmaejdon3hv"
+metadata/_custom_type_script = "uid://bu4bc7atpf70e"

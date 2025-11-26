@@ -1,36 +1,44 @@
-[gd_scene load_steps=7 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=9 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
+[ext_resource type="PhysicsMaterial" uid="uid://cjx2112xkeh4h" path="res://Data/PhysicsMaterials/PM_Glass.tres" id="1_u2t4m"]
 [ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="1_xweuc"]
 [ext_resource type="Script" uid="uid://gdk3w1bs44k6" path="res://Scripts/Gameplay/Components/Physics/CollisionPhysicsBody.gd" id="2_u2t4m"]
 [ext_resource type="Script" uid="uid://b6ll43e7dibhk" path="res://Scripts/Gameplay/Components/Damage/HitBoxComponent.gd" id="2_vfrhl"]
-[ext_resource type="Script" uid="uid://dbxmaejdon3hv" path="res://Scripts/Gameplay/Components/Damage/ExplodeComponent.gd" id="3_f24x0"]
+[ext_resource type="PackedScene" uid="uid://c25oryxv4t0us" path="res://Scenes/VFX/Damage/Death/VFX_Prop_Death_Glass.tscn" id="6_6pqks"]
+[ext_resource type="Script" uid="uid://bu4bc7atpf70e" path="res://Scripts/Gameplay/Components/Damage/DeathComponent.gd" id="6_u2t4m"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xweuc"]
 points = PackedVector3Array(0.0412013, -8.06525e-06, 0.107645, 0.0291265, -0.0291345, 0.107645, 0.0275455, -0.0275536, 0.00697681, 0.0389509, -8.06525e-06, 0.00697681, 0.0275455, 0.0275455, 0.00693465, 0.0291265, 0.0291265, 0.107645, 0.00782406, 0.00782406, 0.212761, 0.0110666, 0, 0.212761, 0.00782406, -0.00783212, 0.212761, 0, -0.0412013, 0.107645, 0, -0.0110747, 0.212761, 0, -0.038959, 0.00697681, 0, -0.0377007, 0, 0.0266502, -0.0266583, 0, 0.0376926, 0, 0, 0.0266502, 0.0266502, 0, 0, 0.0376926, 0, 0, 0.0389509, 0.00697681, 0, 0.0412013, 0.107645, 0, 0.0110666, 0.212761, 0.00670287, 0.00670287, 0.215333, 0.00947759, 0, 0.215333, 0.00670287, -0.00671094, 0.215333, -0.0291345, -0.0291345, 0.107645, -0.0275536, -0.0275536, 0.00697681, -0.00783212, -0.00783212, 0.212761, 0, -0.00948566, 0.215333, -0.00671094, -0.00671094, 0.215333, -0.0266583, -0.0266583, 0, -0.0266583, 0.0266502, 0, -0.0275536, 0.0275455, 0.00697681, -0.0291345, 0.0291265, 0.107645, -0.00783212, 0.00782406, 0.212761, -0.00671094, 0.00670287, 0.215333, 0, 0.00947759, 0.215333, -0.0412013, -8.06525e-06, 0.107645, -0.038959, -8.06525e-06, 0.00697681, -0.0377007, 0, 0, -0.0110747, 0, 0.212761, -0.00948566, 0, 0.215333)
 
 [node name="CollisionPhysicsBody" type="RigidBody3D"]
+physics_material_override = ExtResource("1_u2t4m")
 contact_monitor = true
 max_contacts_reported = 1
 script = ExtResource("2_u2t4m")
 metadata/_custom_type_script = "uid://gdk3w1bs44k6"
 
+[node name="DeathVFX_Point" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.100631, 0)
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+transform = Transform3D(1.5, 0, 0, 0, -6.55671e-08, 1.5, 0, -1.5, -6.55671e-08, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_xweuc")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
 mesh = ExtResource("1_bt6bh")
+skeleton = NodePath("../..")
 surface_material_override/0 = ExtResource("1_xweuc")
-
-[node name="ExplodeComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
-script = ExtResource("3_f24x0")
-hitbox = NodePath("../HitboxComponent")
-metadata/_custom_type_script = "uid://dbxmaejdon3hv"
 
 [node name="HitboxComponent" type="Node" parent="." node_paths=PackedStringArray("shapes_to_register_hits_from", "rigidbodies_to_register_collisions_from")]
 script = ExtResource("2_vfrhl")
 shapes_to_register_hits_from = [NodePath("..")]
 rigidbodies_to_register_collisions_from = [NodePath("..")]
 metadata/_custom_type_script = "uid://b6ll43e7dibhk"
+
+[node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
+script = ExtResource("6_u2t4m")
+hitbox = NodePath("../HitboxComponent")
+min_collision_impulse = 0.2
+on_death_vfx = ExtResource("6_6pqks")
+death_vfx_spawn_node = NodePath("../DeathVFX_Point")

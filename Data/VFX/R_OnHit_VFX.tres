@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="PhysicsMatDictionary" load_steps=3 format=3 uid="uid://nt4u6v0ss2o3"]
+[gd_resource type="Resource" script_class="PhysicsMatDictionary" load_steps=5 format=3 uid="uid://nt4u6v0ss2o3"]
 
-[ext_resource type="PackedScene" uid="uid://bcoj47sn0g6ns" path="res://Scenes/VFX/Damage/VFX_Prop_OnHit.tscn" id="1_ctm2d"]
+[ext_resource type="PackedScene" uid="uid://bcoj47sn0g6ns" path="res://Scenes/VFX/Damage/OnHit/VFX_Prop_OnHit_Generic.tscn" id="1_ctm2d"]
 [ext_resource type="Script" uid="uid://2qhiodxs4uwf" path="res://Scripts/VFX/PhysicsMatDictionary.gd" id="1_p2oib"]
+[ext_resource type="PhysicsMaterial" uid="uid://cjx2112xkeh4h" path="res://Data/PhysicsMaterials/PM_Glass.tres" id="2_044wy"]
+[ext_resource type="PackedScene" uid="uid://bhil82quun5b3" path="res://Scenes/VFX/Damage/OnHit/VFX_Prop_OnHit_Glass.tscn" id="3_yis8i"]
 
 [resource]
 script = ExtResource("1_p2oib")
-physics_material_map = Dictionary[PhysicsMaterial, PackedScene]({})
+physics_material_map = Dictionary[PhysicsMaterial, PackedScene]({
+ExtResource("2_044wy"): ExtResource("3_yis8i")
+})
 fallback = ExtResource("1_ctm2d")
 metadata/_custom_type_script = "uid://2qhiodxs4uwf"

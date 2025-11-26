@@ -11,4 +11,5 @@ func _ready() -> void:
 	
 func _toggle_emit_vfx(vfx_to_toggle: Array[GPUParticles3D], emit : bool) -> void:
 	for vfx in vfx_to_toggle:
-		vfx.emitting = emit
+		if(vfx != null):
+			vfx.emitting = emit

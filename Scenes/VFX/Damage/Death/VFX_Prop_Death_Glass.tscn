@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3 uid="uid://c25oryxv4t0us"]
+
+[ext_resource type="Script" uid="uid://bk7a3qhcp1ymh" path="res://Scripts/VFX/VFX_Instance.gd" id="1_ui8k4"]
+[ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="2_2je5n"]
+
+[sub_resource type="Curve" id="Curve_ffrpg"]
+_limits = [0.0267016, 10.0, 0.0, 1.0]
+_data = [Vector2(0, 6.74171), 0.0, 13.9626, 0, 0, Vector2(1, 2.53308), -21.4257, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_ffrpg"]
+curve = SubResource("Curve_ffrpg")
+
+[sub_resource type="Curve" id="Curve_63m68"]
+_data = [Vector2(0, 1), 0.0, -0.133884, 0, 0, Vector2(0.627072, 0.845405), -0.605663, -0.605663, 0, 0, Vector2(1, 0), -1.45502, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_axupb"]
+curve = SubResource("Curve_63m68")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_63m68"]
+lifetime_randomness = 0.4
+particle_flag_align_y = true
+angle_min = 1.07288e-05
+angle_max = 1.07288e-05
+spread = 180.0
+initial_velocity_min = 18.0
+initial_velocity_max = 25.0
+damping_min = 4.0
+damping_max = 6.0
+attractor_interaction_enabled = false
+scale_min = 1.5
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_axupb")
+scale_over_velocity_min = 0.6
+scale_over_velocity_max = 1.25
+color = Color(1, 0.894118, 0.478431, 1)
+emission_curve = SubResource("CurveTexture_ffrpg")
+hue_variation_min = -0.01
+hue_variation_max = 0.00999998
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ffrpg"]
+material = ExtResource("2_2je5n")
+top_radius = 0.03
+bottom_radius = 0.01
+height = 0.05
+radial_segments = 4
+rings = 0
+cap_bottom = false
+
+[node name="VFX_Prop_Death_Glass" type="Node3D" node_paths=PackedStringArray("particles_emit_on_spawn")]
+script = ExtResource("1_ui8k4")
+lifetime = 1.5
+particles_emit_on_spawn = [NodePath("Shards")]
+
+[node name="Shards" type="GPUParticles3D" parent="."]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.05, 0)
+emitting = false
+amount = 16
+lifetime = 0.2
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_63m68")
+draw_pass_1 = SubResource("CylinderMesh_ffrpg")
