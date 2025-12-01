@@ -14,7 +14,7 @@ class_name OutlineComponent extends  Node
 @export var outline_color : Color
 
 const width_shader_param : String = "outline_width"
-const colour_shader_param : String = "outline_colour"
+const colour_shader_param : String = "outline_color"
 
 func _ready() -> void:
 	if(!outline_mat):
@@ -24,7 +24,7 @@ func _ready() -> void:
 	_sync_outline_settings()
 
 func _sync_outline_settings() -> void:
-	var width_to_set : float = 0
+	var width_to_set : float = 0.0
 	if(enabled):
 		width_to_set = outline_width
 		

@@ -16,8 +16,12 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = outline_color.rgb;
-	if (outline_color.a < 1.0) {
-		ALPHA = outline_color.a;
+	if(outline_width > 0.0)
+	{
+		ALBEDO = outline_color.rgb;
+		if (outline_color.a < 1.0)
+		{
+			ALPHA = outline_color.a;
+		}
 	}
 }

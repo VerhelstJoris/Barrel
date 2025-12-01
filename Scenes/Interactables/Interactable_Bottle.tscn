@@ -66,4 +66,5 @@ script = ExtResource("10_kukbf")
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
 outline_mat = SubResource("ShaderMaterial_6tjey")
 enabled = false
-outline_color = Color(1, 1, 1, 1)
+outline_width = 1.5
+outline_color = Color(0.412152, 0.412152, 0.412152, 1)
