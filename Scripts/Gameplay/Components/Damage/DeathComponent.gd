@@ -18,6 +18,8 @@ func _ready() -> void:
 			hitbox.on_hit_direct.connect(_on_direct_damage)	
 		if(take_hitbox_collision_damage):
 			hitbox.on_hit_collision.connect(_on_collision_damage)
+	else:
+		push_error("No Hitbox assigned on " ,self.name , ", interactable cannot initialize properly")
 		
 func _on_direct_damage(_global_pos : Vector3, _normal : Vector3, _other_object : Object, _damage : float) -> void:
 	if(_damage < min_direct_damage):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=54 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -35,6 +35,7 @@
 [ext_resource type="Script" uid="uid://bt31heev5y0mu" path="res://Scripts/Animation/FP_AnimationBus.gd" id="30_p7if2"]
 [ext_resource type="Animation" uid="uid://7pl5p8vtrqwe" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Uncrouch.res" id="31_tvmyk"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://duun6khj30hj5" path="res://Animations/Player/Character/WorldCamera/ABT_FP_Camera.tres" id="32_2fqq0"]
+[ext_resource type="Script" uid="uid://b4chk6pi8aunw" path="res://Scripts/Player/InteractorComponent.gd" id="36_wrold"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
 height = 1.8
@@ -214,6 +215,10 @@ default_alpha = 0.025
 [node name="CenterContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
 layout_mode = 2
 
+[node name="InteractRay" type="RayCast3D" parent="CameraPivot/SmoothCamera"]
+transform = Transform3D(1, 0, 0, 0, -4.47035e-08, -1, 0, 1, -4.47035e-08, 0, 0, 0)
+target_position = Vector3(0, -1.5, 0)
+
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
 ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode")]
@@ -246,7 +251,7 @@ max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
 
-[node name="Node" type="Node" parent="PlayerMovementComponent"]
+[node name="MovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
 script = ExtResource("17_y16om")
 
 [node name="BaseMovementStateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
@@ -350,5 +355,10 @@ parameters/UnCrouchOneShot/active = false
 parameters/UnCrouchOneShot/internal_active = false
 parameters/UnCrouchOneShot/request = 0
 script = ExtResource("30_p7if2")
+
+[node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray")]
+script = ExtResource("36_wrold")
+interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
+metadata/_custom_type_script = "uid://b4chk6pi8aunw"
 
 [editable path="PlayerInputManagerComponent"]

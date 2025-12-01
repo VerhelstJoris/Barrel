@@ -4,7 +4,7 @@ class_name HitboxComponent extends Node
 @export var shapes_to_register_hits_from : Array[PhysicsBody3D]
 @export var rigidbodies_to_register_collisions_from : Array[CollisionPhysicsBody]
 
-const damaged_signal_name : String = "on_damaged"
+const damaged_signal_name : String = "direct_damage"
 
 signal on_hit_collision( global_pos : Vector3, normal : Vector3, hit_impulse : Vector3, hit_velocity : Vector3, other_object : Object)
 signal on_hit_direct(_global_pos : Vector3, normal : Vector3,other_object : Object, damage : float)
@@ -15,7 +15,7 @@ func _ready() -> void:
 func _register_shape_signals() -> void:
 	for shape in shapes_to_register_hits_from:
 		shape.add_user_signal(damaged_signal_name, ["Hit", "Damage"])
-		shape.connect(damaged_signal_name, Callable(self, "_on_shape_hit"))
+		shape.connect(damaged_signal_name, _on_shape_hit)
 
 	for rb in rigidbodies_to_register_collisions_from:
 		rb.on_rigidbody_collision.connect(_on_rigidbody_collision)

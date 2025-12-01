@@ -41,7 +41,7 @@ hue_variation_max = 0.00999998
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_ffrpg"]
 material = ExtResource("2_2je5n")
-top_radius = 0.03
+top_radius = 0.02
 bottom_radius = 0.01
 height = 0.05
 radial_segments = 4
