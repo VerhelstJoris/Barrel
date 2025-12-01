@@ -6,6 +6,9 @@ class_name InteractableComponent extends Node
 
 @export var interact_shapes_to_detect_overlap : Array[PhysicsBody3D]
 
+@export var outline : OutlineComponent
+
+@export var outline_material : Material
 
 const hover_start_signal_name : String = "on_interact_hover_start"
 const hover_end_signal_name : String = "on_interact_hover_end"
@@ -38,12 +41,12 @@ func _register_interact_signals_on_shape(body : PhysicsBody3D) -> void:
 
 func _on_hover_start(_interactor: InteractorComponent) -> void:
 	print("Hover Start")
-	pass
-
+	outline.enabled = true
+		
 func _on_hover_end(_interactor: InteractorComponent) -> void:
 	print("Hover END")
-	pass
-	
+	outline.enabled = false
+
 func _on_interact(_interactor: InteractorComponent) -> void:
 	print("ON INTERACT")
 	pass

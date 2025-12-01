@@ -230,7 +230,7 @@ transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0,
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -2.20362, 0.991762, -4.77356)
 
 [node name="CollisionPhysicsBody" parent="." instance=ExtResource("7_f3jw6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.640603, 1, -4.63989)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.640603, 1.00688, -4.63989)
 
 [node name="CollisionPhysicsBody2" parent="." instance=ExtResource("7_f3jw6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.44268, 1, -4.63989)
