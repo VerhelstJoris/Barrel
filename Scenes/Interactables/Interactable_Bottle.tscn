@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=15 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
 [ext_resource type="PhysicsMaterial" uid="uid://cjx2112xkeh4h" path="res://Data/PhysicsMaterials/PM_Glass.tres" id="1_u2t4m"]
@@ -9,16 +9,14 @@
 [ext_resource type="PackedScene" uid="uid://c25oryxv4t0us" path="res://Scenes/VFX/Damage/Death/VFX_Prop_Death_Glass.tscn" id="6_6pqks"]
 [ext_resource type="Script" uid="uid://bu4bc7atpf70e" path="res://Scripts/Gameplay/Components/Damage/DeathComponent.gd" id="6_u2t4m"]
 [ext_resource type="Script" uid="uid://vancee6lfbu6" path="res://Scripts/Gameplay/Components/Interaction/InteractableComponent.gd" id="8_00ys1"]
+[ext_resource type="Resource" uid="uid://cvehamcvspdg4" path="res://Data/Interactions/DA_Interactable_Bottle.tres" id="10_471q5"]
 [ext_resource type="Script" uid="uid://8nctmriibrv5" path="res://Scripts/Gameplay/Components/Visual/OutlineComponent.gd" id="10_kukbf"]
+[ext_resource type="Material" uid="uid://b35y3kq560nyb" path="res://Materials/Misc/Outline/mat_outline.tres" id="11_6tjey"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xweuc"]
 points = PackedVector3Array(0.0412013, -8.06525e-06, 0.107645, 0.0291265, -0.0291345, 0.107645, 0.0275455, -0.0275536, 0.00697681, 0.0389509, -8.06525e-06, 0.00697681, 0.0275455, 0.0275455, 0.00693465, 0.0291265, 0.0291265, 0.107645, 0.00782406, 0.00782406, 0.212761, 0.0110666, 0, 0.212761, 0.00782406, -0.00783212, 0.212761, 0, -0.0412013, 0.107645, 0, -0.0110747, 0.212761, 0, -0.038959, 0.00697681, 0, -0.0377007, 0, 0.0266502, -0.0266583, 0, 0.0376926, 0, 0, 0.0266502, 0.0266502, 0, 0, 0.0376926, 0, 0, 0.0389509, 0.00697681, 0, 0.0412013, 0.107645, 0, 0.0110666, 0.212761, 0.00670287, 0.00670287, 0.215333, 0.00947759, 0, 0.215333, 0.00670287, -0.00671094, 0.215333, -0.0291345, -0.0291345, 0.107645, -0.0275536, -0.0275536, 0.00697681, -0.00783212, -0.00783212, 0.212761, 0, -0.00948566, 0.215333, -0.00671094, -0.00671094, 0.215333, -0.0266583, -0.0266583, 0, -0.0266583, 0.0266502, 0, -0.0275536, 0.0275455, 0.00697681, -0.0291345, 0.0291265, 0.107645, -0.00783212, 0.00782406, 0.212761, -0.00671094, 0.00670287, 0.215333, 0, 0.00947759, 0.215333, -0.0412013, -8.06525e-06, 0.107645, -0.038959, -8.06525e-06, 0.00697681, -0.0377007, 0, 0, -0.0110747, 0, 0.212761, -0.00948566, 0, 0.215333)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oek0c"]
-render_priority = 0
-shader = ExtResource("3_oek0c")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_6tjey"]
 render_priority = 0
 shader = ExtResource("3_oek0c")
 
@@ -59,12 +57,13 @@ script = ExtResource("8_00ys1")
 hitbox = NodePath("../HitboxComponent")
 outline = NodePath("../OutlineComponent")
 outline_material = SubResource("ShaderMaterial_oek0c")
+interact_data = ExtResource("10_471q5")
 metadata/_custom_type_script = "uid://vancee6lfbu6"
 
 [node name="OutlineComponent" type="Node" parent="." node_paths=PackedStringArray("meshes")]
 script = ExtResource("10_kukbf")
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
-outline_mat = SubResource("ShaderMaterial_6tjey")
+outline_mat = ExtResource("11_6tjey")
 enabled = false
-outline_width = 1.5
-outline_color = Color(0.412152, 0.412152, 0.412152, 1)
+outline_width = 1.25
+outline_color = Color(0.564962, 0.564962, 0.564962, 1)

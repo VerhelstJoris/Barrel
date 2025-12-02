@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="InteractableDataAsset" load_steps=2 format=3 uid="uid://cvehamcvspdg4"]
+
+[ext_resource type="Script" uid="uid://61aq8tp2dlfq" path="res://Scripts/Gameplay/Components/Interaction/InteractableDataAsset.gd" id="1_4f4tl"]
+
+[resource]
+script = ExtResource("1_4f4tl")
+interactable_display_name = "Bottle"
+interaction_description = "Pick Up"
+metadata/_custom_type_script = "uid://61aq8tp2dlfq"

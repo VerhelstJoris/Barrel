@@ -6,6 +6,7 @@ class_name InteractorComponent extends Node
 var interact_cast_result : Dictionary
 
 var current_hovered_object : Object = null
+var current_hovered_interactable : InteractableComponent = null
 
 func _ready() -> void:
 	if(!interact_ray):
@@ -39,3 +40,9 @@ func _find_current_hovered_object() -> void:
 func _attempt_interact() -> void:
 	pass
 	
+func _try_set_current_interactable(_interactable_component: InteractableComponent)-> void:
+	current_hovered_interactable = _interactable_component
+
+func _try_clear_current_interactable(_interactable_component: InteractableComponent) -> void:
+	if(current_hovered_interactable == _interactable_component):
+		current_hovered_interactable = null

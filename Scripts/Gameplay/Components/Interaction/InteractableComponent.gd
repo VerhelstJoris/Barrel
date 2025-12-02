@@ -10,6 +10,8 @@ class_name InteractableComponent extends Node
 
 @export var outline_material : Material
 
+@export var interact_data : InteractableDataAsset
+
 const hover_start_signal_name : String = "on_interact_hover_start"
 const hover_end_signal_name : String = "on_interact_hover_end"
 const on_interact_signal_name : String = "on_interact_signal_name"
@@ -40,13 +42,18 @@ func _register_interact_signals_on_shape(body : PhysicsBody3D) -> void:
 
 
 func _on_hover_start(_interactor: InteractorComponent) -> void:
-	print("Hover Start")
-	outline.enabled = true
+	if(outline):
+		outline.enabled = true
+	
+	if(_interactor):
+		_interactor._try_set_current_interactable(self)
 		
 func _on_hover_end(_interactor: InteractorComponent) -> void:
-	print("Hover END")
-	outline.enabled = false
+	if(outline):
+		outline.enabled = false
+	
+	if(_interactor):
+		_interactor._try_clear_current_interactable(self)
 
 func _on_interact(_interactor: InteractorComponent) -> void:
-	print("ON INTERACT")
 	pass

@@ -23,7 +23,7 @@ corner_detail = 5
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[sub_resource type="InputEventKey" id="InputEventKey_272gq"]
+[sub_resource type="InputEventKey" id="InputEventKey_qdl6h"]
 device = -1
 physical_keycode = 82
 unicode = 82
@@ -33,7 +33,7 @@ font_names = PackedStringArray("Times New Roman")
 font_weight = 600
 subpixel_positioning = 0
 
-[node name="MarginContainer" type="MarginContainer"]
+[node name="MarginContainer" type="MarginContainer" node_paths=PackedStringArray("input_label", "action_prompt", "backup_label")]
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
@@ -49,6 +49,9 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 script = ExtResource("1_xpofu")
+input_label = NodePath("PanelContainer/HBoxContainer/PanelContainer/MarginContainer/InputTextLabel")
+action_prompt = NodePath("PanelContainer/HBoxContainer/MarginContainer/ActionPrompt")
+backup_label = NodePath("PanelContainer/HBoxContainer/MarginContainer/ActionPrompt/BackUpLabel")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 2
@@ -96,7 +99,7 @@ stretch_mode = 5
 script = ExtResource("3_awh55")
 action = "enter_reload"
 icon = 4
-events = Array[InputEvent]([SubResource("InputEventKey_272gq")])
+events = Array[InputEvent]([SubResource("InputEventKey_qdl6h")])
 metadata/_custom_type_script = "uid://dnx3ficr864og"
 
 [node name="BackUpLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer/ActionPrompt"]

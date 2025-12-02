@@ -99,6 +99,8 @@ func _refresh():
 
 
 func _input(event: InputEvent):
+	if action.is_empty():
+		return
 	if not event.is_action_pressed(action):
 		return
 	emit_signal("pressed")
