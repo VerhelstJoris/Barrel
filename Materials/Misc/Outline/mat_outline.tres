@@ -1,9 +1,11 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b35y3kq560nyb"]
-
-[ext_resource type="Shader" uid="uid://bh4w71qdaulis" path="res://Materials/Shaders/Misc/Outline.gdshader" id="1_u3vl0"]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://dre2y62xrhejm"]
 
 [resource]
-render_priority = -1
-shader = ExtResource("1_u3vl0")
-shader_parameter/outline_color = Color(1, 1, 1, 1)
-shader_parameter/outline_width = 1.0
+shading_mode = 0
+disable_ambient_light = true
+disable_fog = true
+disable_specular_occlusion = true
+disable_receive_shadows = true
+proximity_fade_distance = 0.01
+stencil_mode = 3
+stencil_flags = 2

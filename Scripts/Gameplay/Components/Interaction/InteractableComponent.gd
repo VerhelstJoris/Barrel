@@ -8,8 +8,6 @@ class_name InteractableComponent extends Node
 
 @export var outline : OutlineComponent
 
-@export var outline_material : Material
-
 @export var interact_data : InteractableDataAsset
 
 const hover_start_signal_name : String = "on_interact_hover_start"

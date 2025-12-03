@@ -1,8 +1,9 @@
-[gd_scene load_steps=54 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=58 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
+[ext_resource type="Script" uid="uid://col10avn6eftl" path="res://Scripts/UI/OutlineCompositorEffect.gd" id="2_yfo8f"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
 [ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="3_gd45c"]
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
@@ -12,6 +13,7 @@
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
 [ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
 [ext_resource type="PackedScene" uid="uid://cooy44h1jqbd2" path="res://Scenes/UI/HUD/HUD_Reticle.tscn" id="7_2fqq0"]
+[ext_resource type="PackedScene" uid="uid://eoo0jp2ntvw5" path="res://Scenes/UI/HUD/HUD_Interactable_Hovered.tscn" id="8_n1qck"]
 [ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
@@ -49,6 +51,21 @@ height = 1.8
 margin = 0.0
 radius = 0.45
 height = 1.1
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_kw8h7"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("2_yfo8f")
+outline_color = Color(0.54896253, 0.5489626, 0.5489625, 1)
+thickness = 2
+metadata/_custom_type_script = "uid://col10avn6eftl"
+
+[sub_resource type="Compositor" id="Compositor_ohefb"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_kw8h7")])
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i7lip"]
 shader = ExtResource("5_bn61v")
@@ -173,6 +190,7 @@ transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695
 [node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
 cull_mask = 1048573
+compositor = SubResource("Compositor_ohefb")
 current = true
 script = ExtResource("2_1py82")
 
@@ -205,7 +223,7 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 2.08165e-12, 1.20468, 2.08165e-12)
 rotation_order = 0
 
-[node name="HUDVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
+[node name="CrouchVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
 material = SubResource("ShaderMaterial_i7lip")
 custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
@@ -213,6 +231,9 @@ script = ExtResource("6_i7lip")
 default_alpha = 0.025
 
 [node name="CenterContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
+layout_mode = 2
+
+[node name="MarginContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("8_n1qck")]
 layout_mode = 2
 
 [node name="InteractRay" type="RayCast3D" parent="CameraPivot/SmoothCamera"]
@@ -296,7 +317,7 @@ standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
 crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
 crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
 camera_attach_node = NodePath("../../../../../CameraPivot")
-vignette = NodePath("../../../../../CameraPivot/SmoothCamera/SubViewportContainer/HUDVignette")
+vignette = NodePath("../../../../../CameraPivot/SmoothCamera/SubViewportContainer/CrouchVignette")
 crouch_vignette_alpha = 0.45
 crouch_vignette_transition_time = 0.14
 first_person_anim_bus = NodePath("../../../../../AnimationTree")
