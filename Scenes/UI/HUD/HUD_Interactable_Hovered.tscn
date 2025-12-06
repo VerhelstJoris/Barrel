@@ -1,25 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://eoo0jp2ntvw5"]
+[gd_scene load_steps=7 format=3 uid="uid://eoo0jp2ntvw5"]
 
 [ext_resource type="Script" uid="uid://ecfi71xbx8cj" path="res://Scripts/UI/HUD/Interactables/HUD_Interactable_Prompt.gd" id="1_cqk6g"]
 [ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/Equipment/HUD_Equipment_Input_Item.gd" id="1_qdl6h"]
 [ext_resource type="StyleBox" uid="uid://cvhs6pu0kbycd" path="res://Data/UI/HUD_Equipment_Input_Background_Style.tres" id="2_cqk6g"]
 [ext_resource type="FontFile" uid="uid://bkrmbxj3lfo56" path="res://Fonts/Arvo-Italic.ttf" id="3_a3ibw"]
-[ext_resource type="Texture2D" uid="uid://1mp043iv0a8j" path="res://addons/input_prompts/icons/keyboard/T_R_Key_Retro.png" id="4_b2ho5"]
-[ext_resource type="Script" uid="uid://dnx3ficr864og" path="res://addons/input_prompts/action_prompt/action_prompt.gd" id="5_wm855"]
+[ext_resource type="PackedScene" uid="uid://lovjpe2l2afl" path="res://Scenes/UI/HUD/HUD_Prompt.tscn" id="5_qdl6h"]
 
 [sub_resource type="Theme" id="Theme_ucgfk"]
 default_font = ExtResource("3_a3ibw")
 default_font_size = 0
-
-[sub_resource type="InputEventKey" id="InputEventKey_cqk6g"]
-device = -1
-physical_keycode = 82
-unicode = 82
-
-[sub_resource type="SystemFont" id="SystemFont_cjqlk"]
-font_names = PackedStringArray("Times New Roman")
-font_weight = 600
-subpixel_positioning = 0
 
 [node name="HUDInteractablePrompt" type="Control"]
 layout_mode = 3
@@ -88,54 +77,18 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 2
 text = "Bottle"
 
-[node name="BottomLine" type="HBoxContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer" node_paths=PackedStringArray("input_label", "action_prompt", "backup_label")]
+[node name="BottomLine" type="HBoxContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer" node_paths=PackedStringArray("input_label")]
 layout_mode = 2
 size_flags_horizontal = 8
 script = ExtResource("1_qdl6h")
 input_label = NodePath("PanelContainer/MarginContainer/InputTextLabel")
-action_prompt = NodePath("PromptContainer/ActionPrompt")
-backup_label = NodePath("PromptContainer/ActionPrompt/BackUpLabel")
 
 [node name="MarginContainer2" type="MarginContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 
-[node name="PromptContainer" type="MarginContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine"]
+[node name="HUDPromptContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/MarginContainer2" instance=ExtResource("5_qdl6h")]
 layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_right = 5
-
-[node name="ActionPrompt" type="TextureRect" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/PromptContainer"]
-unique_name_in_owner = true
-texture_filter = 2
-layout_mode = 2
-texture = ExtResource("4_b2ho5")
-expand_mode = 2
-stretch_mode = 5
-script = ExtResource("5_wm855")
-action = "enter_reload"
-icon = 4
-events = Array[InputEvent]([SubResource("InputEventKey_cqk6g")])
-metadata/_custom_type_script = "uid://dnx3ficr864og"
-
-[node name="BackUpLabel" type="Label" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/PromptContainer/ActionPrompt"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -6.0
-offset_top = -9.5
-offset_right = 6.0
-offset_bottom = 9.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.0823529, 0.0352941, 0.0196078, 1)
-theme_override_fonts/font = SubResource("SystemFont_cjqlk")
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine"]
 layout_mode = 2

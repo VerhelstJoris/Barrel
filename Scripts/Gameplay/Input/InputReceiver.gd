@@ -20,7 +20,6 @@ func _get_description_for_input(action_to_find: InputActionInfo) -> String:
 	return "DESC_STRING_NOT_FOUND"
 	
 func _change_HUD_available_actions(new_available: Array[InputActionInfo]) -> void:
-	print("CHANGE AVAILABLE ACTIONS")
 	if(new_available.is_empty()):
 		on_available_equipment_actions_cleared.emit()
 		return

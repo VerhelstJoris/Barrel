@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3 uid="uid://lovjpe2l2afl"]
+
+[ext_resource type="Script" uid="uid://ck4jhqc5g5hpr" path="res://Scripts/UI/HUD/HUD_Prompt.gd" id="1_gxlgp"]
+[ext_resource type="Texture2D" uid="uid://1mp043iv0a8j" path="res://addons/input_prompts/icons/keyboard/T_R_Key_Retro.png" id="2_6yxau"]
+[ext_resource type="Script" uid="uid://dnx3ficr864og" path="res://addons/input_prompts/action_prompt/action_prompt.gd" id="3_m1k7i"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_2kqe6"]
+device = -1
+physical_keycode = 82
+unicode = 82
+
+[sub_resource type="SystemFont" id="SystemFont_cjqlk"]
+font_names = PackedStringArray("Times New Roman")
+font_weight = 600
+subpixel_positioning = 0
+
+[node name="HUDPromptContainer" type="MarginContainer" node_paths=PackedStringArray("action_prompt", "backup_label")]
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+script = ExtResource("1_gxlgp")
+action_prompt = NodePath("ActionPrompt")
+backup_label = NodePath("ActionPrompt/BackUpLabel")
+
+[node name="ActionPrompt" type="TextureRect" parent="."]
+unique_name_in_owner = true
+texture_filter = 2
+layout_mode = 2
+texture = ExtResource("2_6yxau")
+expand_mode = 2
+stretch_mode = 5
+script = ExtResource("3_m1k7i")
+action = "enter_reload"
+icon = 4
+events = Array[InputEvent]([SubResource("InputEventKey_2kqe6")])
+metadata/_custom_type_script = "uid://dnx3ficr864og"
+
+[node name="BackUpLabel" type="Label" parent="ActionPrompt"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.0
+offset_top = -9.5
+offset_right = 6.0
+offset_bottom = 9.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.0823529, 0.0352941, 0.0196078, 1)
+theme_override_fonts/font = SubResource("SystemFont_cjqlk")
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
