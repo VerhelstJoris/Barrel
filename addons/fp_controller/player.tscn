@@ -16,7 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://eoo0jp2ntvw5" path="res://Scenes/UI/HUD/HUD_Interactable_Hovered.tscn" id="8_n1qck"]
 [ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
-[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="14_a8wmt"]
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="14_a8wmt"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
 [ext_resource type="Resource" uid="uid://coeb3qrcnhyj2" path="res://Data/Input/Movement/IA_Move_Sprint.tres" id="16_nycc1"]
 [ext_resource type="Script" uid="uid://dgvffrq1m604v" path="res://Scripts/Player/Movement/PlayerMovementComponent.gd" id="16_y16om"]
@@ -233,7 +233,7 @@ default_alpha = 0.025
 [node name="CenterContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
 layout_mode = 2
 
-[node name="MarginContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("8_n1qck")]
+[node name="HUDInteractableHovered" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("8_n1qck")]
 layout_mode = 2
 
 [node name="InteractRay" type="RayCast3D" parent="CameraPivot/SmoothCamera"]
@@ -377,9 +377,10 @@ parameters/UnCrouchOneShot/internal_active = false
 parameters/UnCrouchOneShot/request = 0
 script = ExtResource("30_p7if2")
 
-[node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray")]
+[node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray", "interactable_prompt")]
 script = ExtResource("36_wrold")
 interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
+interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
 
 [editable path="PlayerInputManagerComponent"]

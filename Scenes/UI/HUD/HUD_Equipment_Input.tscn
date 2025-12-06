@@ -1,29 +1,16 @@
-[gd_scene load_steps=10 format=3 uid="uid://din5t3mpcj8gc"]
+[gd_scene load_steps=9 format=3 uid="uid://din5t3mpcj8gc"]
 
-[ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/HUD_Equipment_Input_Item.gd" id="1_xpofu"]
+[ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/Equipment/HUD_Equipment_Input_Item.gd" id="1_xpofu"]
 [ext_resource type="StyleBox" uid="uid://cvhs6pu0kbycd" path="res://Data/UI/HUD_Equipment_Input_Background_Style.tres" id="2_cjqlk"]
 [ext_resource type="FontFile" uid="uid://bkrmbxj3lfo56" path="res://Fonts/Arvo-Italic.ttf" id="2_ucgfk"]
 [ext_resource type="Script" uid="uid://dnx3ficr864og" path="res://addons/input_prompts/action_prompt/action_prompt.gd" id="3_awh55"]
 [ext_resource type="Texture2D" uid="uid://1mp043iv0a8j" path="res://addons/input_prompts/icons/keyboard/T_R_Key_Retro.png" id="4_272gq"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_272gq"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.1, 0.1, 0.1, 0.6)
-draw_center = false
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
-
 [sub_resource type="Theme" id="Theme_ucgfk"]
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[sub_resource type="InputEventKey" id="InputEventKey_qdl6h"]
+[sub_resource type="InputEventKey" id="InputEventKey_272gq"]
 device = -1
 physical_keycode = 82
 unicode = 82
@@ -49,7 +36,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 script = ExtResource("1_xpofu")
-input_label = NodePath("PanelContainer/HBoxContainer/PanelContainer/MarginContainer/InputTextLabel")
+input_label = NodePath("PanelContainer/HBoxContainer/MarginContainer2/InputTextLabel")
 action_prompt = NodePath("PanelContainer/HBoxContainer/MarginContainer/ActionPrompt")
 backup_label = NodePath("PanelContainer/HBoxContainer/MarginContainer/ActionPrompt/BackUpLabel")
 
@@ -62,16 +49,12 @@ theme_override_styles/panel = ExtResource("2_cjqlk")
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_272gq")
-
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/HBoxContainer/PanelContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_bottom = 2
 
-[node name="InputTextLabel" type="Label" parent="PanelContainer/HBoxContainer/PanelContainer/MarginContainer"]
+[node name="InputTextLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 theme = SubResource("Theme_ucgfk")
@@ -83,6 +66,11 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 2
 text = "Lorem Ipsum peepee poopoo"
 horizontal_alignment = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = ExtResource("2_cjqlk")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
@@ -99,7 +87,7 @@ stretch_mode = 5
 script = ExtResource("3_awh55")
 action = "enter_reload"
 icon = 4
-events = Array[InputEvent]([SubResource("InputEventKey_qdl6h")])
+events = Array[InputEvent]([SubResource("InputEventKey_272gq")])
 metadata/_custom_type_script = "uid://dnx3ficr864og"
 
 [node name="BackUpLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer/ActionPrompt"]

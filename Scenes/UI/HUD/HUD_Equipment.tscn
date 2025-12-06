@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dymwfb8k5bofe"]
 
 [ext_resource type="PackedScene" uid="uid://din5t3mpcj8gc" path="res://Scenes/UI/HUD/HUD_Equipment_Input.tscn" id="1_4fuvh"]
-[ext_resource type="Script" uid="uid://d2p238e3dw4p6" path="res://Scripts/UI/HUD/HUD_Equipment_Input.gd" id="1_hdvdu"]
+[ext_resource type="Script" uid="uid://d2p238e3dw4p6" path="res://Scripts/UI/HUD/Equipment/HUD_Equipment_Input.gd" id="1_hdvdu"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_rtdxi"]
 blend_mode = 2

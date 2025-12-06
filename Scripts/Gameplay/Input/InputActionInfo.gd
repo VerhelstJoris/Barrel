@@ -1,5 +1,6 @@
 class_name InputActionInfo extends  Resource
 
+#the literal input string in the project settings this corresponds with
 @export	var input_string : String
 @export var description_string : String
 

@@ -8,7 +8,8 @@ class_name HUDEquipmentInputItem extends Control
 @export var input_text: String = "lorem ipsum":
 	set(new_value):
 		input_text = new_value
-		input_label.text = input_text
+		if(input_label):	
+			input_label.text = input_text
 
 @export var input_action : String:
 	set(new_value):

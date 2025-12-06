@@ -3,6 +3,8 @@ class_name InteractorComponent extends Node
 
 @export var interact_ray : RayCast3D
 
+@export var interactable_prompt : HUDInteractablePrompt
+
 var interact_cast_result : Dictionary
 
 var current_hovered_object : Object = null
@@ -11,6 +13,10 @@ var current_hovered_interactable : InteractableComponent = null
 func _ready() -> void:
 	if(!interact_ray):
 		push_error("Interact Raycast not set on ", self.name, ", on ", owner)
+	if(!interactable_prompt):
+		push_error("No prompt set on " , self.name , " on " , owner)
+
+	interactable_prompt.visible = false		
 
 func _physics_process(_delta: float) -> void:
 	_find_current_hovered_object()
@@ -42,7 +48,10 @@ func _attempt_interact() -> void:
 	
 func _try_set_current_interactable(_interactable_component: InteractableComponent)-> void:
 	current_hovered_interactable = _interactable_component
-
+	if(current_hovered_interactable):
+		interactable_prompt.visible = true
+	
 func _try_clear_current_interactable(_interactable_component: InteractableComponent) -> void:
 	if(current_hovered_interactable == _interactable_component):
 		current_hovered_interactable = null
+		interactable_prompt.visible = false

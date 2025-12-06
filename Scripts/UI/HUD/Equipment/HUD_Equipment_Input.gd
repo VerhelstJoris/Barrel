@@ -18,20 +18,21 @@ func _clear_current_input_details() -> void:
 		child.queue_free()
 	current_inputs.clear()
 		
-func _create_new_item(info: InputActionInfo):
+func _create_new_item(info: InputActionInfo, description : String):
 	var new_item: HUDEquipmentInputItem = input_item_scene.instantiate()
 	input_item_container.add_child(new_item)
-	new_item.input_text = info.description_string
+	new_item.input_text = description
 	new_item.input_action = info.input_string
 
 	input_item_container.notification(NOTIFICATION_RESIZED)
 	
-func _on_equipment_input_actions_changed(new_inputs : Array[InputActionInfo]) -> void:
+func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo, String]) -> void:
 	_clear_current_input_details()
 	for info in new_inputs:
-		if(!current_inputs.has(info.description_string)):
-			_create_new_item(info)
-			current_inputs.push_back(info.description_string)
+		var string_desc : String = new_inputs[info]
+		if(!current_inputs.has(string_desc)):
+			_create_new_item(info, string_desc)
+			current_inputs.push_back(string_desc)
 		
 	UIAnimation.animate_slide_from_right(self, 5.0, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
 		

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="InputActionInfo" load_steps=2 format=3 uid="uid://c74mnvf3pkusb"]
 
-[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/UI/HUD/InputActionInfo.gd" id="1_01msd"]
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_01msd"]
 
 [resource]
 script = ExtResource("1_01msd")
