@@ -1,6 +1,7 @@
 class_name BarrelPlayerSceneDebug extends BarrelSceneDebugNode
 
 var player : Player
+var equipment_manager : EquipmentManager
 
 var equipment_debug_node : BarrelEquipmentSceneDebug = null
 
@@ -8,9 +9,10 @@ func _ready() -> void:
 	super()
 	await owner.ready
 	player = owner as Player
+	equipment_manager = player.equipment_manager
 	BarrelDebugWindow.draw_player_debug.connect(_draw)
-	player.on_equipped.connect(_on_new_equipped)
-	player.on_unequipped.connect(_on_old_unequipped)
+	equipment_manager.on_equipped.connect(_on_new_equipped)
+	equipment_manager.on_unequipped.connect(_on_old_unequipped)
 	
 func _draw(_delta: float) -> void:
 	super(_delta)
@@ -35,8 +37,8 @@ func _on_new_equipped(new : PlayerEquipment):
 	_find_current_equipment()	
 		
 func _find_current_equipment() -> void:
-	if(player.current_equipment != null):
-		for child in player.current_equipment.get_children():
+	if(equipment_manager.current_equipment != null):
+		for child in equipment_manager.current_equipment.get_children():
 			if child is BarrelEquipmentSceneDebug:
 				equipment_debug_node = child
 				break

@@ -101,8 +101,8 @@ func _init_player_data(player : Player) -> void:
 	input_receiver = player.input_receiver
 	if(!input_receiver):
 		push_error("No Input Receiver set on the FP Arms Anim Bus")
-	player.on_holster_started.connect(_on_player_holster_started)
-	player.on_unholster_started.connect(_on_player_unholster_started)
+	player.equipment_manager.on_holster_started.connect(_on_player_holster_started)
+	player.equipment_manager.on_unholster_started.connect(_on_player_unholster_started)
 
 func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	set( request_name, request_type)

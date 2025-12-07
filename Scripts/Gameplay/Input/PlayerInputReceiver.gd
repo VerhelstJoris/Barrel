@@ -64,4 +64,3 @@ func _on_movement_input(_event : InputEvent) -> void:
 		input_direction = Vector2.ZERO
 
 	on_player_movement.emit(input_direction)
-	

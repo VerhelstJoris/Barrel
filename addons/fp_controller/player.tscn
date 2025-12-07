@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=61 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -33,11 +33,13 @@
 [ext_resource type="Script" uid="uid://dkwfkuralqxts" path="res://Scripts/Player/Movement/MovementStates/Grounded/MovementState_Grounded.gd" id="24_bjt1r"]
 [ext_resource type="Script" uid="uid://y04e5atcb2bu" path="res://Scripts/Player/Movement/MovementStates/MovementState_Crouch.gd" id="25_hwrxm"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="25_jajtq"]
+[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="25_kw8h7"]
 [ext_resource type="Animation" uid="uid://dlgu11excnqap" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Crouch.res" id="30_2707o"]
 [ext_resource type="Script" uid="uid://bt31heev5y0mu" path="res://Scripts/Animation/FP_AnimationBus.gd" id="30_p7if2"]
 [ext_resource type="Animation" uid="uid://7pl5p8vtrqwe" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Uncrouch.res" id="31_tvmyk"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://duun6khj30hj5" path="res://Animations/Player/Character/WorldCamera/ABT_FP_Camera.tres" id="32_2fqq0"]
-[ext_resource type="Script" uid="uid://b4chk6pi8aunw" path="res://Scripts/Player/InteractorComponent.gd" id="36_wrold"]
+[ext_resource type="Script" uid="uid://b4chk6pi8aunw" path="res://Scripts/Gameplay/Components/InteractorComponent.gd" id="36_wrold"]
+[ext_resource type="Script" uid="uid://cda6d6uhlpkmt" path="res://Scripts/Gameplay/Equipment/EquipmentManager.gd" id="40_ohefb"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
 height = 1.8
@@ -102,13 +104,13 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_nycc1"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("..")
+signal_node = NodePath("../EquipmentManager")
 signal_name = "on_holster_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_bjt1r"]
 script = ExtResource("20_5af7x")
-signal_node = NodePath("..")
+signal_node = NodePath("../EquipmentManager")
 signal_name = "on_quick_unholster_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
@@ -128,6 +130,12 @@ metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 script = ExtResource("20_5af7x")
 signal_node = NodePath(".")
 signal_name = "on_jump_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_ohefb"]
+script = ExtResource("20_5af7x")
+signal_node = NodePath("../InteractorComponent")
+signal_name = "on_interact_input_received"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Curve" id="Curve_hwrxm"]
@@ -261,7 +269,8 @@ ExtResource("20_62dvf"): SubResource("Resource_nycc1"),
 ExtResource("21_62dvf"): SubResource("Resource_bjt1r"),
 ExtResource("16_nycc1"): SubResource("Resource_jajtq"),
 ExtResource("17_bjt1r"): SubResource("Resource_w7r7y"),
-ExtResource("18_w7r7y"): SubResource("Resource_hwrxm")
+ExtResource("18_w7r7y"): SubResource("Resource_hwrxm"),
+ExtResource("25_kw8h7"): SubResource("Resource_ohefb")
 })
 
 [node name="PlayerMovementComponent" type="Node" parent="."]
@@ -382,5 +391,11 @@ script = ExtResource("36_wrold")
 interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
 interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
+
+[node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player")]
+unique_name_in_owner = true
+script = ExtResource("40_ohefb")
+player = NodePath("..")
+metadata/_custom_type_script = "uid://cda6d6uhlpkmt"
 
 [editable path="PlayerInputManagerComponent"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=57 format=3 uid="uid://dnx078m804hk4"]
 
-[ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Player/PlayerEquipmentPistol.gd" id="1_ur76o"]
+[ext_resource type="Script" uid="uid://3hbliyaetwxw" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentPistol.gd" id="1_ur76o"]
 [ext_resource type="PackedScene" uid="uid://xdok7aguyjvv" path="res://Scenes/Character/Equipment/Colt_Bullet.tscn" id="2_u1ese"]
 [ext_resource type="Animation" uid="uid://cs7d81cwc7rnk" path="res://Animations/Player/Colt_SAA/A_Colt_Fire.res" id="3_10y14"]
 [ext_resource type="Resource" uid="uid://nt4u6v0ss2o3" path="res://Data/VFX/R_OnHit_VFX.tres" id="3_c6e7s"]

@@ -10,13 +10,18 @@ var interact_cast_result : Dictionary
 var current_hovered_object : Object = null
 var current_hovered_interactable : InteractableComponent = null
 
+signal on_interact_input_received(event : InputEvent)
+
 func _ready() -> void:
 	if(!interact_ray):
 		push_error("Interact Raycast not set on ", self.name, ", on ", owner)
 	if(!interactable_prompt):
 		push_error("No prompt set on " , self.name , " on " , owner)
+	else:
+		interactable_prompt._init_with_data(null)
+	
+	on_interact_input_received.connect(_on_interact_input_received)
 
-	interactable_prompt.visible = false		
 
 func _physics_process(_delta: float) -> void:
 	_find_current_hovered_object()
@@ -55,3 +60,7 @@ func _try_clear_current_interactable(_interactable_component: InteractableCompon
 	if(current_hovered_interactable == _interactable_component):
 		current_hovered_interactable = null
 		interactable_prompt._init_with_data(null)
+
+func _on_interact_input_received(_event : InputEvent) -> void:
+	print("try interact")
+		
