@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://eoo0jp2ntvw5"]
+[gd_scene load_steps=6 format=3 uid="uid://eoo0jp2ntvw5"]
 
 [ext_resource type="Script" uid="uid://ecfi71xbx8cj" path="res://Scripts/UI/HUD/Interactables/HUD_Interactable_Prompt.gd" id="1_cqk6g"]
-[ext_resource type="Script" uid="uid://01f8cpq7lbos" path="res://Scripts/UI/HUD/Equipment/HUD_Equipment_Input_Item.gd" id="1_qdl6h"]
 [ext_resource type="StyleBox" uid="uid://cvhs6pu0kbycd" path="res://Data/UI/HUD_Equipment_Input_Background_Style.tres" id="2_cqk6g"]
 [ext_resource type="FontFile" uid="uid://bkrmbxj3lfo56" path="res://Fonts/Arvo-Italic.ttf" id="3_a3ibw"]
 [ext_resource type="PackedScene" uid="uid://lovjpe2l2afl" path="res://Scenes/UI/HUD/HUD_Prompt.tscn" id="5_qdl6h"]
@@ -10,7 +9,7 @@
 default_font = ExtResource("3_a3ibw")
 default_font_size = 0
 
-[node name="HUDInteractablePrompt" type="Control"]
+[node name="HUDInteractablePrompt" type="Control" node_paths=PackedStringArray("description_label", "name_label", "prompt")]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -24,6 +23,9 @@ offset_bottom = 24.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cqk6g")
+description_label = NodePath("HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/PanelContainer/MarginContainer/DescriptionLabel")
+name_label = NodePath("HUD_Interactable_Hovered/MarginContainer/VBoxContainer/TopLine/NameContainer/NameLabel")
+prompt = NodePath("HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/HUDPromptContainer")
 metadata/_custom_type_script = "uid://ecfi71xbx8cj"
 
 [node name="HUD_Interactable_Hovered" type="MarginContainer" parent="."]
@@ -75,19 +77,17 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 2
-text = "Bottle"
+text = "Display Name"
 
-[node name="BottomLine" type="HBoxContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer" node_paths=PackedStringArray("input_label")]
+[node name="BottomLine" type="HBoxContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 8
-script = ExtResource("1_qdl6h")
-input_label = NodePath("PanelContainer/MarginContainer/InputTextLabel")
 
 [node name="MarginContainer2" type="MarginContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 
-[node name="HUDPromptContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/MarginContainer2" instance=ExtResource("5_qdl6h")]
+[node name="HUDPromptContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine" instance=ExtResource("5_qdl6h")]
 layout_mode = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine"]
@@ -99,7 +99,7 @@ layout_mode = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_bottom = 2
 
-[node name="InputTextLabel" type="Label" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/PanelContainer/MarginContainer"]
+[node name="DescriptionLabel" type="Label" parent="HUD_Interactable_Hovered/MarginContainer/VBoxContainer/BottomLine/PanelContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme = SubResource("Theme_ucgfk")
@@ -109,4 +109,4 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 2
-text = "Pick Up"
+text = "Description"

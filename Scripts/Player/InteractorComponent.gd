@@ -49,9 +49,9 @@ func _attempt_interact() -> void:
 func _try_set_current_interactable(_interactable_component: InteractableComponent)-> void:
 	current_hovered_interactable = _interactable_component
 	if(current_hovered_interactable):
-		interactable_prompt.visible = true
+		interactable_prompt._init_with_data(current_hovered_interactable.interact_data)
 	
 func _try_clear_current_interactable(_interactable_component: InteractableComponent) -> void:
 	if(current_hovered_interactable == _interactable_component):
 		current_hovered_interactable = null
-		interactable_prompt.visible = false
+		interactable_prompt._init_with_data(null)

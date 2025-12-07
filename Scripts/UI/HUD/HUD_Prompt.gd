@@ -9,6 +9,7 @@ class_name HUDPrompt extends Node
 		backup_label.visible = false
 		
 		if(action_prompt.texture == null):
+			push_error("failed to retrieve action for input string ", new)
 			_set_backup_for_keyboard_action()
 
 func _ready() -> void:

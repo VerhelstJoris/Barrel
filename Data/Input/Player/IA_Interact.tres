@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="InputActionInfo" load_steps=2 format=3 uid="uid://brwn6eti3jb8i"]
+
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_80qwg"]
+
+[resource]
+script = ExtResource("1_80qwg")
+input_string = "interact"
