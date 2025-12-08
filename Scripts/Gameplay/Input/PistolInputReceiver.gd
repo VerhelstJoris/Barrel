@@ -11,7 +11,7 @@ func _ready() -> void:
 	colt_equipment.on_action_started.connect(_on_colt_action_started)
 	colt_equipment.on_unholstered.connect(_on_unholstered)
 	colt_equipment.on_holstered.connect(_on_holstered)
-	_change_HUD_available_actions(input_dictionary.keys())
+	_change_HUD_available_actions(input_dictionary.keys(),colt_equipment.slot)
 	
 	
 func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnector]:
@@ -21,25 +21,25 @@ func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnect
 		return input_dictionary
 		
 func _on_unholstered() -> void:
-	_change_HUD_available_actions(input_dictionary.keys())
+	_change_HUD_available_actions(input_dictionary.keys(), colt_equipment.slot)
 
 func _on_holstered() -> void:
-	on_available_equipment_actions_cleared.emit()
+	_change_HUD_available_actions([],colt_equipment.slot)
 
 func _on_colt_action_started(action : EPistolState.Actions) -> void:
 	if(is_entering_reload):
 		is_entering_reload = false
-		_change_HUD_available_actions(input_reload_dictionary.keys())
+		_change_HUD_available_actions(input_reload_dictionary.keys(),colt_equipment.slot)
 	
 	if(is_exiting_reload):
 		is_entering_reload = false
-		_change_HUD_available_actions(input_dictionary.keys())
+		_change_HUD_available_actions(input_dictionary.keys(),colt_equipment.slot)
 	
 	is_exiting_reload = false
 	if(action == EPistolState.Actions.EnterReload || action == EPistolState.Actions.EnterReloadUncock):
 		is_entering_reload = true
-		_change_HUD_available_actions([])
+		_change_HUD_available_actions([], colt_equipment.slot)
 	elif (action == EPistolState.Actions.ExitReload):
 		is_exiting_reload = true
-		_change_HUD_available_actions([])
+		_change_HUD_available_actions([],colt_equipment.slot)
 		

@@ -2,11 +2,10 @@ class_name PlayerEquipment extends Node3D
 
 
 enum Equipment_Type {Permanent , Consumable, Temporary}
-enum Equipment_Hold {MainHand, OffHand, Both}
 
 @export_group("Equipment Details")
 @export var equip_type : Equipment_Type = Equipment_Type.Permanent
-@export var hold_type : Equipment_Hold = Equipment_Hold.MainHand
+@export var slot : EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
 
 @onready var anim_tree : AnimationTree = %AnimationTree
 @export var input_receiver : InputReceiver

@@ -19,9 +19,9 @@ func _get_description_for_input(action_to_find: InputActionInfo) -> String:
 	push_error("description key not found for input : " , action_to_find.name , " on ", self.name)	
 	return "DESC_STRING_NOT_FOUND"
 	
-func _change_HUD_available_actions(new_available: Array[InputActionInfo]) -> void:
+func _change_HUD_available_actions(new_available: Array[InputActionInfo],slot : EquipmentManager.Equipment_Slot) -> void:
 	if(new_available.is_empty()):
-		on_available_equipment_actions_cleared.emit()
+		on_available_equipment_actions_cleared.emit(slot)
 		return
 		
 	var new_description_data : Dictionary[InputActionInfo, String]
@@ -29,4 +29,5 @@ func _change_HUD_available_actions(new_available: Array[InputActionInfo]) -> voi
 	for id in new_available.size():
 		new_description_data[new_available[id]] = _get_description_for_input(new_available[id])
 
-	on_available_equipment_actions_changed.emit(new_description_data)
+	on_available_equipment_actions_changed.emit(new_description_data, slot)
+			
