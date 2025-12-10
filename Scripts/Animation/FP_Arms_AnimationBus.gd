@@ -50,9 +50,9 @@ const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning3"
 
 # these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
-var exit_reload_done : bool = false
-var colt_unholstered : bool = false
-var colt_fan_hammer : bool = false
+var exit_reload_done : bool  = false
+var colt_equipped : bool      = false
+var colt_fan_hammer : bool   = false
 var fanning_hammer_anim_id : int = 1
 
 var sprinting : bool = false
@@ -108,10 +108,8 @@ func _init_player_data(player : Player) -> void:
 
 func _set_equipment_oneshot_request(request_name : String, right_hand = true, two_handed = false,  request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	if(right_hand || two_handed):
-		print("setting request ", anim_right_arm_sm_path + request_name)
 		_set_anim_tree_oneshot_request(anim_right_arm_sm_path + request_name, request_type)
 	if(!right_hand || two_handed):
-		print("setting request ", anim_left_arm_sm_path + request_name)
 		_set_anim_tree_oneshot_request(anim_left_arm_sm_path + request_name, request_type)
 
 func _set_equipment_anim_variable(variable  : String, new_value : bool, right_hand = true, two_handed = false) -> void:
@@ -127,7 +125,6 @@ func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOn
 func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
 	var two_handed : bool = pistol._is_two_handed_action(new_action)
-	print("is two handed? ", two_handed)
 	var right_handed : bool = pistol._is_right_handed()
 	match new_action:
 		EPistolState.Actions.Fire:
@@ -218,8 +215,7 @@ func _process(_delta: float) -> void:
 func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
 	_set_equipment_oneshot_request(anim_colt_sm_path+ anim_fire_request, pistol._is_right_handed(), false,AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT )
-
-
+	
 	fanning_hammer_anim_id = randi() %3 +1
 	_set_equipment_anim_variable( anim_colt_sm_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1, true, true)
 	_set_equipment_anim_variable(anim_colt_sm_path + anim_fanning_condition_2,fanning_hammer_anim_id == 2, true, true)
@@ -243,13 +239,13 @@ func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 	
 func _on_player_holster_started():
-	colt_unholstered = false
+	colt_equipped = false
 
 func _holster_anim_finished():
 	on_holster_anim_finish.emit()
 	
 func _on_player_unholster_started():
-	colt_unholstered = true
+	colt_equipped = true
 	
 func _toggle_equipment_visible(visible : bool) -> void:
 	pistol.visible = visible

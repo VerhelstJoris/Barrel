@@ -323,6 +323,8 @@ func _can_shoot() -> bool:
 func _can_be_holstered() -> bool:
 	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
 	
+func _is_currently_using_both_hands() -> bool:
+	return _is_two_handed_action(current_action)
 
 func _is_two_handed_action(action : EPistolState.Actions) -> bool:
 	match action:
@@ -331,4 +333,7 @@ func _is_two_handed_action(action : EPistolState.Actions) -> bool:
 		_:
 			pass
 	
+	if(current_state == EPistolState.State.Reloading):
+		return true
+		
 	return false	

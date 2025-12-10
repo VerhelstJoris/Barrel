@@ -50,3 +50,6 @@ func _can_be_holstered() -> bool:
 
 func _is_right_handed() -> bool:
 	return slot == EquipmentManager.Equipment_Slot.Right
+	
+func _is_currently_using_both_hands() -> bool:
+	return false

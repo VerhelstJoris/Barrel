@@ -123,6 +123,12 @@ func _can_use_equipment() -> bool:
 	return equipment_holster_state == Holster_State.Ready
 
 func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
-	return true
+	match slot:
+		Equipment_Slot.Left:
+			return current_left_equipment == null && (current_right_equipment == null || !current_right_equipment._is_currently_using_both_hands())
+		Equipment_Slot.Right:
+			return current_right_equipment == null && (current_left_equipment == null || !current_left_equipment._is_currently_using_both_hands())
+		_:
+			return false
 	
 			

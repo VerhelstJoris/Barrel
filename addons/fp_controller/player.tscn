@@ -386,10 +386,11 @@ parameters/UnCrouchOneShot/internal_active = false
 parameters/UnCrouchOneShot/request = 0
 script = ExtResource("30_p7if2")
 
-[node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray", "interactable_prompt")]
+[node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray", "interactable_prompt", "equipment_manager")]
 script = ExtResource("36_wrold")
 interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
 interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
+equipment_manager = NodePath("../EquipmentManager")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
 
 [node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player")]

@@ -4,6 +4,7 @@ class_name InteractorComponent extends Node
 @export var interact_ray : RayCast3D
 
 @export var interactable_prompt : HUDInteractablePrompt
+@export var equipment_manager : EquipmentManager
 
 var interact_cast_result : Dictionary
 
@@ -19,13 +20,20 @@ func _ready() -> void:
 		push_error("No prompt set on " , self.name , " on " , owner)
 	else:
 		interactable_prompt._init_with_data(null)
+	if(!equipment_manager):
+		push_error("No equipment manager set on " , self.name , " on " , owner)
 	
 	on_interact_input_received.connect(_on_interact_input_received)
 
 
 func _physics_process(_delta: float) -> void:
 	_find_current_hovered_object()
-	
+	#_check_for_display_promt()
+	if(_can_currently_interact_with_hovered()):
+		interactable_prompt._init_with_data(current_hovered_interactable)
+	else:
+		interactable_prompt._init_with_data(null)
+
 func _can_currently_interact() -> bool:
 	return true
 	
@@ -53,9 +61,7 @@ func _attempt_interact() -> void:
 	
 func _try_set_current_interactable(_interactable_component: InteractableComponent)-> void:
 	current_hovered_interactable = _interactable_component
-	if(current_hovered_interactable):
-		interactable_prompt._init_with_data(current_hovered_interactable.interact_data)
-	
+
 func _try_clear_current_interactable(_interactable_component: InteractableComponent) -> void:
 	if(current_hovered_interactable == _interactable_component):
 		current_hovered_interactable = null
@@ -64,3 +70,16 @@ func _try_clear_current_interactable(_interactable_component: InteractableCompon
 func _on_interact_input_received(_event : InputEvent) -> void:
 	print("try interact")
 		
+func _can_currently_interact_with_hovered() -> bool:
+	if(current_hovered_interactable == null):
+		return false
+	
+	match current_hovered_interactable.interact_data.type:
+		InteractableDataAsset.InteractionType.Pickup:
+			#is left hand slot free?
+			return equipment_manager._is_equipment_slot_available(EquipmentManager.Equipment_Slot.Left)
+		_:
+			pass
+
+	return true	
+
