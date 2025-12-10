@@ -159,6 +159,7 @@ func _enable_interrupting_for_next_fire() -> void:
 func _fire_current_bullet() -> void:
 	fire_next_physics_frame = true
 	
+#region Firing	
 func _physics_fire_current_bullet() -> void:
 	var valid_bullet : bool = current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()
 	if(valid_bullet || debug_shot_valid):
@@ -167,8 +168,6 @@ func _physics_fire_current_bullet() -> void:
 		on_fired.emit()
 		_damage_target(_find_target_hit())
 		
-
-
 func _find_target_hit() -> Dictionary:
 	var world_cam : Camera3D = player.player_cam
 	var cam_pos : Vector3 = world_cam.get_global_position()
@@ -219,10 +218,10 @@ func _spawn_on_hit_vfx(hit : Dictionary) -> void:
 		created_effect.set_global_position(hit.position)
 		created_effect.quaternion = Quaternion(Vector3.UP, hit.normal)
 		
-	
 func _calculate_damage(_hit : Dictionary) -> float:
 	return base_damage
-	
+#endregion
+
 func _enter_reload_state() -> void:
 	var action : EPistolState.Actions = EPistolState.Actions.None
 	if(current_state == EPistolState.State.HammerUncocked):
@@ -324,3 +323,12 @@ func _can_shoot() -> bool:
 func _can_be_holstered() -> bool:
 	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
 	
+
+func _is_two_handed_action(action : EPistolState.Actions) -> bool:
+	match action:
+		EPistolState.Actions.EnterReload, EPistolState.Actions.EnterReloadUncock, EPistolState.Actions.CylinderNext, EPistolState.Actions.CylinderPrev,	EPistolState.Actions.Insert,EPistolState.Actions.Eject,	EPistolState.Actions.ExitReload, EPistolState.Actions.FanFire:
+			return true
+		_:
+			pass
+	
+	return false	

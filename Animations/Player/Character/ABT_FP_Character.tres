@@ -1,10 +1,50 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=52 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=61 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/ASM_FP_Colt.tres" id="1_x8ke2"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ys0lo"]
+animation = &"AL_FP_Character/A_FP_Idle_Pose"
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_tmq1e"]
+filter_enabled = true
+filters = ["AnimationTree", "Arms_Rig/Skeleton3D:Hand_L", "Arms_Rig/Skeleton3D:Index_1_L", "Arms_Rig/Skeleton3D:Index_2_L", "Arms_Rig/Skeleton3D:Index_3_L", "Arms_Rig/Skeleton3D:Lower_L", "Arms_Rig/Skeleton3D:Lower_Twist_1_L", "Arms_Rig/Skeleton3D:Lower_Twist_2_L", "Arms_Rig/Skeleton3D:Lower_Twist_3_L", "Arms_Rig/Skeleton3D:Lower_Twist_4_L", "Arms_Rig/Skeleton3D:Middle_1_L", "Arms_Rig/Skeleton3D:Middle_2_L", "Arms_Rig/Skeleton3D:Middle_3_L", "Arms_Rig/Skeleton3D:Pinky_1_L", "Arms_Rig/Skeleton3D:Pinky_2_L", "Arms_Rig/Skeleton3D:Pinky_3_L", "Arms_Rig/Skeleton3D:Prop_L", "Arms_Rig/Skeleton3D:Ring_1_L", "Arms_Rig/Skeleton3D:Ring_2_L", "Arms_Rig/Skeleton3D:Ring_3_L", "Arms_Rig/Skeleton3D:Root", "Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_3_L", "Arms_Rig/Skeleton3D:Upper_L"]
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_x8ke2"]
 filter_enabled = true
 filters = ["", "AnimationTree", "Arms_Rig/Skeleton3D:Hand_L", "Arms_Rig/Skeleton3D:Hand_R", "Arms_Rig/Skeleton3D:Index_1_L", "Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_L", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_L", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Lower_L", "Arms_Rig/Skeleton3D:Lower_R", "Arms_Rig/Skeleton3D:Lower_Twist_1_L", "Arms_Rig/Skeleton3D:Lower_Twist_1_R", "Arms_Rig/Skeleton3D:Lower_Twist_2_L", "Arms_Rig/Skeleton3D:Lower_Twist_2_R", "Arms_Rig/Skeleton3D:Lower_Twist_3_L", "Arms_Rig/Skeleton3D:Lower_Twist_3_R", "Arms_Rig/Skeleton3D:Lower_Twist_4_L", "Arms_Rig/Skeleton3D:Lower_Twist_4_R", "Arms_Rig/Skeleton3D:Middle_1_L", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_L", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_L", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_L", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_L", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_L", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Ring_1_L", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_L", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_L", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Thumb_1_L", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_L", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_L", "Arms_Rig/Skeleton3D:Thumb_3_R", "Arms_Rig/Skeleton3D:Upper_L", "Arms_Rig/Skeleton3D:Upper_R"]
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_em04p"]
+filter_enabled = true
+filters = ["AnimationTree", "Arms_Rig/Skeleton3D:Hand_R", "Arms_Rig/Skeleton3D:Index_1_R", "Arms_Rig/Skeleton3D:Index_2_R", "Arms_Rig/Skeleton3D:Index_3_R", "Arms_Rig/Skeleton3D:Lower_R", "Arms_Rig/Skeleton3D:Lower_Twist_1_R", "Arms_Rig/Skeleton3D:Lower_Twist_2_R", "Arms_Rig/Skeleton3D:Lower_Twist_3_R", "Arms_Rig/Skeleton3D:Lower_Twist_4_R", "Arms_Rig/Skeleton3D:Middle_1_R", "Arms_Rig/Skeleton3D:Middle_2_R", "Arms_Rig/Skeleton3D:Middle_3_R", "Arms_Rig/Skeleton3D:Pinky_1_R", "Arms_Rig/Skeleton3D:Pinky_2_R", "Arms_Rig/Skeleton3D:Pinky_3_R", "Arms_Rig/Skeleton3D:Prop_Bone_Global", "Arms_Rig/Skeleton3D:Prop_R", "Arms_Rig/Skeleton3D:Ring_1_R", "Arms_Rig/Skeleton3D:Ring_2_R", "Arms_Rig/Skeleton3D:Ring_3_R", "Arms_Rig/Skeleton3D:Root", "Arms_Rig/Skeleton3D:Thumb_1_R", "Arms_Rig/Skeleton3D:Thumb_2_R", "Arms_Rig/Skeleton3D:Thumb_3_R", "Arms_Rig/Skeleton3D:Upper_R"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xfiur"]
+animation = &"AL_FP_Character/A_FP_FullyHolstered"
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_tgs44"]
+graph_offset = Vector2(-362, -157)
+nodes/Holstered/node = SubResource("AnimationNodeAnimation_xfiur")
+nodes/Holstered/position = Vector2(-80, 80)
+node_connections = [&"output", 0, &"Holstered"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_utm5c"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_x8ke2"]
+advance_mode = 2
+advance_expression = "colt_unholstered"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ys0lo"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_forti"]
+states/HOLSTERED/node = SubResource("AnimationNodeBlendTree_tgs44")
+states/HOLSTERED/position = Vector2(336, 137)
+states/SM_Colt/node = ExtResource("1_x8ke2")
+states/SM_Colt/position = Vector2(331, 300)
+states/Start/position = Vector2(149, 125)
+transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_utm5c"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_x8ke2"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_ys0lo")]
+graph_offset = Vector2(-92, 37)
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_g0oko"]
 
@@ -306,15 +346,23 @@ states/SM_Colt/node = ExtResource("1_x8ke2")
 states/SM_Colt/position = Vector2(412, 257)
 states/Start/position = Vector2(156, 124)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_g0oko"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_em04p"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_tmq1e")]
-graph_offset = Vector2(-163, -18)
+graph_offset = Vector2(-209, 26)
 
 [resource]
-graph_offset = Vector2(-842.325, 243.113)
+graph_offset = Vector2(-1051.0392, -135.3194)
 nodes/output/position = Vector2(280, 300)
-nodes/SM_Player/node = SubResource("AnimationNodeStateMachine_hxvos")
-nodes/SM_Player/position = Vector2(-460, 120)
+nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
+nodes/SM_Right/position = Vector2(-500, 160)
 nodes/SM_Movement/node = SubResource("AnimationNodeStateMachine_ioi4e")
 nodes/SM_Movement/position = Vector2(-420, 400)
 nodes/MoveBlendAdd/node = SubResource("AnimationNodeAdd2_x8ke2")
 nodes/MoveBlendAdd/position = Vector2(-20, 160)
-node_connections = [&"output", 0, &"MoveBlendAdd", &"MoveBlendAdd", 0, &"SM_Player", &"MoveBlendAdd", 1, &"SM_Movement"]
+nodes/Right_Arm_Filter/node = SubResource("AnimationNodeAdd2_em04p")
+nodes/Right_Arm_Filter/position = Vector2(-220, 80)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_ys0lo")
+nodes/Animation/position = Vector2(-1020, -120)
+nodes/SM_Left/node = SubResource("AnimationNodeStateMachine_forti")
+nodes/SM_Left/position = Vector2(-980, 60)
+nodes/Left_Arm_Filter/node = SubResource("AnimationNodeAdd2_tmq1e")
+nodes/Left_Arm_Filter/position = Vector2(-620, -100)
+node_connections = [&"output", 0, &"MoveBlendAdd", &"MoveBlendAdd", 0, &"Right_Arm_Filter", &"MoveBlendAdd", 1, &"SM_Movement", &"Right_Arm_Filter", 0, &"Left_Arm_Filter", &"Right_Arm_Filter", 1, &"SM_Right", &"Left_Arm_Filter", 0, &"Animation", &"Left_Arm_Filter", 1, &"SM_Left"]

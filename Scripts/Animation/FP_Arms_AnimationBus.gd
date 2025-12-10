@@ -11,9 +11,11 @@ var input_receiver : PlayerInputReceiver
 enum E_prop_bone_type{Left, Right, Global}
 var right_prop_bone_pos : Vector3 = Vector3.ZERO
 
+const anim_right_arm_sm_path : String = "parameters/SM_Right/"
+const anim_left_arm_sm_path : String = "parameters/SM_Left/"
 
 #pistol related
-const anim_colt_state_machine_path : String  = "parameters/SM_Player/SM_Colt/"
+const anim_colt_sm_path : String = "SM_Colt/"
 
 const anim_fire_request : String = "ReadyBlendTree/FireOneShot/request"
 const anim_dry_fire_request : String = "ReadyBlendTree/DryFireOneShot/request"
@@ -104,18 +106,36 @@ func _init_player_data(player : Player) -> void:
 	player.equipment_manager.on_holster_started.connect(_on_player_holster_started)
 	player.equipment_manager.on_unholster_started.connect(_on_player_unholster_started)
 
+func _set_equipment_oneshot_request(request_name : String, right_hand = true, two_handed = false,  request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
+	if(right_hand || two_handed):
+		print("setting request ", anim_right_arm_sm_path + request_name)
+		_set_anim_tree_oneshot_request(anim_right_arm_sm_path + request_name, request_type)
+	if(!right_hand || two_handed):
+		print("setting request ", anim_left_arm_sm_path + request_name)
+		_set_anim_tree_oneshot_request(anim_left_arm_sm_path + request_name, request_type)
+
+func _set_equipment_anim_variable(variable  : String, new_value : bool, right_hand = true, two_handed = false) -> void:
+	if(right_hand || two_handed):
+		set(anim_right_arm_sm_path + variable, new_value)
+	if(!right_hand || two_handed):
+		set(anim_left_arm_sm_path + variable, new_value)
+
+
 func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	set( request_name, request_type)
-
+	
 func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 	_finish_prev_pistol_action()
+	var two_handed : bool = pistol._is_two_handed_action(new_action)
+	print("is two handed? ", two_handed)
+	var right_handed : bool = pistol._is_right_handed()
 	match new_action:
 		EPistolState.Actions.Fire:
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_fire_request, right_handed, two_handed )
 		EPistolState.Actions.DryFire:
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_dry_fire_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_dry_fire_request, right_handed, two_handed)
 		EPistolState.Actions.CockHammer:
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_hammer_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_hammer_request, right_handed, two_handed)
 		EPistolState.Actions.EnterReload:
 			_on_reload_change(true,false,false)
 		EPistolState.Actions.EnterReloadUncock:
@@ -124,20 +144,20 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 			_on_reload_change(false,false,true)
 		EPistolState.Actions.CylinderNext:
 			if(next_cyl_cont):
-				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_next_chamber_cont_request)
+				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_next_chamber_cont_request, right_handed, two_handed)
 				next_cyl_cont = false
-			else:		
-				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_next_chamber_request)
+			else:
+				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_next_chamber_request, right_handed, two_handed)
 		EPistolState.Actions.CylinderPrev:
 			if(prev_cyl_cont):
-				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_previous_chamber_cont_request)
+				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_previous_chamber_cont_request, right_handed, two_handed)
 				prev_cyl_cont = false
 			else:
-				_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_previous_chamber_request)
+				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_previous_chamber_request, right_handed, two_handed)
 		EPistolState.Actions.Insert:
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_insert_shell_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_insert_shell_request, right_handed, two_handed)
 		EPistolState.Actions.Eject:
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_reload_eject_shell_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_eject_shell_request, right_handed, two_handed)
 		EPistolState.Actions.FanFire:
 			_on_fanning_entered()
 		_:
@@ -158,21 +178,22 @@ func _on_pistol_action_interrupted(_prev : EPistolState.Actions, _new : EPistolS
 	if (_prev == EPistolState.Actions.None):
 		return
 		
+	var two_handed : bool = pistol._is_two_handed_action(_prev)	
+	var right_handed : bool = pistol._is_right_handed()
 	#specific edge cases to compensate for hand going forward/back
 	if(_prev == EPistolState.Actions.Insert && _new == EPistolState.Actions.Eject):
-		set(anim_reload_insert_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_insert_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 
 	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
-		set(anim_reload_eject_shell_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-			
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_eject_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 	if(_prev == EPistolState.Actions.CylinderNext && _new == EPistolState.Actions.CylinderNext):
-		set(anim_reload_next_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-		set(anim_reload_next_chamber_cont_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		next_cyl_cont = true
 
 	if(_prev == EPistolState.Actions.CylinderPrev && _new == EPistolState.Actions.CylinderPrev):
-		set(anim_reload_previous_chamber_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-		set(anim_reload_previous_chamber_cont_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		prev_cyl_cont = true
 
 
@@ -196,28 +217,27 @@ func _process(_delta: float) -> void:
 
 func _on_fanning_entered() -> void:
 	colt_fan_hammer = true
-	_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_fire_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
+	_set_equipment_oneshot_request(anim_colt_sm_path+ anim_fire_request, pistol._is_right_handed(), false,AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT )
 
 
 	fanning_hammer_anim_id = randi() %3 +1
-	set(anim_colt_state_machine_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1)
-	set(anim_colt_state_machine_path + anim_fanning_condition_2,fanning_hammer_anim_id == 2)
-	set(anim_colt_state_machine_path + anim_fanning_condition_3,fanning_hammer_anim_id == 3)
+	_set_equipment_anim_variable( anim_colt_sm_path + anim_fanning_condition_1,fanning_hammer_anim_id == 1, true, true)
+	_set_equipment_anim_variable(anim_colt_sm_path + anim_fanning_condition_2,fanning_hammer_anim_id == 2, true, true)
+	_set_equipment_anim_variable(anim_colt_sm_path + anim_fanning_condition_3,fanning_hammer_anim_id == 3,true, true)
 
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		if(enter):
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+anim_enter_reload_request)
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(EPistolState.Actions.EnterReload))
 		elif(enter_uncock):
-			_set_anim_tree_oneshot_request(anim_colt_state_machine_path+ anim_enter_reload_uncock_request)
-
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(EPistolState.Actions.EnterReloadUncock))
 		enter_reload_done = false
 	elif(exit):
 		exit_reload_done = false
 
 	_tween_move_blend_amount(reload_transition_movement_blend_value, reload_transition_movement_blend_tween_time)
-	set(anim_colt_state_machine_path + anim_enter_reload_condition, enter || enter_uncock)
-	set(anim_colt_state_machine_path + anim_exit_reload_condition,  exit)
+	_set_equipment_anim_variable(anim_colt_sm_path + anim_enter_reload_condition, enter || enter_uncock, true, true)
+	_set_equipment_anim_variable(anim_colt_sm_path + anim_exit_reload_condition,  exit, true, true)
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
