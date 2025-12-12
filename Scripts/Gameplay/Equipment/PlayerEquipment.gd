@@ -7,7 +7,6 @@ enum Equipment_Type {Permanent , Consumable, Temporary}
 @export var equip_type : Equipment_Type = Equipment_Type.Permanent
 @export var slot : EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
 
-@onready var anim_tree : AnimationTree = %AnimationTree
 @export var input_receiver : InputReceiver
 
 var player : Player = null
@@ -22,7 +21,6 @@ signal use_equipment_input(event: InputEvent)
 
 func _ready() -> void:
 	use_equipment_input.connect(_try_use_equipment)
-	
 	
 func _on_start_holster():
 	on_holstered.emit()

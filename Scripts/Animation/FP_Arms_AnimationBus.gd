@@ -51,9 +51,11 @@ const anim_fanning_condition_3 : String = "FanningSM/conditions/fanning3"
 # these variables are checked by the state machine itself as an expression
 var enter_reload_done : bool = false
 var exit_reload_done : bool  = false
-var colt_equipped : bool      = false
+var colt_unholstered : bool  = false
 var colt_fan_hammer : bool   = false
 var fanning_hammer_anim_id : int = 1
+var throwable_unholstered : bool = false
+
 
 var sprinting : bool = false
 var crouching : bool = false
@@ -103,8 +105,6 @@ func _init_player_data(player : Player) -> void:
 	input_receiver = player.input_receiver
 	if(!input_receiver):
 		push_error("No Input Receiver set on the FP Arms Anim Bus")
-	player.equipment_manager.on_holster_started.connect(_on_player_holster_started)
-	player.equipment_manager.on_unholster_started.connect(_on_player_unholster_started)
 
 func _set_equipment_oneshot_request(request_name : String, right_hand = true, two_handed = false,  request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	if(right_hand || two_handed):
@@ -237,15 +237,9 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
-	
-func _on_player_holster_started():
-	colt_equipped = false
 
 func _holster_anim_finished():
 	on_holster_anim_finish.emit()
-	
-func _on_player_unholster_started():
-	colt_equipped = true
 	
 func _toggle_equipment_visible(visible : bool) -> void:
 	pistol.visible = visible
@@ -287,11 +281,14 @@ func _fire_crouch_oneshot(enter : bool) -> void:
 	
 	crouching = enter	
 		
-func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
+func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : bool ) -> void:
+	if(node == null):
+		return
+
 	var bone_to_reparent_to : BoneAttachment3D
 	var new_pos : Vector3 = Vector3.ZERO;
 	
-	match (new_parent):
+	match (new):
 		E_prop_bone_type.Left:
 			bone_to_reparent_to = left_prop_bone
 		E_prop_bone_type.Right:
@@ -299,9 +296,14 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 			new_pos = right_prop_bone_pos
 		E_prop_bone_type.Global:
 			bone_to_reparent_to = global_prop_bone
-		
-	pistol.reparent(bone_to_reparent_to,true)
-	pistol.set_position(new_pos)
+
+	node.reparent(bone_to_reparent_to,true)
+	if(reset_pos):
+		node.set_position(new_pos)
+
+# called by anim notifies	
+func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
+	_reparent_to_prop_bone(pistol, new_parent, true)
 
 #called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:

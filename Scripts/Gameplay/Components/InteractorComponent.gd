@@ -11,9 +11,14 @@ var interact_cast_result : Dictionary
 var current_hovered_object : Object = null
 var current_hovered_interactable : InteractableComponent = null
 
+var player : Player
+
 signal on_interact_input_received(event : InputEvent)
 
 func _ready() -> void:
+	await owner.ready
+	player = owner as Player
+	
 	if(!interact_ray):
 		push_error("Interact Raycast not set on ", self.name, ", on ", owner)
 	if(!interactable_prompt):
@@ -24,8 +29,7 @@ func _ready() -> void:
 		push_error("No equipment manager set on " , self.name , " on " , owner)
 	
 	on_interact_input_received.connect(_on_interact_input_received)
-
-
+	
 func _physics_process(_delta: float) -> void:
 	_find_current_hovered_object()
 	#_check_for_display_promt()
@@ -56,9 +60,13 @@ func _find_current_hovered_object() -> void:
 		if(current_hovered_object.has_user_signal(InteractableComponent.hover_start_signal_name)):
 			current_hovered_object.emit_signal(InteractableComponent.hover_start_signal_name, self)
 			
-func _attempt_interact() -> void:
-	pass
+func _on_interact_input_received(_event : InputEvent) -> void:
+	_attempt_interact()
 	
+func _attempt_interact() -> void:
+	if(_can_currently_interact() && _can_currently_interact_with_hovered()):
+		current_hovered_interactable._interact(self)
+		
 func _try_set_current_interactable(_interactable_component: InteractableComponent)-> void:
 	current_hovered_interactable = _interactable_component
 
@@ -66,16 +74,13 @@ func _try_clear_current_interactable(_interactable_component: InteractableCompon
 	if(current_hovered_interactable == _interactable_component):
 		current_hovered_interactable = null
 		interactable_prompt._init_with_data(null)
-
-func _on_interact_input_received(_event : InputEvent) -> void:
-	print("try interact")
 		
 func _can_currently_interact_with_hovered() -> bool:
 	if(current_hovered_interactable == null):
 		return false
 	
 	match current_hovered_interactable.interact_data.type:
-		InteractableDataAsset.InteractionType.Pickup:
+		InteractableDataAsset.InteractionType.Equip:
 			#is left hand slot free?
 			return equipment_manager._is_equipment_slot_available(EquipmentManager.Equipment_Slot.Left)
 		_:

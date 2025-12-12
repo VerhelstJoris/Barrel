@@ -54,13 +54,18 @@ func _change_equipment(new_equipment : PlayerEquipment) -> void:
 
 	if(new_equipment.slot == EquipmentManager.Equipment_Slot.Right):
 		current_right_equipment = new_equipment
+		player.arms.arms_animation_bus._reparent_to_prop_bone(current_right_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, false)
+		print("equip new right slot ", new_equipment)
 	elif(new_equipment.slot == EquipmentManager.Equipment_Slot.Left):
+		print("equip new left slot ", new_equipment)
 		current_left_equipment = new_equipment
-
+		player.arms.arms_animation_bus._reparent_to_prop_bone(current_left_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, false)
+	
 	_on_equip(new_equipment)	
 
 func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
+	print("unequip ", old_equipment)
 	if(old_equipment != null):
 		old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
 		old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._on_equipment_input_actions_cleared)
@@ -69,9 +74,9 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
+	print("equip ", new_equipment)
 
 	if(new_equipment != null):
-		print("on equip ", new_equipment)
 		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped(player)
@@ -94,7 +99,7 @@ func _on_holster_input(_event : InputEvent) -> void:
 			pass
 
 func _can_holster_equipment() -> bool:
-	return equipment_holster_state == Holster_State.Ready && current_right_equipment._can_be_holstered()
+	return equipment_holster_state == Holster_State.Ready && current_right_equipment._can_be_holstered() && current_left_equipment._can_be_holstered()
 
 func _change_holster_state(new_state : Holster_State) -> void:
 	if(current_right_equipment == null && current_left_equipment == null):
@@ -104,12 +109,21 @@ func _change_holster_state(new_state : Holster_State) -> void:
 	match new_state:
 		Holster_State.Holstering:
 			on_holster_started.emit()
-			current_right_equipment._on_start_holster()
+			if(current_right_equipment):
+				current_right_equipment._on_start_holster()
+			if(current_left_equipment):
+				current_left_equipment._on_start_holster()
 		Holster_State.Unholstering:
 			on_unholster_started.emit()
-			current_right_equipment._on_start_unholster()
+			if(current_right_equipment):
+				current_right_equipment._on_start_unholster()
+			if(current_left_equipment):	
+				current_left_equipment._on_start_unholster()
 		Holster_State.Hidden:
-			current_right_equipment.visible = false
+			if(current_right_equipment):
+				current_right_equipment.visible = false
+			if(current_left_equipment):
+				current_left_equipment.visible = false
 		_:
 			pass
 

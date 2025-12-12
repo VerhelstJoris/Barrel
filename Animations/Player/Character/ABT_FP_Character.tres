@@ -43,7 +43,7 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_x8ke2"]
 advance_mode = 2
-advance_expression = "colt_equipped"
+advance_expression = "colt_unholstered"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ys0lo"]
 switch_mode = 2
@@ -51,7 +51,7 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_28pq6"]
 advance_mode = 2
-advance_expression = "throwable_equiped"
+advance_expression = "throwable_unholstered"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jqlb3"]
 advance_mode = 2
@@ -65,7 +65,7 @@ states/Start/position = Vector2(149, 125)
 states/Throwable/node = SubResource("AnimationNodeStateMachine_x8ke2")
 states/Throwable/position = Vector2(552, 69)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_utm5c"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_x8ke2"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_ys0lo"), "HOLSTERED", "Throwable", SubResource("AnimationNodeStateMachineTransition_28pq6"), "Throwable", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_jqlb3")]
-graph_offset = Vector2(-118, -43)
+graph_offset = Vector2(3, -41)
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_g0oko"]
 
@@ -353,7 +353,7 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_em04p"]
 advance_mode = 2
-advance_expression = "colt_equipped"
+advance_expression = "colt_unholstered"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_tmq1e"]
 switch_mode = 2
@@ -367,10 +367,10 @@ states/SM_Colt/node = ExtResource("1_x8ke2")
 states/SM_Colt/position = Vector2(412, 257)
 states/Start/position = Vector2(156, 124)
 transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_g0oko"), "HOLSTERED", "SM_Colt", SubResource("AnimationNodeStateMachineTransition_em04p"), "SM_Colt", "HOLSTERED", SubResource("AnimationNodeStateMachineTransition_tmq1e")]
-graph_offset = Vector2(-184, 67)
+graph_offset = Vector2(-229, 37)
 
 [resource]
-graph_offset = Vector2(-857, 3)
+graph_offset = Vector2(-1061.824, -48.48945)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Right/position = Vector2(-500, 160)

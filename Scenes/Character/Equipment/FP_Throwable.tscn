@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://buu53mngd0ykn"]
+
+[ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_blexn"]
+[ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="2_du6af"]
+[ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="3_0kkhu"]
+
+[node name="FpThrowable" type="Node3D" node_paths=PackedStringArray("input_receiver")]
+script = ExtResource("1_blexn")
+equip_type = 2
+slot = 1
+input_receiver = NodePath("InputReceiver")
+metadata/_custom_type_script = "uid://cqgld2k53jtha"
+
+[node name="InputReceiver" type="Node" parent="."]
+script = ExtResource("2_du6af")
+metadata/_custom_type_script = "uid://mjfa6lofa7kw"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("3_0kkhu")

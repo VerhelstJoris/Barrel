@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cm66edh5n2owj"]
+[gd_scene load_steps=12 format=3 uid="uid://cm66edh5n2owj"]
 
 [ext_resource type="Script" uid="uid://cbm0v5ab2m4p0" path="res://Scripts/Gameplay/FP_Arms.gd" id="1_1ioya"]
 [ext_resource type="Script" uid="uid://b3i0p430ofsda" path="res://Scripts/Animation/FP_Arms_AnimationBus.gd" id="1_24ex7"]
@@ -161,11 +161,6 @@ bind/47/pose = Transform3D(0.602949, -0.686013, -0.407234, 0.618539, 0.724375, -
 bind/48/name = &"Prop_Bone_Global"
 bind/48/bone = -1
 bind/48/pose = Transform3D(0.0966451, -0.0139996, -0.99522, -0.301922, -0.9532, -0.015911, -0.948421, 0.302017, -0.0963489, 0.00515332, -0.00781466, 0.00301817)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aylc3"]
-albedo_color = Color(1, 1, 0, 1)
-
-[sub_resource type="SphereMesh" id="SphereMesh_24osw"]
 
 [node name="FP_Arms" type="Node3D"]
 script = ExtResource("1_1ioya")
@@ -548,13 +543,6 @@ bone_idx = 23
 unique_name_in_owner = true
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 4.82555e-05, 9.48738e-05, 7.02897e-05)
 raycast_dist = 1500.0
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Arms_Rig/Skeleton3D/RPropBone"]
-transform = Transform3D(0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.001, 0, 0, 0)
-visible = false
-layers = 2
-material_override = SubResource("StandardMaterial3D_aylc3")
-mesh = SubResource("SphereMesh_24osw")
 
 [node name="LPropBone" type="BoneAttachment3D" parent="Arms_Rig/Skeleton3D"]
 unique_name_in_owner = true

@@ -323,6 +323,15 @@ func _can_shoot() -> bool:
 func _can_be_holstered() -> bool:
 	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
 	
+func _on_start_holster():
+	super()
+	player.arms.arms_animation_bus.colt_unholstered = false
+
+func _on_start_unholster():
+	super()
+	player.arms.arms_animation_bus.colt_unholstered = true
+
+
 func _is_currently_using_both_hands() -> bool:
 	return _is_two_handed_action(current_action)
 

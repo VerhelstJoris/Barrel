@@ -12,7 +12,6 @@ class_name InteractableComponent extends Node
 
 const hover_start_signal_name : String = "on_interact_hover_start"
 const hover_end_signal_name : String = "on_interact_hover_end"
-const on_interact_signal_name : String = "on_interact_signal_name"
 
 func _ready() -> void:
 	if(!hitbox && interact_shapes_to_detect_overlap.is_empty()):
@@ -26,6 +25,22 @@ func _ready() -> void:
 		for shape in hitbox.interact_shapes_to_detect_overlap:
 			_register_interact_signals_on_shape(shape)
 			
+	if(interact_data):
+		_verify_data_asset()
+	else:
+		push_error("No valid interact data asset assigned on ", self.name)
+	#verify some info 
+	
+func _verify_data_asset() -> void:
+	match interact_data.type:
+		InteractableDataAsset.InteractionType.Equip:
+			if(interact_data.interaction_item == null):
+				push_error("No valid interact item set on interact data on ", interact_data.name, " should be a player equipment scene")
+		InteractableDataAsset.InteractionType.None:
+			push_error("No valid interact type set on  assigned on ", interact_data.name)
+		_:
+			pass
+			
 			
 func _register_interact_signals_on_shape(body : PhysicsBody3D) -> void:
 	if(!body):
@@ -35,8 +50,6 @@ func _register_interact_signals_on_shape(body : PhysicsBody3D) -> void:
 	body.connect(hover_start_signal_name, _on_hover_start)
 	body.add_user_signal(hover_end_signal_name, ["Interactor"])
 	body.connect(hover_end_signal_name, _on_hover_end)
-	body.add_user_signal(on_interact_signal_name, ["Interactor"])
-	body.connect(on_interact_signal_name, _on_interact)
 
 
 func _on_hover_start(_interactor: InteractorComponent) -> void:
@@ -53,5 +66,17 @@ func _on_hover_end(_interactor: InteractorComponent) -> void:
 	if(_interactor):
 		_interactor._try_clear_current_interactable(self)
 
-func _on_interact(_interactor: InteractorComponent) -> void:
-	pass
+func _interact(_interactor: InteractorComponent) -> void:
+	match interact_data.type:
+		InteractableDataAsset.InteractionType.Equip:
+			_equip_interact_item_on_interactor(_interactor)
+		_:
+			push_error("interact type currently not implemented")
+
+func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> void:
+	if(interact_data.interaction_item):
+		var created_item : PlayerEquipment = interact_data.interaction_item.instantiate()
+		_interactor.player.arms.add_child(created_item)
+		_interactor.player.equipment_manager._change_equipment(created_item)
+	
+	
