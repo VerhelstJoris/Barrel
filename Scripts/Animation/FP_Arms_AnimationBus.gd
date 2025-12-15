@@ -56,7 +56,6 @@ var colt_fan_hammer : bool   = false
 var fanning_hammer_anim_id : int = 1
 var throwable_unholstered : bool = false
 
-
 var sprinting : bool = false
 var crouching : bool = false
 
@@ -75,7 +74,6 @@ var prev_cyl_cont : bool = false
 signal on_unholster_anim_finish()
 signal on_holster_anim_finish()
 
-var prev_delta : float = 0
 @export_group("movement animation values")
 @export var horizontal_movement_blend_rate : float = 2
 @export var vertical_movement_blend_rate : float = 4
@@ -156,7 +154,7 @@ func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
 		EPistolState.Actions.Eject:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_eject_shell_request, right_handed, two_handed)
 		EPistolState.Actions.FanFire:
-			_on_fanning_entered()
+			_enter_fanning()
 		_:
 			pass
 	current_action = new_action
@@ -165,11 +163,14 @@ func _finish_prev_pistol_action()->void:
 	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
 		enter_reload_done = true
 		_tween_move_blend_amount(reload_movement_blend_value, reload_movement_blend_tween_time)
+		return
 	elif (current_action == EPistolState.Actions.ExitReload):
 		exit_reload_done = true
-	else:
-		exit_reload_done = false
-		enter_reload_done = false
+		return	
+	
+	colt_fan_hammer = false	
+	exit_reload_done = false
+	enter_reload_done = false
 
 func _on_pistol_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
 	if (_prev == EPistolState.Actions.None):
@@ -180,9 +181,9 @@ func _on_pistol_action_interrupted(_prev : EPistolState.Actions, _new : EPistolS
 	#specific edge cases to compensate for hand going forward/back
 	if(_prev == EPistolState.Actions.Insert && _new == EPistolState.Actions.Eject):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_insert_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-
 	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_eject_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+	
 	if(_prev == EPistolState.Actions.CylinderNext && _new == EPistolState.Actions.CylinderNext):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
@@ -192,11 +193,8 @@ func _on_pistol_action_interrupted(_prev : EPistolState.Actions, _new : EPistolS
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		prev_cyl_cont = true
-
-
 	elif(_prev == EPistolState.Actions.EnterReloadUncock || _prev == EPistolState.Actions.EnterReload):
 		_on_enter_reload_interrupted()
-		
 	elif(_prev == EPistolState.Actions.ExitReload):
 		_on_exit_reload_interrupted()
 		
@@ -210,9 +208,8 @@ func _on_exit_reload_interrupted() -> void:
 func _process(_delta: float) -> void:
 	_update_movement_blend_values(_delta)
 	colt_fan_hammer = false
-	prev_delta = _delta
 
-func _on_fanning_entered() -> void:
+func _enter_fanning() -> void:
 	colt_fan_hammer = true
 	_set_equipment_oneshot_request(anim_colt_sm_path+ anim_fire_request, pistol._is_right_handed(), false,AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT )
 	
@@ -243,6 +240,11 @@ func _holster_anim_finished():
 	
 func _toggle_equipment_visible(visible : bool) -> void:
 	pistol.visible = visible
+
+func current_right_equipment_two_handed() -> bool:
+	if(pistol == null):
+		return false
+	return pistol._is_currently_using_both_hands()
 
 func _unholster_anim_finished():
 	on_unholster_anim_finish.emit()
@@ -308,7 +310,6 @@ func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
 #called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:
 	_tween_anim_property(move_blend_tween, anim_move_blend_add_amount_property, new_val, duration)
-	
 
 func _tween_anim_property(tween: Tween, blend_property : String ,new_value : float, time : float) -> void:
 	if(tween && tween.is_running()):

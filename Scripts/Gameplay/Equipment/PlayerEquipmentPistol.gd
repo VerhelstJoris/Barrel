@@ -330,8 +330,7 @@ func _on_start_holster():
 func _on_start_unholster():
 	super()
 	player.arms.arms_animation_bus.colt_unholstered = true
-
-
+	
 func _is_currently_using_both_hands() -> bool:
 	return _is_two_handed_action(current_action)
 
