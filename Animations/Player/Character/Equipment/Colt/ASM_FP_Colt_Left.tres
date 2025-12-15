@@ -386,7 +386,6 @@ advance_expression = "!colt_unholstered || !current_right_equipment_two_handed()
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_lhqfo"]
 advance_mode = 2
-advance_expression = "colt_fan_hammer"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jm0sb"]
 advance_mode = 2
@@ -410,4 +409,4 @@ states/ReloadingBlendTree/node = SubResource("AnimationNodeBlendTree_7gfv3")
 states/ReloadingBlendTree/position = Vector2(374, 481)
 states/Start/position = Vector2(-637, 107)
 transitions = ["Exit Reload", "Ready", SubResource("AnimationNodeStateMachineTransition_g0oko"), "ReloadingBlendTree", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_x4084"), "Ready", "Enter_Fanning", SubResource("AnimationNodeStateMachineTransition_mvouq"), "Exit_Fanning", "Ready", SubResource("AnimationNodeStateMachineTransition_nbwfs"), "Ready", "EnterReloadBT", SubResource("AnimationNodeStateMachineTransition_aank0"), "Exit_Fanning", "EnterReloadBT", SubResource("AnimationNodeStateMachineTransition_hgbq4"), "Exit Reload", "EnterReloadBT", SubResource("AnimationNodeStateMachineTransition_n61xj"), "EnterReloadBT", "ReloadingBlendTree", SubResource("AnimationNodeStateMachineTransition_484js"), "EnterReloadBT", "Exit Reload", SubResource("AnimationNodeStateMachineTransition_vbs3n"), "Enter_Fanning", "FanningSM", SubResource("AnimationNodeStateMachineTransition_6xr2n"), "Exit_Fanning", "FanningSM", SubResource("AnimationNodeStateMachineTransition_pi647"), "FanningSM", "Exit_Fanning", SubResource("AnimationNodeStateMachineTransition_ru2fe"), "Exit Reload", "Enter_Fanning", SubResource("AnimationNodeStateMachineTransition_3ewnr"), "Ready", "End", SubResource("AnimationNodeStateMachineTransition_yd8du"), "Start", "Enter_Fanning", SubResource("AnimationNodeStateMachineTransition_lhqfo"), "Start", "EnterReloadBT", SubResource("AnimationNodeStateMachineTransition_jm0sb")]
-graph_offset = Vector2(-972, -172)
+graph_offset = Vector2(-535, -269)
