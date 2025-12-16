@@ -11,12 +11,9 @@ enum Equipment_Slot {None, Left, Right}
 var equipment_holster_state : Holster_State   = Holster_State.Hidden:
 	set = _change_holster_state
 
-var current_right_equipment : PlayerEquipment = null:
-	set = _change_equipment
-
-var current_left_equipment : PlayerEquipment = null:
-	set = _change_equipment
-
+var current_right_equipment : PlayerEquipment = null
+var current_left_equipment : PlayerEquipment = null
+	
 signal on_holster_started()
 signal on_holster_finish()
 signal on_unholster_started()
@@ -31,7 +28,7 @@ signal on_unequipped(old_equipment : PlayerEquipment, slot : Equipment_Slot)
 func _ready() -> void:
 	await owner.ready
 	player = owner as Player
-	current_right_equipment = player.arms.pistol_equipment
+	_change_equipment(player.arms.pistol_equipment, false)
 	_change_holster_state(Holster_State.Hidden)
 	_setup_input_signals()
 	_setup_animation_data()
@@ -44,7 +41,7 @@ func _setup_animation_data() -> void:
 	player.arms.arms_animation_bus.on_holster_anim_finish.connect(_on_holster_anim_finish)
 	player.arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
 
-func _change_equipment(new_equipment : PlayerEquipment) -> void:
+func _change_equipment(new_equipment : PlayerEquipment, _unholster_immediately : bool = false) -> void:
 	var equipment_to_replace : PlayerEquipment = current_right_equipment if (new_equipment.slot == EquipmentManager.Equipment_Slot.Right) else current_left_equipment		
 	
 	if(new_equipment == equipment_to_replace):
@@ -54,14 +51,16 @@ func _change_equipment(new_equipment : PlayerEquipment) -> void:
 
 	if(new_equipment.slot == EquipmentManager.Equipment_Slot.Right):
 		current_right_equipment = new_equipment
-		player.arms.arms_animation_bus._reparent_to_prop_bone(current_right_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, false)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(current_right_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, true)
 		print("equip new right slot ", new_equipment)
 	elif(new_equipment.slot == EquipmentManager.Equipment_Slot.Left):
 		print("equip new left slot ", new_equipment)
 		current_left_equipment = new_equipment
-		player.arms.arms_animation_bus._reparent_to_prop_bone(current_left_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, false)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(current_left_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, true)
 	
 	_on_equip(new_equipment)	
+	if(_unholster_immediately):
+		new_equipment._on_start_unholster()
 
 func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
@@ -99,7 +98,12 @@ func _on_holster_input(_event : InputEvent) -> void:
 			pass
 
 func _can_holster_equipment() -> bool:
-	return equipment_holster_state == Holster_State.Ready && current_right_equipment._can_be_holstered() && current_left_equipment._can_be_holstered()
+	var right_valid : bool = current_right_equipment!= null
+	var left_valid : bool = current_left_equipment!= null
+	if(!right_valid && !left_valid):
+		return false
+	
+	return equipment_holster_state == Holster_State.Ready && (!right_valid || current_right_equipment._can_be_holstered()) && (!left_valid || current_left_equipment._can_be_holstered())
 
 func _change_holster_state(new_state : Holster_State) -> void:
 	if(current_right_equipment == null && current_left_equipment == null):

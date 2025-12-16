@@ -17,7 +17,7 @@ var current_horizontal_velocity : Vector2 = Vector2.ZERO
 @onready var step_in_front_ray : RayCast3D = %StepInFrontRay
 var _stepped_last_frame : bool = false
 
-var _draw_step_debug : bool = true
+var _draw_step_debug : bool = false
 
 @export_group("Gravity Settings")
 @export var max_gravity_velocity : float = -18

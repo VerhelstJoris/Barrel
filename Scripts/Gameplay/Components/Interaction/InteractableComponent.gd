@@ -77,6 +77,6 @@ func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> voi
 	if(interact_data.interaction_item):
 		var created_item : PlayerEquipment = interact_data.interaction_item.instantiate()
 		_interactor.player.arms.add_child(created_item)
-		_interactor.player.equipment_manager._change_equipment(created_item)
+		_interactor.player.equipment_manager._change_equipment(created_item, true)
 	
 	

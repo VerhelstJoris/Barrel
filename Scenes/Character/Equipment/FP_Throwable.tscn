@@ -16,4 +16,6 @@ script = ExtResource("2_du6af")
 metadata/_custom_type_script = "uid://mjfa6lofa7kw"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
+layers = 2
 mesh = ExtResource("3_0kkhu")
