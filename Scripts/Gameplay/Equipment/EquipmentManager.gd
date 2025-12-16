@@ -150,3 +150,9 @@ func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
 			return false
 	
 			
+	
+func _can_enter_two_handed_action( from_slot : Equipment_Slot ) -> bool:
+	if(from_slot == Equipment_Slot.Right):
+		return current_left_equipment == null
+		
+	return true

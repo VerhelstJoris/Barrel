@@ -305,7 +305,7 @@ func _can_eject_round() -> bool:
 	return current_state == EPistolState.State.Reloading && _can_proceed_state(true)
 
 func _can_enter_reload() -> bool:
-	return _can_proceed_state(true) && current_state != EPistolState.State.Reloading
+	return _can_proceed_state(true) && current_state != EPistolState.State.Reloading && player.equipment_manager._can_enter_two_handed_action(slot)
 	
 func _can_exit_reload() -> bool:
 	return _can_proceed_state(true) && current_state == EPistolState.State.Reloading
@@ -315,7 +315,7 @@ func _can_cock_hammer() -> bool:
 
 func _can_fan_fire() -> bool:
 	#can fan the hammer if we're in the ready state or already fanning
-	return _can_proceed_state(true, true) && (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked)
+	return _can_proceed_state(true, true) && (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && player.equipment_manager._can_enter_two_handed_action(slot)
 
 func _can_shoot() -> bool:
 	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
