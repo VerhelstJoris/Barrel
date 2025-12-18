@@ -214,13 +214,11 @@ size_flags_vertical = 3
 stretch = true
 
 [node name="HUDEquipment_Right" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
-unique_name_in_owner = true
 visibility_layer = 2
 layout_mode = 2
 mouse_filter = 2
 
 [node name="HUDEquipment_Left" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
-unique_name_in_owner = true
 visibility_layer = 2
 layout_mode = 2
 mouse_filter = 2
@@ -400,10 +398,11 @@ interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer
 equipment_manager = NodePath("../EquipmentManager")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
 
-[node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player")]
+[node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player", "HUD_equipment_input_arr")]
 unique_name_in_owner = true
 script = ExtResource("40_ohefb")
 player = NodePath("..")
+HUD_equipment_input_arr = [NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDEquipment_Right"), NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDEquipment_Left")]
 metadata/_custom_type_script = "uid://cda6d6uhlpkmt"
 
 [editable path="PlayerInputManagerComponent"]

@@ -2,7 +2,7 @@ class_name EquipmentManager extends Node
 
 @export var player : Player
 
-@onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment_Right
+@export var HUD_equipment_input_arr : Array[HUDEquipmentInput]
 
 enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
@@ -66,8 +66,9 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
 	print("unequip ", old_equipment)
 	if(old_equipment != null):
-		old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(HUD_equipment_input._on_equipment_input_actions_changed)
-		old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(HUD_equipment_input._on_equipment_input_actions_cleared)
+		for equipment_info in HUD_equipment_input_arr:
+			old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(equipment_info._on_equipment_input_actions_changed)
+			old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(equipment_info._on_equipment_input_actions_cleared)
 		slot = old_equipment.slot
 	on_unequipped.emit(old_equipment, slot)
 
@@ -75,8 +76,9 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
 	print("equip ", new_equipment)
 	if(new_equipment != null):
-		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
-		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)
+		for equipment_info in HUD_equipment_input_arr:
+			new_equipment.input_receiver.on_available_equipment_actions_changed.connect(equipment_info._on_equipment_input_actions_changed)
+			new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(equipment_info._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped(player)
 		slot = new_equipment.slot
 
@@ -149,7 +151,16 @@ func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
 			return false
 	
 			
+func _get_input_receivers_to_process()-> Array[InputReceiver]:
+	var ret : Array[InputReceiver]
+	if(current_left_equipment && _can_use_equipment()):
+		ret.append(current_left_equipment.input_receiver)
+		
+	if(current_right_equipment && _can_use_equipment()):
+		ret.append(current_right_equipment.input_receiver)
 	
+	return ret
+
 func _can_enter_two_handed_action( from_slot : Equipment_Slot ) -> bool:
 	if(from_slot == Equipment_Slot.Right):
 		return current_left_equipment == null

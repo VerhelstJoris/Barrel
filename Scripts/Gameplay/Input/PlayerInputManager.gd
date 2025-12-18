@@ -16,8 +16,8 @@ func _input(event: InputEvent) -> void:
 	if(_player.input_receiver != null):
 		_process_input_receiver(_player.input_receiver, event)
 		
-	if(_player.equipment_manager._can_use_equipment() && _player.equipment_manager.current_right_equipment.input_receiver):
-		_process_input_receiver(_player.equipment_manager.current_right_equipment.input_receiver, event)
+	for receiver in _player.equipment_manager._get_input_receivers_to_process():
+		_process_input_receiver(receiver, event)
 		
 func _process_input_receiver(receiver : InputReceiver, event : InputEvent) -> void:
 	var available_receiver_inputs = receiver._get_available_inputs()

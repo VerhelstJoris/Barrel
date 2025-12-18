@@ -9,7 +9,7 @@
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[node name="MarginContainer" type="MarginContainer" node_paths=PackedStringArray("input_label", "prompt")]
+[node name="MarginContainer" type="MarginContainer" node_paths=PackedStringArray("input_label", "hbox_container", "prompt", "text_container", "background_container")]
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
@@ -25,24 +25,27 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 script = ExtResource("1_xpofu")
-input_label = NodePath("PanelContainer/HBoxContainer/MarginContainer2/InputTextLabel")
-prompt = NodePath("PanelContainer/HBoxContainer/HUDPromptContainer")
+input_label = NodePath("BackgroundPanel/HBoxContainer/TextContainer/InputTextLabel")
+hbox_container = NodePath("BackgroundPanel/HBoxContainer")
+prompt = NodePath("BackgroundPanel/HBoxContainer/HUDPromptContainer")
+text_container = NodePath("BackgroundPanel/HBoxContainer/TextContainer")
+background_container = NodePath("BackgroundPanel")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="BackgroundPanel" type="PanelContainer" parent="."]
 layout_mode = 2
 size_flags_horizontal = 8
 theme_override_styles/panel = ExtResource("2_cjqlk")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="BackgroundPanel"]
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/HBoxContainer"]
+[node name="TextContainer" type="MarginContainer" parent="BackgroundPanel/HBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_bottom = 2
 
-[node name="InputTextLabel" type="Label" parent="PanelContainer/HBoxContainer/MarginContainer2"]
+[node name="InputTextLabel" type="Label" parent="BackgroundPanel/HBoxContainer/TextContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme = SubResource("Theme_ucgfk")
@@ -52,14 +55,9 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 2
-text = "Lorem Ipsum peepee poopoo"
+text = "Lorem Ipsum"
 horizontal_alignment = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HBoxContainer"]
-visible = false
-layout_mode = 2
-theme_override_styles/panel = ExtResource("2_cjqlk")
-
-[node name="HUDPromptContainer" parent="PanelContainer/HBoxContainer" instance=ExtResource("4_cjqlk")]
+[node name="HUDPromptContainer" parent="BackgroundPanel/HBoxContainer" instance=ExtResource("4_cjqlk")]
 layout_mode = 2
 current_input_action_to_display = "fire"

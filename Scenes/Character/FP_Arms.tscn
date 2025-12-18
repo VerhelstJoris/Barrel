@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cm66edh5n2owj"]
+[gd_scene load_steps=12 format=3 uid="uid://cm66edh5n2owj"]
 
 [ext_resource type="Script" uid="uid://cbm0v5ab2m4p0" path="res://Scripts/Gameplay/FP_Arms.gd" id="1_1ioya"]
 [ext_resource type="Script" uid="uid://b3i0p430ofsda" path="res://Scripts/Animation/FP_Arms_AnimationBus.gd" id="1_24ex7"]
@@ -161,8 +161,6 @@ bind/47/pose = Transform3D(0.602949, -0.686013, -0.407234, 0.618539, 0.724375, -
 bind/48/name = &"Prop_Bone_Global"
 bind/48/bone = -1
 bind/48/pose = Transform3D(0.0966451, -0.0139996, -0.99522, -0.301922, -0.9532, -0.015911, -0.948421, 0.302017, -0.0963489, 0.00515332, -0.00781466, 0.00301817)
-
-[sub_resource type="SphereMesh" id="SphereMesh_64w0u"]
 
 [node name="FP_Arms" type="Node3D"]
 script = ExtResource("1_1ioya")
@@ -551,11 +549,6 @@ unique_name_in_owner = true
 transform = Transform3D(0.93831027, -0.08613578, -0.33488917, -0.29285163, -0.7129249, -0.63715833, -0.18387073, 0.6959238, -0.6941728, -0.0030970268, -0.002181664, 0.015529937)
 bone_name = "Prop_L"
 bone_idx = 47
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Arms_Rig/Skeleton3D/LPropBone"]
-transform = Transform3D(0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.001, 0, 0, 0)
-layers = 2
-mesh = SubResource("SphereMesh_64w0u")
 
 [node name="GlobalPropBone" type="BoneAttachment3D" parent="Arms_Rig/Skeleton3D"]
 unique_name_in_owner = true

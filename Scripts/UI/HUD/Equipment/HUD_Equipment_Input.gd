@@ -3,7 +3,8 @@ class_name HUDEquipmentInput extends Control
 
 @export var input_item_scene: PackedScene
 
-@onready var input_item_container: BoxContainer = %VBoxContainer
+@export var input_item_container: BoxContainer
+@export var screen_alignment_container: Container
 @export var equipment_slot_to_track : EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
 
 
@@ -17,7 +18,18 @@ func _ready() -> void:
 func _clear_current_input_details_internal(slot : EquipmentManager.Equipment_Slot) -> void:
 	if(slot != equipment_slot_to_track):
 		return
-		
+	
+	match slot:
+		EquipmentManager.Equipment_Slot.Right:
+			set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
+			screen_alignment_container.set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
+		EquipmentManager.Equipment_Slot.Left:
+			set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
+			screen_alignment_container.set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_LEFT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
+		_:
+			pass
+	
+
 	for child in input_item_container.get_children():
 		input_item_container.remove_child(child)
 		child.queue_free()
@@ -26,12 +38,15 @@ func _clear_current_input_details_internal(slot : EquipmentManager.Equipment_Slo
 func _create_new_item(info: InputActionInfo, description : String):
 	var new_item: HUDEquipmentInputItem = input_item_scene.instantiate()
 	input_item_container.add_child(new_item)
+	new_item._set_slot_visual_data(equipment_slot_to_track)
 	new_item.input_text = description
 	new_item.input_action = info.input_string
 
 	input_item_container.notification(NOTIFICATION_RESIZED)
 	
 func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo, String], slot : EquipmentManager.Equipment_Slot) -> void:
+	print("actions changed on slot ", slot)
+	
 	if(slot != equipment_slot_to_track):
 		return
 
@@ -45,11 +60,25 @@ func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo
 		if(!current_inputs.has(string_desc)):
 			_create_new_item(info, string_desc)
 			current_inputs.push_back(string_desc)
-		
-	UIAnimation.animate_slide_from_right(self, 5.0, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
+
+	match slot:
+		EquipmentManager.Equipment_Slot.Right:
+			UIAnimation.animate_slide_from_right(self, 5.0, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
+		EquipmentManager.Equipment_Slot.Left:
+			UIAnimation.animate_slide_from_left(self, 5.0, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
+		_:
+			pass
+
 
 func _on_equipment_input_actions_cleared(slot : EquipmentManager.Equipment_Slot) -> void:
 	if(slot != equipment_slot_to_track):
 		return
 		
-	UIAnimation.animate_slide_to_right(self, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)
+	match slot:
+		EquipmentManager.Equipment_Slot.Right:	
+			UIAnimation.animate_slide_to_right(self, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)
+		EquipmentManager.Equipment_Slot.Left:
+			UIAnimation.aniamte_slide_to_left(self, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)
+		_:
+			pass
+

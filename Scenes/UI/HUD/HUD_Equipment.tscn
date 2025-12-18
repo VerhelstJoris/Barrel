@@ -19,7 +19,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="HudEquipment" type="Control"]
+[node name="HudEquipment" type="Control" node_paths=PackedStringArray("input_item_container", "screen_alignment_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,21 +30,14 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_hdvdu")
 input_item_scene = ExtResource("1_4fuvh")
+input_item_container = NodePath("PanelContainer/MarginContainer/VBoxContainer")
+screen_alignment_container = NodePath("PanelContainer")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
-unique_name_in_owner = true
 material = SubResource("CanvasItemMaterial_rtdxi")
 layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -259.0
-offset_top = -20.0
-offset_bottom = 20.0
-grow_horizontal = 0
-grow_vertical = 2
+offset_right = 259.0
+offset_bottom = 40.0
 pivot_offset = Vector2(100, 20)
 theme_override_styles/panel = SubResource("StyleBoxFlat_hdvdu")
 
@@ -56,9 +49,8 @@ theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
-unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Input Item" parent="PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("1_4fuvh")]
+[node name="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("1_4fuvh")]
 layout_mode = 2
