@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://buu53mngd0ykn"]
+[gd_scene load_steps=5 format=3 uid="uid://buu53mngd0ykn"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_blexn"]
 [ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="2_du6af"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="3_0kkhu"]
+[ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="3_jw0ub"]
 
 [node name="FpThrowable" type="Node3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("1_blexn")
@@ -16,6 +17,6 @@ script = ExtResource("2_du6af")
 metadata/_custom_type_script = "uid://mjfa6lofa7kw"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 layers = 2
+material_override = ExtResource("3_jw0ub")
 mesh = ExtResource("3_0kkhu")

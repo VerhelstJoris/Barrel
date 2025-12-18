@@ -302,6 +302,9 @@ func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : b
 	node.reparent(bone_to_reparent_to,true)
 	if(reset_pos):
 		node.set_position(new_pos)
+	else:
+		node.position = Vector3.ZERO
+		node.rotation = Vector3.ZERO
 
 # called by anim notifies	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:

@@ -135,7 +135,6 @@ signal_name = "on_try_enter_reload_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [node name="SK_Colt" type="Node3D" node_paths=PackedStringArray("animation_bus", "bullet_attachment_point", "bullet_reparent_point", "cylinder_attachment", "muzzle_point", "input_receiver")]
-transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 script = ExtResource("1_ur76o")
 bullet_scene = ExtResource("2_u1ese")
 on_hit_effect_dictionary = ExtResource("3_c6e7s")

@@ -2,7 +2,7 @@ class_name EquipmentManager extends Node
 
 @export var player : Player
 
-@onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment
+@onready var HUD_equipment_input : HUDEquipmentInput = %HUDEquipment_Right
 
 enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
@@ -74,7 +74,6 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
 	print("equip ", new_equipment)
-
 	if(new_equipment != null):
 		new_equipment.input_receiver.on_available_equipment_actions_changed.connect(HUD_equipment_input._on_equipment_input_actions_changed)
 		new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(HUD_equipment_input._on_equipment_input_actions_cleared)

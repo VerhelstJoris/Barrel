@@ -213,11 +213,18 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 stretch = true
 
-[node name="HUDEquipment" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
+[node name="HUDEquipment_Right" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
 unique_name_in_owner = true
 visibility_layer = 2
 layout_mode = 2
 mouse_filter = 2
+
+[node name="HUDEquipment_Left" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
+unique_name_in_owner = true
+visibility_layer = 2
+layout_mode = 2
+mouse_filter = 2
+equipment_slot_to_track = 1
 
 [node name="SubViewport" type="SubViewport" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
 unique_name_in_owner = true
@@ -228,7 +235,7 @@ render_target_update_mode = 4
 
 [node name="FP_Arms" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
-transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 2.08165e-12, 1.20468, 2.08165e-12)
+transform = Transform3D(-0.25, 0, -3.774895e-08, 0, 0.25, 0, 3.774895e-08, 0, -0.25, 2.08165e-12, 1.20468, 2.08165e-12)
 rotation_order = 0
 
 [node name="CrouchVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
