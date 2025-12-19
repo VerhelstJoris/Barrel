@@ -45,8 +45,6 @@ func _create_new_item(info: InputActionInfo, description : String):
 	input_item_container.notification(NOTIFICATION_RESIZED)
 	
 func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo, String], slot : EquipmentManager.Equipment_Slot) -> void:
-	print("actions changed on slot ", slot)
-	
 	if(slot != equipment_slot_to_track):
 		return
 

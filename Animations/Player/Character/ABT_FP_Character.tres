@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=67 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=69 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt.tres" id="1_x8ke2"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://byhj6ox58mvk6" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt_Left.tres" id="2_g0oko"]
@@ -91,18 +91,28 @@ stretch_time_scale = true
 start_offset = 0.0
 loop_mode = 0
 
+[sub_resource type="Curve" id="Curve_hxvos"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_yws3a"]
 mix_mode = 1
 fadein_time = 0.02
-fadeout_time = 0.03
+fadeout_time = 0.08
+fadeout_curve = SubResource("Curve_hxvos")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sq2n5"]
 animation = &"AL_FP_Character_Movement/A_FP_Exit_Crouch"
 
+[sub_resource type="Curve" id="Curve_forti"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_aax62"]
 mix_mode = 1
 fadein_time = 0.02
-fadeout_time = 0.03
+fadeout_time = 0.06
+fadeout_curve = SubResource("Curve_forti")
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_em04p"]
 animation = &"AL_FP_Character_Movement/A_FP_Crouch_Idle"
@@ -297,7 +307,7 @@ blend_point_2/node = SubResource("AnimationNodeAnimation_yud83")
 blend_point_2/pos = -1.0
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-1250.22, -279.161)
+graph_offset = Vector2(-253.67761, 256.06528)
 nodes/output/position = Vector2(880, 400)
 nodes/SubBasePoseFromHorizontalMove/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/SubBasePoseFromHorizontalMove/position = Vector2(-620, -160)
@@ -372,7 +382,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-269, 1)
 
 [resource]
-graph_offset = Vector2(-1225, -92)
+graph_offset = Vector2(-540, 141)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Right/position = Vector2(-500, 160)
