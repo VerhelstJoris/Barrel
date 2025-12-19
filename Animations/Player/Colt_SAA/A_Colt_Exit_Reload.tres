@@ -3,6 +3,7 @@
 [resource]
 resource_name = "Scene"
 length = 2.04167
+step = 0.041666668
 tracks/0/type = "rotation_3d"
 tracks/0/imported = true
 tracks/0/enabled = true
