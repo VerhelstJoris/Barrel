@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://1mp043iv0a8j" path="res://addons/input_prompts/icons/keyboard/T_R_Key_Retro.png" id="2_6yxau"]
 [ext_resource type="Script" uid="uid://dnx3ficr864og" path="res://addons/input_prompts/action_prompt/action_prompt.gd" id="3_m1k7i"]
 
-[sub_resource type="InputEventKey" id="InputEventKey_2kqe6"]
+[sub_resource type="InputEventKey" id="InputEventKey_gxlgp"]
 device = -1
 physical_keycode = 82
 unicode = 82
@@ -20,6 +20,7 @@ theme_override_constants/margin_right = 5
 script = ExtResource("1_gxlgp")
 action_prompt = NodePath("ActionPrompt")
 backup_label = NodePath("ActionPrompt/BackUpLabel")
+unavailable_color = Color(0.360784, 0.360784, 0.360784, 0.745098)
 
 [node name="ActionPrompt" type="TextureRect" parent="."]
 unique_name_in_owner = true
@@ -31,7 +32,7 @@ stretch_mode = 5
 script = ExtResource("3_m1k7i")
 action = "enter_reload"
 icon = 4
-events = Array[InputEvent]([SubResource("InputEventKey_2kqe6")])
+events = Array[InputEvent]([SubResource("InputEventKey_gxlgp")])
 metadata/_custom_type_script = "uid://dnx3ficr864og"
 
 [node name="BackUpLabel" type="Label" parent="ActionPrompt"]

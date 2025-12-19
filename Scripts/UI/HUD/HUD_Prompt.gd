@@ -1,7 +1,12 @@
 class_name HUDPrompt extends Node
 
-@onready var action_prompt: ActionPrompt = %ActionPrompt
-@onready var backup_label: Label = %BackUpLabel
+@export var action_prompt: ActionPrompt
+@export var backup_label: Label
+
+@export var unavailable_color : Color
+
+var currently_available: bool = true:
+	set = _change_availability
 
 @export var current_input_action_to_display : String:
 	set (new):
@@ -26,3 +31,10 @@ func _set_backup_for_keyboard_action() -> void:
 			if(action_prompt):
 				action_prompt.texture = PromptManager.get_keyboard_textures().fallback
 			return	#quit out early
+
+func _change_availability(available : bool)	-> void:
+	if(available):
+		action_prompt.modulate = Color.WHITE
+	else:
+		action_prompt.modulate = unavailable_color
+	currently_available = available	

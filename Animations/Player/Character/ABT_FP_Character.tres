@@ -307,7 +307,7 @@ blend_point_2/node = SubResource("AnimationNodeAnimation_yud83")
 blend_point_2/pos = -1.0
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
-graph_offset = Vector2(-253.67761, 256.06528)
+graph_offset = Vector2(-253.678, 256.065)
 nodes/output/position = Vector2(880, 400)
 nodes/SubBasePoseFromHorizontalMove/node = SubResource("AnimationNodeSub2_te7e3")
 nodes/SubBasePoseFromHorizontalMove/position = Vector2(-620, -160)

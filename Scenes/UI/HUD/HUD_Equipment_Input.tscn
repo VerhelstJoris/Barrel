@@ -9,7 +9,7 @@
 default_font = ExtResource("2_ucgfk")
 default_font_size = 0
 
-[node name="MarginContainer" type="MarginContainer" node_paths=PackedStringArray("input_label", "hbox_container", "prompt", "text_container", "background_container")]
+[node name="MarginContainer" type="MarginContainer" node_paths=PackedStringArray("input_label", "hbox_container", "prompt", "text_container")]
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
@@ -29,7 +29,8 @@ input_label = NodePath("BackgroundPanel/HBoxContainer/TextContainer/InputTextLab
 hbox_container = NodePath("BackgroundPanel/HBoxContainer")
 prompt = NodePath("BackgroundPanel/HBoxContainer/HUDPromptContainer")
 text_container = NodePath("BackgroundPanel/HBoxContainer/TextContainer")
-background_container = NodePath("BackgroundPanel")
+unavailable_text_color = Color(0.621524, 0.621524, 0.621524, 1)
+currently_available = false
 
 [node name="BackgroundPanel" type="PanelContainer" parent="."]
 layout_mode = 2

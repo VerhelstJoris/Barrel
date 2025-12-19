@@ -9,41 +9,35 @@ func get_node_center(node):
 
 
 func animate_slide_from_left(node, offset = default_offset, speed = default_speed, ease_type = Tween.EASE_OUT, trans_type = Tween.TRANS_BACK):
-	node.position.x = -node.size.x
-	
+	var current_pos : float = node.position.x
+	node.position.x = current_pos - offset
+
 	var t = create_tween()
-	t.tween_property(node, 'position:x', offset, speed).set_trans(trans_type).set_ease(ease_type)
-	
+	t.tween_property(node, 'position:x', current_pos, speed).set_trans(trans_type).set_ease(ease_type)
+
 	return t.finished
-
-
-func animate_slide_to_left(node, speed = default_speed, ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
-	var t = create_tween()
-	t.tween_property(node, 'position:x', -node.size.x, speed).set_trans(trans_type).set_ease(ease_type)
 	
-	return t.finished
-
 
 func animate_slide_from_right(node, offset = default_offset, speed = default_speed, ease_type = Tween.EASE_OUT, trans_type = Tween.TRANS_BACK):
-	node.position.x = get_viewport().size.x
-	
-	var vp_size = get_viewport().get_visible_rect().size.x
+	var current_pos : float = node.position.x
+	node.position.x = current_pos + offset
 	
 	var t = create_tween()
-	t.tween_property(node, 'position:x', (vp_size - node.size.x) - offset, speed).set_trans(trans_type).set_ease(ease_type)
+	t.tween_property(node, 'position:x', current_pos, speed).set_trans(trans_type).set_ease(ease_type)
 	
 	return t.finished
-
-
-func animate_slide_to_right(node, speed = default_speed, ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
-	var vp_size = get_viewport().get_visible_rect().size.x
-
+	
+func animate_slide_to_right(node, offset = default_offset, speed = default_speed,  ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
 	var t = create_tween()
-	t.tween_property(node, 'position:x', node.size.x, speed).set_trans(trans_type).set_ease(ease_type)
-
+	t.tween_property(node, 'position:x',node.position.x + offset, speed).set_trans(trans_type).set_ease(ease_type)
 
 	return t.finished
 
+func animate_slide_to_left(node, offset = default_offset, speed = default_speed, ease_type = Tween.EASE_IN, trans_type = Tween.TRANS_BACK):
+	var t = create_tween()
+	t.tween_property(node, 'position:x', node.position.x - offset, speed).set_trans(trans_type).set_ease(ease_type)
+
+	return t.finished
 
 func animate_pop(node):
 	node.pivot_offset.x = node.size.x / 2
