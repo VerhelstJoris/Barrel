@@ -3,6 +3,8 @@ class_name HUDPrompt extends Node
 @export var action_prompt: ActionPrompt
 @export var backup_label: Label
 
+var unavailable_tween : Tween
+@export var unvailable_lerp_time : float = 0.1
 @export var unavailable_color : Color
 
 var currently_available: bool = true:
@@ -18,7 +20,7 @@ var currently_available: bool = true:
 			_set_backup_for_keyboard_action()
 
 func _ready() -> void:
-	if(action_prompt):
+	if(action_prompt && !current_input_action_to_display.is_empty()):
 		action_prompt._set_action(current_input_action_to_display)
 
 func _set_backup_for_keyboard_action() -> void:
@@ -33,8 +35,17 @@ func _set_backup_for_keyboard_action() -> void:
 			return	#quit out early
 
 func _change_availability(available : bool)	-> void:
-	if(available):
-		action_prompt.modulate = Color.WHITE
-	else:
-		action_prompt.modulate = unavailable_color
-	currently_available = available	
+	if(available == currently_available):
+		return
+		
+	if(unavailable_tween && unavailable_tween.is_running()):
+		unavailable_tween.stop()
+
+	unavailable_tween = create_tween()
+	var color : Color = Color.WHITE
+	if(!available):
+		color = unavailable_color
+
+	unavailable_tween.tween_property(action_prompt, 'modulate' , color, unvailable_lerp_time)
+
+	currently_available = available

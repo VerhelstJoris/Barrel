@@ -7,6 +7,8 @@ class_name HUDEquipmentInputItem extends Control
 @export var prompt : HUDPrompt
 @export var text_container : Container
 
+var unavailable_tween : Tween
+@export var unvailable_lerp_time : float = 0.1
 @export var unavailable_text_color : Color
 
 var available_color : Color
@@ -59,13 +61,21 @@ func _set_slot_visual_data(slot: EquipmentManager.Equipment_Slot) -> void:
 			
 		
 func _change_availability(available : bool)	-> void:
-	if(available):
-		if(input_label):
-			input_label[font_color_property_name] =  available_color
-	else:
-		if(input_label):
-			input_label[font_color_property_name] = unavailable_text_color
+	if(available == currently_available):
+		return
+		
+	
+	if(input_label):
+		if(unavailable_tween && unavailable_tween.is_running()):
+			unavailable_tween.stop()
 
+		unavailable_tween = create_tween()
+		var color : Color = available_color
+		if(!available):
+			color = unavailable_text_color
+		
+		unavailable_tween.tween_property(input_label, font_color_property_name, color, unvailable_lerp_time)
+		
 	if(prompt):
 		prompt.currently_available = available
 	currently_available = available			
