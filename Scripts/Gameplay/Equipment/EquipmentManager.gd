@@ -28,15 +28,22 @@ signal on_unequipped(old_equipment : PlayerEquipment, slot : Equipment_Slot)
 func _ready() -> void:
 	await owner.ready
 	player = owner as Player
-	_change_equipment(player.arms.pistol_equipment, false)
-	_change_holster_state(Holster_State.Hidden)
 	_setup_input_signals()
 	_setup_animation_data()
+	_setup_ui_data()
+	_change_equipment(player.arms.pistol_equipment, false)
+	_change_holster_state(Holster_State.Hidden)
+
 
 func _setup_input_signals() -> void:
 	on_holster_input_received.connect(_on_holster_input)
 	on_quick_unholster_input_received.connect(_on_quick_unholster_input)
 	
+func _setup_ui_data()-> void:
+	for equipment_hud in HUD_equipment_input_arr:
+		if(equipment_hud):
+			equipment_hud._intialize(player)
+
 func _setup_animation_data() -> void:
 	player.arms.arms_animation_bus.on_holster_anim_finish.connect(_on_holster_anim_finish)
 	player.arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)

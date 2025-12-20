@@ -5,7 +5,7 @@ func _on_start_unholster():
 	print("throwable unholster")
 	player.arms.arms_animation_bus.throwable_unholstered = true
 	if(input_receiver):
-		input_receiver._change_HUD_available_actions(input_receiver.input_dictionary.keys(), slot)
+		input_receiver._change_HUD_available_actions(input_receiver.input_dictionary.keys(), self)
 		
 func _on_start_holster():
 	super()

@@ -4,7 +4,7 @@ class_name InputReceiver extends Node
 @export_group("Input Map")
 @export var input_dictionary : Dictionary[InputActionInfo, ExposedSignalConnector]
 
-@export var description_dictionary : Dictionary[InputActionInfo, String] 
+@export var description_dictionary : Dictionary[InputActionInfo, HUDInputInfo]
 
 signal on_available_equipment_actions_changed
 signal on_available_equipment_actions_cleared
@@ -12,22 +12,22 @@ signal on_available_equipment_actions_cleared
 func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnector]:
 	return input_dictionary
 
-func _get_description_for_input(action_to_find: InputActionInfo) -> String:
+func _get_description_for_input(action_to_find: InputActionInfo) -> HUDInputInfo:
 	if(description_dictionary.has(action_to_find)):
-		return description_dictionary[action_to_find]
+		return (description_dictionary[action_to_find])
 	
-	push_error("description key not found for input : " , action_to_find.name , " on ", self.name)	
-	return "DESC_STRING_NOT_FOUND"
+	push_error("description not found for input : " , action_to_find.get_name() , " on ", self.name)	
+	return null
 	
-func _change_HUD_available_actions(new_available: Array[InputActionInfo],slot : EquipmentManager.Equipment_Slot) -> void:
+func _change_HUD_available_actions(new_available: Array[InputActionInfo], equipment : PlayerEquipment) -> void:
 	if(new_available.is_empty()):
-		on_available_equipment_actions_cleared.emit(slot)
+		on_available_equipment_actions_cleared.emit(equipment.slot)
 		return
 		
-	var new_description_data : Dictionary[InputActionInfo, String]
+	var new_description_data : Dictionary[InputActionInfo, HUDInputInfo]
 	
 	for id in new_available.size():
 		new_description_data[new_available[id]] = _get_description_for_input(new_available[id])
 
-	on_available_equipment_actions_changed.emit(new_description_data, slot)
+	on_available_equipment_actions_changed.emit(new_description_data, equipment.slot)
 			

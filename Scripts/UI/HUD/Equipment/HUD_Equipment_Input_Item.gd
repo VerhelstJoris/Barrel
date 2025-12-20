@@ -57,6 +57,7 @@ func _set_slot_visual_data(slot: EquipmentManager.Equipment_Slot) -> void:
 		_:
 			pass
 			
+		
 func _change_availability(available : bool)	-> void:
 	if(available):
 		if(input_label):

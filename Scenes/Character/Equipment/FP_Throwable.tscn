@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://buu53mngd0ykn"]
+[gd_scene load_steps=11 format=3 uid="uid://buu53mngd0ykn"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_blexn"]
 [ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="2_du6af"]
@@ -7,12 +7,18 @@
 [ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="3_jw0ub"]
 [ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="4_dwdlq"]
 [ext_resource type="Resource" uid="uid://cwp0xmw1kgeft" path="res://Data/Input/Equipment/IA_Throw.tres" id="5_g3lih"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="6_dwdlq"]
 
 [sub_resource type="Resource" id="Resource_yrv68"]
 script = ExtResource("4_dwdlq")
 signal_node = NodePath("..")
 signal_name = "use_equipment_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_g3lih"]
+script = ExtResource("6_dwdlq")
+display_string = "Throw"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
 
 [node name="FpThrowable" type="Node3D" node_paths=PackedStringArray("input_receiver")]
 script = ExtResource("1_blexn")
@@ -26,8 +32,8 @@ script = ExtResource("2_du6af")
 input_dictionary = Dictionary[ExtResource("3_g7o6g"), ExtResource("4_dwdlq")]({
 ExtResource("5_g3lih"): SubResource("Resource_yrv68")
 })
-description_dictionary = Dictionary[ExtResource("3_g7o6g"), String]({
-ExtResource("5_g3lih"): "Throw"
+description_dictionary = Dictionary[ExtResource("3_g7o6g"), ExtResource("6_dwdlq")]({
+ExtResource("5_g3lih"): SubResource("Resource_g3lih")
 })
 metadata/_custom_type_script = "uid://mjfa6lofa7kw"
 
