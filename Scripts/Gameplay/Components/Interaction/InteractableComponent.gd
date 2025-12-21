@@ -34,10 +34,10 @@ func _ready() -> void:
 func _verify_data_asset() -> void:
 	match interact_data.type:
 		InteractableDataAsset.InteractionType.Equip:
-			if(interact_data.interaction_item == null):
-				push_error("No valid interact item set on interact data on ", interact_data.name, " should be a player equipment scene")
+			if(interact_data.alternative_interaction_item == null && !interact_data.pick_up_self):
+				push_error("No valid interact item set on interact data on ", owner.name, " should be a player equipment scene")
 		InteractableDataAsset.InteractionType.None:
-			push_error("No valid interact type set on  assigned on ", interact_data.name)
+			push_error("No valid interact type set on  assigned on ", owner.name)
 		_:
 			pass
 			
@@ -74,12 +74,21 @@ func _interact(_interactor: InteractorComponent) -> void:
 			push_error("interact type currently not implemented")
 
 func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> void:
-	if(interact_data.interaction_item):
-		var created_item : PlayerEquipment = interact_data.interaction_item.instantiate()
-		_interactor.player.arms.add_child(created_item)
-		created_item.transform = Transform3D.IDENTITY
+	var equipment_to_pickup : PlayerEquipment = null
 
-		_interactor.player.equipment_manager._change_equipment(created_item, true)
-		created_item.rotation = Vector3.ZERO
-		created_item.position = Vector3.ZERO
+	if(interact_data.alternative_interaction_item != null):
+		equipment_to_pickup = interact_data.alternative_interaction_item.instantiate()
+		_interactor.player.arms.add_child(equipment_to_pickup)
+	elif(interact_data.pick_up_self):
+		equipment_to_pickup = owner as PlayerEquipment
+		equipment_to_pickup.reparent(_interactor.player.arms, false)
 
+	if(!equipment_to_pickup):
+		push_error("No equipment can be picked up from the interaction on ", owner.name)
+		return
+
+	equipment_to_pickup.transform = Transform3D.IDENTITY
+	
+	_interactor.player.equipment_manager._change_equipment(equipment_to_pickup, true)
+	equipment_to_pickup.rotation = Vector3.ZERO
+	equipment_to_pickup.position = Vector3.ZERO

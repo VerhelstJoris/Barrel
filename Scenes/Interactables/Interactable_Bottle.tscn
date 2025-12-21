@@ -1,5 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=24 format=3 uid="uid://dl55tndc0qxky"]
 
+[ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_471q5"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
 [ext_resource type="PhysicsMaterial" uid="uid://cjx2112xkeh4h" path="res://Data/PhysicsMaterials/PM_Glass.tres" id="1_u2t4m"]
 [ext_resource type="Material" uid="uid://baheit7pwnuql" path="res://Materials/Props/Mat_Glass_Colored_Green.tres" id="1_xweuc"]
@@ -11,12 +12,49 @@
 [ext_resource type="Material" uid="uid://dre2y62xrhejm" path="res://Materials/Misc/Outline/Mat_Outline.tres" id="9_471q5"]
 [ext_resource type="Resource" uid="uid://cvehamcvspdg4" path="res://Data/Interactions/DA_Interactable_Bottle.tres" id="10_471q5"]
 [ext_resource type="Script" uid="uid://8nctmriibrv5" path="res://Scripts/Gameplay/Components/Visual/OutlineComponent.gd" id="10_kukbf"]
+[ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="13_5mh7m"]
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="14_eqah0"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="15_bn1jt"]
+[ext_resource type="Resource" uid="uid://cwp0xmw1kgeft" path="res://Data/Input/Equipment/IA_Throw.tres" id="16_s08uy"]
+[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="17_jvbyj"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="18_b0rhv"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6tjey"]
 points = PackedVector3Array(0.0721023, 0, 0.18837914, 0.050971307, -0.05098542, 0.18837914, 0.048204653, -0.048218764, 0.012135644, 0.06816406, 0, 0.012209417, 0.048204653, 0.048204653, 0.012209417, 0.050971307, 0.050971307, 0.18837914, 0.013692096, 0.013692096, 0.3723319, 0.019366555, 0, 0.3723319, 0.013692096, -0.013706211, 0.3723319, 0, -0.0721023, 0.18837914, 0, -0.01938067, 0.3723319, 0, -0.06817818, 0.012209417, 0, -0.06597614, 0, 0.046637826, -0.046651937, 0, 0.06596204, 0, 0, 0.046637826, 0.046637826, 0, -1.41114e-05, 0.06596204, 0, -1.41114e-05, 0.06816406, 0.012209417, -1.41114e-05, 0.0721023, 0.18837914, 0, 0.019366555, 0.3723319, 0.011730038, 0.011730038, 0.37683204, 0.01658579, 0, 0.37683204, 0.011730038, -0.011744149, 0.37683204, -0.05098542, -0.05098542, 0.18837914, -0.048218764, -0.048218764, 0.012209417, -0.013706211, -0.013706211, 0.3723319, 0, -0.016599901, 0.37683204, -0.011744149, -0.011744149, 0.37683204, -0.046651937, -0.046651937, 0, -0.046651937, 0.046637826, 0, -0.048218764, 0.048204653, 0.012209417, -0.05098542, 0.050971307, 0.18837914, -0.013706211, 0.013692096, 0.3723319, -0.011744149, 0.011730038, 0.37683204, 0, 0.01658579, 0.37683204, -0.0721023, -1.41114e-05, 0.18837914, -0.06817818, -1.41114e-05, 0.012209417, -0.06597614, -1.41114e-05, 0, -0.01938067, 0, 0.3723319, -0.016599901, 0, 0.37683204)
 
-[node name="CollisionPhysicsBody" type="RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+[sub_resource type="Resource" id="Resource_yrv68"]
+script = ExtResource("15_bn1jt")
+signal_node = NodePath("..")
+signal_name = "use_equipment_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_yhxqx"]
+script = ExtResource("15_bn1jt")
+signal_node = NodePath("..")
+signal_name = "drop_equipment_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_g3lih"]
+script = ExtResource("18_b0rhv")
+display_string = "Throw"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_1n50k"]
+script = ExtResource("18_b0rhv")
+display_string = "Drop"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[node name="PlayerEquipmentThrowable" type="Node3D" node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "input_receiver")]
+script = ExtResource("1_471q5")
+rigid_body = NodePath("CollisionPhysicsBody")
+hitboxes = [NodePath("HitboxComponent")]
+meshes = [NodePath("CollisionPhysicsBody/CollisionShape3D/MeshInstance3D")]
+equip_type = 2
+slot = 1
+input_receiver = NodePath("InputReceiver")
+metadata/_custom_type_script = "uid://cqgld2k53jtha"
+
+[node name="CollisionPhysicsBody" type="RigidBody3D" parent="."]
 mass = 2.0
 physics_material_override = ExtResource("1_u2t4m")
 contact_monitor = true
@@ -24,13 +62,21 @@ max_contacts_reported = 1
 script = ExtResource("2_u2t4m")
 metadata/_custom_type_script = "uid://gdk3w1bs44k6"
 
-[node name="DeathVFX_Point" type="Node3D" parent="."]
+[node name="DeathVFX_Point" type="Node3D" parent="CollisionPhysicsBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.100631, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CollisionPhysicsBody"]
+shape = SubResource("ConvexPolygonShape3D_6tjey")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionPhysicsBody/CollisionShape3D"]
+mesh = ExtResource("1_bt6bh")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("1_xweuc")
 
 [node name="HitboxComponent" type="Node" parent="." node_paths=PackedStringArray("shapes_to_register_hits_from", "rigidbodies_to_register_collisions_from")]
 script = ExtResource("2_vfrhl")
-shapes_to_register_hits_from = [NodePath("..")]
-rigidbodies_to_register_collisions_from = [NodePath("..")]
+shapes_to_register_hits_from = [NodePath("../CollisionPhysicsBody")]
+rigidbodies_to_register_collisions_from = [NodePath("../CollisionPhysicsBody")]
 metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
@@ -38,7 +84,7 @@ script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
 min_collision_impulse = 0.2
 on_death_vfx = ExtResource("6_6pqks")
-death_vfx_spawn_node = NodePath("../DeathVFX_Point")
+death_vfx_spawn_node = NodePath("../CollisionPhysicsBody/DeathVFX_Point")
 
 [node name="InteractableComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "outline")]
 script = ExtResource("8_00ys1")
@@ -49,15 +95,18 @@ metadata/_custom_type_script = "uid://vancee6lfbu6"
 
 [node name="OutlineComponent" type="Node" parent="." node_paths=PackedStringArray("meshes")]
 script = ExtResource("10_kukbf")
-meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
+meshes = [NodePath("../CollisionPhysicsBody/CollisionShape3D/MeshInstance3D")]
 outline_mat = ExtResource("9_471q5")
 enabled = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -1, -1.509958e-07, 0, 1.509958e-07, -1, 0, 0, 0)
-shape = SubResource("ConvexPolygonShape3D_6tjey")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
-mesh = ExtResource("1_bt6bh")
-skeleton = NodePath("../..")
-surface_material_override/0 = ExtResource("1_xweuc")
+[node name="InputReceiver" type="Node" parent="."]
+script = ExtResource("13_5mh7m")
+input_dictionary = Dictionary[ExtResource("14_eqah0"), ExtResource("15_bn1jt")]({
+ExtResource("16_s08uy"): SubResource("Resource_yrv68"),
+ExtResource("17_jvbyj"): SubResource("Resource_yhxqx")
+})
+description_dictionary = Dictionary[ExtResource("14_eqah0"), ExtResource("18_b0rhv")]({
+ExtResource("16_s08uy"): SubResource("Resource_g3lih"),
+ExtResource("17_jvbyj"): SubResource("Resource_1n50k")
+})
+metadata/_custom_type_script = "uid://mjfa6lofa7kw"

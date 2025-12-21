@@ -8,8 +8,8 @@ enum InteractionType {None, Equip, Pickup, World}
 @export var type : InteractionType = InteractionType.None
 
 #if this is the equip type, equip this item (assuming it derives from PlayerEquipment)
-@export var interaction_item : PackedScene 
-@export var interact_item_replaces_self : bool = true
+@export var pick_up_self : bool = true
+@export var alternative_interaction_item : PackedScene 
 
 @export_group("Prompt")
 @export var interactable_display_name : String = "Item Name"

@@ -132,6 +132,7 @@ func _change_holster_state(new_state : Holster_State) -> void:
 			if(current_left_equipment):	
 				current_left_equipment._on_start_unholster()
 		Holster_State.Hidden:
+			print("holster finished")
 			if(current_right_equipment):
 				current_right_equipment.visible = false
 			if(current_left_equipment):

@@ -1,7 +1,5 @@
 class_name CollisionPhysicsBody extends RigidBody3D
 
-
-
 signal on_rigidbody_collision( global_pos : Vector3, normal : Vector3, hit_impulse : Vector3, hit_velocity : Vector3, other_rid : RID, other_object : Object, self_rigid_body: CollisionPhysicsBody  )
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
