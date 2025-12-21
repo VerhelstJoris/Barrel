@@ -35,7 +35,7 @@ var can_interrupt_into_next_state: bool = false
 var can_interrupt_fire : bool = false
 var queued_fire : bool = false
 
-var fire_next_physics_frame : bool = false
+var fire_queued : bool = false
 
 var current_bullets: Array[ColtBullet]
 const chamber_amount: int = 6
@@ -75,8 +75,8 @@ func _ready() -> void:
 		push_error("No Hit VFX Dictionary Assigned on Colt!")
 
 func _physics_process(_delta: float) -> void:
-	if(fire_next_physics_frame):
-		fire_next_physics_frame = false
+	if(fire_queued):
+		fire_queued = false
 		_physics_fire_current_bullet()
 
 func _try_insert_round(_event : InputEvent) -> void:
@@ -146,18 +146,18 @@ func _try_use_equipment(_event : InputEvent) -> void:
 #used as anim notify	
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
-	if(queued_fire):
+	if(queued_fire && player.equipment_manager._can_enter_two_handed_action(slot)):
 		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
 
 #used as anim notify		
 func _enable_interrupting_for_next_fire() -> void:
 	can_interrupt_fire = true
-	if(queued_fire):
+	if(queued_fire && player.equipment_manager._can_enter_two_handed_action(slot)):
 		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
 
 #used as anim notify
 func _fire_current_bullet() -> void:
-	fire_next_physics_frame = true
+	fire_queued = true
 	
 #region Firing	
 func _physics_fire_current_bullet() -> void:
