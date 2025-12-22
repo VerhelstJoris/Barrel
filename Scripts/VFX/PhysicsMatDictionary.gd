@@ -17,7 +17,7 @@ func _find_scene_from_physicsbody(body: PhysicsBody3D)	-> PackedScene:
 	if(!body):
 		return fallback
 
-	if(body && body.physics_material_override):
+	if(body as StaticBody3D && body.physics_material_override):
 		return _find_scene_from_material(body.physics_material_override)
 		
 	return fallback	
