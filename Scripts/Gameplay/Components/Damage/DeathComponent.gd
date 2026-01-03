@@ -36,7 +36,7 @@ func _on_collision_damage( _global_pos : Vector3, _normal : Vector3, hit_impulse
 func _die():
 	if(on_death_vfx && death_vfx_spawn_node):
 		var created_effect : VFXInstance = on_death_vfx.instantiate()
-		owner.get_parent().add_child(created_effect)
+		get_tree().root.add_child(created_effect)
 		created_effect.set_global_position(death_vfx_spawn_node.get_global_position())
 		created_effect.quaternion = death_vfx_spawn_node.quaternion
 		

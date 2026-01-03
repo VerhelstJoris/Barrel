@@ -214,7 +214,7 @@ func _spawn_on_hit_vfx(hit : Dictionary) -> void:
 
 	if(scene_found):
 		var created_effect : VFXInstance = scene_found.instantiate()
-		player.get_parent().add_child(created_effect)
+		get_tree().root.add_child(created_effect)
 		created_effect.set_global_position(hit.position)
 		created_effect.quaternion = Quaternion(Vector3.UP, hit.normal)
 		

@@ -1,5 +1,7 @@
 class_name LineRenderer extends MeshInstance3D
 
+@export var draw_debug : bool = false
+
 @export var should_draw : bool = true
 @export var replace_start_point : Node3D
 @export var points: Array[Vector3]
@@ -103,6 +105,9 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 	if use_global_coords:
 		A = to_local(A)
 		B = to_local(B)
+		
+	if(draw_debug):
+		DebugDraw3D.draw_line(A,B,Color(1,0,0,1))
 		
 	var current_thickness : float
 	var next_thickness : float

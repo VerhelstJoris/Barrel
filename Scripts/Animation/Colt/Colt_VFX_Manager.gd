@@ -23,7 +23,9 @@ const muzzle_smoke_grow_shader_param : String = "AlphaGrow"
 const muzzle_smoke_shrink_shader_param : String = "AlphaShrink"
 
 @export_group("Fire Muzzle Smoke Line Renderer Settings")
-@export var smoke_renderer : LineRenderer
+@export var smoke_renderer_scene : PackedScene
+@export var smoke_renderer_start_point : Node3D
+var smoke_renderer : LineRenderer
 @export var _point_amount : int = 75
 @export var _smoke_point_tracking_time : float = 4.0
 @export var _muzzle_smoke_start_width:float = 0.1
@@ -67,6 +69,7 @@ var muzzle_smoke_decay_duration : float = 0.0
 @export_range(1, 3, 0.01) var cylinder_fire_max_scale : float = 2
 
 func _ready() -> void:
+	await owner.ready
 	colt_equipment = get_owner() as PlayerEquipmentPistol
 	colt_equipment.on_fired.connect(_on_bullet_fired)
 	colt_equipment.on_holstered.connect(_on_start_holstering)
@@ -77,9 +80,10 @@ func _ready() -> void:
 	_toggle_initial_muzzle_vfx(false)
 	_toggle_main_muzzle_vfx(false)
 	_toggle_cylinder_fire_vfx(false)
+	_create_smoke_renderer()
 	_reset_muzzle_smoke_vfx_shader_params()
 
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	_process_muzzle_smoke(delta)
 	_process_muzzle_smoke_points(delta)
 
@@ -89,6 +93,16 @@ func _on_start_holstering() -> void:
 func _on_start_unholstering() -> void:
 	_reset_vars()
 	
+func _create_smoke_renderer() -> void:
+	if(!smoke_renderer_scene):
+		push_error("No Smoke Renderer scene assigned on Colt Vfx Manager on ", get_owner().name)
+		return
+		
+	smoke_renderer = smoke_renderer_scene.instantiate()
+	get_tree().root.add_child.call_deferred(smoke_renderer)
+	
+	smoke_renderer.replace_start_point = smoke_renderer_start_point
+
 func _process_muzzle_smoke(delta : float) -> void:
 	if muzzle_smoke_active:
 		muzzle_smoke_current_timer += delta
@@ -105,11 +119,11 @@ func _reset_vars() -> void:
 	muzzle_smoke_width_arr.clear()
 	muzzle_smoke_active = false
 	muzzle_smoke_decaying = false
-	smoke_renderer.points.clear()
-	smoke_renderer.pre_computed_thickness_arr.clear()
-	_reset_muzzle_smoke_vfx_shader_params()
+	if(smoke_renderer):
+		smoke_renderer.points.clear()
+		smoke_renderer.pre_computed_thickness_arr.clear()
+		_reset_muzzle_smoke_vfx_shader_params()
 	
-
 func _add_muzzle_smoke_point() -> void:
 	if(muzzle_positions.size() >= _point_amount):
 		muzzle_positions.pop_back()
@@ -143,11 +157,12 @@ func _update_existing_muzzle_points(_delta : float) -> void:
 		
 	for id in range(1, muzzle_positions.size() -1):
 		#average x/z of position out to between previous and next point
+		var prev_y : float = muzzle_positions[id].y
 		muzzle_positions[id] = lerp(muzzle_positions[id], (muzzle_positions[id -1] + muzzle_positions[id + 1]) /2, _delta * muzzle_smoke_averaging_speed)
-			
+		muzzle_positions[id].y = prev_y	
 
 	#only process the first X points if possible	
-	var points_to_process : int = min(15, muzzle_positions.size() -1)	
+	var points_to_process : int = min(15, muzzle_positions.size() -2)	
 	for id in points_to_process:
 		if( id < 1):	
 			continue
@@ -238,6 +253,9 @@ func _activate_main_muzzle_vfx() -> void:
 	_toggle_main_muzzle_vfx(false)
 	
 func _activate_muzzle_smoke() -> void:
+	if(!smoke_renderer):
+		return
+	
 	muzzle_smoke_current_timer = 0.0 #reset the timer before early out
 	muzzle_smoke_decay_timer = 0.0
 	var interrupting_already_active : bool = false
@@ -274,10 +292,12 @@ func _interrupt_muzzle_smoke_decay() -> void:
 	_set_shrink_shader_param(0)
 	
 func _set_grow_shader_param(value : float) -> void:
-	smoke_renderer.set_instance_shader_parameter(muzzle_smoke_grow_shader_param, value)
+	if(smoke_renderer):
+		smoke_renderer.set_instance_shader_parameter(muzzle_smoke_grow_shader_param, value)
 
 func _set_shrink_shader_param(value : float) -> void:
-	smoke_renderer.set_instance_shader_parameter(muzzle_smoke_shrink_shader_param, value)
+	if(smoke_renderer):
+		smoke_renderer.set_instance_shader_parameter(muzzle_smoke_shrink_shader_param, value)
 	
 func _randomize_fire_vfx() -> void:
 	barrel_muzzle_initial_vfx_parent.rotation.y = randf() * 360
