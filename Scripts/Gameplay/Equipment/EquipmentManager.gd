@@ -73,19 +73,40 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
 	print("unequip ", old_equipment)
 	if(old_equipment != null):
-		for equipment_info in HUD_equipment_input_arr:
-			old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(equipment_info._on_equipment_input_actions_changed)
-			old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(equipment_info._on_equipment_input_actions_cleared)
+		old_equipment._on_unequipped()
+		for hud_info in HUD_equipment_input_arr:
+			if(hud_info.equipment_slot_to_track == old_equipment.slot):
+				print("DISCONNECT SIGNALS ON ", old_equipment.name)
+				old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(hud_info._on_equipment_input_actions_changed)
+				old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(hud_info._on_equipment_input_actions_cleared)
 		slot = old_equipment.slot
+
 	on_unequipped.emit(old_equipment, slot)
+
+
+func _remove_equipment_from_slot(slot : Equipment_Slot) -> void:
+	var equipment_to_remove : PlayerEquipment = _get_equipment_in_slot(slot)
+	if(!equipment_to_remove):
+		return
+		
+	_on_unequip(equipment_to_remove)
+	
+	match slot:
+		Equipment_Slot.Left:
+			current_left_equipment = null
+		Equipment_Slot.Right:
+			current_right_equipment = null
+	
 
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
 	print("equip ", new_equipment)
 	if(new_equipment != null):
-		for equipment_info in HUD_equipment_input_arr:
-			new_equipment.input_receiver.on_available_equipment_actions_changed.connect(equipment_info._on_equipment_input_actions_changed)
-			new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(equipment_info._on_equipment_input_actions_cleared)
+		for hud_info in HUD_equipment_input_arr:
+			if(hud_info.equipment_slot_to_track == new_equipment.slot):
+				print("CONNECT SIGNALS ON ", new_equipment.name)
+				new_equipment.input_receiver.on_available_equipment_actions_changed.connect(hud_info._on_equipment_input_actions_changed)
+				new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(hud_info._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped(player)
 		slot = new_equipment.slot
 
@@ -157,7 +178,6 @@ func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
 			return current_right_equipment == null && (current_left_equipment == null || !current_left_equipment._is_currently_using_both_hands())
 		_:
 			return false
-	
 			
 func _get_input_receivers_to_process()-> Array[InputReceiver]:
 	var ret : Array[InputReceiver]
@@ -168,6 +188,15 @@ func _get_input_receivers_to_process()-> Array[InputReceiver]:
 		ret.append(current_right_equipment.input_receiver)
 	
 	return ret
+
+func _get_equipment_in_slot(slot : Equipment_Slot) -> PlayerEquipment:
+	match slot:
+		Equipment_Slot.Left:
+			return	current_left_equipment
+		Equipment_Slot.Right:
+			return current_right_equipment
+		_:
+			return null
 
 func _can_enter_two_handed_action( from_slot : Equipment_Slot ) -> bool:
 	if(from_slot == Equipment_Slot.Right):

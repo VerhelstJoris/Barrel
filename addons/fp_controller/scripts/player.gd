@@ -12,6 +12,7 @@ class_name Player extends CharacterBody3D
 @onready var player_cam: Camera3D = %SmoothCamera
 @onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent
 @onready var equipment_manager : EquipmentManager = %EquipmentManager
+@onready var interactor : InteractorComponent = %InteractorComponent
 
 @onready var arms: FPArms = %FP_Arms
 

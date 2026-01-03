@@ -392,6 +392,7 @@ parameters/UnCrouchOneShot/request = 0
 script = ExtResource("30_p7if2")
 
 [node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray", "interactable_prompt", "equipment_manager")]
+unique_name_in_owner = true
 script = ExtResource("36_wrold")
 interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
 interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
