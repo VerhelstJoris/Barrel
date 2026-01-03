@@ -81,7 +81,6 @@ func _ready() -> void:
 	_toggle_main_muzzle_vfx(false)
 	_toggle_cylinder_fire_vfx(false)
 	_create_smoke_renderer()
-	_reset_muzzle_smoke_vfx_shader_params()
 
 func _process(delta: float) -> void:
 	_process_muzzle_smoke(delta)
@@ -100,6 +99,7 @@ func _create_smoke_renderer() -> void:
 		
 	smoke_renderer = smoke_renderer_scene.instantiate()
 	get_tree().root.add_child.call_deferred(smoke_renderer)
+	_reset_muzzle_smoke_vfx_shader_params()
 	
 	smoke_renderer.replace_start_point = smoke_renderer_start_point
 
@@ -129,7 +129,7 @@ func _add_muzzle_smoke_point() -> void:
 		muzzle_positions.pop_back()
 		muzzle_smoke_width_arr.pop_back()
 
-	muzzle_positions.push_front(smoke_renderer.get_global_position())
+	muzzle_positions.push_front(smoke_renderer_start_point.get_global_position())
 	muzzle_smoke_width_arr.push_front(_muzzle_smoke_start_width)
 	
 func _process_muzzle_smoke_points(_delta : float) -> void:
