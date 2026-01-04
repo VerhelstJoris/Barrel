@@ -83,7 +83,7 @@ func _can_currently_throw(_event : InputEvent) -> bool:
 	return true	
 	
 func _can_currently_drop(_event : InputEvent) -> bool:
-	if(_event.is_pressed()):
+	if(_event.is_pressed() && Input.is_action_just_pressed(_event.get_name())):
 		return true
 		
 	return false	
@@ -102,7 +102,7 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 	current_throwable_state = new_state
 	
 func _drop() -> void:
-	print("try drop throwabe")
+	print("DROP")
 	player.equipment_manager._remove_equipment_from_slot(slot)
 	self.reparent(get_tree().root, true)
 	set_global_transform(_decide_target_transform_for_drop())

@@ -71,8 +71,8 @@ var sprint_move_blend_tween : Tween
 var next_cyl_cont : bool = false
 var prev_cyl_cont : bool = false
 
-signal on_unholster_anim_finish()
-signal on_holster_anim_finish()
+signal on_unholster_anim_finish(slot : EquipmentManager.Equipment_Slot)
+signal on_holster_anim_finish(slot : EquipmentManager.Equipment_Slot)
 
 @export_group("movement animation values")
 @export var horizontal_movement_blend_rate : float = 2
@@ -235,8 +235,8 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 
-func _holster_anim_finished():
-	on_holster_anim_finish.emit()
+func _holster_anim_finished(slot : EquipmentManager.Equipment_Slot):
+	on_holster_anim_finish.emit(slot)
 	
 func _toggle_equipment_visible(visible : bool) -> void:
 	pistol.visible = visible
@@ -246,8 +246,8 @@ func current_right_equipment_two_handed() -> bool:
 		return false
 	return pistol._is_currently_using_both_hands()
 
-func _unholster_anim_finished():
-	on_unholster_anim_finish.emit()
+func _unholster_anim_finished(slot : EquipmentManager.Equipment_Slot):
+	on_unholster_anim_finish.emit(slot)
 	
 func _update_movement_blend_values(delta : float) -> void:
 	var horizontal_move : float = mov_comp.current_horizontal_velocity.length()

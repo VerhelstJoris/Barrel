@@ -8,12 +8,9 @@ enum Holster_State {Hidden , Unholstering, Ready, Holstering}
 
 enum Equipment_Slot {None, Left, Right}
 
-var equipment_holster_state : Holster_State   = Holster_State.Hidden:
-	set = _change_holster_state
+var current_equipment : Dictionary[Equipment_Slot, PlayerEquipment]
+var current_holster_states : Dictionary[Equipment_Slot,Holster_State]
 
-var current_right_equipment : PlayerEquipment = null
-var current_left_equipment : PlayerEquipment = null
-	
 signal on_holster_started()
 signal on_holster_finish()
 signal on_unholster_started()
@@ -31,9 +28,18 @@ func _ready() -> void:
 	_setup_input_signals()
 	_setup_animation_data()
 	_setup_ui_data()
-	_change_equipment(player.arms.pistol_equipment, false)
-	_change_holster_state(Holster_State.Hidden)
+	_setup_initial_equipment_data()
 
+	
+func _setup_initial_equipment_data() -> void:
+	current_holster_states[Equipment_Slot.Left] = Holster_State.Hidden
+	current_holster_states[Equipment_Slot.Right] = Holster_State.Hidden
+	current_equipment[Equipment_Slot.Left] = null
+	current_equipment[Equipment_Slot.Right] = null
+
+	_change_equipment(player.arms.pistol_equipment, false)
+	_change_holster_state(Holster_State.Hidden, Equipment_Slot.Left)
+	_change_holster_state(Holster_State.Hidden, Equipment_Slot.Right)
 
 func _setup_input_signals() -> void:
 	on_holster_input_received.connect(_on_holster_input)
@@ -49,21 +55,20 @@ func _setup_animation_data() -> void:
 	player.arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
 
 func _change_equipment(new_equipment : PlayerEquipment, _unholster_immediately : bool = false) -> void:
-	var equipment_to_replace : PlayerEquipment = current_right_equipment if (new_equipment.slot == EquipmentManager.Equipment_Slot.Right) else current_left_equipment		
+	var equipment_to_replace : PlayerEquipment = current_equipment[new_equipment.slot]		
 	
 	if(new_equipment == equipment_to_replace):
 		return
 
 	_on_unequip(equipment_to_replace)
 
+	current_equipment[new_equipment.slot] = new_equipment
 	if(new_equipment.slot == EquipmentManager.Equipment_Slot.Right):
-		current_right_equipment = new_equipment
-		player.arms.arms_animation_bus._reparent_to_prop_bone(current_right_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, true)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, true)
 		print("equip new right slot ", new_equipment)
 	elif(new_equipment.slot == EquipmentManager.Equipment_Slot.Left):
 		print("equip new left slot ", new_equipment)
-		current_left_equipment = new_equipment
-		player.arms.arms_animation_bus._reparent_to_prop_bone(current_left_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, true)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, true)
 	
 	_on_equip(new_equipment)	
 	if(_unholster_immediately):
@@ -76,7 +81,6 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 		old_equipment._on_unequipped()
 		for hud_info in HUD_equipment_input_arr:
 			if(hud_info.equipment_slot_to_track == old_equipment.slot):
-				print("DISCONNECT SIGNALS ON ", old_equipment.name)
 				old_equipment.input_receiver.on_available_equipment_actions_changed.disconnect(hud_info._on_equipment_input_actions_changed)
 				old_equipment.input_receiver.on_available_equipment_actions_cleared.disconnect(hud_info._on_equipment_input_actions_cleared)
 		slot = old_equipment.slot
@@ -85,26 +89,19 @@ func _on_unequip(old_equipment : PlayerEquipment) -> void:
 
 
 func _remove_equipment_from_slot(slot : Equipment_Slot) -> void:
-	var equipment_to_remove : PlayerEquipment = _get_equipment_in_slot(slot)
+	var equipment_to_remove : PlayerEquipment = current_equipment[slot]
 	if(!equipment_to_remove):
 		return
 		
 	_on_unequip(equipment_to_remove)
 	
-	match slot:
-		Equipment_Slot.Left:
-			current_left_equipment = null
-		Equipment_Slot.Right:
-			current_right_equipment = null
-	
+	current_equipment[slot] = null
 
 func _on_equip(new_equipment : PlayerEquipment) -> void:
 	var slot : Equipment_Slot = EquipmentManager.Equipment_Slot.None
-	print("equip ", new_equipment)
 	if(new_equipment != null):
 		for hud_info in HUD_equipment_input_arr:
 			if(hud_info.equipment_slot_to_track == new_equipment.slot):
-				print("CONNECT SIGNALS ON ", new_equipment.name)
 				new_equipment.input_receiver.on_available_equipment_actions_changed.connect(hud_info._on_equipment_input_actions_changed)
 				new_equipment.input_receiver.on_available_equipment_actions_cleared.connect(hud_info._on_equipment_input_actions_cleared)
 		new_equipment._on_equipped(player)
@@ -113,93 +110,81 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 	on_equipped.emit(new_equipment, slot)
 
 func _on_quick_unholster_input(_event : InputEvent) -> void:
-	if(equipment_holster_state == Holster_State.Hidden):
-		_change_holster_state(Holster_State.Unholstering)
+	if(current_holster_states[Equipment_Slot.Right] == Holster_State.Hidden):
+		_change_holster_state(Holster_State.Unholstering, Equipment_Slot.Right)
+	if(current_holster_states[Equipment_Slot.Left] == Holster_State.Hidden):
+		_change_holster_state(Holster_State.Unholstering, Equipment_Slot.Left)
 
 func _on_holster_input(_event : InputEvent) -> void:
-	match equipment_holster_state:
+	match current_holster_states[Equipment_Slot.Right]:
 		Holster_State.Hidden:
-			_change_holster_state(Holster_State.Unholstering)
+			_change_holster_state(Holster_State.Unholstering, Equipment_Slot.Right)
 		Holster_State.Ready:
 			if(_can_holster_equipment()):
-				_change_holster_state(Holster_State.Holstering)
+				_change_holster_state(Holster_State.Holstering, Equipment_Slot.Right)
 		_:
 			pass
 
 func _can_holster_equipment() -> bool:
-	var right_valid : bool = current_right_equipment!= null
-	var left_valid : bool = current_left_equipment!= null
+	var right_valid : bool = current_equipment[Equipment_Slot.Right] != null
+	var left_valid : bool = current_equipment[Equipment_Slot.Left] != null
 	if(!right_valid && !left_valid):
 		return false
 	
-	return equipment_holster_state == Holster_State.Ready && (!right_valid || current_right_equipment._can_be_holstered()) && (!left_valid || current_left_equipment._can_be_holstered())
+	return current_holster_states[Equipment_Slot.Right] == Holster_State.Ready && (!right_valid || current_equipment[Equipment_Slot.Right]._can_be_holstered()) && (!left_valid || current_equipment[Equipment_Slot.Left]._can_be_holstered())
 
-func _change_holster_state(new_state : Holster_State) -> void:
-	if(current_right_equipment == null && current_left_equipment == null):
+func _change_holster_state(new_state : Holster_State, _slot : Equipment_Slot) -> void:
+	if(current_equipment[Equipment_Slot.Right] == null && current_equipment[Equipment_Slot.Left] == null):
 		return
 
-	equipment_holster_state = new_state
+	current_holster_states[_slot] = new_state
 	match new_state:
 		Holster_State.Holstering:
 			on_holster_started.emit()
-			if(current_right_equipment):
-				current_right_equipment._on_start_holster()
-			if(current_left_equipment):
-				current_left_equipment._on_start_holster()
+			if(current_equipment[_slot] != null):
+				current_equipment[_slot]._on_start_holster()
 		Holster_State.Unholstering:
 			on_unholster_started.emit()
-			if(current_right_equipment):
-				current_right_equipment._on_start_unholster()
-			if(current_left_equipment):	
-				current_left_equipment._on_start_unholster()
+			if(current_equipment[_slot] != null):
+				current_equipment[_slot]._on_start_unholster()
 		Holster_State.Hidden:
-			print("holster finished")
-			if(current_right_equipment):
-				current_right_equipment.visible = false
-			if(current_left_equipment):
-				current_left_equipment.visible = false
+			if(current_equipment[_slot] != null):
+				current_equipment[_slot].visible = false
 		_:
 			pass
 
-func _on_holster_anim_finish() -> void:
-	equipment_holster_state = Holster_State.Hidden
+func _on_holster_anim_finish(_slot : EquipmentManager.Equipment_Slot) -> void:
+	_change_holster_state(Holster_State.Hidden, _slot)
 
-func _on_unholster_anim_finish() -> void:
-	equipment_holster_state = Holster_State.Ready
+func _on_unholster_anim_finish(_slot : EquipmentManager.Equipment_Slot) -> void:
+	_change_holster_state(Holster_State.Ready, _slot)
 
-func _can_use_equipment() -> bool:
-	return equipment_holster_state == Holster_State.Ready
+
+func _can_use_equipment(slot : Equipment_Slot) -> bool:
+	return current_holster_states[slot] == Holster_State.Ready
 
 func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
 	match slot:
 		Equipment_Slot.Left:
-			return current_left_equipment == null && (current_right_equipment == null || !current_right_equipment._is_currently_using_both_hands())
+			return current_equipment[Equipment_Slot.Left] == null && (current_equipment[Equipment_Slot.Right] == null || !current_equipment[Equipment_Slot.Right]._is_currently_using_both_hands())
 		Equipment_Slot.Right:
-			return current_right_equipment == null && (current_left_equipment == null || !current_left_equipment._is_currently_using_both_hands())
+			return current_equipment[Equipment_Slot.Right] == null && (current_equipment[Equipment_Slot.Left] == null || !current_equipment[Equipment_Slot.Left]._is_currently_using_both_hands())
 		_:
 			return false
 			
 func _get_input_receivers_to_process()-> Array[InputReceiver]:
 	var ret : Array[InputReceiver]
-	if(current_left_equipment && _can_use_equipment()):
-		ret.append(current_left_equipment.input_receiver)
+	if(current_equipment[Equipment_Slot.Left] && _can_use_equipment(Equipment_Slot.Left)):
+		ret.append(current_equipment[Equipment_Slot.Left].input_receiver)
 		
-	if(current_right_equipment && _can_use_equipment()):
-		ret.append(current_right_equipment.input_receiver)
+	if(current_equipment[Equipment_Slot.Right] && _can_use_equipment(Equipment_Slot.Right)):
+		ret.append(current_equipment[Equipment_Slot.Right].input_receiver)
 	
 	return ret
-
-func _get_equipment_in_slot(slot : Equipment_Slot) -> PlayerEquipment:
-	match slot:
-		Equipment_Slot.Left:
-			return	current_left_equipment
-		Equipment_Slot.Right:
-			return current_right_equipment
-		_:
-			return null
+	
 
 func _can_enter_two_handed_action( from_slot : Equipment_Slot ) -> bool:
 	if(from_slot == Equipment_Slot.Right):
-		return current_left_equipment == null
-		
+		return current_equipment[Equipment_Slot.Left] == null
+
 	return true
