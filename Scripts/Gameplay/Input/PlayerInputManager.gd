@@ -31,15 +31,23 @@ func _process_single_input(input_action_info: InputActionInfo, event : InputEven
 		return
 		
 	var current_time : float = 	Time.get_unix_time_from_system()
-	if(input_action_info.is_hold):
+	
+	if(input_action_info.trigger_on_hold_time_reached):
 		if(event.is_released() && input_action_time_map.has(input_action_info)):
 			input_action_time_map.erase(input_action_info)
 		elif (Input.is_action_just_pressed(action_to_check) && !input_action_time_map.has(input_action_info)):
 			_add_new_map_entry(input_action_info, event, node, exposed_signal_connector, current_time)
-	else:
-		_on_input_succesful(node, exposed_signal_connector, event)
+	if(input_action_info.trigger_on_started):
+		if(Input.is_action_just_pressed(action_to_check)):
+			_on_input_succesful(node, exposed_signal_connector, event , action_to_check)
+	if(input_action_info.trigger_on_released):
+		if(Input.is_action_just_released(action_to_check)):
+			_on_input_succesful(node, exposed_signal_connector, event , action_to_check)
+	if(input_action_info.trigger_on_down):
+		if(Input.is_action_pressed(action_to_check)):
+			_on_input_succesful(node, exposed_signal_connector, event , action_to_check)
 
-func _on_input_succesful(node : Node, exposed_signal_connector: ExposedSignalConnector, event: InputEvent) -> void:
+func _on_input_succesful(node : Node, exposed_signal_connector: ExposedSignalConnector, event: InputEvent, _succesful_action : String) -> void:
 	ExposedSignalConnector._try_send_signal(node, exposed_signal_connector, event)
 	
 func _add_new_map_entry(input_action_info : InputActionInfo, event : InputEvent, node : Node, exposed_signal_connector: ExposedSignalConnector, start_time : float)	-> void:	
@@ -53,7 +61,7 @@ func _physics_process(_delta: float) -> void:
 func _process_held_input(input : InputActionInfo, current_time : float) -> void:
 	if(Input.is_action_pressed(input.input_string)):
 		if(input_action_time_map[input][InputTrackData.StartTime] + input.hold_time < current_time):
-			_on_input_succesful(input_action_time_map[input][InputTrackData.Node], input_action_time_map[input][InputTrackData.SignalConnector], input_action_time_map[input][InputTrackData.StartInputEvent])
+			_on_input_succesful(input_action_time_map[input][InputTrackData.Node], input_action_time_map[input][InputTrackData.SignalConnector], input_action_time_map[input][InputTrackData.StartInputEvent], input.input_string)
 			input_action_time_map.erase(input)
 		else:	
 			on_input_held.emit(input, input_action_time_map[input][InputTrackData.StartTime])

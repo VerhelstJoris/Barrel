@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1_gn4sm")
 input_string = "sprint"
-description_string = ""
-is_hold = false
+trigger_on_down = true
+trigger_on_released = true
 hold_time = 0.0

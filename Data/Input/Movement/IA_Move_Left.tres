@@ -5,7 +5,5 @@
 [resource]
 script = ExtResource("1_nm1nd")
 input_string = "move_left"
-description_string = ""
-is_hold = false
-hold_time = 0.3
-metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+trigger_on_down = true
+trigger_on_released = true

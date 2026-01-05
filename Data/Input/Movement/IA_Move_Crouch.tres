@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1_t46ub")
 input_string = "crouch"
-description_string = "on_crouch_input_received"
-is_hold = false
+trigger_on_down = true
+trigger_on_released = true
 hold_time = 0.0

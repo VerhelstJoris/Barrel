@@ -5,7 +5,5 @@
 [resource]
 script = ExtResource("1_ib7r7")
 input_string = "holster"
-description_string = "Holster"
-is_hold = true
-hold_time = 0.3
-metadata/_custom_type_script = "uid://b6c2jl5dxod1a"
+trigger_on_started = false
+trigger_on_hold_time_reached = true
