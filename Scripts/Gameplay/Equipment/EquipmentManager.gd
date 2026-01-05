@@ -110,9 +110,9 @@ func _on_equip(new_equipment : PlayerEquipment) -> void:
 	on_equipped.emit(new_equipment, slot)
 
 func _on_quick_unholster_input(_event : InputEvent) -> void:
-	if(current_holster_states[Equipment_Slot.Right] == Holster_State.Hidden):
+	if(current_holster_states[Equipment_Slot.Right] == Holster_State.Hidden  && current_equipment[Equipment_Slot.Right] != null):
 		_change_holster_state(Holster_State.Unholstering, Equipment_Slot.Right)
-	if(current_holster_states[Equipment_Slot.Left] == Holster_State.Hidden):
+	if(current_holster_states[Equipment_Slot.Left] == Holster_State.Hidden && current_equipment[Equipment_Slot.Left] != null):
 		_change_holster_state(Holster_State.Unholstering, Equipment_Slot.Left)
 
 func _on_holster_input(_event : InputEvent) -> void:
@@ -158,12 +158,14 @@ func _on_holster_anim_finish(_slot : EquipmentManager.Equipment_Slot) -> void:
 
 func _on_unholster_anim_finish(_slot : EquipmentManager.Equipment_Slot) -> void:
 	_change_holster_state(Holster_State.Ready, _slot)
-
-
+	
 func _can_use_equipment(slot : Equipment_Slot) -> bool:
 	return current_holster_states[slot] == Holster_State.Ready
 
 func _is_equipment_slot_available(slot : Equipment_Slot) -> bool:
+	if(current_holster_states[slot] != Holster_State.Hidden):
+		return false
+
 	match slot:
 		Equipment_Slot.Left:
 			return current_equipment[Equipment_Slot.Left] == null && (current_equipment[Equipment_Slot.Right] == null || !current_equipment[Equipment_Slot.Right]._is_currently_using_both_hands())

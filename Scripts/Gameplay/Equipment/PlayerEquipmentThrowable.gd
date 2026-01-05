@@ -55,6 +55,7 @@ func _on_unequipped():
 	for mesh in meshes:
 		mesh.set_layer_mask_value(1,true)
 		mesh.set_layer_mask_value(2,false)
+		
 
 func _try_use_equipment(_event : InputEvent) -> void:
 	match current_throwable_state:
@@ -102,20 +103,23 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 	current_throwable_state = new_state
 	
 func _drop() -> void:
-	print("DROP")
+	var drop_transform : Transform3D = _decide_target_transform_for_drop()
 	player.equipment_manager._remove_equipment_from_slot(slot)
 	self.reparent(get_tree().root, true)
-	set_global_transform(_decide_target_transform_for_drop())
-	
+	set_global_transform(drop_transform)
+
 func _decide_target_transform_for_drop() -> Transform3D:
 	var new_transform : Transform3D = Transform3D.IDENTITY
 
 	# if the player's interactor raycast has hit something, put it there based on the normal of the hit
 	if(player.interactor.interact_ray.is_colliding()):
+		#TODO: check if the angle compared to the UP is not too big?
+		new_transform = new_transform.looking_at(player.interactor.interact_ray.get_collision_normal(),Vector3.UP,true )
 		new_transform.origin = player.interactor.interact_ray.get_collision_point()
 	else:
-		#else just put it at the end of the interactor ray
-		new_transform.origin = player.interactor.interact_ray.get_global_position() + (player.interactor.interact_ray.get_global_rotation() * player.interactor.interact_ray.get_target_position())
-		pass
+		#else just put it at the end of the interactor ray, pointing up
+		var forward_offset : Vector3 = (-player.interactor.interact_ray.get_global_basis().y * player.interactor.interact_ray.get_target_position().length())
+		new_transform = new_transform.looking_at(Vector3.UP,Vector3.UP,true)
+		new_transform.origin = player.interactor.interact_ray.get_global_position() + forward_offset
 	
 	return new_transform

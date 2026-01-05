@@ -55,6 +55,7 @@ input_receiver = NodePath("InputReceiver")
 metadata/_custom_type_script = "uid://cqgld2k53jtha"
 
 [node name="CollisionPhysicsBody" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 mass = 2.0
 physics_material_override = ExtResource("1_u2t4m")
 contact_monitor = true
