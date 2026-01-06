@@ -52,11 +52,11 @@ tracks/3/keys = {
 tracks/4/type = "method"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath(".")
+tracks/4/path = NodePath("PlayerEquipmentPistol")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(1.3),
+"times": PackedFloat32Array(1.29673),
 "transitions": PackedFloat32Array(1),
 "values": [{
 "args": [],

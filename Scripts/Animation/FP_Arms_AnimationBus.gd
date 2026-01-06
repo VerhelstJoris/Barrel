@@ -1,6 +1,7 @@
 class_name FPArmsAnimationBus extends AnimationTree
 
-@onready var pistol : PlayerEquipmentPistol = %FP_Colt
+@export var colt_scene : Node3D
+var pistol : PlayerEquipmentPistol
 var mov_comp : PlayerMovementComponent
 var input_receiver : PlayerInputReceiver
 
@@ -90,10 +91,12 @@ signal on_holster_anim_finish(slot : EquipmentManager.Equipment_Slot)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	await owner.ready
+	
 	pistol.on_action_started.connect(_on_pistol_action_started)
 	pistol.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
 	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-	right_prop_bone_pos = pistol.get_position()
+	right_prop_bone_pos = pistol.owner.get_position()
 	set(anim_move_blend_add_amount_property, 1.0)
 	
 func _init_player_data(player : Player) -> void:
@@ -239,7 +242,8 @@ func _holster_anim_finished(slot : EquipmentManager.Equipment_Slot):
 	on_holster_anim_finish.emit(slot)
 	
 func _toggle_equipment_visible(visible : bool) -> void:
-	pistol.visible = visible
+	print("toggle pistol visible ", visible)
+	pistol.owner.visible = visible
 
 func current_right_equipment_two_handed() -> bool:
 	if(pistol == null):
@@ -308,7 +312,7 @@ func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : b
 
 # called by anim notifies	
 func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
-	_reparent_to_prop_bone(pistol, new_parent, true)
+	_reparent_to_prop_bone(pistol.owner, new_parent, true)
 
 #called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:

@@ -24,7 +24,11 @@ const anim_reload_eject_shell_request : String = "parameters/EjectShellOneShot/r
 const anim_reload_fan_fire_request : String = "parameters/FanFireOneShot/request"
 
 func _ready() -> void:
-	colt_equipment = get_owner() as PlayerEquipmentPistol
+	if(!get_owner().has_meta(PlayerEquipment.equipment_node_name)):
+		push_error("Colt Animation Bus Cannot find equipment node via metadata")
+		return
+		
+	colt_equipment = get_owner().get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipmentPistol
 	colt_equipment.on_action_started.connect(_on_action_started)
 	colt_equipment.on_current_action_interrupted.connect(_interrupt_current_action)
 	anim_tree.animation_finished.connect(_on_animation_finished)

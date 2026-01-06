@@ -32,9 +32,12 @@ func _can_be_holstered() -> bool:
 	return false
 	
 func _on_equipped(_player : Player) -> void:
+	print("EQUIPPED")
 	super(_player)
-	if(rigid_body):
-		rigid_body.set_transform(Transform3D.IDENTITY)
+	owner.set_rotation(Vector3.ZERO)
+	owner.set_position(Vector3.ZERO)
+	#if(rigid_body):
+	#	rigid_body.set_transform(Transform3D.IDENTITY)
 		
 	for hitbox in hitboxes:
 		hitbox._set_collisions_enabled(false)
@@ -105,8 +108,8 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 func _drop() -> void:
 	var drop_transform : Transform3D = _decide_target_transform_for_drop()
 	player.equipment_manager._remove_equipment_from_slot(slot)
-	self.reparent(get_tree().root, true)
-	set_global_transform(drop_transform)
+	owner.reparent(get_tree().root, true)
+	owner.set_global_transform(drop_transform)
 
 func _decide_target_transform_for_drop() -> Transform3D:
 	var new_transform : Transform3D = Transform3D.IDENTITY

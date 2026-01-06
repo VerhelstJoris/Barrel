@@ -24,13 +24,13 @@ points = PackedVector3Array(0.0721023, 0, 0.18837914, 0.050971307, -0.05098542, 
 
 [sub_resource type="Resource" id="Resource_yrv68"]
 script = ExtResource("15_bn1jt")
-signal_node = NodePath("..")
+signal_node = NodePath("../PlayerEquipmentThrowable")
 signal_name = "use_equipment_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Resource" id="Resource_yhxqx"]
 script = ExtResource("15_bn1jt")
-signal_node = NodePath("..")
+signal_node = NodePath("../PlayerEquipmentThrowable")
 signal_name = "drop_equipment_input"
 metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
@@ -44,18 +44,7 @@ script = ExtResource("18_b0rhv")
 display_string = "Drop"
 metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
 
-[node name="PlayerEquipmentThrowable" type="Node3D" node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "input_receiver")]
-script = ExtResource("1_471q5")
-rigid_body = NodePath("CollisionPhysicsBody")
-hitboxes = [NodePath("HitboxComponent")]
-meshes = [NodePath("CollisionPhysicsBody/CollisionShape3D/MeshInstance3D")]
-equip_type = 2
-slot = 1
-input_receiver = NodePath("InputReceiver")
-metadata/_custom_type_script = "uid://cqgld2k53jtha"
-
-[node name="CollisionPhysicsBody" type="RigidBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
+[node name="Prop_Bottle" type="RigidBody3D"]
 mass = 2.0
 physics_material_override = ExtResource("1_u2t4m")
 contact_monitor = true
@@ -63,21 +52,31 @@ max_contacts_reported = 1
 script = ExtResource("2_u2t4m")
 metadata/_custom_type_script = "uid://gdk3w1bs44k6"
 
-[node name="DeathVFX_Point" type="Node3D" parent="CollisionPhysicsBody"]
+[node name="DeathVFX_Point" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.100631, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CollisionPhysicsBody"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_6tjey")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionPhysicsBody/CollisionShape3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
 mesh = ExtResource("1_bt6bh")
 skeleton = NodePath("../..")
 surface_material_override/0 = ExtResource("1_xweuc")
 
+[node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "input_receiver")]
+script = ExtResource("1_471q5")
+rigid_body = NodePath("..")
+hitboxes = [NodePath("../HitboxComponent")]
+meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
+equip_type = 2
+slot = 1
+input_receiver = NodePath("../InputReceiver")
+metadata/_custom_type_script = "uid://cqgld2k53jtha"
+
 [node name="HitboxComponent" type="Node" parent="." node_paths=PackedStringArray("shapes_to_register_hits_from", "rigidbodies_to_register_collisions_from")]
 script = ExtResource("2_vfrhl")
-shapes_to_register_hits_from = [NodePath("../CollisionPhysicsBody")]
-rigidbodies_to_register_collisions_from = [NodePath("../CollisionPhysicsBody")]
+shapes_to_register_hits_from = [NodePath("..")]
+rigidbodies_to_register_collisions_from = [NodePath("..")]
 metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
@@ -85,7 +84,7 @@ script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
 min_collision_impulse = 0.2
 on_death_vfx = ExtResource("6_6pqks")
-death_vfx_spawn_node = NodePath("../CollisionPhysicsBody/DeathVFX_Point")
+death_vfx_spawn_node = NodePath("../DeathVFX_Point")
 
 [node name="InteractableComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "outline")]
 script = ExtResource("8_00ys1")
@@ -96,7 +95,7 @@ metadata/_custom_type_script = "uid://vancee6lfbu6"
 
 [node name="OutlineComponent" type="Node" parent="." node_paths=PackedStringArray("meshes")]
 script = ExtResource("10_kukbf")
-meshes = [NodePath("../CollisionPhysicsBody/CollisionShape3D/MeshInstance3D")]
+meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
 outline_mat = ExtResource("9_471q5")
 enabled = false
 

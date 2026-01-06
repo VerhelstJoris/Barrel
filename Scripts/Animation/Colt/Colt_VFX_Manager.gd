@@ -69,8 +69,11 @@ var muzzle_smoke_decay_duration : float = 0.0
 @export_range(1, 3, 0.01) var cylinder_fire_max_scale : float = 2
 
 func _ready() -> void:
-	await owner.ready
-	colt_equipment = get_owner() as PlayerEquipmentPistol
+	if(!get_owner().has_meta(PlayerEquipment.equipment_node_name)):
+		push_error("Colt VFX Manager Cannot find equipment node via metadata")
+		return
+
+	colt_equipment = get_owner().get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipmentPistol
 	colt_equipment.on_fired.connect(_on_bullet_fired)
 	colt_equipment.on_holstered.connect(_on_start_holstering)
 	colt_equipment.on_unholstered.connect(_on_start_unholstering)

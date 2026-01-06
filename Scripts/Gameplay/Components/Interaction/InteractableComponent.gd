@@ -80,15 +80,18 @@ func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> voi
 		equipment_to_pickup = interact_data.alternative_interaction_item.instantiate()
 		_interactor.player.arms.add_child(equipment_to_pickup)
 	elif(interact_data.pick_up_self):
-		equipment_to_pickup = owner as PlayerEquipment
-		equipment_to_pickup.reparent(_interactor.player.arms, false)
+		if(!owner.has_meta(PlayerEquipment.equipment_node_name)):
+			push_error("Interactable Component Cannot find equipment node via metadata")
+			return
+		equipment_to_pickup = owner.get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipment
+		owner.reparent(_interactor.player.arms, false)
 
 	if(!equipment_to_pickup):
 		push_error("No equipment can be picked up from the interaction on ", owner.name)
 		return
 
-	equipment_to_pickup.transform = Transform3D.IDENTITY
+	equipment_to_pickup.owner.transform = Transform3D.IDENTITY
 	
 	_interactor.player.equipment_manager._change_equipment(equipment_to_pickup, true)
-	equipment_to_pickup.rotation = Vector3.ZERO
-	equipment_to_pickup.position = Vector3.ZERO
+	equipment_to_pickup.owner.rotation = Vector3.ZERO
+	equipment_to_pickup.owner.position = Vector3.ZERO

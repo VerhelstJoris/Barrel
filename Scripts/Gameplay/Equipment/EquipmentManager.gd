@@ -64,11 +64,11 @@ func _change_equipment(new_equipment : PlayerEquipment, _unholster_immediately :
 
 	current_equipment[new_equipment.slot] = new_equipment
 	if(new_equipment.slot == EquipmentManager.Equipment_Slot.Right):
-		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment, FPArmsAnimationBus.E_prop_bone_type.Right, true)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment.owner as Node3D, FPArmsAnimationBus.E_prop_bone_type.Right, true)
 		print("equip new right slot ", new_equipment)
 	elif(new_equipment.slot == EquipmentManager.Equipment_Slot.Left):
 		print("equip new left slot ", new_equipment)
-		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment, FPArmsAnimationBus.E_prop_bone_type.Left, true)
+		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment.owner as Node3D, FPArmsAnimationBus.E_prop_bone_type.Left, true)
 	
 	_on_equip(new_equipment)	
 	if(_unholster_immediately):
@@ -149,7 +149,7 @@ func _change_holster_state(new_state : Holster_State, _slot : Equipment_Slot) ->
 				current_equipment[_slot]._on_start_unholster()
 		Holster_State.Hidden:
 			if(current_equipment[_slot] != null):
-				current_equipment[_slot].visible = false
+				current_equipment[_slot].owner.visible = false
 		_:
 			pass
 

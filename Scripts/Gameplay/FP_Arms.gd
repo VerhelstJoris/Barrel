@@ -2,8 +2,19 @@ class_name FPArms extends Node3D
 
 @onready var arms_animation_bus : FPArmsAnimationBus = %AnimationTree
 
-@onready var pistol_equipment : PlayerEquipmentPistol = %FP_Colt
+@export var colt_scene : Node3D
+@onready var pistol_equipment : PlayerEquipmentPistol
+
 @onready var FP_camera : Camera3D = %FP_Camera
+
+func _ready() -> void:
+	if(!colt_scene.has_meta(PlayerEquipment.equipment_node_name)):
+		push_error("FP Arms Cannot find equipment node via metadata")
+		return
+
+	pistol_equipment = colt_scene.get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipmentPistol
+	arms_animation_bus.pistol = pistol_equipment
+
 
 func _align_to_world_camera(align_to : Camera3D ) -> void:
 	var current_transform : Transform3D = get_global_transform()

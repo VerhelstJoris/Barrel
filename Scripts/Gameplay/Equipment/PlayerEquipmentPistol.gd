@@ -192,7 +192,7 @@ func _find_target_hit() -> Dictionary:
 	return dict
 
 func _ray_for_hit_target(origin :Vector3 , end :Vector3 ) -> Dictionary:
-	var space_state: PhysicsDirectSpaceState3D = get_world_3d().get_direct_space_state()
+	var space_state: PhysicsDirectSpaceState3D = owner.get_world_3d().get_direct_space_state()
 
 	var query := PhysicsRayQueryParameters3D.create(origin, end)
 	query.collide_with_bodies = true

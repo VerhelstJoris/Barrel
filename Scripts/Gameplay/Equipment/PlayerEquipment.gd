@@ -1,4 +1,5 @@
-class_name PlayerEquipment extends Node3D
+@icon("res://DEBUG/Icons/Ico_Hand.png")
+class_name PlayerEquipment extends Node
 
 
 enum Equipment_Type {Permanent , Consumable, Temporary}
@@ -18,6 +19,11 @@ signal on_holstered
 signal on_unholstered
 
 signal use_equipment_input(event: InputEvent)
+
+const equipment_node_name : String = "Node_Equipment"
+
+func _enter_tree() -> void:
+	owner.set_meta(equipment_node_name, self)
 
 func _ready() -> void:
 	use_equipment_input.connect(_try_use_equipment)
