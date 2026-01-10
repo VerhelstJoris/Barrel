@@ -1,5 +1,9 @@
 class_name PlayerEquipmentPistol extends PlayerEquipment 
 
+enum EPistolState {ReadyToFire, HammerUncocked, Reloading}
+
+enum EPistolActions {None, Fire, DryFire, CockHammer, EnterReload, EnterReloadUncock, ExitReload, CylinderNext, CylinderPrev, Eject, Insert, FanFire}
+
 @export_group("Pistol Details")
 @export var bullet_scene: PackedScene
 
@@ -24,13 +28,14 @@ signal on_action_started(new_action)
 signal on_current_action_interrupted(current_action, new_action)
 signal on_fired()
 
-var current_state: EPistolState.State = EPistolState.State.HammerUncocked
-var current_action : EPistolState.Actions = EPistolState.Actions.None:
+var current_state : EPistolState = EPistolState.HammerUncocked
+
+var current_action : EPistolActions = EPistolActions.None:
 	set(new):
 		on_action_started.emit(new)
 		current_action = new
 
-var can_proceed_state: bool = true
+var can_proceed_state: bool                      = true
 var can_interrupt_into_next_state: bool = false
 var can_interrupt_fire : bool = false
 var queued_fire : bool = false
@@ -59,7 +64,7 @@ func _ready() -> void:
 	super()
 	current_bullets.resize(chamber_amount)
 	current_bullets.fill(null)
-	current_state = EPistolState.State.HammerUncocked
+	current_state = EPistolState.HammerUncocked
 	
 	on_try_insert_input.connect(_try_insert_round)
 	on_try_eject_input.connect(_try_eject_round)
@@ -80,25 +85,25 @@ func _physics_process(_delta: float) -> void:
 		_physics_fire_current_bullet()
 
 func _try_insert_round(_event : InputEvent) -> void:
-	if(current_state == EPistolState.State.Reloading):
+	if(current_state == EPistolState.Reloading):
 		if(_can_insert_round()):
-			_start_new_action(EPistolState.Actions.Insert, current_state, 0)
+			_start_new_action(EPistolActions.Insert, current_state, 0)
 			
 func _try_eject_round(_event : InputEvent) -> void:
-	if(current_state == EPistolState.State.Reloading):
+	if(current_state == EPistolState.Reloading):
 		if(_can_eject_round()):
-			_start_new_action( EPistolState.Actions.Eject, current_state, 0)
+			_start_new_action( EPistolActions.Eject, current_state, 0)
 		
 func _try_cylinder_next(_event : InputEvent) -> void:
 	if(_can_reload_rotate_cylinder()):
-		_start_new_action(EPistolState.Actions.CylinderNext, current_state, -1)
+		_start_new_action(EPistolActions.CylinderNext, current_state, -1)
 		
 func _try_cylinder_prev(_event : InputEvent) -> void:
 	if(_can_reload_rotate_cylinder()):
-		_start_new_action(EPistolState.Actions.CylinderPrev, current_state, 1)
+		_start_new_action(EPistolActions.CylinderPrev, current_state, 1)
 		
 func _can_reload_rotate_cylinder() -> bool:
-	if(current_state != EPistolState.State.Reloading):
+	if(current_state != EPistolState.Reloading):
 		return false
 
 	if(!_can_proceed_state(true)):
@@ -124,18 +129,18 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	var within_fan_time_margin : bool = current_time - main_equipment_last_use_time <= fan_hammer_max_delay
 	if( within_fan_time_margin):
 		if(_can_fan_fire()):
-			_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+			_start_new_action(EPistolActions.FanFire, EPistolState.ReadyToFire, 0)
 			started_action = true
 	
 	if(!started_action):
 		if _can_shoot():
 			if((current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired())|| debug_shot_valid):
-				_start_new_action(EPistolState.Actions.Fire, EPistolState.State.HammerUncocked, 0)
+				_start_new_action(EPistolActions.Fire, EPistolState.HammerUncocked, 0)
 			else:
-				_start_new_action(EPistolState.Actions.DryFire, EPistolState.State.HammerUncocked, 0)
+				_start_new_action(EPistolActions.DryFire, EPistolState.HammerUncocked, 0)
 			started_action = true
 		elif(_can_cock_hammer()):
-			_start_new_action(EPistolState.Actions.CockHammer, EPistolState.State.ReadyToFire , 1)
+			_start_new_action(EPistolActions.CockHammer, EPistolState.ReadyToFire , 1)
 			started_action = true
 
 	if(!started_action && within_fan_time_margin):
@@ -147,13 +152,13 @@ func _try_use_equipment(_event : InputEvent) -> void:
 func _enable_interrupting_action() -> void:
 	can_interrupt_into_next_state = true
 	if(queued_fire && player.equipment_manager._can_enter_two_handed_action(slot)):
-		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+		_start_new_action(EPistolActions.FanFire, EPistolState.ReadyToFire, 0)
 
 #used as anim notify		
 func _enable_interrupting_for_next_fire() -> void:
 	can_interrupt_fire = true
 	if(queued_fire && player.equipment_manager._can_enter_two_handed_action(slot)):
-		_start_new_action(EPistolState.Actions.FanFire, EPistolState.State.ReadyToFire, 0)
+		_start_new_action(EPistolActions.FanFire, EPistolState.ReadyToFire, 0)
 
 #used as anim notify
 func _fire_current_bullet() -> void:
@@ -223,18 +228,18 @@ func _calculate_damage(_hit : Dictionary) -> float:
 #endregion
 
 func _enter_reload_state() -> void:
-	var action : EPistolState.Actions = EPistolState.Actions.None
-	if(current_state == EPistolState.State.HammerUncocked):
-		action = EPistolState.Actions.EnterReload
+	var action : EPistolActions = EPistolActions.None
+	if(current_state == EPistolState.HammerUncocked):
+		action = EPistolActions.EnterReload
 	else:
-		action = EPistolState.Actions.EnterReloadUncock
+		action = EPistolActions.EnterReloadUncock
 
-	_start_new_action( action, EPistolState.State.Reloading ,1)
+	_start_new_action( action, EPistolState.Reloading ,1)
 	
 func _exit_reload_state() -> void:
-	_start_new_action( EPistolState.Actions.ExitReload, EPistolState.State.ReadyToFire, 0)
+	_start_new_action( EPistolActions.ExitReload, EPistolState.ReadyToFire, 0)
 	
-func _start_new_action(new_action: EPistolState.Actions, new_state: EPistolState.State, cylinder_rotations : int) -> void:
+func _start_new_action(new_action: EPistolActions, new_state: EPistolState, cylinder_rotations : int) -> void:
 	if(can_interrupt_into_next_state):
 		on_current_action_interrupted.emit(current_action, new_action)
 	
@@ -260,7 +265,7 @@ func _enable_changing_states(enabled : bool) -> void:
 	can_proceed_state = enabled
 	can_interrupt_into_next_state = false
 	can_interrupt_fire = false
-	current_action = EPistolState.Actions.None
+	current_action = EPistolActions.None
 	
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
@@ -299,29 +304,29 @@ func _can_proceed_state(allow_general_interrupt : bool = false, allow_interrupt_
 	return ret	
 	
 func _can_insert_round() -> bool:
-	return current_state == EPistolState.State.Reloading && _can_proceed_state(true) && current_bullets[insert_chamber_id] == null
+	return current_state == EPistolState.Reloading && _can_proceed_state(true) && current_bullets[insert_chamber_id] == null
 
 func _can_eject_round() -> bool:
-	return current_state == EPistolState.State.Reloading && _can_proceed_state(true)
+	return current_state == EPistolState.Reloading && _can_proceed_state(true)
 
 func _can_enter_reload() -> bool:
-	return _can_proceed_state(true) && current_state != EPistolState.State.Reloading && player.equipment_manager._can_enter_two_handed_action(slot)
+	return _can_proceed_state(true) && current_state != EPistolState.Reloading && player.equipment_manager._can_enter_two_handed_action(slot)
 	
 func _can_exit_reload() -> bool:
-	return _can_proceed_state(true) && current_state == EPistolState.State.Reloading
+	return _can_proceed_state(true) && current_state == EPistolState.Reloading
 	
 func _can_cock_hammer() -> bool:
-	return current_state == EPistolState.State.HammerUncocked && _can_proceed_state(true)
+	return current_state == EPistolState.HammerUncocked && _can_proceed_state(true)
 
 func _can_fan_fire() -> bool:
 	#can fan the hammer if we're in the ready state or already fanning
-	return _can_proceed_state(true, true) && (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && player.equipment_manager._can_enter_two_handed_action(slot)
+	return _can_proceed_state(true, true) && (current_state == EPistolState.ReadyToFire || current_state == EPistolState.HammerUncocked) && player.equipment_manager._can_enter_two_handed_action(slot)
 
 func _can_shoot() -> bool:
-	return current_state == EPistolState.State.ReadyToFire && _can_proceed_state(true)
+	return current_state == EPistolState.ReadyToFire && _can_proceed_state(true)
 
 func _can_be_holstered() -> bool:
-	return (current_state == EPistolState.State.ReadyToFire || current_state == EPistolState.State.HammerUncocked) && _can_proceed_state(false)
+	return (current_state == EPistolState.ReadyToFire || current_state == EPistolState.HammerUncocked) && _can_proceed_state(false)
 	
 func _on_start_holster():
 	super()
@@ -334,14 +339,14 @@ func _on_start_unholster():
 func _is_currently_using_both_hands() -> bool:
 	return _is_two_handed_action(current_action)
 
-func _is_two_handed_action(action : EPistolState.Actions) -> bool:
+func _is_two_handed_action(action : EPistolActions) -> bool:
 	match action:
-		EPistolState.Actions.EnterReload, EPistolState.Actions.EnterReloadUncock, EPistolState.Actions.CylinderNext, EPistolState.Actions.CylinderPrev,	EPistolState.Actions.Insert,EPistolState.Actions.Eject,	EPistolState.Actions.ExitReload, EPistolState.Actions.FanFire:
+		EPistolActions.EnterReload, EPistolActions.EnterReloadUncock, EPistolActions.CylinderNext, EPistolActions.CylinderPrev,	EPistolActions.Insert,EPistolActions.Eject,	EPistolActions.ExitReload, EPistolActions.FanFire:
 			return true
 		_:
 			pass
 	
-	if(current_state == EPistolState.State.Reloading):
+	if(current_state == EPistolState.Reloading):
 		return true
 		
 	return false	

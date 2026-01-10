@@ -5,7 +5,7 @@ class_name HUDEquipmentInput extends Control
 
 @export var input_item_container: BoxContainer
 @export var screen_alignment_container: Container
-@export var equipment_slot_to_track : EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
+@export var equipment_slot_to_track : EquipmentManager.EEquipmentSlot = EquipmentManager.EEquipmentSlot.Right
 
 
 var current_inputs : Dictionary[HUDInputInfo, HUDEquipmentInputItem]
@@ -21,15 +21,15 @@ func _ready() -> void:
 func _intialize(player : Player) -> void:
 	equipment_manager = player.equipment_manager
 
-func _clear_current_input_details_internal(slot : EquipmentManager.Equipment_Slot) -> void:
+func _clear_current_input_details_internal(slot : EquipmentManager.EEquipmentSlot) -> void:
 	if(slot != equipment_slot_to_track):
 		return
 	
 	match slot:
-		EquipmentManager.Equipment_Slot.Right:
+		EquipmentManager.EEquipmentSlot.Right:
 			set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
 			screen_alignment_container.set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
-		EquipmentManager.Equipment_Slot.Left:
+		EquipmentManager.EEquipmentSlot.Left:
 			set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_LEFT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
 			screen_alignment_container.set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_LEFT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
 		_:
@@ -52,7 +52,7 @@ func _create_new_item(info: InputActionInfo, description : HUDInputInfo) -> HUDE
 
 	return new_item
 	
-func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo, HUDInputInfo], slot : EquipmentManager.Equipment_Slot) -> void:
+func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo, HUDInputInfo], slot : EquipmentManager.EEquipmentSlot) -> void:
 	if(slot != equipment_slot_to_track):
 		return
 
@@ -72,9 +72,9 @@ func _on_equipment_input_actions_changed(new_inputs : Dictionary[InputActionInfo
 	var viewport_x_size : float = get_viewport().get_visible_rect().size.x
 
 	match slot:
-		EquipmentManager.Equipment_Slot.Right:
+		EquipmentManager.EEquipmentSlot.Right:
 			UIAnimation.animate_slide_from_right(self, viewport_x_size, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
-		EquipmentManager.Equipment_Slot.Left:
+		EquipmentManager.EEquipmentSlot.Left:
 			UIAnimation.animate_slide_from_left(self, viewport_x_size, animate_speed, Tween.EASE_OUT, Tween.TRANS_CUBIC)
 		_:
 			pass
@@ -91,15 +91,15 @@ func _process(_delta: float) -> void:
 			current_inputs[input_info].currently_available = equipment_manager._can_enter_two_handed_action(equipment_slot_to_track)
 			
 
-func _on_equipment_input_actions_cleared(slot : EquipmentManager.Equipment_Slot) -> void:
+func _on_equipment_input_actions_cleared(slot : EquipmentManager.EEquipmentSlot) -> void:
 	if(slot != equipment_slot_to_track):
 		return
 		
 	var viewport_x_size : float  = get_viewport().get_visible_rect().size.x	
 	match slot:
-		EquipmentManager.Equipment_Slot.Right:
+		EquipmentManager.EEquipmentSlot.Right:
 			UIAnimation.animate_slide_to_right(self, viewport_x_size, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)
-		EquipmentManager.Equipment_Slot.Left:
+		EquipmentManager.EEquipmentSlot.Left:
 			UIAnimation.animate_slide_to_left(self,viewport_x_size, animate_speed, Tween.EASE_IN, Tween.TRANS_CUBIC)
 			pass
 		_:

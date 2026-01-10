@@ -24,7 +24,7 @@ var available_color : Color
 
 const font_color_property_name : String = "theme_override_colors/font_color"
 
-var equipment_slot :EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
+var equipment_slot :EquipmentManager.EEquipmentSlot = EquipmentManager.EEquipmentSlot.Right
 
 @export var input_action : String:
 	set(new_value):
@@ -40,16 +40,16 @@ func _ready() -> void:
 		prompt.current_input_action_to_display = input_action
 		prompt.currently_available = currently_available
 		
-func _set_slot_visual_data(slot: EquipmentManager.Equipment_Slot) -> void:
+func _set_slot_visual_data(slot: EquipmentManager.EEquipmentSlot) -> void:
 	match slot:
-		EquipmentManager.Equipment_Slot.Right:
+		EquipmentManager.EEquipmentSlot.Right:
 			hbox_container.move_child(prompt,text_container.get_index() +1)
 		
 			set_h_size_flags(Control.GROW_DIRECTION_END)
 		
 			input_label.set_horizontal_alignment(HorizontalAlignment.HORIZONTAL_ALIGNMENT_RIGHT)
 			set_anchors_and_offsets_preset(Control.LayoutPreset.PRESET_CENTER_RIGHT, Control.LayoutPresetMode.PRESET_MODE_KEEP_SIZE, 0)
-		EquipmentManager.Equipment_Slot.Left:
+		EquipmentManager.EEquipmentSlot.Left:
 			hbox_container.move_child(text_container,prompt.get_index())
 
 			set_h_size_flags(Control.GROW_DIRECTION_BEGIN)

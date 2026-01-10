@@ -2,5 +2,5 @@ class_name Fall extends MovementState_Base
 
 func _check_transitions() -> void:
 	if mov_comp._is_on_floor():
-		state_machine._transition_to(state_machine.E_StateName.Grounded)
+		state_machine._transition_to(state_machine.EStateName.Grounded)
 		

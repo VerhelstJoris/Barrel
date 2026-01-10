@@ -33,10 +33,10 @@ func _ready() -> void:
 	
 func _verify_data_asset() -> void:
 	match interact_data.type:
-		InteractableDataAsset.InteractionType.Equip:
+		InteractableDataAsset.EInteractionType.Equip:
 			if(interact_data.alternative_interaction_item == null && !interact_data.pick_up_self):
 				push_error("No valid interact item set on interact data on ", owner.name, " should be a player equipment scene")
-		InteractableDataAsset.InteractionType.None:
+		InteractableDataAsset.EInteractionType.None:
 			push_error("No valid interact type set on  assigned on ", owner.name)
 		_:
 			pass
@@ -68,7 +68,7 @@ func _on_hover_end(_interactor: InteractorComponent) -> void:
 
 func _interact(_interactor: InteractorComponent) -> void:
 	match interact_data.type:
-		InteractableDataAsset.InteractionType.Equip:
+		InteractableDataAsset.EInteractionType.Equip:
 			_equip_interact_item_on_interactor(_interactor)
 		_:
 			push_error("interact type currently not implemented")

@@ -48,7 +48,7 @@ func _init_player_data(in_player : Player) -> void:
 	
 func _check_transitions() -> void:
 	if(!input_comp.crouch_down && _can_currently_exit()):
-		state_machine._transition_to(state_machine.E_StateName.Walk)
+		state_machine._transition_to(state_machine.EStateName.Walk)
 	
 func _on_enter_internal() -> void:
 	crouching_shape.disabled = false

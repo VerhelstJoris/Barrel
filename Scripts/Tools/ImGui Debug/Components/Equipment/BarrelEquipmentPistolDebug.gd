@@ -39,11 +39,11 @@ func _draw_pistol_debug(_delta : float) -> void:
 
 
 func _on_pistol_action_started(_new_action: int) -> void:
-	if(_new_action == EPistolState.Actions.None):
+	if(_new_action == PlayerEquipmentPistol.EPistolActions.None):
 		return
 		
 	if(log_debug_info):	
-		print("Colt action started : ", EPistolState.Actions.keys()[_new_action])
+		print("Colt action started : ", PlayerEquipmentPistol.EPistolActions.keys()[_new_action])
 		print(_get_chamber_states())
 
 func _get_chamber_states() -> String:
@@ -70,7 +70,7 @@ func _get_chamber_states() -> String:
 			builtStr+="]"
 		index +=1
 
-	builtStr += " "	+ EPistolState.State.keys()[pistol.current_state]
+	builtStr += " "	+ PlayerEquipmentPistol.EPistolState.keys()[pistol.current_state]
 	builtStr += " Current Chamber: %d" % pistol.current_chamber_id
 	return builtStr
 	

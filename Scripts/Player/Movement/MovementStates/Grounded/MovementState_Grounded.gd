@@ -14,8 +14,8 @@ func _on_exit_internal() -> void:
 
 func _check_transitions() -> void:
 	if(!mov_comp._is_on_floor()):
-		state_machine._transition_to(state_machine.E_StateName.Fall)
+		state_machine._transition_to(state_machine.EStateName.Fall)
 		
 	if(jump_queued):
 		jump_queued = false
-		state_machine._transition_to(state_machine.E_StateName.Jump)
+		state_machine._transition_to(state_machine.EStateName.Jump)

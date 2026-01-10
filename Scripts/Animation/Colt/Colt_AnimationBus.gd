@@ -37,38 +37,38 @@ func _set_anim_tree_oneshot_request(request_name):
 	anim_tree.set(request_name, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	current_anim_request = request_name
 	
-func _on_action_started(new_action : EPistolState.Actions)	-> void:
+func _on_action_started(new_action : PlayerEquipmentPistol.EPistolActions)	-> void:
 	match new_action:
-		EPistolState.Actions.Fire:
+		PlayerEquipmentPistol.EPistolActions.Fire:
 			_set_anim_tree_oneshot_request(anim_fire_request)
-		EPistolState.Actions.DryFire:
+		PlayerEquipmentPistol.EPistolActions.DryFire:
 			_set_anim_tree_oneshot_request(anim_dry_fire_request)
-		EPistolState.Actions.CockHammer:
+		PlayerEquipmentPistol.EPistolActions.CockHammer:
 			_set_anim_tree_oneshot_request(anim_hammer_request)
-		EPistolState.Actions.EnterReload:
+		PlayerEquipmentPistol.EPistolActions.EnterReload:
 			_set_anim_tree_oneshot_request(anim_enter_reload_request)
-		EPistolState.Actions.EnterReloadUncock:
+		PlayerEquipmentPistol.EPistolActions.EnterReloadUncock:
 			_set_anim_tree_oneshot_request(anim_enter_reload_uncock_request)
-		EPistolState.Actions.ExitReload:
+		PlayerEquipmentPistol.EPistolActions.ExitReload:
 			_set_anim_tree_oneshot_request(anim_exit_reload_request)
-		EPistolState.Actions.CylinderNext:
+		PlayerEquipmentPistol.EPistolActions.CylinderNext:
 			_set_anim_tree_oneshot_request(anim_reload_next_chamber_request)
-		EPistolState.Actions.CylinderPrev:
+		PlayerEquipmentPistol.EPistolActions.CylinderPrev:
 			_set_anim_tree_oneshot_request(anim_reload_previous_chamber_request)
-		EPistolState.Actions.Insert:
+		PlayerEquipmentPistol.EPistolActions.Insert:
 			_set_anim_tree_oneshot_request(anim_reload_insert_shell_request)
-		EPistolState.Actions.Eject:
+		PlayerEquipmentPistol.EPistolActions.Eject:
 			_set_anim_tree_oneshot_request(anim_reload_eject_shell_request)
-		EPistolState.Actions.FanFire:
+		PlayerEquipmentPistol.EPistolActions.FanFire:
 			_set_anim_tree_oneshot_request(anim_reload_fan_fire_request)	
 		_:
 			pass
 
-func _interrupt_current_action(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
+func _interrupt_current_action(_prev : PlayerEquipmentPistol.EPistolActions, _new : PlayerEquipmentPistol.EPistolActions) -> void:
 	if(current_anim_request != ""):
 		anim_tree.set(current_anim_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
 	
-	if(_prev != EPistolState.Actions.None):
+	if(_prev != PlayerEquipmentPistol.EPistolActions.None):
 		_on_current_action_finished()
 		
 func _on_animation_finished(_animation_name : String) -> void:

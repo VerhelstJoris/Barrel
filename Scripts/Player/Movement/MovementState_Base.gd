@@ -22,7 +22,7 @@ var input_comp : PlayerInputReceiver
 @export var override_velocity_acceleration_speed : float = 0.0
 var current_time_in_state : float = 0.0
 
-var state_type : PlayerStateMachine.E_StateName = PlayerStateMachine.E_StateName.None
+var state_type : PlayerStateMachine.EStateName = PlayerStateMachine.EStateName.None
 
 @export var is_affected_by_gravity : bool = true
 

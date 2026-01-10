@@ -1,11 +1,11 @@
 class_name InteractableDataAsset extends Resource
 
-enum InteractionType {None, Equip, Pickup, World}
+enum EInteractionType {None, Equip, Pickup, World}
 
 @export var interaction_input : InputActionInfo
 
 @export_group("Interact Type")
-@export var type : InteractionType = InteractionType.None
+@export var type : EInteractionType = EInteractionType.None
 
 #if this is the equip type, equip this item (assuming it derives from PlayerEquipment)
 @export var pick_up_self : bool = true

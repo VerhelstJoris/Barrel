@@ -19,7 +19,7 @@ func _ready() -> void:
 	
 	
 func _get_available_inputs() -> Dictionary[InputActionInfo, ExposedSignalConnector]:
-	if(colt_equipment.current_state == EPistolState.State.Reloading):
+	if(colt_equipment.current_state == PlayerEquipmentPistol.EPistolState.Reloading):
 		return input_reload_dictionary
 	else:
 		return input_dictionary
@@ -30,7 +30,7 @@ func _on_unholstered() -> void:
 func _on_holstered() -> void:
 	_change_HUD_available_actions([],colt_equipment)
 
-func _on_colt_action_started(action : EPistolState.Actions) -> void:
+func _on_colt_action_started(action : PlayerEquipmentPistol.EPistolActions) -> void:
 	if(is_entering_reload):
 		is_entering_reload = false
 		_change_HUD_available_actions(input_reload_dictionary.keys(),colt_equipment)
@@ -40,10 +40,10 @@ func _on_colt_action_started(action : EPistolState.Actions) -> void:
 		_change_HUD_available_actions(input_dictionary.keys(),colt_equipment)
 	
 	is_exiting_reload = false
-	if(action == EPistolState.Actions.EnterReload || action == EPistolState.Actions.EnterReloadUncock):
+	if(action == PlayerEquipmentPistol.EPistolActions.EnterReload || action == PlayerEquipmentPistol.EPistolActions.EnterReloadUncock):
 		is_entering_reload = true
 		_change_HUD_available_actions([], colt_equipment)
-	elif (action == EPistolState.Actions.ExitReload):
+	elif (action == PlayerEquipmentPistol.EPistolActions.ExitReload):
 		is_exiting_reload = true
 		_change_HUD_available_actions([],colt_equipment)
 		

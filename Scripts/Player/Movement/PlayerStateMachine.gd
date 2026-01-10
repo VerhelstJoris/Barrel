@@ -5,11 +5,11 @@ signal transitioned(state: MovementState_Base)
 
 var owner_state : MovementState_Base = null
 
-enum E_StateName {None, Grounded, Walk, Sprint, Fall, Jump, Crouch}
+enum EStateName {None, Grounded, Walk, Sprint, Fall, Jump, Crouch}
 
-@export var states_map : Dictionary[E_StateName, MovementState_Base]
+@export var states_map : Dictionary[EStateName, MovementState_Base]
 
-@export var initial_state : E_StateName = E_StateName.None
+@export var initial_state : EStateName = EStateName.None
 
 var current_state: MovementState_Base
 
@@ -21,7 +21,7 @@ func _ready() -> void:
 	set_process(false)
 			
 func _enter_initial_state() -> void:
-	if(initial_state != E_StateName.None):
+	if(initial_state != EStateName.None):
 		if(states_map.has(initial_state)):
 			_transition_to(initial_state)
 		else:
@@ -48,8 +48,8 @@ func _physics_update(delta: float) -> void:
 		current_state._check_transitions()
 	current_state._physics_update(delta)
 	
-func _transition_to(target_state: E_StateName) -> void:
-	var target_state_name : String = E_StateName.keys()[target_state]
+func _transition_to(target_state: EStateName) -> void:
+	var target_state_name : String = EStateName.keys()[target_state]
 	if(!states_map.has(target_state)):
 		push_error("No target node \"" +target_state_name + "\" found")
 		return

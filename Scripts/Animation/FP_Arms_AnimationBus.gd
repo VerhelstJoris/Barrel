@@ -9,7 +9,7 @@ var input_receiver : PlayerInputReceiver
 @onready var left_prop_bone : BoneAttachment3D = %LPropBone
 @onready var right_prop_bone : BoneAttachment3D = %RPropBone
 
-enum E_prop_bone_type{Left, Right, Global}
+enum EPropBoneType{Left, Right, Global}
 var right_prop_bone_pos : Vector3 = Vector3.ZERO
 
 const anim_right_arm_sm_path : String = "parameters/SM_Right/"
@@ -60,7 +60,7 @@ var throwable_unholstered : bool = false
 var sprinting : bool = false
 var crouching : bool = false
 
-var current_action : EPistolState.Actions = EPistolState.Actions.None
+var current_action : PlayerEquipmentPistol.EPistolActions = PlayerEquipmentPistol.EPistolActions.None
 
 var anim_move_blend_add_amount_property : String = "parameters/MoveBlendAdd/add_amount"
 var movement_blend_value : Vector2 = Vector2.ZERO
@@ -72,8 +72,8 @@ var sprint_move_blend_tween : Tween
 var next_cyl_cont : bool = false
 var prev_cyl_cont : bool = false
 
-signal on_unholster_anim_finish(slot : EquipmentManager.Equipment_Slot)
-signal on_holster_anim_finish(slot : EquipmentManager.Equipment_Slot)
+signal on_unholster_anim_finish(slot : EquipmentManager.EEquipmentSlot)
+signal on_holster_anim_finish(slot : EquipmentManager.EEquipmentSlot)
 
 @export_group("movement animation values")
 @export var horizontal_movement_blend_rate : float = 2
@@ -123,51 +123,51 @@ func _set_equipment_anim_variable(variable  : String, new_value : bool, right_ha
 func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	set( request_name, request_type)
 	
-func _on_pistol_action_started(new_action : EPistolState.Actions) -> void:
+func _on_pistol_action_started(new_action : PlayerEquipmentPistol.EPistolActions) -> void:
 	_finish_prev_pistol_action()
 	var two_handed : bool = pistol._is_two_handed_action(new_action)
 	var right_handed : bool = pistol._is_right_handed()
 	match new_action:
-		EPistolState.Actions.Fire:
+		PlayerEquipmentPistol.EPistolActions.Fire:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_fire_request, right_handed, two_handed )
-		EPistolState.Actions.DryFire:
+		PlayerEquipmentPistol.EPistolActions.DryFire:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_dry_fire_request, right_handed, two_handed)
-		EPistolState.Actions.CockHammer:
+		PlayerEquipmentPistol.EPistolActions.CockHammer:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_hammer_request, right_handed, two_handed)
-		EPistolState.Actions.EnterReload:
+		PlayerEquipmentPistol.EPistolActions.EnterReload:
 			_on_reload_change(true,false,false)
-		EPistolState.Actions.EnterReloadUncock:
+		PlayerEquipmentPistol.EPistolActions.EnterReloadUncock:
 			_on_reload_change(false,true,false)
-		EPistolState.Actions.ExitReload:
+		PlayerEquipmentPistol.EPistolActions.ExitReload:
 			_on_reload_change(false,false,true)
-		EPistolState.Actions.CylinderNext:
+		PlayerEquipmentPistol.EPistolActions.CylinderNext:
 			if(next_cyl_cont):
 				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_next_chamber_cont_request, right_handed, two_handed)
 				next_cyl_cont = false
 			else:
 				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_next_chamber_request, right_handed, two_handed)
-		EPistolState.Actions.CylinderPrev:
+		PlayerEquipmentPistol.EPistolActions.CylinderPrev:
 			if(prev_cyl_cont):
 				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_previous_chamber_cont_request, right_handed, two_handed)
 				prev_cyl_cont = false
 			else:
 				_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_previous_chamber_request, right_handed, two_handed)
-		EPistolState.Actions.Insert:
+		PlayerEquipmentPistol.EPistolActions.Insert:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_insert_shell_request, right_handed, two_handed)
-		EPistolState.Actions.Eject:
+		PlayerEquipmentPistol.EPistolActions.Eject:
 			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_reload_eject_shell_request, right_handed, two_handed)
-		EPistolState.Actions.FanFire:
+		PlayerEquipmentPistol.EPistolActions.FanFire:
 			_enter_fanning()
 		_:
 			pass
 	current_action = new_action
 
 func _finish_prev_pistol_action()->void:
-	if(current_action == EPistolState.Actions.EnterReload || current_action == EPistolState.Actions.EnterReloadUncock):
+	if(current_action == PlayerEquipmentPistol.EPistolActions.EnterReload || current_action == PlayerEquipmentPistol.EPistolActions.EnterReloadUncock):
 		enter_reload_done = true
 		_tween_move_blend_amount(reload_movement_blend_value, reload_movement_blend_tween_time)
 		return
-	elif (current_action == EPistolState.Actions.ExitReload):
+	elif (current_action == PlayerEquipmentPistol.EPistolActions.ExitReload):
 		exit_reload_done = true
 		return	
 	
@@ -175,30 +175,30 @@ func _finish_prev_pistol_action()->void:
 	exit_reload_done = false
 	enter_reload_done = false
 
-func _on_pistol_action_interrupted(_prev : EPistolState.Actions, _new : EPistolState.Actions) -> void:
-	if (_prev == EPistolState.Actions.None):
+func _on_pistol_action_interrupted(_prev : PlayerEquipmentPistol.EPistolActions, _new : PlayerEquipmentPistol.EPistolActions) -> void:
+	if (_prev == PlayerEquipmentPistol.EPistolActions.None):
 		return
 		
 	var two_handed : bool = pistol._is_two_handed_action(_prev)	
 	var right_handed : bool = pistol._is_right_handed()
 	#specific edge cases to compensate for hand going forward/back
-	if(_prev == EPistolState.Actions.Insert && _new == EPistolState.Actions.Eject):
+	if(_prev == PlayerEquipmentPistol.EPistolActions.Insert && _new == PlayerEquipmentPistol.EPistolActions.Eject):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_insert_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
-	elif(_prev == EPistolState.Actions.Eject && _new == EPistolState.Actions.Insert):
+	elif(_prev == PlayerEquipmentPistol.EPistolActions.Eject && _new == PlayerEquipmentPistol.EPistolActions.Insert):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_eject_shell_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 	
-	if(_prev == EPistolState.Actions.CylinderNext && _new == EPistolState.Actions.CylinderNext):
+	if(_prev == PlayerEquipmentPistol.EPistolActions.CylinderNext && _new == PlayerEquipmentPistol.EPistolActions.CylinderNext):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_next_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		next_cyl_cont = true
 
-	if(_prev == EPistolState.Actions.CylinderPrev && _new == EPistolState.Actions.CylinderPrev):
+	if(_prev == PlayerEquipmentPistol.EPistolActions.CylinderPrev && _new == PlayerEquipmentPistol.EPistolActions.CylinderPrev):
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		_set_equipment_oneshot_request(anim_colt_sm_path + anim_reload_previous_chamber_cont_request, right_handed, two_handed,AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		prev_cyl_cont = true
-	elif(_prev == EPistolState.Actions.EnterReloadUncock || _prev == EPistolState.Actions.EnterReload):
+	elif(_prev == PlayerEquipmentPistol.EPistolActions.EnterReloadUncock || _prev == PlayerEquipmentPistol.EPistolActions.EnterReload):
 		_on_enter_reload_interrupted()
-	elif(_prev == EPistolState.Actions.ExitReload):
+	elif(_prev == PlayerEquipmentPistol.EPistolActions.ExitReload):
 		_on_exit_reload_interrupted()
 		
 func _on_enter_reload_interrupted() -> void:
@@ -224,9 +224,9 @@ func _enter_fanning() -> void:
 func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 	if(enter || enter_uncock):
 		if(enter):
-			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(EPistolState.Actions.EnterReload))
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(PlayerEquipmentPistol.EPistolActions.EnterReload))
 		elif(enter_uncock):
-			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(EPistolState.Actions.EnterReloadUncock))
+			_set_equipment_oneshot_request(anim_colt_sm_path+ anim_enter_reload_request, pistol._is_right_handed(), pistol._is_two_handed_action(PlayerEquipmentPistol.EPistolActions.EnterReloadUncock))
 		enter_reload_done = false
 	elif(exit):
 		exit_reload_done = false
@@ -238,11 +238,10 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 
-func _holster_anim_finished(slot : EquipmentManager.Equipment_Slot):
+func _holster_anim_finished(slot : EquipmentManager.EEquipmentSlot):
 	on_holster_anim_finish.emit(slot)
 	
 func _toggle_equipment_visible(visible : bool) -> void:
-	print("toggle pistol visible ", visible)
 	pistol.owner.visible = visible
 
 func current_right_equipment_two_handed() -> bool:
@@ -250,7 +249,7 @@ func current_right_equipment_two_handed() -> bool:
 		return false
 	return pistol._is_currently_using_both_hands()
 
-func _unholster_anim_finished(slot : EquipmentManager.Equipment_Slot):
+func _unholster_anim_finished(slot : EquipmentManager.EEquipmentSlot):
 	on_unholster_anim_finish.emit(slot)
 	
 func _update_movement_blend_values(delta : float) -> void:
@@ -287,7 +286,7 @@ func _fire_crouch_oneshot(enter : bool) -> void:
 	
 	crouching = enter	
 		
-func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : bool ) -> void:
+func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool ) -> void:
 	if(node == null):
 		return
 
@@ -295,12 +294,12 @@ func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : b
 	var new_pos : Vector3 = Vector3.ZERO;
 	
 	match (new):
-		E_prop_bone_type.Left:
+		EPropBoneType.Left:
 			bone_to_reparent_to = left_prop_bone
-		E_prop_bone_type.Right:
+		EPropBoneType.Right:
 			bone_to_reparent_to = right_prop_bone
 			new_pos = right_prop_bone_pos
-		E_prop_bone_type.Global:
+		EPropBoneType.Global:
 			bone_to_reparent_to = global_prop_bone
 
 	node.reparent(bone_to_reparent_to,true)
@@ -311,7 +310,7 @@ func _reparent_to_prop_bone(node: Node3D,  new : E_prop_bone_type, reset_pos : b
 		node.rotation = Vector3.ZERO
 
 # called by anim notifies	
-func _reparent_gun_to_prop_bone(new_parent : E_prop_bone_type) -> void:
+func _reparent_gun_to_prop_bone(new_parent : EPropBoneType) -> void:
 	_reparent_to_prop_bone(pistol.owner, new_parent, true)
 
 #called by some anim notifies

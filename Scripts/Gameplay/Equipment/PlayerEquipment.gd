@@ -2,11 +2,9 @@
 class_name PlayerEquipment extends Node
 
 
-enum Equipment_Type {Permanent , Consumable, Temporary}
-
 @export_group("Equipment Details")
-@export var equip_type : Equipment_Type = Equipment_Type.Permanent
-@export var slot : EquipmentManager.Equipment_Slot = EquipmentManager.Equipment_Slot.Right
+@export var equip_type : EquipmentManager.EEquipmentType = EquipmentManager.EEquipmentType.Permanent
+@export var slot : EquipmentManager.EEquipmentSlot = EquipmentManager.EEquipmentSlot.Right
 
 @export var input_receiver : InputReceiver
 
@@ -50,7 +48,7 @@ func _can_be_holstered() -> bool:
 	return true
 
 func _is_right_handed() -> bool:
-	return slot == EquipmentManager.Equipment_Slot.Right
+	return slot == EquipmentManager.EEquipmentSlot.Right
 	
 func _is_currently_using_both_hands() -> bool:
 	return false

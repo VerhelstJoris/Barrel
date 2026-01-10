@@ -30,13 +30,13 @@ func _draw_children(_delta : float) -> void:
 		ImGui.Text("No Equipment Equipped")
 	
 
-func _on_new_equipped(new : PlayerEquipment, _slot : EquipmentManager.Equipment_Slot) -> void:
+func _on_new_equipped(new : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
 	if(new == null):
 		return
 
 	_find_current_equipment(_slot)	
 		
-func _find_current_equipment(_slot : EquipmentManager.Equipment_Slot) -> void:
+func _find_current_equipment(_slot : EquipmentManager.EEquipmentSlot) -> void:
 	var equipment : PlayerEquipment = equipment_manager.current_equipment[_slot]
 	if(equipment != null):
 		for child in equipment.get_children():
@@ -44,12 +44,12 @@ func _find_current_equipment(_slot : EquipmentManager.Equipment_Slot) -> void:
 				equipment_debug_node = child
 				break
 			
-func _on_old_unequipped(old : PlayerEquipment, _slot : EquipmentManager.Equipment_Slot) -> void:
+func _on_old_unequipped(old : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
 	if(old == null):
 		return
 
 	equipment_debug_node = null
 
 func _check_current_equipment() -> void:
-	_find_current_equipment(EquipmentManager.Equipment_Slot.Right)
+	_find_current_equipment(EquipmentManager.EEquipmentSlot.Right)
 		

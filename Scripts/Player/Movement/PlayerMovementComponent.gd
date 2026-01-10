@@ -4,8 +4,8 @@ class_name PlayerMovementComponent extends Node
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var current_queued_velocity : Vector3 = Vector3.ZERO
 
-signal on_player_movement_state_enter(new_state : PlayerStateMachine.E_StateName)
-signal on_player_movement_state_leave(new_state : PlayerStateMachine.E_StateName)
+signal on_player_movement_state_enter(new_state : PlayerStateMachine.EStateName)
+signal on_player_movement_state_leave(new_state : PlayerStateMachine.EStateName)
 
 @export_group("Movement Acceleration Settings")
 @export var horizontal_velocity_acceleration : float = 6.0
@@ -194,7 +194,7 @@ func _reset_gravity_vel() -> void:
 	current_gravity_velocity = 0
 	current_gravity_time = 0
 	
-func _is_current_movement_state(state : PlayerStateMachine.E_StateName) -> bool:
+func _is_current_movement_state(state : PlayerStateMachine.EStateName) -> bool:
 	var current_sm : PlayerStateMachine = state_machine._get_current_state_machine()
 	if(current_sm.states_map.has(state)):
 		return current_sm.states_map[state] == current_sm._get_current_active_state()

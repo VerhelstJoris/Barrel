@@ -80,9 +80,9 @@ func _can_currently_interact_with_hovered() -> bool:
 		return false
 	
 	match current_hovered_interactable.interact_data.type:
-		InteractableDataAsset.InteractionType.Equip:
+		InteractableDataAsset.EInteractionType.Equip:
 			#is left hand slot free?
-			return equipment_manager._is_equipment_slot_available(EquipmentManager.Equipment_Slot.Left)
+			return equipment_manager._is_equipment_slot_available(EquipmentManager.EEquipmentSlot.Left)
 		_:
 			pass
 
