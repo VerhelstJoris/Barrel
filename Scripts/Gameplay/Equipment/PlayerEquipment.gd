@@ -21,7 +21,7 @@ signal use_equipment_input(event: InputEvent)
 const equipment_node_name : String = "Node_Equipment"
 
 func _enter_tree() -> void:
-	owner.set_meta(equipment_node_name, self)
+	NodeUtils._add_node_meta_to_owner(equipment_node_name, self, self)
 
 func _ready() -> void:
 	use_equipment_input.connect(_try_use_equipment)

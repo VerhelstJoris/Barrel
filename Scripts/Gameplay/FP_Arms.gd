@@ -8,11 +8,9 @@ class_name FPArms extends Node3D
 @onready var FP_camera : Camera3D = %FP_Camera
 
 func _ready() -> void:
-	if(!colt_scene.has_meta(PlayerEquipment.equipment_node_name)):
-		push_error("FP Arms Cannot find equipment node via metadata")
-		return
 
-	pistol_equipment = colt_scene.get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipmentPistol
+
+	pistol_equipment = NodeUtils._retrieve_node_meta_from_self(PlayerEquipment.equipment_node_name, colt_scene)
 	arms_animation_bus.pistol = pistol_equipment
 
 

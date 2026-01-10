@@ -1,3 +1,4 @@
+@icon("res://DEBUG/Icons/Ico_Hand.png")
 class_name EquipmentManager extends Node
 
 @export var player : Player

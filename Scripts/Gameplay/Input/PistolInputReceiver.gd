@@ -7,11 +7,10 @@ var is_entering_reload : bool = false
 var is_exiting_reload : bool = false
 
 func _ready() -> void:
-	if(!get_owner().has_meta(PlayerEquipment.equipment_node_name)):
-		push_error("Pistol Input Receiver Cannot find equipment node via metadata")
+	colt_equipment = NodeUtils._retrieve_node_meta_from_owner(PlayerEquipment.equipment_node_name, self)
+	if(colt_equipment == null):
 		return
 
-	colt_equipment = get_owner().get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipmentPistol
 	colt_equipment.on_action_started.connect(_on_colt_action_started)
 	colt_equipment.on_unholstered.connect(_on_unholstered)
 	colt_equipment.on_holstered.connect(_on_holstered)
