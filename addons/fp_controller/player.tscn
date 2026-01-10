@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=62 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -39,6 +39,7 @@
 [ext_resource type="Animation" uid="uid://7pl5p8vtrqwe" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Uncrouch.res" id="31_tvmyk"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://duun6khj30hj5" path="res://Animations/Player/Character/WorldCamera/ABT_FP_Camera.tres" id="32_2fqq0"]
 [ext_resource type="Script" uid="uid://b4chk6pi8aunw" path="res://Scripts/Gameplay/Components/InteractorComponent.gd" id="36_wrold"]
+[ext_resource type="Script" uid="uid://eomy6oeduxxk" path="res://Scripts/Tools/ImGui Debug/Components/BarrelInteractorDebugNode.gd" id="40_2w6x1"]
 [ext_resource type="Script" uid="uid://cda6d6uhlpkmt" path="res://Scripts/Gameplay/Equipment/EquipmentManager.gd" id="40_ohefb"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_aufvi"]
@@ -255,7 +256,7 @@ target_position = Vector3(0, -1.5, 0)
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
-ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode")]
+ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode"), NodePath("../InteractorComponent/BarrelInteractorDebugNode")]
 auto_expanded = true
 metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 
@@ -285,9 +286,6 @@ horizontal_velocity_acceleration = 25.0
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
-
-[node name="MovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
-script = ExtResource("17_y16om")
 
 [node name="BaseMovementStateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
 unique_name_in_owner = true
@@ -362,8 +360,9 @@ override_velocity_acceleration = true
 override_velocity_acceleration_speed = 10.0
 metadata/_custom_type_script = "uid://dualuy1631ivy"
 
-[node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent"]
+[node name="PlayerMovementComponentDebugNode" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("mov_comp")]
 script = ExtResource("17_y16om")
+mov_comp = NodePath("..")
 metadata/_custom_type_script = "uid://rflwqd4b4ayy"
 
 [node name="StepInFrontRay" type="RayCast3D" parent="."]
@@ -398,6 +397,11 @@ interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
 interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
 equipment_manager = NodePath("../EquipmentManager")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
+
+[node name="BarrelInteractorDebugNode" type="Node" parent="InteractorComponent" node_paths=PackedStringArray("interactor")]
+script = ExtResource("40_2w6x1")
+interactor = NodePath("..")
+metadata/_custom_type_script = "uid://eomy6oeduxxk"
 
 [node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player", "HUD_equipment_input_arr")]
 unique_name_in_owner = true

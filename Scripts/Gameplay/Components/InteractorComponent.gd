@@ -2,11 +2,11 @@
 class_name InteractorComponent extends Node
 
 @export var interact_ray : RayCast3D
+var DEBUG_draw_target : bool = false
+
 
 @export var interactable_prompt : HUDInteractablePrompt
 @export var equipment_manager : EquipmentManager
-
-var interact_cast_result : Dictionary
 
 var current_hovered_object : Object = null
 var current_hovered_interactable : InteractableComponent = null
@@ -37,6 +37,15 @@ func _physics_process(_delta: float) -> void:
 		interactable_prompt._init_with_data(current_hovered_interactable)
 	else:
 		interactable_prompt._init_with_data(null)
+
+	if(DEBUG_draw_target):
+		if(interact_ray.is_colliding()):
+			DebugDraw3D.draw_sphere(interact_ray.get_collision_point(), 0.03, Color.RED)
+		else:
+			var forward_offset : Vector3 = (-interact_ray.get_global_basis().y * interact_ray.get_target_position().length())
+			DebugDraw3D.draw_sphere(interact_ray.get_global_position() + forward_offset, 0.03, Color.GREEN)
+
+
 
 func _can_currently_interact() -> bool:
 	return true

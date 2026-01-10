@@ -53,7 +53,7 @@ var main_equipment_last_use_time : float = 0
 @export var raycast_dist : float = 1500
 @export var base_damage : float = 100
 
-var debug_shot_valid : bool = false
+var DEBUG_always_fire : bool = false
 
 var insert_chamber_id: int:
 	get:
@@ -134,7 +134,7 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	
 	if(!started_action):
 		if _can_shoot():
-			if((current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired())|| debug_shot_valid):
+			if((current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired())|| DEBUG_always_fire):
 				_start_new_action(EPistolActions.Fire, EPistolState.HammerUncocked, 0)
 			else:
 				_start_new_action(EPistolActions.DryFire, EPistolState.HammerUncocked, 0)
@@ -167,7 +167,7 @@ func _fire_current_bullet() -> void:
 #region Firing	
 func _physics_fire_current_bullet() -> void:
 	var valid_bullet : bool = current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired()
-	if(valid_bullet || debug_shot_valid):
+	if(valid_bullet || DEBUG_always_fire):
 		if(valid_bullet):
 			current_bullets[current_chamber_id]._on_fired()
 		on_fired.emit()

@@ -20,9 +20,9 @@ func _draw_contents(_delta: float) -> void:
 	if(ImGui.Checkbox("Log Debug?", log_info)):
 		log_debug_info = log_info[0]
 		
-	var invalid_allowed : Array[bool] = [pistol.debug_shot_valid]
+	var invalid_allowed : Array[bool] = [pistol.DEBUG_always_fire]
 	if(ImGui.Checkbox("Always Fire?", invalid_allowed)):
-		pistol.debug_shot_valid = invalid_allowed[0]	
+		pistol.DEBUG_always_fire = invalid_allowed[0]	
 
 	ImGui.SeparatorText("Components")
 	super(_delta)

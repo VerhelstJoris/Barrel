@@ -1,22 +1,15 @@
 class_name PlayerMovementComponentDebugNode extends BarrelSceneDebugNode
 
-var player : Player
-var mov_comp : PlayerMovementComponent
-
-func _ready() -> void:
-	super()
-	await owner.ready
-	player = owner as Player
-	mov_comp = player.movement_component
+@export var mov_comp : PlayerMovementComponent
 	
 func _get_name() -> String:
-	return "Movement Component"
+	return mov_comp.name
 
 func _draw_contents(_delta : float) -> void:
 	super(_delta)
 	ImGui.SeparatorText("Input")
-	ImGui.Text("Movement Input: " + str(mov_comp.input_direction))
-	ImGui.Text("Sprint Input: " + str(mov_comp.sprint_down))
+	ImGui.Text("Movement Input: " + str(mov_comp.player.input_receiver.input_direction))
+	ImGui.Text("Sprint Input: " + str(mov_comp.player.input_receiver.sprint_down))
 
 	ImGui.SeparatorText("State")
 	ImGui.Text("Current Movement State: " + str(_get_current_state(mov_comp.state_machine).name))
