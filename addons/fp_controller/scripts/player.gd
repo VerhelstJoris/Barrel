@@ -40,7 +40,7 @@ func _handle_camera_motion() -> void:
 	camera_pivot.rotate_x(mouse_motion.y  * camera_sensitivity)
 
 	camera_pivot.rotation_degrees.x = clampf(
-		camera_pivot.rotation_degrees.x, -89.0, 89.0
+		camera_pivot.rotation_degrees.x, -85.0, 85.0
 	)
 
 	mouse_motion = Vector2.ZERO

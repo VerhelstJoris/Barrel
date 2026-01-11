@@ -394,6 +394,7 @@ script = ExtResource("30_p7if2")
 unique_name_in_owner = true
 script = ExtResource("36_wrold")
 interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
+extend_interact_length_max_mult = 1.6
 interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
 equipment_manager = NodePath("../EquipmentManager")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"

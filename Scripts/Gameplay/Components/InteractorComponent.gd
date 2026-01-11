@@ -1,12 +1,23 @@
 @icon("res://DEBUG/Icons/Ico_Interact.png")
 class_name InteractorComponent extends Node
 
+@export_group("Targeting")
 @export var interact_ray : RayCast3D
+var default_raycast_target : Vector3
 var DEBUG_draw_target : bool = false
 
 
+@export var extend_interact_length_on_look_down : bool = true
+@export var extend_interact_length_max_mult : float = 2.0
+@export var extend_interact_length_max_angle : float = 80.0
+
+@export_group("Components")
 @export var interactable_prompt : HUDInteractablePrompt
 @export var equipment_manager : EquipmentManager
+
+
+
+var current_look_angle: float = 0.0
 
 var current_hovered_object : Object = null
 var current_hovered_interactable : InteractableComponent = null
@@ -27,10 +38,13 @@ func _ready() -> void:
 		interactable_prompt._init_with_data(null)
 	if(!equipment_manager):
 		push_error("No equipment manager set on " , self.name , " on " , owner)
-	
+
+	default_raycast_target = interact_ray.target_position
+
 	on_interact_input_received.connect(_on_interact_input_received)
 	
 func _physics_process(_delta: float) -> void:
+	_decide_current_raycast_target_length()
 	_find_current_hovered_object()
 	#_check_for_display_promt()
 	if(_can_currently_interact_with_hovered()):
@@ -46,7 +60,18 @@ func _physics_process(_delta: float) -> void:
 			DebugDraw3D.draw_sphere(interact_ray.get_global_position() + forward_offset, 0.03, Color.GREEN)
 
 
-
+func _decide_current_raycast_target_length() -> void:
+	
+	current_look_angle= player.player_cam.get_global_rotation_degrees().x
+	#extend the target length if we're looking down to ensure we can pick things off the ground
+	if(current_look_angle < 0):
+		var abs_angle : float = abs(current_look_angle)
+		var alpha : float = (abs_angle/ max(abs_angle,extend_interact_length_max_angle))
+		interact_ray.target_position = lerp(default_raycast_target, default_raycast_target * extend_interact_length_max_mult, alpha)
+	else:
+		interact_ray.target_position = default_raycast_target
+	
+	
 func _can_currently_interact() -> bool:
 	return true
 	

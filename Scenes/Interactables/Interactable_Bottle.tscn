@@ -82,7 +82,7 @@ metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
 script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
-min_collision_impulse = 0.2
+min_collision_impulse = 500.0
 on_death_vfx = ExtResource("6_6pqks")
 death_vfx_spawn_node = NodePath("../DeathVFX_Point")
 

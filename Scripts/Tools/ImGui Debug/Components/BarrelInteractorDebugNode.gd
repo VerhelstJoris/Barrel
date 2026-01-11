@@ -17,6 +17,10 @@ func _draw_contents(_delta: float) -> void:
 	if(ImGui.Checkbox("Draw Interactor Target?", draw_target)):
 		interactor.DEBUG_draw_target = draw_target[0]
 		
+		
+	ImGui.Text("Current Ray Length %f " % interactor.interact_ray.target_position.length())	
+	ImGui.Text("Current Look Angle %f " % interactor.current_look_angle)	
+
 	super(_delta)
 
 func _draw_interactable_data_info(data : InteractableDataAsset)	-> void:
