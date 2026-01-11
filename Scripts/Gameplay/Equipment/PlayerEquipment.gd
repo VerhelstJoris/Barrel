@@ -37,6 +37,7 @@ func _on_equipped(in_player : Player):
 	on_equipped.emit()
 	
 func _on_unequipped():
+	player = null
 	on_unequipped.emit()
 	
 func _try_use_equipment(_event : InputEvent):

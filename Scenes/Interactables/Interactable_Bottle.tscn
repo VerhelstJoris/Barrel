@@ -64,6 +64,7 @@ skeleton = NodePath("../..")
 surface_material_override/0 = ExtResource("1_xweuc")
 
 [node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "input_receiver")]
+process_mode = 1
 script = ExtResource("1_471q5")
 rigid_body = NodePath("..")
 hitboxes = [NodePath("../HitboxComponent")]

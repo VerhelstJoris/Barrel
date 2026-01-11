@@ -78,7 +78,7 @@ func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> voi
 
 	if(interact_data.alternative_interaction_item != null):
 		equipment_to_pickup = interact_data.alternative_interaction_item.instantiate()
-		_interactor.player.arms.add_child(equipment_to_pickup)
+		_interactor.player.arms.add_child(equipment_to_pickup.owner)
 	elif(interact_data.pick_up_self):
 		if(!owner.has_meta(PlayerEquipment.equipment_node_name)):
 			push_error("Interactable Component Cannot find equipment node via metadata")
