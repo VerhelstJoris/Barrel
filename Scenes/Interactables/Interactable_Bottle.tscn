@@ -63,12 +63,13 @@ mesh = ExtResource("1_bt6bh")
 skeleton = NodePath("../..")
 surface_material_override/0 = ExtResource("1_xweuc")
 
-[node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "input_receiver")]
+[node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "collision_shape_for_drop_test", "input_receiver")]
 process_mode = 1
 script = ExtResource("1_471q5")
 rigid_body = NodePath("..")
 hitboxes = [NodePath("../HitboxComponent")]
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
+collision_shape_for_drop_test = NodePath("../CollisionShape3D")
 equip_type = 2
 slot = 1
 input_receiver = NodePath("../InputReceiver")
