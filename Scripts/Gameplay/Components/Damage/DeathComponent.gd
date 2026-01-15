@@ -7,6 +7,8 @@ class_name DeathComponent extends Node
 @export var min_direct_damage : float = 5.0
 @export var take_hitbox_collision_damage : bool = true
 @export var min_collision_impulse : float = 5.0
+@export var min_collision_speed : float = 5.0
+@export var need_impulse_and_speed_requirements : bool = false
 
 @export var on_death_vfx : PackedScene
 @export var death_vfx_spawn_node : Node3D
@@ -28,10 +30,13 @@ func _on_direct_damage(_global_pos : Vector3, _normal : Vector3, _other_object :
 	_die()
 
 func _on_collision_damage( _global_pos : Vector3, _normal : Vector3, hit_impulse : Vector3, _hit_velocity : Vector3, _other_object : Object) -> void:
-	if(hit_impulse.length() < min_collision_impulse):
-		return
-		
-	_die()	
+	var impulse_met : bool = hit_impulse.length() > min_collision_impulse
+	var speed_met : bool = _hit_velocity.length() > min_collision_speed
+	
+	if(need_impulse_and_speed_requirements && speed_met && impulse_met):
+		_die()
+	elif(speed_met || impulse_met):
+		_die()
 		
 func _die():
 	if(on_death_vfx && death_vfx_spawn_node):

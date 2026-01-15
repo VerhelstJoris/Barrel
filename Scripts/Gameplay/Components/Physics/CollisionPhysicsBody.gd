@@ -11,7 +11,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		var global_pos: Vector3 = state.get_contact_collider_position(col_id)
 		var local_normal: Vector3 = state.get_contact_local_normal(col_id)
 		var impulse : Vector3 = state.get_contact_impulse(col_id)
-		var velocity : Vector3 = state.get_contact_collider_velocity_at_position(col_id)
+		var velocity : Vector3 = state.get_contact_local_velocity_at_position(col_id)
 		var col_rid : RID = state.get_contact_collider(col_id)
 		var other_obj : RID = state.get_contact_collider_object(col_id)
 		

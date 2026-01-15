@@ -322,45 +322,45 @@ transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, 
 transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, -4.3711385e-08, -0.35899997, 2, 13.293)
 
 [node name="Label_05" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 2.603346, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 2.603346, 2.6576247, 9.79066)
 text = "0.5m"
 font_size = 40
 
 [node name="Label_12" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 0, 2.658, 12.791)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 0, 3.658, 12.791)
 text = "Physics Props Drop Test"
 font_size = 40
 
 [node name="Label_06" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 1.6033461, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 1.6033461, 2.6576247, 9.79066)
 text = "1m"
 font_size = 40
 
 [node name="Label_07" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 0.6033461, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, 0.6033461, 2.6576247, 9.79066)
 text = "1.5m"
 font_size = 40
 
 [node name="Label_08" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -0.3966539, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -0.3966539, 2.6576247, 9.79066)
 text = "2m
 "
 font_size = 40
 
 [node name="Label_09" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -1.3966539, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -1.3966539, 2.6576247, 9.79066)
 text = "2.5m
 "
 font_size = 40
 
 [node name="Label_10" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -2.396654, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -2.396654, 2.6576247, 9.79066)
 text = "3m
 "
 font_size = 40
 
 [node name="Label_11" type="Label3D" parent="Obstacles/PhysicsPropTesting"]
-transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -3.396654, 1.6576246, 9.79066)
+transform = Transform3D(-1, 0, -8.940697e-08, 0, 1, 0, 8.940697e-08, 0, -1, -3.396654, 2.6576247, 9.79066)
 text = "3.5m
 "
 font_size = 40
