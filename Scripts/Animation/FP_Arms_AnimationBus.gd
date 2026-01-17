@@ -56,6 +56,7 @@ var colt_unholstered : bool  = false
 var colt_fan_hammer : bool   = false
 var fanning_hammer_anim_id : int = 1
 var throwable_unholstered : bool = false
+var throwable_aiming : bool = false
 
 var sprinting : bool = false
 var crouching : bool = false
