@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="InputActionMappingContext" load_steps=11 format=3 uid="uid://d4jhubg04nj20"]
+
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_5mw3x"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_w1bgp"]
+[ext_resource type="Resource" uid="uid://cwp0xmw1kgeft" path="res://Data/Input/Equipment/IA_Throw.tres" id="3_w3lym"]
+[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="4_orfdq"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="5_rvxal"]
+[ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="6_v5u8m"]
+
+[sub_resource type="Resource" id="Resource_g3lih"]
+script = ExtResource("2_w1bgp")
+display_string = "Throw (Release)"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_1n50k"]
+script = ExtResource("2_w1bgp")
+display_string = "Cancel"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_yrv68"]
+script = ExtResource("5_rvxal")
+signal_node = NodePath("../PlayerEquipmentThrowable")
+signal_name = "use_equipment_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_yhxqx"]
+script = ExtResource("5_rvxal")
+signal_node = NodePath("../PlayerEquipmentThrowable")
+signal_name = "drop_equipment_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[resource]
+script = ExtResource("6_v5u8m")
+input_dictionary = Dictionary[ExtResource("1_5mw3x"), ExtResource("5_rvxal")]({
+ExtResource("3_w3lym"): SubResource("Resource_yrv68"),
+ExtResource("4_orfdq"): SubResource("Resource_yhxqx")
+})
+description_dictionary = Dictionary[ExtResource("1_5mw3x"), ExtResource("2_w1bgp")]({
+ExtResource("3_w3lym"): SubResource("Resource_g3lih"),
+ExtResource("4_orfdq"): SubResource("Resource_1n50k")
+})
+metadata/_custom_type_script = "uid://1r2i2aponh4x"

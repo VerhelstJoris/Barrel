@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="InputActionMappingContext" load_steps=24 format=3 uid="uid://diyyoq7rn8tpr"]
+
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_m8h8v"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_yf5g0"]
+[ext_resource type="Resource" uid="uid://by15g85r6kgap" path="res://Data/Input/Equipment/IA_Fire.tres" id="3_f3lc7"]
+[ext_resource type="Resource" uid="uid://bs0loyw07mm2d" path="res://Data/Input/Equipment/IA_Enter_Reload.tres" id="4_dniql"]
+[ext_resource type="Resource" uid="uid://dk7vsktkhily" path="res://Data/Input/Equipment/IA_Eject_Shell.tres" id="5_vw1c0"]
+[ext_resource type="Resource" uid="uid://dsm4d3qqcepjo" path="res://Data/Input/Equipment/IA_Insert_Shell.tres" id="6_ujyuu"]
+[ext_resource type="Resource" uid="uid://c4vgprx6fkfvx" path="res://Data/Input/Equipment/IA_Exit_Reload.tres" id="7_erkwk"]
+[ext_resource type="Resource" uid="uid://di4848nuwx6v2" path="res://Data/Input/Equipment/IA_Cycle_Cylinder_Next.tres" id="8_uhggy"]
+[ext_resource type="Resource" uid="uid://d2vsm1pv2xlr" path="res://Data/Input/Equipment/IA_Cycle_Cylinder_Prev.tres" id="9_i27dl"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="10_aout4"]
+[ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="11_wfxcm"]
+
+[sub_resource type="Resource" id="Resource_uf43g"]
+script = ExtResource("2_yf5g0")
+display_string = "Fire"
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_d6oc2"]
+script = ExtResource("2_yf5g0")
+display_string = "Reload"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_t7f62"]
+script = ExtResource("2_yf5g0")
+display_string = "Eject"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_r2dco"]
+script = ExtResource("2_yf5g0")
+display_string = "Insert"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_weol6"]
+script = ExtResource("2_yf5g0")
+display_string = "Exit"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_n1t4g"]
+script = ExtResource("2_yf5g0")
+display_string = "Cycle"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_px8xe"]
+script = ExtResource("2_yf5g0")
+display_string = "Cycle"
+two_handed = true
+metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
+
+[sub_resource type="Resource" id="Resource_2hcnp"]
+script = ExtResource("10_aout4")
+signal_node = NodePath("../PlayerEquipmentPistol")
+signal_name = "on_try_insert_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_itbd8"]
+script = ExtResource("10_aout4")
+signal_node = NodePath("../PlayerEquipmentPistol")
+signal_name = "on_try_eject_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_yq7b0"]
+script = ExtResource("10_aout4")
+signal_node = NodePath("../PlayerEquipmentPistol")
+signal_name = "on_try_cylinder_next_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_0tuoe"]
+script = ExtResource("10_aout4")
+signal_node = NodePath("../PlayerEquipmentPistol")
+signal_name = "on_try_cylinder_prev_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_8w4rf"]
+script = ExtResource("10_aout4")
+signal_node = NodePath("../PlayerEquipmentPistol")
+signal_name = "on_try_exit_reload_input"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[resource]
+script = ExtResource("11_wfxcm")
+input_dictionary = Dictionary[ExtResource("1_m8h8v"), ExtResource("10_aout4")]({
+ExtResource("6_ujyuu"): SubResource("Resource_2hcnp"),
+ExtResource("5_vw1c0"): SubResource("Resource_itbd8"),
+ExtResource("8_uhggy"): SubResource("Resource_yq7b0"),
+ExtResource("9_i27dl"): SubResource("Resource_0tuoe"),
+ExtResource("7_erkwk"): SubResource("Resource_8w4rf")
+})
+description_dictionary = Dictionary[ExtResource("1_m8h8v"), ExtResource("2_yf5g0")]({
+ExtResource("3_f3lc7"): SubResource("Resource_uf43g"),
+ExtResource("4_dniql"): SubResource("Resource_d6oc2"),
+ExtResource("5_vw1c0"): SubResource("Resource_t7f62"),
+ExtResource("6_ujyuu"): SubResource("Resource_r2dco"),
+ExtResource("7_erkwk"): SubResource("Resource_weol6"),
+ExtResource("8_uhggy"): SubResource("Resource_n1t4g"),
+ExtResource("9_i27dl"): SubResource("Resource_px8xe")
+})
+metadata/_custom_type_script = "uid://1r2i2aponh4x"

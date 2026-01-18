@@ -5,3 +5,4 @@
 [resource]
 script = ExtResource("1_jbik6")
 input_string = "equipment_secondary_use"
+trigger_on_released = true

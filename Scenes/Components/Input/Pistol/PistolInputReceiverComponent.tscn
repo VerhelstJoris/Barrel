@@ -1,12 +1,35 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8oxrvwv5gxo3"]
+[gd_scene load_steps=3 format=3 uid="uid://3cbfrm7leivv"]
 
-[ext_resource type="Script" uid="uid://f8afy3pyt1jr" path="res://Scripts/Gameplay/Input/PistolInputReceiver.gd" id="1_7jwf2"]
-[ext_resource type="Script" uid="uid://bh4jyg37xvxq7" path="res://Scripts/Tools/ImGui Debug/Components/PistolInputReceiverDebugNode.gd" id="2_lufih"]
+[ext_resource type="Script" uid="uid://lyu3pqqeaklk" path="res://Scripts/Tools/ImGui Debug/Components/InputReceiverDebugNode.gd" id="2_7jwf2"]
+
+[sub_resource type="GDScript" id="GDScript_acf64"]
+script/source = "class_name PistolInputReceiver extends InputReceiver
+
+@export var input_reload_dictionary : Dictionary[InputActionInfo, ExposedSignalConnector]
+
+var colt_equipment : PlayerEquipmentPistol = null
+var is_entering_reload : bool = false
+var is_exiting_reload : bool = false
+
+func _ready() -> void:
+	super()
+	colt_equipment = NodeUtils._retrieve_node_meta_from_owner(PlayerEquipment.equipment_node_name, self)
+	if(colt_equipment == null):
+		return
+		
+func _on_colt_action_started(_action : PlayerEquipmentPistol.EPistolActions) -> void:
+	#is_exiting_reload = false
+	#if(action == PlayerEquipmentPistol.EPistolActions.EnterReload || action == PlayerEquipmentPistol.EPistolActions.EnterReloadUncock):
+	#	is_entering_reload = true
+	#elif (action == PlayerEquipmentPistol.EPistolActions.ExitReload):
+	#	is_exiting_reload = true
+	return
+		"
 
 [node name="PistolInputReceiverComponent" type="Node"]
-script = ExtResource("1_7jwf2")
+script = SubResource("GDScript_acf64")
 metadata/_custom_type_script = "uid://f8afy3pyt1jr"
 
 [node name="PistolInputReceiverDebugNode" type="Node" parent="."]
-script = ExtResource("2_lufih")
+script = ExtResource("2_7jwf2")
 metadata/_custom_type_script = "uid://bh4jyg37xvxq7"

@@ -1,0 +1,92 @@
+[gd_resource type="Resource" script_class="InputActionMappingContext" load_steps=25 format=3 uid="uid://crg7w5jka1q2l"]
+
+[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_38a4m"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_d2ut6"]
+[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="3_x8u4y"]
+[ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="4_hwpox"]
+[ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="5_sfs6c"]
+[ext_resource type="Resource" uid="uid://dpdcr67h4kfen" path="res://Data/Input/Movement/IA_Move_Left.tres" id="6_rg4q1"]
+[ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="7_d3gbb"]
+[ext_resource type="Resource" uid="uid://dyfgw7gi8do1w" path="res://Data/Input/Player/IA_Holster.tres" id="8_e3ggu"]
+[ext_resource type="Resource" uid="uid://c74mnvf3pkusb" path="res://Data/Input/Player/IA_Quick_Unholster.tres" id="9_c1ek8"]
+[ext_resource type="Resource" uid="uid://coeb3qrcnhyj2" path="res://Data/Input/Movement/IA_Move_Sprint.tres" id="10_y4mea"]
+[ext_resource type="Resource" uid="uid://dxmjit07qci5j" path="res://Data/Input/Movement/IA_Move_Crouch.tres" id="11_hf58n"]
+[ext_resource type="Resource" uid="uid://bfw1mhriic6yq" path="res://Data/Input/Movement/IA_Move_Jump.tres" id="12_53akb"]
+[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="13_jd4c1"]
+[ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="14_u6n3u"]
+
+[sub_resource type="Resource" id="Resource_gd45c"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_5af7x"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_62dvf"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_y16om"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_movement_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_nycc1"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath("../EquipmentManager")
+signal_name = "on_holster_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_bjt1r"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath("../EquipmentManager")
+signal_name = "on_quick_unholster_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_jajtq"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_sprint_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_w7r7y"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_crouch_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_hwrxm"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath(".")
+signal_name = "on_jump_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[sub_resource type="Resource" id="Resource_ohefb"]
+script = ExtResource("3_x8u4y")
+signal_node = NodePath("../InteractorComponent")
+signal_name = "on_interact_input_received"
+metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
+
+[resource]
+script = ExtResource("14_u6n3u")
+input_dictionary = Dictionary[ExtResource("1_38a4m"), ExtResource("3_x8u4y")]({
+ExtResource("4_hwpox"): SubResource("Resource_gd45c"),
+ExtResource("5_sfs6c"): SubResource("Resource_5af7x"),
+ExtResource("6_rg4q1"): SubResource("Resource_62dvf"),
+ExtResource("7_d3gbb"): SubResource("Resource_y16om"),
+ExtResource("8_e3ggu"): SubResource("Resource_nycc1"),
+ExtResource("9_c1ek8"): SubResource("Resource_bjt1r"),
+ExtResource("10_y4mea"): SubResource("Resource_jajtq"),
+ExtResource("11_hf58n"): SubResource("Resource_w7r7y"),
+ExtResource("12_53akb"): SubResource("Resource_hwrxm"),
+ExtResource("13_jd4c1"): SubResource("Resource_ohefb")
+})
+metadata/_custom_type_script = "uid://1r2i2aponh4x"

@@ -26,8 +26,8 @@ func _physics_process(_delta: float) -> void:
 func _on_start_unholster():
 	super()
 	player.arms.arms_animation_bus.throwable_unholstered = true
-	if(input_receiver):
-		input_receiver._change_HUD_available_actions(input_receiver.input_dictionary.keys(), self)
+	#if(input_receiver):
+		#input_receiver._change_HUD_available_actions(input_receiver.input_dictionary.keys(), self)
 		
 func _on_start_holster():
 	super()
@@ -65,10 +65,12 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	match current_throwable_state:
 		EThrowableEquipmentState.Default:
 			if(_can_enter_aiming_mode(_event)):
+				player.arms.arms_animation_bus.throwable_aiming = true
 				#enter aiming
 				pass
 		EThrowableEquipmentState.Aiming:
 			if(_can_currently_throw(_event)):
+				player.arms.arms_animation_bus.throwable_aiming = false
 				#actually throw
 				pass
 				

@@ -9,8 +9,6 @@ func _connect_input_signals_to_functions():
 	on_jump_input_received.connect(_on_jump_input)
 	on_movement_input_received.connect(_on_movement_input)
 
-
-
 signal on_sprint_input_received(event: InputEvent)
 signal on_player_sprint_toggle(new_val)
 

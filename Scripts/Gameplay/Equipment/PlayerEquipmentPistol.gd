@@ -53,6 +53,8 @@ var main_equipment_last_use_time : float = 0
 @export var raycast_dist : float = 1500
 @export var base_damage : float = 100
 
+const reloading_input_context_name : String = "Reloading"
+
 var DEBUG_always_fire : bool = false
 
 var insert_chamber_id: int:
@@ -233,10 +235,19 @@ func _enter_reload_state() -> void:
 		action = EPistolActions.EnterReload
 	else:
 		action = EPistolActions.EnterReloadUncock
+	
+	if(input_receiver):
+		input_receiver._change_current_input_mapping_context(reloading_input_context_name,self , false)
+		input_receiver._enable_current_HUD_actions(self, false)
 
 	_start_new_action( action, EPistolState.Reloading ,1)
 	
 func _exit_reload_state() -> void:
+	if(input_receiver):
+		input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name,self , false)
+		input_receiver._enable_current_HUD_actions(self, false)
+
+
 	_start_new_action( EPistolActions.ExitReload, EPistolState.ReadyToFire, 0)
 	
 func _start_new_action(new_action: EPistolActions, new_state: EPistolState, cylinder_rotations : int) -> void:
@@ -265,7 +276,16 @@ func _enable_changing_states(enabled : bool) -> void:
 	can_proceed_state = enabled
 	can_interrupt_into_next_state = false
 	can_interrupt_fire = false
+	_on_previous_action_finished(current_action)
 	current_action = EPistolActions.None
+	
+func _on_previous_action_finished(action: EPistolActions)-> void:
+	match action:
+		EPistolActions.EnterReload, EPistolActions.EnterReloadUncock, EPistolActions.ExitReload:
+			if(input_receiver):
+				input_receiver._enable_current_HUD_actions(self, true)
+		_:
+			pass
 	
 func _spawn_bullet_for_chamber() -> void:
 	if(bullet_scene.can_instantiate()):
@@ -331,11 +351,15 @@ func _can_be_holstered() -> bool:
 func _on_start_holster():
 	super()
 	player.arms.arms_animation_bus.colt_unholstered = false
-
+	if(input_receiver):
+		input_receiver._change_HUD_available_actions([],self)
+		
 func _on_start_unholster():
 	super()
 	player.arms.arms_animation_bus.colt_unholstered = true
-	
+	if(input_receiver):
+		input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name,self)
+		
 func _is_currently_using_both_hands() -> bool:
 	return _is_two_handed_action(current_action)
 

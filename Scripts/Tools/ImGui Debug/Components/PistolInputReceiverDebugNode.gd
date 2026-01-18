@@ -1,1 +1,0 @@
-class_name PistolInputReceiverDebugNode extends InputReceiverDebugNode

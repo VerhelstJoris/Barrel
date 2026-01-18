@@ -1,39 +1,29 @@
-[gd_scene load_steps=62 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=42 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
 [ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="Script" uid="uid://col10avn6eftl" path="res://Scripts/UI/OutlineCompositorEffect.gd" id="2_yfo8f"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
-[ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="3_gd45c"]
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
-[ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="4_5af7x"]
-[ext_resource type="Resource" uid="uid://dpdcr67h4kfen" path="res://Data/Input/Movement/IA_Move_Left.tres" id="5_62dvf"]
 [ext_resource type="Shader" uid="uid://cuppwen4i4k7j" path="res://Materials/Shaders/UI/Screen_Vignette.gdshader" id="5_bn61v"]
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
-[ext_resource type="Resource" uid="uid://cu3mcxv3qvrtf" path="res://Data/Input/Movement/IA_Move_Right.tres" id="6_y16om"]
 [ext_resource type="PackedScene" uid="uid://cooy44h1jqbd2" path="res://Scenes/UI/HUD/HUD_Reticle.tscn" id="7_2fqq0"]
 [ext_resource type="PackedScene" uid="uid://eoo0jp2ntvw5" path="res://Scenes/UI/HUD/HUD_Interactable_Hovered.tscn" id="8_n1qck"]
 [ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
-[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="14_a8wmt"]
+[ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="14_krggn"]
+[ext_resource type="Resource" uid="uid://crg7w5jka1q2l" path="res://Data/Input/Movement/IMC_Movement.tres" id="15_4rh7j"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
-[ext_resource type="Resource" uid="uid://coeb3qrcnhyj2" path="res://Data/Input/Movement/IA_Move_Sprint.tres" id="16_nycc1"]
 [ext_resource type="Script" uid="uid://dgvffrq1m604v" path="res://Scripts/Player/Movement/PlayerMovementComponent.gd" id="16_y16om"]
-[ext_resource type="Resource" uid="uid://dxmjit07qci5j" path="res://Data/Input/Movement/IA_Move_Crouch.tres" id="17_bjt1r"]
 [ext_resource type="Script" uid="uid://rflwqd4b4ayy" path="res://Scripts/Tools/ImGui Debug/Components/PlayerMovementComponentDebugNode.gd" id="17_y16om"]
-[ext_resource type="Resource" uid="uid://bfw1mhriic6yq" path="res://Data/Input/Movement/IA_Move_Jump.tres" id="18_w7r7y"]
 [ext_resource type="Script" uid="uid://cpn2yvmmj6a2f" path="res://Scripts/Player/Movement/MovementStates/MovementState_Walk.gd" id="19_bjt1r"]
 [ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
-[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="20_5af7x"]
-[ext_resource type="Resource" uid="uid://dyfgw7gi8do1w" path="res://Data/Input/Player/IA_Holster.tres" id="20_62dvf"]
 [ext_resource type="Script" uid="uid://dyjuhb41dawo7" path="res://Scripts/Player/Movement/MovementStates/MovementState_Sprint.gd" id="20_jajtq"]
-[ext_resource type="Resource" uid="uid://c74mnvf3pkusb" path="res://Data/Input/Player/IA_Quick_Unholster.tres" id="21_62dvf"]
 [ext_resource type="Script" uid="uid://ck5a5wfg6fqxy" path="res://Scripts/Player/Movement/MovementStates/MovementState_Fall.gd" id="23_nycc1"]
 [ext_resource type="Script" uid="uid://dkwfkuralqxts" path="res://Scripts/Player/Movement/MovementStates/Grounded/MovementState_Grounded.gd" id="24_bjt1r"]
 [ext_resource type="Script" uid="uid://y04e5atcb2bu" path="res://Scripts/Player/Movement/MovementStates/MovementState_Crouch.gd" id="25_hwrxm"]
 [ext_resource type="Script" uid="uid://d15my068lx2hx" path="res://Scripts/Player/Movement/MovementStates/MovementState_Jump.gd" id="25_jajtq"]
-[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="25_kw8h7"]
 [ext_resource type="Animation" uid="uid://dlgu11excnqap" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Crouch.res" id="30_2707o"]
 [ext_resource type="Script" uid="uid://bt31heev5y0mu" path="res://Scripts/Animation/FP_AnimationBus.gd" id="30_p7if2"]
 [ext_resource type="Animation" uid="uid://7pl5p8vtrqwe" path="res://Animations/Player/Character/WorldCamera/A_FP_Camera_Uncrouch.res" id="31_tvmyk"]
@@ -78,66 +68,6 @@ shader_parameter/outer_radius = 1.0
 shader_parameter/edge_mult = 0.735
 shader_parameter/uv_offset = Vector2(0, 0.15)
 shader_parameter/vignette_colour = Vector3(0.08, 0.03, 0)
-
-[sub_resource type="Resource" id="Resource_gd45c"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_movement_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_5af7x"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_movement_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_62dvf"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_movement_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_y16om"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_movement_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_nycc1"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath("../EquipmentManager")
-signal_name = "on_holster_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_bjt1r"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath("../EquipmentManager")
-signal_name = "on_quick_unholster_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_jajtq"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_sprint_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_w7r7y"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_crouch_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_hwrxm"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath(".")
-signal_name = "on_jump_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_ohefb"]
-script = ExtResource("20_5af7x")
-signal_node = NodePath("../InteractorComponent")
-signal_name = "on_interact_input_received"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
 
 [sub_resource type="Curve" id="Curve_hwrxm"]
 _data = [Vector2(0, 0), 0.0, 2.93445, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -266,17 +196,8 @@ _player = NodePath("..")
 [node name="InputReceiverComponent" parent="." instance=ExtResource("19_gd45c")]
 script = ExtResource("10_tvmyk")
 movement_deadzone = Vector2(0.1, 0.1)
-input_dictionary = Dictionary[ExtResource("14_a8wmt"), ExtResource("20_5af7x")]({
-ExtResource("3_gd45c"): SubResource("Resource_gd45c"),
-ExtResource("4_5af7x"): SubResource("Resource_5af7x"),
-ExtResource("5_62dvf"): SubResource("Resource_62dvf"),
-ExtResource("6_y16om"): SubResource("Resource_y16om"),
-ExtResource("20_62dvf"): SubResource("Resource_nycc1"),
-ExtResource("21_62dvf"): SubResource("Resource_bjt1r"),
-ExtResource("16_nycc1"): SubResource("Resource_jajtq"),
-ExtResource("17_bjt1r"): SubResource("Resource_w7r7y"),
-ExtResource("18_w7r7y"): SubResource("Resource_hwrxm"),
-ExtResource("25_kw8h7"): SubResource("Resource_ohefb")
+input_contexts = Dictionary[String, ExtResource("14_krggn")]({
+"Default": ExtResource("15_4rh7j")
 })
 
 [node name="PlayerMovementComponent" type="Node" parent="."]
