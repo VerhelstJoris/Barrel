@@ -432,6 +432,7 @@ bullet_attachment_point = NodePath("../Colt_Saa_Rig/Skeleton3D/BulletAttachmentP
 bullet_reparent_point = NodePath("../Colt_Saa_Rig/Skeleton3D/BulletReparentPoint")
 cylinder_attachment = NodePath("../Colt_Saa_Rig/Skeleton3D/CylinderAttachment")
 muzzle_point = NodePath("../Colt_Saa_Rig/Skeleton3D/MuzzlePoint")
+fan_hammer_max_delay = 0.25
 raycast_dist = 100.0
 input_receiver = NodePath("../InputReceiver")
 metadata/_custom_type_script = "uid://3hbliyaetwxw"
@@ -439,7 +440,7 @@ metadata/_custom_type_script = "uid://3hbliyaetwxw"
 [node name="BarrelEquipmentPistolDebug" type="Node" parent="PlayerEquipmentPistol" node_paths=PackedStringArray("pistol", "ChildNodesToDisplay")]
 script = ExtResource("29_3sg0a")
 pistol = NodePath("..")
-ChildNodesToDisplay = [NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode"), NodePath(""), null, NodePath("../../Colt_VFX_Manager/ColtVFXManagerDebugNode")]
+ChildNodesToDisplay = [NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHatchModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverTriggerCacheModifier/BarrelBoneCacheModifierDebugNode"), NodePath("../../Colt_Saa_Rig/Skeleton3D/SkeletonRevolverHammerModifier/BarrelBoneCacheModifierDebugNode"), null, null, NodePath("../../Colt_VFX_Manager/ColtVFXManagerDebugNode")]
 auto_expanded = true
 metadata/_custom_type_script = "uid://binu307e8ex3o"
 
