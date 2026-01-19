@@ -14,6 +14,9 @@ enum EThrowableEquipmentState{ Default, Aiming, Throwing}
 
 var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
 
+const aiming_input_context_name : String = "Aiming"
+
+
 func _ready() -> void:
 	super()
 	drop_equipment_input.connect(_try_drop_equipment)
@@ -26,8 +29,6 @@ func _physics_process(_delta: float) -> void:
 func _on_start_unholster():
 	super()
 	player.arms.arms_animation_bus.throwable_unholstered = true
-	#if(input_receiver):
-		#input_receiver._change_HUD_available_actions(input_receiver.input_dictionary.keys(), self)
 		
 func _on_start_holster():
 	super()
@@ -49,6 +50,8 @@ func _on_equipped(_player : Player) -> void:
 		mesh.set_layer_mask_value(1,false)
 		mesh.set_layer_mask_value(2,true)
 		
+	_change_throwable_state(EThrowableEquipmentState.Default)	
+		
 func _on_unequipped():
 	input_receiver.on_available_equipment_actions_cleared.emit(slot)
 	player.arms.arms_animation_bus.throwable_unholstered = false
@@ -65,13 +68,9 @@ func _try_use_equipment(_event : InputEvent) -> void:
 	match current_throwable_state:
 		EThrowableEquipmentState.Default:
 			if(_can_enter_aiming_mode(_event)):
-				player.arms.arms_animation_bus.throwable_aiming = true
-				#enter aiming
-				pass
+				_change_throwable_state(EThrowableEquipmentState.Aiming)
 		EThrowableEquipmentState.Aiming:
 			if(_can_currently_throw(_event)):
-				player.arms.arms_animation_bus.throwable_aiming = false
-				#actually throw
 				pass
 				
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:
@@ -89,14 +88,38 @@ func _can_currently_throw(_event : InputEvent) -> bool:
 func _try_drop_equipment(_event : InputEvent) -> void:
 	match current_throwable_state:
 		EThrowableEquipmentState.Default:
-			drop_queued = true
+			if(_can_be_dropped()):
+				drop_queued = true
+		EThrowableEquipmentState.Aiming:
+			if(_can_exit_aiming()):
+				_change_throwable_state(EThrowableEquipmentState.Default)
 		_:
 			#exit out of aiming	
 			pass
 			
+func _can_be_dropped() -> bool:
+	return true
+	
+func _can_exit_aiming() -> bool:
+	return true
+
 func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 	current_throwable_state = new_state
 	
+	match current_throwable_state:
+		EThrowableEquipmentState.Default:
+			player.arms.arms_animation_bus.throwable_aiming = false
+			if(input_receiver):
+				input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name ,self, true)
+		EThrowableEquipmentState.Aiming:
+			player.arms.arms_animation_bus.throwable_aiming = true
+			if(input_receiver):
+				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
+		EThrowableEquipmentState.Throwing:
+			pass				
+
+
+
 func _drop() -> void:
 	if(!_decide_target_transform_for_drop()):
 		return
