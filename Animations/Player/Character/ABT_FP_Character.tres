@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=87 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=89 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt.tres" id="1_x8ke2"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://byhj6ox58mvk6" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt_Left.tres" id="2_g0oko"]
@@ -64,11 +64,23 @@ advance_mode = 2
 advance_mode = 2
 advance_expression = "throwable_aiming"
 
+[sub_resource type="Curve" id="Curve_jqlb3"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_do14k"]
+xfade_time = 0.05
+xfade_curve = SubResource("Curve_jqlb3")
 switch_mode = 2
 advance_mode = 2
 
+[sub_resource type="Curve" id="Curve_yud83"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_g8edg"]
+xfade_time = 0.05
+xfade_curve = SubResource("Curve_yud83")
 advance_mode = 2
 advance_expression = "!throwable_aiming"
 
@@ -467,6 +479,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-269, 1)
 
 [resource]
+graph_offset = Vector2(-993.1866, -119.20294)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Right/position = Vector2(-500, 160)

@@ -1,11 +1,5 @@
 class_name Player extends CharacterBody3D
 
-@export_range(1.0, 10.0) var camera_sensitivity: float = 2.0
-
-@export_range(0.0, 0.5) var camera_start_deadzone: float = .2
-
-@export_range(0.0, 0.5) var camera_end_deadzone: float = .1
-
 @export_group("Components")
 @export var input_receiver : PlayerInputReceiver
 @onready var player_cam: Camera3D = %WorldCamera
