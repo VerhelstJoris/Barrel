@@ -1,17 +1,12 @@
 class_name FPArms extends Node3D
 
-@onready var arms_animation_bus : FPArmsAnimationBus = %AnimationTree
-
 @export var colt_scene : Node3D
 @onready var pistol_equipment : PlayerEquipmentPistol
 
 @onready var FP_camera : Camera3D = %FP_Camera
 
 func _ready() -> void:
-
-
 	pistol_equipment = NodeUtils._retrieve_node_meta_from_self(PlayerEquipment.equipment_node_name, colt_scene)
-	arms_animation_bus.pistol = pistol_equipment
 
 
 func _align_to_world_camera(align_to : Camera3D ) -> void:

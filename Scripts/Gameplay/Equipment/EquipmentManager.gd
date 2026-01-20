@@ -13,10 +13,10 @@ enum EEquipmentType {Permanent , Consumable, Temporary}
 var current_equipment : Dictionary[EEquipmentSlot, PlayerEquipment]
 var current_holster_states : Dictionary[EEquipmentSlot,EHolsterState]
 
-signal on_holster_started()
-signal on_holster_finish()
-signal on_unholster_started()
-signal on_unholster_finished()
+signal on_holster_started(equipment : PlayerEquipment, slot : EEquipmentSlot)
+signal on_holster_finished(equipment : PlayerEquipment, slot : EEquipmentSlot)
+signal on_unholster_started(equipment : PlayerEquipment, slot : EEquipmentSlot)
+signal on_unholster_finished(equipment : PlayerEquipment, slot : EEquipmentSlot)
 
 signal on_holster_input_received(event : InputEvent)
 signal on_quick_unholster_input_received(event : InputEvent)
@@ -53,8 +53,12 @@ func _setup_ui_data()-> void:
 			equipment_hud._intialize(player)
 
 func _setup_animation_data() -> void:
-	player.arms.arms_animation_bus.on_holster_anim_finish.connect(_on_holster_anim_finish)
-	player.arms.arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
+	var arms_animation_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_self(FPArmsAnimationBus.arms_anim_bus_node_name,player.arms)
+	if(arms_animation_bus == null):
+		push_error("Failed to retrieve the FP Arms animation bus on the equipment manager")
+	
+	arms_animation_bus.on_holster_anim_finish.connect(_on_holster_anim_finish)
+	arms_animation_bus.on_unholster_anim_finish.connect(_on_unholster_anim_finish)
 
 func _change_equipment(new_equipment : PlayerEquipment, _unholster_immediately : bool = false) -> void:
 	var equipment_to_replace : PlayerEquipment = current_equipment[new_equipment.slot]		
@@ -65,16 +69,10 @@ func _change_equipment(new_equipment : PlayerEquipment, _unholster_immediately :
 	_on_unequip(equipment_to_replace)
 
 	current_equipment[new_equipment.slot] = new_equipment
-	if(new_equipment.slot == EEquipmentSlot.Right):
-		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment.owner as Node3D, FPArmsAnimationBus.EPropBoneType.Right, true)
-		print("equip new right slot ", new_equipment)
-	elif(new_equipment.slot == EEquipmentSlot.Left):
-		print("equip new left slot ", new_equipment)
-		player.arms.arms_animation_bus._reparent_to_prop_bone(new_equipment.owner as Node3D, FPArmsAnimationBus.EPropBoneType.Left, true)
-	
+
 	_on_equip(new_equipment)	
 	if(_unholster_immediately):
-		new_equipment._on_start_unholster()
+		_change_holster_state(EHolsterState.Unholstering, new_equipment.slot)
 
 func _on_unequip(old_equipment : PlayerEquipment) -> void:
 	var slot : EEquipmentSlot = EEquipmentSlot.None
@@ -142,11 +140,11 @@ func _change_holster_state(new_state : EHolsterState, _slot : EEquipmentSlot) ->
 	current_holster_states[_slot] = new_state
 	match new_state:
 		EHolsterState.Holstering:
-			on_holster_started.emit()
+			on_holster_started.emit(current_equipment[_slot], _slot)
 			if(current_equipment[_slot] != null):
 				current_equipment[_slot]._on_start_holster()
 		EHolsterState.Unholstering:
-			on_unholster_started.emit()
+			on_unholster_started.emit(current_equipment[_slot], _slot)
 			if(current_equipment[_slot] != null):
 				current_equipment[_slot]._on_start_unholster()
 		EHolsterState.Hidden:
@@ -157,10 +155,12 @@ func _change_holster_state(new_state : EHolsterState, _slot : EEquipmentSlot) ->
 
 func _on_holster_anim_finish(_slot : EquipmentManager.EEquipmentSlot) -> void:
 	_change_holster_state(EHolsterState.Hidden, _slot)
+	on_holster_finished.emit(current_equipment[_slot], _slot)
 
 func _on_unholster_anim_finish(_slot : EquipmentManager.EEquipmentSlot) -> void:
 	_change_holster_state(EHolsterState.Ready, _slot)
-	
+	on_unholster_finished.emit(current_equipment[_slot], _slot)
+
 func _can_use_equipment(slot : EEquipmentSlot) -> bool:
 	return current_holster_states[slot] == EHolsterState.Ready
 

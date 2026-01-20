@@ -467,7 +467,6 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-269, 1)
 
 [resource]
-graph_offset = Vector2(-879.0622, -107.518845)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Right/position = Vector2(-500, 160)

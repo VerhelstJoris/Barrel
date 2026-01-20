@@ -23,7 +23,12 @@ func _ready() -> void:
 	_setup_animation_data()
 	
 func _setup_animation_data() -> void:
-	arms.arms_animation_bus._init_player_data(self)
+	var anim_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_self(FPArmsAnimationBus.arms_anim_bus_node_name, arms) as FPArmsAnimationBus
+	if(anim_bus == null):
+		push_error("No valid FP Arms animation bus found on player")
+		return
+
+	anim_bus._init_player_data(self)
 	
 func _on_mouse_motion_input(event : InputEvent) -> void:
 	mouse_motion = -event.relative * 0.001

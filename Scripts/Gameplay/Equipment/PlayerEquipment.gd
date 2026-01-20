@@ -37,6 +37,8 @@ func _on_equipped(in_player : Player):
 	on_equipped.emit()
 	
 func _on_unequipped():
+	if(input_receiver):
+		input_receiver.on_available_equipment_actions_cleared.emit(slot)
 	player = null
 	on_unequipped.emit()
 	

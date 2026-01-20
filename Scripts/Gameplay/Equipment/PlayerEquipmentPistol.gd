@@ -134,6 +134,7 @@ func _try_use_equipment(_event : InputEvent) -> void:
 			_start_new_action(EPistolActions.FanFire, EPistolState.ReadyToFire, 0)
 			started_action = true
 	
+	
 	if(!started_action):
 		if _can_shoot():
 			if((current_bullets[current_chamber_id] != null && current_bullets[current_chamber_id]._can_be_fired())|| DEBUG_always_fire):
@@ -350,13 +351,11 @@ func _can_be_holstered() -> bool:
 	
 func _on_start_holster():
 	super()
-	player.arms.arms_animation_bus.colt_unholstered = false
 	if(input_receiver):
 		input_receiver._change_HUD_available_actions([],self)
 		
 func _on_start_unholster():
 	super()
-	player.arms.arms_animation_bus.colt_unholstered = true
 	if(input_receiver):
 		input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name,self)
 		

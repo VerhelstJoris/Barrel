@@ -16,6 +16,7 @@ var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentStat
 
 const aiming_input_context_name : String = "Aiming"
 
+signal on_throwable_state_changed(prev : EThrowableEquipmentState, new : EThrowableEquipmentState)
 
 func _ready() -> void:
 	super()
@@ -25,15 +26,7 @@ func _physics_process(_delta: float) -> void:
 	if(drop_queued):
 		_drop()
 		drop_queued = false
-
-func _on_start_unholster():
-	super()
-	player.arms.arms_animation_bus.throwable_unholstered = true
 		
-func _on_start_holster():
-	super()
-	player.arms.arms_animation_bus.throwable_unholstered = false
-	
 func _can_be_holstered() -> bool:
 	return false
 	
@@ -53,9 +46,6 @@ func _on_equipped(_player : Player) -> void:
 	_change_throwable_state(EThrowableEquipmentState.Default)	
 		
 func _on_unequipped():
-	input_receiver.on_available_equipment_actions_cleared.emit(slot)
-	player.arms.arms_animation_bus.throwable_unholstered = false
-	
 	for hitbox in hitboxes:
 		hitbox._set_collisions_enabled(true)
 
@@ -104,19 +94,20 @@ func _can_exit_aiming() -> bool:
 	return true
 
 func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
+	var prev = current_throwable_state
 	current_throwable_state = new_state
 	
 	match current_throwable_state:
 		EThrowableEquipmentState.Default:
-			player.arms.arms_animation_bus.throwable_aiming = false
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name ,self, true)
 		EThrowableEquipmentState.Aiming:
-			player.arms.arms_animation_bus.throwable_aiming = true
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
 		EThrowableEquipmentState.Throwing:
-			pass				
+			pass			
+	
+	on_throwable_state_changed.emit(prev, new_state)		
 
 
 

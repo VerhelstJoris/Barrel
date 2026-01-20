@@ -4,13 +4,14 @@ class_name FPArmsAnimationBus extends AnimationTree
 var pistol : PlayerEquipmentPistol
 var mov_comp : PlayerMovementComponent
 var input_receiver : PlayerInputReceiver
+var equipment_manager : EquipmentManager
 
 @onready var global_prop_bone : BoneAttachment3D = %GlobalPropBone
 @onready var left_prop_bone : BoneAttachment3D = %LPropBone
 @onready var right_prop_bone : BoneAttachment3D = %RPropBone
 
 enum EPropBoneType{Left, Right, Global}
-var right_prop_bone_pos : Vector3 = Vector3.ZERO
+var pistol_prop_bone_offset : Vector3 = Vector3.ZERO
 
 const anim_right_arm_sm_path : String = "parameters/SM_Right/"
 const anim_left_arm_sm_path : String = "parameters/SM_Left/"
@@ -89,15 +90,18 @@ signal on_holster_anim_finish(slot : EquipmentManager.EEquipmentSlot)
 @export_group("sprint settings")
 @export var sprint_speed_anim_threshold : float = 4
 
+const arms_anim_bus_node_name : String = "FPArmsAnimationBus"
 
-# Called when the node enters the scene tree for the first time.
+func _enter_tree() -> void:
+	NodeUtils._add_node_meta_to_owner(arms_anim_bus_node_name,self, self)
+	
 func _ready() -> void:
 	await owner.ready
 	
-	pistol.on_action_started.connect(_on_pistol_action_started)
-	pistol.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
-	pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-	right_prop_bone_pos = pistol.owner.get_position()
+	#pistol.on_action_started.connect(_on_pistol_action_started)
+	#pistol.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
+	#pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
+	#pistol_prop_bone_offset = pistol.owner.get_position()
 	set(anim_move_blend_add_amount_property, 1.0)
 	
 func _init_player_data(player : Player) -> void:
@@ -107,6 +111,82 @@ func _init_player_data(player : Player) -> void:
 	input_receiver = player.input_receiver
 	if(!input_receiver):
 		push_error("No Input Receiver set on the FP Arms Anim Bus")
+	equipment_manager = player.equipment_manager
+	if(!equipment_manager):
+		push_error("No Equipment Manager set on the FP Arms Anim Bus")
+		
+	equipment_manager.on_holster_started.connect(_on_equipmnent_start_holster)	
+	equipment_manager.on_unholster_started.connect(_on_equipmnent_start_unholster)
+	equipment_manager.on_equipped.connect(_on_equipped)
+	equipment_manager.on_unequipped.connect(_on_unequipped)
+
+func _on_equipmnent_start_holster(equipment : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
+	_set_equipment_type_holster_value(equipment, false)
+	
+func _on_equipmnent_start_unholster(equipment : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
+	_set_equipment_type_holster_value(equipment, true)
+	
+func _on_equipped(equipment : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
+	var override_reparent_pos : Vector3 =Vector3.ZERO
+	match typeof(equipment):
+		_ when equipment is PlayerEquipmentThrowable:
+			_connect_throwable_signals(equipment)
+		_ when equipment is PlayerEquipmentPistol:
+			pistol = equipment
+			_connect_pistol_signals(equipment)
+			override_reparent_pos = pistol_prop_bone_offset
+		_:
+			pass	
+
+	match _slot:
+		EquipmentManager.EEquipmentSlot.Left:
+			_reparent_to_prop_bone(equipment.owner as Node3D, EPropBoneType.Left, true, override_reparent_pos)
+		EquipmentManager.EEquipmentSlot.Right:
+			_reparent_to_prop_bone(equipment.owner as Node3D, EPropBoneType.Right, true, override_reparent_pos)
+		_:
+			pass
+	
+
+
+func _on_unequipped(equipment : PlayerEquipment, _slot : EquipmentManager.EEquipmentSlot) -> void:
+	_set_equipment_type_holster_value(equipment, false)
+
+	match typeof(equipment):
+		_ when equipment is PlayerEquipmentThrowable:
+			_disconnect_throwable_signals(equipment)
+		_ when equipment is PlayerEquipmentPistol:
+			_disconnect_pistol_signals(equipment)
+			pistol = null
+		_:
+			pass
+
+func _connect_throwable_signals(throwable : PlayerEquipmentThrowable) -> void:
+	throwable.on_throwable_state_changed.connect(_on_throwable_equipment_state_changed)
+	
+func _disconnect_throwable_signals(throwable : PlayerEquipmentThrowable) -> void:
+	throwable.on_throwable_state_changed.disconnect(_on_throwable_equipment_state_changed)
+	
+func _connect_pistol_signals(pistolequipment : PlayerEquipmentPistol) -> void:
+	pistolequipment.on_action_started.connect(_on_pistol_action_started)
+	pistolequipment.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
+	pistolequipment.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
+	
+	if(pistol_prop_bone_offset == Vector3.ZERO):
+		pistol_prop_bone_offset = pistolequipment.owner.get_position()
+	
+func _disconnect_pistol_signals(pistolequipment : PlayerEquipmentPistol) -> void:
+	pistolequipment.on_action_started.disconnect(_on_pistol_action_started)
+	pistolequipment.on_current_action_interrupted.disconnect(_on_pistol_action_interrupted)
+	pistolequipment.bullet_spawned_for_inserting.disconnect(_on_bullet_spawned_for_inserting)
+
+func _set_equipment_type_holster_value(equipment : PlayerEquipment, val : bool) -> void:
+	match typeof(equipment):
+		_ when equipment is PlayerEquipmentThrowable:
+			throwable_unholstered = val
+		_ when equipment is PlayerEquipmentPistol:
+			colt_unholstered = val
+		_:
+			pass
 
 func _set_equipment_oneshot_request(request_name : String, right_hand = true, two_handed = false,  request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	if(right_hand || two_handed):
@@ -119,8 +199,7 @@ func _set_equipment_anim_variable(variable  : String, new_value : bool, right_ha
 		set(anim_right_arm_sm_path + variable, new_value)
 	if(!right_hand || two_handed):
 		set(anim_left_arm_sm_path + variable, new_value)
-
-
+		
 func _set_anim_tree_oneshot_request(request_name, request_type = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE):
 	set( request_name, request_type)
 	
@@ -286,8 +365,15 @@ func _fire_crouch_oneshot(enter : bool) -> void:
 		_set_anim_tree_oneshot_request(anim_move_state_machine_path + anim_crouch_enter_request, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 	
 	crouching = enter	
-		
-func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool ) -> void:
+	
+func _on_throwable_equipment_state_changed(_prev : PlayerEquipmentThrowable.EThrowableEquipmentState, _new : PlayerEquipmentThrowable.EThrowableEquipmentState) -> void:
+	match _new:
+		PlayerEquipmentThrowable.EThrowableEquipmentState.Default:
+			throwable_aiming = false
+		PlayerEquipmentThrowable.EThrowableEquipmentState.Aiming:
+			throwable_aiming = true
+
+func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool, override_pos : Vector3 = Vector3.ZERO ) -> void:
 	if(node == null):
 		return
 
@@ -299,9 +385,10 @@ func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool
 			bone_to_reparent_to = left_prop_bone
 		EPropBoneType.Right:
 			bone_to_reparent_to = right_prop_bone
-			new_pos = right_prop_bone_pos
 		EPropBoneType.Global:
 			bone_to_reparent_to = global_prop_bone
+
+	new_pos = override_pos
 
 	node.reparent(bone_to_reparent_to,true)
 	if(reset_pos):
@@ -312,7 +399,7 @@ func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool
 
 # called by anim notifies	
 func _reparent_gun_to_prop_bone(new_parent : EPropBoneType) -> void:
-	_reparent_to_prop_bone(pistol.owner, new_parent, true)
+	_reparent_to_prop_bone(pistol.owner, new_parent, true, pistol_prop_bone_offset)
 
 #called by some anim notifies
 func _tween_move_blend_amount(new_val : float, duration : float) -> void:
