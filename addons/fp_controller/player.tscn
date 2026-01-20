@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
-[ext_resource type="Script" uid="uid://bh0qxywfqoxc0" path="res://addons/fp_controller/scripts/smooth_camera.gd" id="2_1py82"]
 [ext_resource type="Script" uid="uid://col10avn6eftl" path="res://Scripts/UI/OutlineCompositorEffect.gd" id="2_yfo8f"]
 [ext_resource type="PackedScene" uid="uid://cm66edh5n2owj" path="res://Scenes/Character/FP_Arms.tscn" id="3_5qhv4"]
+[ext_resource type="Script" uid="uid://d2011ym02gw8l" path="res://Scripts/Player/PlayerWorldCamera.gd" id="3_krggn"]
 [ext_resource type="PackedScene" uid="uid://dymwfb8k5bofe" path="res://Scenes/UI/HUD/HUD_Equipment.tscn" id="3_njw88"]
 [ext_resource type="Shader" uid="uid://cuppwen4i4k7j" path="res://Materials/Shaders/UI/Screen_Vignette.gdshader" id="5_bn61v"]
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
@@ -45,7 +45,7 @@ margin = 0.0
 radius = 0.45
 height = 1.1
 
-[sub_resource type="CompositorEffect" id="CompositorEffect_kw8h7"]
+[sub_resource type="CompositorEffect" id="CompositorEffect_krggn"]
 resource_local_to_scene = false
 resource_name = ""
 enabled = true
@@ -57,8 +57,8 @@ outline_color = Color(0.54896253, 0.5489626, 0.5489625, 1)
 thickness = 2
 metadata/_custom_type_script = "uid://col10avn6eftl"
 
-[sub_resource type="Compositor" id="Compositor_ohefb"]
-compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_kw8h7")])
+[sub_resource type="Compositor" id="Compositor_krggn"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_krggn")])
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i7lip"]
 shader = ExtResource("5_bn61v")
@@ -84,7 +84,7 @@ length = 0.001
 tracks/0/type = "rotation_3d"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("CameraPivot/SmoothCamera")
+tracks/0/path = NodePath("CameraPivot/WorldCamera")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array()
@@ -126,14 +126,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695, 0, 1.481, -0.35)
 
-[node name="SmoothCamera" type="Camera3D" parent="CameraPivot"]
+[node name="WorldCamera" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
 cull_mask = 1048573
-compositor = SubResource("Compositor_ohefb")
+compositor = SubResource("Compositor_krggn")
 current = true
-script = ExtResource("2_1py82")
+script = ExtResource("3_krggn")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/SmoothCamera"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CameraPivot/WorldCamera"]
 custom_minimum_size = Vector2(1280, 720)
 anchors_preset = 15
 anchor_right = 1.0
@@ -144,43 +144,43 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 stretch = true
 
-[node name="HUDEquipment_Right" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
+[node name="HUDEquipment_Right" parent="CameraPivot/WorldCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
 visibility_layer = 2
 layout_mode = 2
 mouse_filter = 2
 
-[node name="HUDEquipment_Left" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
+[node name="HUDEquipment_Left" parent="CameraPivot/WorldCamera/SubViewportContainer" instance=ExtResource("3_njw88")]
 visibility_layer = 2
 layout_mode = 2
 mouse_filter = 2
 equipment_slot_to_track = 1
 
-[node name="SubViewport" type="SubViewport" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="CameraPivot/WorldCamera/SubViewportContainer"]
 unique_name_in_owner = true
 transparent_bg = true
 handle_input_locally = false
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
-[node name="FP_Arms" parent="CameraPivot/SmoothCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
+[node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
 transform = Transform3D(-0.25, 0, -3.774895e-08, 0, 0.25, 0, 3.774895e-08, 0, -0.25, 2.08165e-12, 1.20468, 2.08165e-12)
 rotation_order = 0
 
-[node name="CrouchVignette" type="ColorRect" parent="CameraPivot/SmoothCamera/SubViewportContainer"]
+[node name="CrouchVignette" type="ColorRect" parent="CameraPivot/WorldCamera/SubViewportContainer"]
 material = SubResource("ShaderMaterial_i7lip")
 custom_minimum_size = Vector2(1280, 720)
 layout_mode = 2
 script = ExtResource("6_i7lip")
 default_alpha = 0.025
 
-[node name="CenterContainer" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
+[node name="CenterContainer" parent="CameraPivot/WorldCamera/SubViewportContainer" instance=ExtResource("7_2fqq0")]
 layout_mode = 2
 
-[node name="HUDInteractableHovered" parent="CameraPivot/SmoothCamera/SubViewportContainer" instance=ExtResource("8_n1qck")]
+[node name="HUDInteractableHovered" parent="CameraPivot/WorldCamera/SubViewportContainer" instance=ExtResource("8_n1qck")]
 layout_mode = 2
 
-[node name="InteractRay" type="RayCast3D" parent="CameraPivot/SmoothCamera"]
+[node name="InteractRay" type="RayCast3D" parent="CameraPivot/WorldCamera"]
 transform = Transform3D(1, 0, 0, 0, -4.47035e-08, -1, 0, 1, -4.47035e-08, 0, 0, 0)
 target_position = Vector3(0, -1.5, 0)
 
@@ -250,7 +250,7 @@ standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
 crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
 crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
 camera_attach_node = NodePath("../../../../../CameraPivot")
-vignette = NodePath("../../../../../CameraPivot/SmoothCamera/SubViewportContainer/CrouchVignette")
+vignette = NodePath("../../../../../CameraPivot/WorldCamera/SubViewportContainer/CrouchVignette")
 crouch_vignette_alpha = 0.45
 crouch_vignette_transition_time = 0.14
 first_person_anim_bus = NodePath("../../../../../AnimationTree")
@@ -314,9 +314,9 @@ script = ExtResource("30_p7if2")
 [node name="InteractorComponent" type="Node" parent="." node_paths=PackedStringArray("interact_ray", "interactable_prompt", "equipment_manager")]
 unique_name_in_owner = true
 script = ExtResource("36_wrold")
-interact_ray = NodePath("../CameraPivot/SmoothCamera/InteractRay")
+interact_ray = NodePath("../CameraPivot/WorldCamera/InteractRay")
 extend_interact_length_max_mult = 1.55
-interactable_prompt = NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDInteractableHovered")
+interactable_prompt = NodePath("../CameraPivot/WorldCamera/SubViewportContainer/HUDInteractableHovered")
 equipment_manager = NodePath("../EquipmentManager")
 metadata/_custom_type_script = "uid://b4chk6pi8aunw"
 
@@ -329,7 +329,7 @@ metadata/_custom_type_script = "uid://eomy6oeduxxk"
 unique_name_in_owner = true
 script = ExtResource("40_ohefb")
 player = NodePath("..")
-HUD_equipment_input_arr = [NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDEquipment_Right"), NodePath("../CameraPivot/SmoothCamera/SubViewportContainer/HUDEquipment_Left")]
+HUD_equipment_input_arr = [NodePath("../CameraPivot/WorldCamera/SubViewportContainer/HUDEquipment_Right"), NodePath("../CameraPivot/WorldCamera/SubViewportContainer/HUDEquipment_Left")]
 metadata/_custom_type_script = "uid://cda6d6uhlpkmt"
 
 [editable path="PlayerInputManagerComponent"]

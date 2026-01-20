@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode diffuse_burley, specular_schlick_ggx, blend_mix, depth_draw_always, cull_disabled;
+render_mode diffuse_burley, specular_schlick_ggx, blend_mix, depth_draw_always, cull_back;
 
 group_uniforms albedo;
 uniform vec4 albedo : source_color = vec4(1.0, 1.0, 1.0, 0.0);
