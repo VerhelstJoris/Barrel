@@ -2,7 +2,12 @@ class_name PlayerEquipmentThrowable extends  PlayerEquipment
 
 signal drop_equipment_input(event: InputEvent)
 var drop_queued : bool = false
+var throw_queued : bool = false
 var drop_transform : Transform3D = Transform3D.IDENTITY
+
+@export var max_throw_distance : float = 15.0
+@export var upward_throw_max_dist_mult : float = 0.4
+@export var downward_throw_max_dist_mult : float = 1.4
 
 @export var rigid_body : CollisionPhysicsBody
 @export var hitboxes : Array[HitboxComponent]
@@ -23,9 +28,19 @@ func _ready() -> void:
 	drop_equipment_input.connect(_try_drop_equipment)
 	
 func _physics_process(_delta: float) -> void:
-	if(drop_queued):
+	if(current_throwable_state == EThrowableEquipmentState.Aiming):
+		var pos : Vector3 = _determine_throw_target()
+	
+	if(drop_queued || throw_queued):
 		_drop()
 		drop_queued = false
+		
+	if(throw_queued):
+		rigid_body.set_linear_velocity(Vector3(0,5,0))
+		rigid_body.set_angular_velocity(Vector3(0,5,0))
+		throw_queued = false
+		
+		
 		
 func _can_be_holstered() -> bool:
 	return false
@@ -61,19 +76,33 @@ func _try_use_equipment(_event : InputEvent) -> void:
 				_change_throwable_state(EThrowableEquipmentState.Aiming)
 		EThrowableEquipmentState.Aiming:
 			if(_can_currently_throw(_event)):
-				pass
+				_throw()
+		_:
+			pass
 				
+func _throw() -> void:
+	_change_throwable_state(EThrowableEquipmentState.Throwing)
+	print("THROW")
+	#throw_queued = true
+
+
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:
+	if(current_throwable_state != EThrowableEquipmentState.Default):
+		return false
+	
 	if(_event.is_released()):
 		return false
 		
 	return true	
 		
 func _can_currently_throw(_event : InputEvent) -> bool:
-	if(_event.is_pressed()):
+	if(current_throwable_state != EThrowableEquipmentState.Throwing):
 		return false
+	
+	if(_event.is_released()):
+		return true
 		
-	return true	
+	return false	
 	
 func _try_drop_equipment(_event : InputEvent) -> void:
 	match current_throwable_state:
@@ -88,6 +117,9 @@ func _try_drop_equipment(_event : InputEvent) -> void:
 			pass
 			
 func _can_be_dropped() -> bool:
+	if(current_throwable_state != EThrowableEquipmentState.Default):
+		return false
+		
 	return true
 	
 func _can_exit_aiming() -> bool:
@@ -105,12 +137,12 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
 		EThrowableEquipmentState.Throwing:
-			pass			
+			# when throwing actually happens, already hide existing prompts
+			if(input_receiver):
+				input_receiver._enable_current_HUD_actions(self, false)
 	
 	on_throwable_state_changed.emit(prev, new_state)		
-
-
-
+	
 func _drop() -> void:
 	if(!_decide_target_transform_for_drop()):
 		return
@@ -122,6 +154,43 @@ func _drop() -> void:
 	player.equipment_manager._remove_equipment_from_slot(slot)
 	owner.reparent(get_tree().root, true)
 	owner.set_global_transform(drop_transform)
+
+func _determine_throw_target() -> Vector3:
+	#perform a raycast looking forward, distance determined by throwable settings
+	var space_state: PhysicsDirectSpaceState3D = owner.get_world_3d().get_direct_space_state()
+
+	var world_cam : Camera3D = player.player_cam
+	var cam_pos : Vector3 = world_cam.get_global_position()
+	var dir : Vector3 = -world_cam.get_global_basis().z
+	var end : Vector3 = cam_pos + (dir.normalized() * _determine_throw_target_length())
+	
+	var query := PhysicsRayQueryParameters3D.create(player.player_cam.get_global_position(), end)
+	query.collide_with_bodies = true
+
+	var ray_hit : Dictionary  = space_state.intersect_ray(query)
+	if (ray_hit):
+		end = ray_hit.position
+		DebugDraw3D.draw_sphere(end,0.1,Color.RED, 0)
+	else:
+		DebugDraw3D.draw_sphere(end,0.1,Color.GREEN, 0)
+
+	return end
+
+func _determine_throw_target_length() -> float:
+	var world_cam : Camera3D = player.player_cam
+	var dir : Vector3 = -world_cam.get_global_basis().z
+	var dot : float = dir.dot(Vector3.UP)
+
+	var mult : float = 1.0
+	#if the dot product is negative, we are looking down and extend the distance we can throw if needed
+	if(dot < 0):
+		mult =  lerp(1.0, downward_throw_max_dist_mult, abs(dot))
+	else:
+		mult =  lerp(1.0, upward_throw_max_dist_mult, abs(dot))
+	
+	#if the dot product is positive, we are looking up and reduce the distance we can throw
+	return max_throw_distance * mult
+
 
 func _decide_target_transform_for_drop() -> bool:
 	drop_transform = Transform3D.IDENTITY

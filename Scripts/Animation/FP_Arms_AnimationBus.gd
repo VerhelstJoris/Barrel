@@ -56,8 +56,10 @@ var exit_reload_done : bool  = false
 var colt_unholstered : bool  = false
 var colt_fan_hammer : bool   = false
 var fanning_hammer_anim_id : int = 1
+
 var throwable_unholstered : bool = false
 var throwable_aiming : bool = false
+var throwable_thrown : bool = false
 
 var sprinting : bool = false
 var crouching : bool = false
@@ -153,7 +155,7 @@ func _on_unequipped(equipment : PlayerEquipment, _slot : EquipmentManager.EEquip
 
 	match typeof(equipment):
 		_ when equipment is PlayerEquipmentThrowable:
-			_disconnect_throwable_signals(equipment)
+			_reset_throwable_data(equipment)
 		_ when equipment is PlayerEquipmentPistol:
 			_disconnect_pistol_signals(equipment)
 			pistol = null
@@ -163,8 +165,12 @@ func _on_unequipped(equipment : PlayerEquipment, _slot : EquipmentManager.EEquip
 func _connect_throwable_signals(throwable : PlayerEquipmentThrowable) -> void:
 	throwable.on_throwable_state_changed.connect(_on_throwable_equipment_state_changed)
 	
-func _disconnect_throwable_signals(throwable : PlayerEquipmentThrowable) -> void:
+func _reset_throwable_data(throwable : PlayerEquipmentThrowable) -> void:
 	throwable.on_throwable_state_changed.disconnect(_on_throwable_equipment_state_changed)
+
+	throwable_unholstered= false
+	throwable_aiming  = false
+	throwable_thrown = false
 	
 func _connect_pistol_signals(pistolequipment : PlayerEquipmentPistol) -> void:
 	pistolequipment.on_action_started.connect(_on_pistol_action_started)
@@ -372,6 +378,8 @@ func _on_throwable_equipment_state_changed(_prev : PlayerEquipmentThrowable.EThr
 			throwable_aiming = false
 		PlayerEquipmentThrowable.EThrowableEquipmentState.Aiming:
 			throwable_aiming = true
+		PlayerEquipmentThrowable.EThrowableEquipmentState.Throwing:
+			throwable_thrown = true
 
 func _reparent_to_prop_bone(node: Node3D,  new : EPropBoneType, reset_pos : bool, override_pos : Vector3 = Vector3.ZERO ) -> void:
 	if(node == null):
