@@ -5,9 +5,11 @@ var drop_queued : bool = false
 var throw_queued : bool = false
 var drop_transform : Transform3D = Transform3D.IDENTITY
 
-@export var max_throw_distance : float = 15.0
+@export_group("Throw Settings")
+@export var max_throw_distance : float = 12.5
 @export var upward_throw_max_dist_mult : float = 0.4
 @export var downward_throw_max_dist_mult : float = 1.4
+@export var throw_velocity : float = 12.5
 
 @export var rigid_body : CollisionPhysicsBody
 @export var hitboxes : Array[HitboxComponent]
@@ -18,26 +20,39 @@ var drop_transform : Transform3D = Transform3D.IDENTITY
 enum EThrowableEquipmentState{ Default, Aiming, Throwing} 
 
 var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
+var current_calculated_throw_velocity = Vector3.ZERO
+var debug_drawn : bool = false
+
 
 const aiming_input_context_name : String = "Aiming"
 
 signal on_throwable_state_changed(prev : EThrowableEquipmentState, new : EThrowableEquipmentState)
 
+var gravity : Vector3 = Vector3(0,-9.8,0)
+
 func _ready() -> void:
 	super()
 	drop_equipment_input.connect(_try_drop_equipment)
+	
+	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") *  ProjectSettings.get_setting("physics/3d/default_gravity")
+	print("gravity ", gravity)
 	
 func _physics_process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
 		var pos : Vector3 = _determine_throw_target()
 	
-	if(drop_queued || throw_queued):
+	if(drop_queued):
 		_drop()
 		drop_queued = false
 		
 	if(throw_queued):
-		rigid_body.set_linear_velocity(Vector3(0,5,0))
-		rigid_body.set_angular_velocity(Vector3(0,5,0))
+		var reset_transform : Transform3D = owner.get_global_transform()
+		player.equipment_manager._remove_equipment_from_slot(slot)
+		owner.reparent(get_tree().root, true)
+		owner.set_global_transform(reset_transform)
+		
+		rigid_body.set_linear_velocity(current_calculated_throw_velocity)
+		rigid_body.set_angular_velocity(current_calculated_throw_velocity)
 		throw_queued = false
 		
 		
@@ -83,7 +98,13 @@ func _try_use_equipment(_event : InputEvent) -> void:
 func _throw() -> void:
 	_change_throwable_state(EThrowableEquipmentState.Throwing)
 	print("THROW")
-	#throw_queued = true
+	
+	#get all capsules on the player and add them to collision exception list for x amount of time
+	
+	if(rigid_body):
+		for shape in player._get_all_collision_shapes():
+			rigid_body.add_collision_exception_with(shape)
+	throw_queued = true
 
 
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:
@@ -96,7 +117,7 @@ func _can_enter_aiming_mode( _event : InputEvent) -> bool:
 	return true	
 		
 func _can_currently_throw(_event : InputEvent) -> bool:
-	if(current_throwable_state != EThrowableEquipmentState.Throwing):
+	if(current_throwable_state != EThrowableEquipmentState.Aiming):
 		return false
 	
 	if(_event.is_released()):
@@ -166,13 +187,21 @@ func _determine_throw_target() -> Vector3:
 	
 	var query := PhysicsRayQueryParameters3D.create(player.player_cam.get_global_position(), end)
 	query.collide_with_bodies = true
-
+		
 	var ray_hit : Dictionary  = space_state.intersect_ray(query)
 	if (ray_hit):
 		end = ray_hit.position
 		DebugDraw3D.draw_sphere(end,0.1,Color.RED, 0)
 	else:
 		DebugDraw3D.draw_sphere(end,0.1,Color.GREEN, 0)
+	
+	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,end, gravity)
+
+	if(!result.is_empty()):
+		var points: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15 )
+		current_calculated_throw_velocity = result[0].velocity
+		for id in points.size() -1:
+			DebugDraw3D.draw_line(points[id].position,points[id+1].position,Color.BLUE,0)
 
 	return end
 
