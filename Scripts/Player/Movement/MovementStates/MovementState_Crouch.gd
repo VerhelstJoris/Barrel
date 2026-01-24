@@ -1,12 +1,6 @@
 class_name Crouch extends MovementState_Base
 
 @export_group("Shape Components")
-@export var standing_shape : CollisionShape3D
-@export var standing_camera_pivot : Node3D
-
-@export var crouching_shape : CollisionShape3D
-@export var crouching_camera_pivot : Node3D
-
 var height_diff : float = 0
 @export var camera_attach_node : Node3D
 
@@ -28,8 +22,6 @@ var entering : bool = false
 
 func _ready() -> void:
 	super()
-	crouching_shape.disabled = true
-	height_diff = (standing_shape.shape as CapsuleShape3D).height - (crouching_shape.shape as CapsuleShape3D).height
 
 	if(!vignette):
 		push_error("No vignette found on crouch state")
@@ -45,14 +37,18 @@ func _init_player_data(in_player : Player) -> void:
 
 	if(!arms_anim_bus):
 		push_error("No Arms Anim Bus set on crouch state")
-	
+
+	player.crouching_shape.disabled = true
+	height_diff = (player.standing_shape.shape as CapsuleShape3D).height - (player.crouching_shape.shape as CapsuleShape3D).height
+
+
 func _check_transitions() -> void:
 	if(!input_comp.crouch_down && _can_currently_exit()):
 		state_machine._transition_to(state_machine.EStateName.Walk)
 	
 func _on_enter_internal() -> void:
-	crouching_shape.disabled = false
-	standing_shape.disabled = true
+	player.crouching_shape.disabled = false
+	player.standing_shape.disabled = true
 	entering = true
 
 	_start_transition(true)
@@ -66,8 +62,8 @@ func _on_enter_internal() -> void:
 		arms_anim_bus._fire_crouch_oneshot(true)
 
 func _on_exit_internal() -> void:
-	crouching_shape.disabled = true
-	standing_shape.disabled = false
+	player.crouching_shape.disabled = true
+	player.standing_shape.disabled = false
 	entering = false
 
 	_start_transition(false)
@@ -96,11 +92,11 @@ func _start_transition(to_crouch : bool) -> void:
 	if(to_crouch):
 		current_time = crouch_to_standing_transition_time
 		next_time = standing_to_crouch_transition_time
-		node_to_lerp_to = crouching_camera_pivot
+		node_to_lerp_to = player.crouching_camera_pivot
 	else:
 		current_time = standing_to_crouch_transition_time
 		next_time = crouch_to_standing_transition_time
-		node_to_lerp_to = standing_camera_pivot
+		node_to_lerp_to = player.standing_camera_pivot
 
 
 	var transition_start_alpha : float = 0

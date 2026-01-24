@@ -96,10 +96,14 @@ _data = {
 &"Uncrouch": ExtResource("31_tvmyk")
 }
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver", "standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot")]
 floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
+standing_shape = NodePath("StandingCollisionShape")
+standing_camera_pivot = NodePath("StandingCameraPivot")
+crouching_shape = NodePath("CrouchingCollisionShape")
+crouching_camera_pivot = NodePath("CrouchingCameraPivot")
 
 [node name="Placeholder_BodyMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.9, 2.08165e-12)
@@ -243,12 +247,8 @@ backward_movement_speed = 2.0
 script = ExtResource("20_jajtq")
 forward_movement_speed = 5.5
 
-[node name="Crouch" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine" node_paths=PackedStringArray("standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot", "camera_attach_node", "vignette", "first_person_anim_bus")]
+[node name="Crouch" type="Node" parent="PlayerMovementComponent/BaseMovementStateMachine/GroundedState/GroundedStateMachine" node_paths=PackedStringArray("camera_attach_node", "vignette", "first_person_anim_bus")]
 script = ExtResource("25_hwrxm")
-standing_shape = NodePath("../../../../../StandingCollisionShape")
-standing_camera_pivot = NodePath("../../../../../StandingCameraPivot")
-crouching_shape = NodePath("../../../../../CrouchingCollisionShape")
-crouching_camera_pivot = NodePath("../../../../../CrouchingCameraPivot")
 camera_attach_node = NodePath("../../../../../CameraPivot")
 vignette = NodePath("../../../../../CameraPivot/WorldCamera/SubViewportContainer/CrouchVignette")
 crouch_vignette_alpha = 0.45

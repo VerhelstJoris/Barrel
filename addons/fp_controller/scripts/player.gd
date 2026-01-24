@@ -2,6 +2,15 @@ class_name Player extends CharacterBody3D
 
 @export_group("Components")
 @export var input_receiver : PlayerInputReceiver
+
+@export_group("Shape Components")
+@export var standing_shape : CollisionShape3D
+@export var standing_camera_pivot : Node3D
+
+@export var crouching_shape : CollisionShape3D
+@export var crouching_camera_pivot : Node3D
+
+
 @onready var player_cam: Camera3D = %WorldCamera
 @onready var movement_component : PlayerMovementComponent = %PlayerMovementComponent
 @onready var equipment_manager : EquipmentManager = %EquipmentManager
@@ -25,4 +34,5 @@ func _on_mouse_motion_input(event : InputEvent) -> void:
 	player_cam.mouse_motion = -event.relative * 0.001
 	
 
-	
+func _get_all_collision_shapes() -> Array[CollisionShape3D]:
+	return [standing_shape, crouching_shape]
