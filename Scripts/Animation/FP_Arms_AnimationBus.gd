@@ -99,11 +99,6 @@ func _enter_tree() -> void:
 	
 func _ready() -> void:
 	await owner.ready
-	
-	#pistol.on_action_started.connect(_on_pistol_action_started)
-	#pistol.on_current_action_interrupted.connect(_on_pistol_action_interrupted)
-	#pistol.bullet_spawned_for_inserting.connect(_on_bullet_spawned_for_inserting)
-	#pistol_prop_bone_offset = pistol.owner.get_position()
 	set(anim_move_blend_add_amount_property, 1.0)
 	
 func _init_player_data(player : Player) -> void:

@@ -55,8 +55,11 @@ func _physics_process(_delta: float) -> void:
 		rigid_body.set_angular_velocity(current_calculated_throw_velocity)
 		throw_queued = false
 		
+func _throw_projectile_from_anim() -> void:
+	throw_queued = true
+	pass
 		
-		
+
 func _can_be_holstered() -> bool:
 	return false
 	
@@ -97,14 +100,11 @@ func _try_use_equipment(_event : InputEvent) -> void:
 				
 func _throw() -> void:
 	_change_throwable_state(EThrowableEquipmentState.Throwing)
-	print("THROW")
-	
-	#get all capsules on the player and add them to collision exception list for x amount of time
-	
-	if(rigid_body):
-		for shape in player._get_all_collision_shapes():
-			rigid_body.add_collision_exception_with(shape)
 	throw_queued = true
+	#get all capsules on the player and add them to collision exception list for x amount of time
+	#if(rigid_body):
+		#for shape in player._get_all_collision_shapes():
+			#rigid_body.add_collision_exception_with(shape)
 
 
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:

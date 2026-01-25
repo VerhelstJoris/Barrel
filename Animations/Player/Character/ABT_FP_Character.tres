@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=89 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=94 format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt.tres" id="1_x8ke2"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://byhj6ox58mvk6" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt_Left.tres" id="2_g0oko"]
@@ -41,6 +41,9 @@ animation = &"AL_FP_Throwable/A_Throwable_Exit_Throw"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tgs44"]
 animation = &"AL_FP_Throwable/A_Throwable_Hold_Pose"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tpc3a"]
+animation = &"AL_FP_Throwable/A_Throwable_Throw"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_anll4"]
 animation = &"AL_FP_Throwable/A_Throwable_Unholster"
@@ -118,6 +121,24 @@ xfade_curve = SubResource("Curve_28pq6")
 advance_mode = 2
 advance_expression = "throwable_aiming"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_n1clm"]
+advance_mode = 2
+advance_expression = "throwable_thrown"
+
+[sub_resource type="Curve" id="Curve_5jyja"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_11c25"]
+xfade_time = 0.05
+xfade_curve = SubResource("Curve_5jyja")
+advance_mode = 2
+advance_expression = "throwable_thrown"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_te7e3"]
+switch_mode = 2
+advance_mode = 2
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_x8ke2"]
 states/AL_FP_Throwable_A_Throwable_Aiming/node = SubResource("AnimationNodeAnimation_hc71j")
 states/AL_FP_Throwable_A_Throwable_Aiming/position = Vector2(562, -208)
@@ -129,12 +150,14 @@ states/AL_FP_Throwable_A_Throwable_Exit_Throw/node = SubResource("AnimationNodeA
 states/AL_FP_Throwable_A_Throwable_Exit_Throw/position = Vector2(812, -82)
 states/AL_FP_Throwable_A_Throwable_Hold_Pose/node = SubResource("AnimationNodeAnimation_tgs44")
 states/AL_FP_Throwable_A_Throwable_Hold_Pose/position = Vector2(590, 105)
+states/AL_FP_Throwable_A_Throwable_Throw/node = SubResource("AnimationNodeAnimation_tpc3a")
+states/AL_FP_Throwable_A_Throwable_Throw/position = Vector2(562, -355)
 states/AL_FP_Throwable_A_Throwable_Unholster/node = SubResource("AnimationNodeAnimation_anll4")
 states/AL_FP_Throwable_A_Throwable_Unholster/position = Vector2(187, 100)
 states/End/position = Vector2(1185, 105)
 states/Start/position = Vector2(-98, 100)
-transitions = ["Start", "AL_FP_Throwable_A_Throwable_Unholster", SubResource("AnimationNodeStateMachineTransition_21h3i"), "AL_FP_Throwable_A_Throwable_Unholster", "AL_FP_Throwable_A_Throwable_Hold_Pose", SubResource("AnimationNodeStateMachineTransition_hc71j"), "AL_FP_Throwable_A_Throwable_Hold_Pose", "AL_FP_Throwable_A_Throwable_Drop", SubResource("AnimationNodeStateMachineTransition_7nk12"), "AL_FP_Throwable_A_Throwable_Drop", "End", SubResource("AnimationNodeStateMachineTransition_tpc3a"), "AL_FP_Throwable_A_Throwable_Hold_Pose", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_0ilga"), "AL_FP_Throwable_A_Throwable_Enter_Throw", "AL_FP_Throwable_A_Throwable_Aiming", SubResource("AnimationNodeStateMachineTransition_do14k"), "AL_FP_Throwable_A_Throwable_Aiming", "AL_FP_Throwable_A_Throwable_Exit_Throw", SubResource("AnimationNodeStateMachineTransition_g8edg"), "AL_FP_Throwable_A_Throwable_Exit_Throw", "AL_FP_Throwable_A_Throwable_Hold_Pose", SubResource("AnimationNodeStateMachineTransition_gmdyn"), "AL_FP_Throwable_A_Throwable_Enter_Throw", "AL_FP_Throwable_A_Throwable_Exit_Throw", SubResource("AnimationNodeStateMachineTransition_3wpmr"), "AL_FP_Throwable_A_Throwable_Exit_Throw", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_kmnmh"), "AL_FP_Throwable_A_Throwable_Unholster", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_yws3a")]
-graph_offset = Vector2(-188, -247)
+transitions = ["Start", "AL_FP_Throwable_A_Throwable_Unholster", SubResource("AnimationNodeStateMachineTransition_21h3i"), "AL_FP_Throwable_A_Throwable_Unholster", "AL_FP_Throwable_A_Throwable_Hold_Pose", SubResource("AnimationNodeStateMachineTransition_hc71j"), "AL_FP_Throwable_A_Throwable_Hold_Pose", "AL_FP_Throwable_A_Throwable_Drop", SubResource("AnimationNodeStateMachineTransition_7nk12"), "AL_FP_Throwable_A_Throwable_Drop", "End", SubResource("AnimationNodeStateMachineTransition_tpc3a"), "AL_FP_Throwable_A_Throwable_Hold_Pose", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_0ilga"), "AL_FP_Throwable_A_Throwable_Enter_Throw", "AL_FP_Throwable_A_Throwable_Aiming", SubResource("AnimationNodeStateMachineTransition_do14k"), "AL_FP_Throwable_A_Throwable_Aiming", "AL_FP_Throwable_A_Throwable_Exit_Throw", SubResource("AnimationNodeStateMachineTransition_g8edg"), "AL_FP_Throwable_A_Throwable_Exit_Throw", "AL_FP_Throwable_A_Throwable_Hold_Pose", SubResource("AnimationNodeStateMachineTransition_gmdyn"), "AL_FP_Throwable_A_Throwable_Enter_Throw", "AL_FP_Throwable_A_Throwable_Exit_Throw", SubResource("AnimationNodeStateMachineTransition_3wpmr"), "AL_FP_Throwable_A_Throwable_Exit_Throw", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_kmnmh"), "AL_FP_Throwable_A_Throwable_Unholster", "AL_FP_Throwable_A_Throwable_Enter_Throw", SubResource("AnimationNodeStateMachineTransition_yws3a"), "AL_FP_Throwable_A_Throwable_Enter_Throw", "AL_FP_Throwable_A_Throwable_Throw", SubResource("AnimationNodeStateMachineTransition_n1clm"), "AL_FP_Throwable_A_Throwable_Aiming", "AL_FP_Throwable_A_Throwable_Throw", SubResource("AnimationNodeStateMachineTransition_11c25"), "AL_FP_Throwable_A_Throwable_Throw", "End", SubResource("AnimationNodeStateMachineTransition_te7e3")]
+graph_offset = Vector2(60, -459)
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_utm5c"]
 advance_mode = 2
@@ -479,7 +502,7 @@ transitions = ["Start", "HOLSTERED", SubResource("AnimationNodeStateMachineTrans
 graph_offset = Vector2(-269, 1)
 
 [resource]
-graph_offset = Vector2(-993.1866, -119.20294)
+graph_offset = Vector2(-1021.99475, -93.23967)
 nodes/output/position = Vector2(280, 300)
 nodes/SM_Right/node = SubResource("AnimationNodeStateMachine_hxvos")
 nodes/SM_Right/position = Vector2(-500, 160)
