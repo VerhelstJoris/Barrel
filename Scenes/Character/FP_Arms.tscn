@@ -167,7 +167,7 @@ script = ExtResource("1_1ioya")
 colt_scene = NodePath("Arms_Rig/Skeleton3D/RPropBone/FP_Colt")
 
 [node name="Arms_Rig" type="Node3D" parent="."]
-transform = Transform3D(100, 0, 0, 0, -4.371139e-06, 100, 0, -100, -4.371139e-06, 0, 0, 0)
+transform = Transform3D(-100, 8.742278e-06, 3.8213708e-13, 0, -4.371139e-06, 100, 8.742278e-06, 100, 4.371139e-06, 0, 0, 0)
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Arms_Rig"]
 animate_physical_bones = false

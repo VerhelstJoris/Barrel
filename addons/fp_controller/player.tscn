@@ -168,7 +168,7 @@ render_target_update_mode = 4
 
 [node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
-transform = Transform3D(-0.25, 0, -3.774895e-08, 0, 0.25, 0, 3.774895e-08, 0, -0.25, 2.08165e-12, 1.20468, 2.08165e-12)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 2.08165e-12, 1.20468, 2.08165e-12)
 rotation_order = 0
 
 [node name="CrouchVignette" type="ColorRect" parent="CameraPivot/WorldCamera/SubViewportContainer"]

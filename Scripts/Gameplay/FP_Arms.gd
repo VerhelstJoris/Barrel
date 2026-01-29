@@ -17,10 +17,6 @@ func _align_to_world_camera(align_to : Camera3D ) -> void:
 	var target_transform : Transform3D = align_to.get_camera_transform()
 	
 	target_transform = target_transform.translated(cam_offset)
-	#flip 2 axis of the basis that don't align
-	target_transform.basis.x *= -1
-	target_transform.basis.z *= -1
-	
 
 	set_global_transform(target_transform)
 
