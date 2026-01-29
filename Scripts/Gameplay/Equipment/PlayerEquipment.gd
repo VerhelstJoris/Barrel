@@ -46,7 +46,10 @@ func _try_use_equipment(_event : InputEvent):
 	# not implemented in base class
 	pass
 	
-	
+func _proceed_with_action_from_animation() -> void:
+	# not implemented in base class
+	pass
+
 func _can_be_holstered() -> bool:
 	return true
 

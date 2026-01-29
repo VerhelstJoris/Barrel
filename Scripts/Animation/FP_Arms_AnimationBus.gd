@@ -319,9 +319,11 @@ func _on_reload_change(enter : bool, enter_uncock : bool, exit : bool)-> void:
 func _on_bullet_spawned_for_inserting(_new_bullet : Node3D) -> void:
 	right_prop_bone.add_child(_new_bullet)
 
+#called as anim notify
 func _holster_anim_finished(slot : EquipmentManager.EEquipmentSlot):
 	on_holster_anim_finish.emit(slot)
 	
+#called as anim notify
 func _toggle_equipment_visible(visible : bool) -> void:
 	pistol.owner.visible = visible
 
@@ -330,9 +332,14 @@ func current_right_equipment_two_handed() -> bool:
 		return false
 	return pistol._is_currently_using_both_hands()
 
+#called as anim notify	
 func _unholster_anim_finished(slot : EquipmentManager.EEquipmentSlot):
 	on_unholster_anim_finish.emit(slot)
 	
+func _proceed_current_equipment_action(_slot : EquipmentManager.EEquipmentSlot):
+	if(equipment_manager.current_equipment[_slot] != null):
+		equipment_manager.current_equipment[_slot]._proceed_with_action_from_animation()
+
 func _update_movement_blend_values(delta : float) -> void:
 	var horizontal_move : float = mov_comp.current_horizontal_velocity.length()
 	sprinting = horizontal_move > sprint_speed_anim_threshold

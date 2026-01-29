@@ -19,10 +19,13 @@ var drop_transform : Transform3D = Transform3D.IDENTITY
 
 enum EThrowableEquipmentState{ Default, Aiming, Throwing} 
 
-var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
-var current_calculated_throw_velocity = Vector3.ZERO
-var debug_drawn : bool = false
+@export var temp_collisions_exceptions_time : float = 0.1
+var temporary_collisions_exceptions_to_remove : Array[Node]
+var collision_exception_timer : Timer
 
+var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
+var current_calculated_throw_velocity : Vector3 = Vector3.ZERO
+var DEBUG_draw_target_path : bool = false
 
 const aiming_input_context_name : String = "Aiming"
 
@@ -39,27 +42,54 @@ func _ready() -> void:
 	
 func _physics_process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
-		var pos : Vector3 = _determine_throw_target()
+		_determine_throw_target()
 	
 	if(drop_queued):
 		_drop()
 		drop_queued = false
+		return
 		
 	if(throw_queued):
-		var reset_transform : Transform3D = owner.get_global_transform()
-		player.equipment_manager._remove_equipment_from_slot(slot)
-		owner.reparent(get_tree().root, true)
-		owner.set_global_transform(reset_transform)
-		
-		rigid_body.set_linear_velocity(current_calculated_throw_velocity)
-		rigid_body.set_angular_velocity(current_calculated_throw_velocity)
+		_throw()
 		throw_queued = false
 		
-func _throw_projectile_from_anim() -> void:
-	throw_queued = true
-	pass
-		
+func _throw() -> void:
+	_add_collisions_exceptions()
+	
+	var reset_transform : Transform3D = owner.get_global_transform()
+	player.equipment_manager._remove_equipment_from_slot(slot)
+	owner.reparent(get_tree().root, true)
+	owner.set_global_transform(reset_transform)
 
+
+
+	rigid_body.set_linear_velocity(current_calculated_throw_velocity)
+	rigid_body.set_angular_velocity(current_calculated_throw_velocity)
+	
+func _add_collisions_exceptions() -> void:
+	if(rigid_body == null):
+		return
+		
+	rigid_body.add_collision_exception_with(player)
+		
+	temporary_collisions_exceptions_to_remove = [player]	
+	
+	if(collision_exception_timer == null):
+		collision_exception_timer = Timer.new()
+		owner.add_child(collision_exception_timer) 
+	
+	collision_exception_timer.wait_time = temp_collisions_exceptions_time
+	collision_exception_timer.one_shot = true
+	
+	collision_exception_timer.timeout.connect(_on_collision_exception_timer_timeout)
+	collision_exception_timer.start()
+	
+func _on_collision_exception_timer_timeout() -> void:
+	if(rigid_body != null):
+		for exception in temporary_collisions_exceptions_to_remove:
+			if(exception != null):
+				rigid_body.remove_collision_exception_with(exception)
+				
 func _can_be_holstered() -> bool:
 	return false
 	
@@ -94,17 +124,14 @@ func _try_use_equipment(_event : InputEvent) -> void:
 				_change_throwable_state(EThrowableEquipmentState.Aiming)
 		EThrowableEquipmentState.Aiming:
 			if(_can_currently_throw(_event)):
-				_throw()
+				_change_throwable_state(EThrowableEquipmentState.Throwing)
 		_:
 			pass
-				
-func _throw() -> void:
-	_change_throwable_state(EThrowableEquipmentState.Throwing)
-	throw_queued = true
-	#get all capsules on the player and add them to collision exception list for x amount of time
-	#if(rigid_body):
-		#for shape in player._get_all_collision_shapes():
-			#rigid_body.add_collision_exception_with(shape)
+			
+func _proceed_with_action_from_animation() -> void:
+	if(current_throwable_state == EThrowableEquipmentState.Throwing):
+		throw_queued = true
+		return
 
 
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:
@@ -191,8 +218,9 @@ func _determine_throw_target() -> Vector3:
 	var ray_hit : Dictionary  = space_state.intersect_ray(query)
 	if (ray_hit):
 		end = ray_hit.position
-		DebugDraw3D.draw_sphere(end,0.1,Color.RED, 0)
-	else:
+		if(DEBUG_draw_target_path):
+			DebugDraw3D.draw_sphere(end,0.1,Color.RED, 0)
+	elif DEBUG_draw_target_path:
 		DebugDraw3D.draw_sphere(end,0.1,Color.GREEN, 0)
 	
 	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,end, gravity)
@@ -200,8 +228,9 @@ func _determine_throw_target() -> Vector3:
 	if(!result.is_empty()):
 		var points: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15 )
 		current_calculated_throw_velocity = result[0].velocity
-		for id in points.size() -1:
-			DebugDraw3D.draw_line(points[id].position,points[id+1].position,Color.BLUE,0)
+		if(DEBUG_draw_target_path):
+			for id in points.size() -1:
+				DebugDraw3D.draw_line(points[id].position,points[id+1].position,Color.BLUE,0)
 
 	return end
 
@@ -219,8 +248,7 @@ func _determine_throw_target_length() -> float:
 	
 	#if the dot product is positive, we are looking up and reduce the distance we can throw
 	return max_throw_distance * mult
-
-
+	
 func _decide_target_transform_for_drop() -> bool:
 	drop_transform = Transform3D.IDENTITY
 	if(player == null):

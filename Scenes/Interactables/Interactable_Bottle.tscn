@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=18 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_471q5"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
@@ -13,39 +13,12 @@
 [ext_resource type="Resource" uid="uid://cvehamcvspdg4" path="res://Data/Interactions/DA_Interactable_Bottle.tres" id="10_471q5"]
 [ext_resource type="Script" uid="uid://8nctmriibrv5" path="res://Scripts/Gameplay/Components/Visual/OutlineComponent.gd" id="10_kukbf"]
 [ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="13_5mh7m"]
-[ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="14_eqah0"]
-[ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="15_bn1jt"]
-[ext_resource type="Resource" uid="uid://cwp0xmw1kgeft" path="res://Data/Input/Equipment/IA_Throw.tres" id="16_s08uy"]
-[ext_resource type="Resource" uid="uid://brwn6eti3jb8i" path="res://Data/Input/Player/IA_Interact.tres" id="17_jvbyj"]
-[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="18_b0rhv"]
 [ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="19_eqah0"]
 [ext_resource type="Resource" uid="uid://bnwpd1ila8vxq" path="res://Data/Input/Equipment/IMC_Throwable_Default.tres" id="20_bn1jt"]
 [ext_resource type="Resource" uid="uid://d4jhubg04nj20" path="res://Data/Input/Equipment/IMC_Throwable_Aiming.tres" id="21_s08uy"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6tjey"]
 points = PackedVector3Array(0.0721023, 0, 0.18837914, 0.050971307, -0.05098542, 0.18837914, 0.048204653, -0.048218764, 0.012135644, 0.06816406, 0, 0.012209417, 0.048204653, 0.048204653, 0.012209417, 0.050971307, 0.050971307, 0.18837914, 0.013692096, 0.013692096, 0.3723319, 0.019366555, 0, 0.3723319, 0.013692096, -0.013706211, 0.3723319, 0, -0.0721023, 0.18837914, 0, -0.01938067, 0.3723319, 0, -0.06817818, 0.012209417, 0, -0.06597614, 0, 0.046637826, -0.046651937, 0, 0.06596204, 0, 0, 0.046637826, 0.046637826, 0, -1.41114e-05, 0.06596204, 0, -1.41114e-05, 0.06816406, 0.012209417, -1.41114e-05, 0.0721023, 0.18837914, 0, 0.019366555, 0.3723319, 0.011730038, 0.011730038, 0.37683204, 0.01658579, 0, 0.37683204, 0.011730038, -0.011744149, 0.37683204, -0.05098542, -0.05098542, 0.18837914, -0.048218764, -0.048218764, 0.012209417, -0.013706211, -0.013706211, 0.3723319, 0, -0.016599901, 0.37683204, -0.011744149, -0.011744149, 0.37683204, -0.046651937, -0.046651937, 0, -0.046651937, 0.046637826, 0, -0.048218764, 0.048204653, 0.012209417, -0.05098542, 0.050971307, 0.18837914, -0.013706211, 0.013692096, 0.3723319, -0.011744149, 0.011730038, 0.37683204, 0, 0.01658579, 0.37683204, -0.0721023, -1.41114e-05, 0.18837914, -0.06817818, -1.41114e-05, 0.012209417, -0.06597614, -1.41114e-05, 0, -0.01938067, 0, 0.3723319, -0.016599901, 0, 0.37683204)
-
-[sub_resource type="Resource" id="Resource_yrv68"]
-script = ExtResource("15_bn1jt")
-signal_node = NodePath("../PlayerEquipmentThrowable")
-signal_name = "use_equipment_input"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_yhxqx"]
-script = ExtResource("15_bn1jt")
-signal_node = NodePath("../PlayerEquipmentThrowable")
-signal_name = "drop_equipment_input"
-metadata/_custom_type_script = "uid://dp2ih4w84ct0t"
-
-[sub_resource type="Resource" id="Resource_g3lih"]
-script = ExtResource("18_b0rhv")
-display_string = "Throw"
-metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
-
-[sub_resource type="Resource" id="Resource_1n50k"]
-script = ExtResource("18_b0rhv")
-display_string = "Drop"
-metadata/_custom_type_script = "uid://qxw8e8yoa5xb"
 
 [node name="Prop_Bottle" type="RigidBody3D"]
 mass = 2.0
@@ -88,6 +61,7 @@ metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
 script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
+take_hitbox_collision_damage = false
 min_collision_impulse = 9.0
 on_death_vfx = ExtResource("6_6pqks")
 death_vfx_spawn_node = NodePath("../DeathVFX_Point")
@@ -107,14 +81,6 @@ enabled = false
 
 [node name="InputReceiver" type="Node" parent="."]
 script = ExtResource("13_5mh7m")
-input_dictionary = Dictionary[ExtResource("14_eqah0"), ExtResource("15_bn1jt")]({
-ExtResource("16_s08uy"): SubResource("Resource_yrv68"),
-ExtResource("17_jvbyj"): SubResource("Resource_yhxqx")
-})
-description_dictionary = Dictionary[ExtResource("14_eqah0"), ExtResource("18_b0rhv")]({
-ExtResource("16_s08uy"): SubResource("Resource_g3lih"),
-ExtResource("17_jvbyj"): SubResource("Resource_1n50k")
-})
 input_contexts = Dictionary[String, ExtResource("19_eqah0")]({
 "Aiming": ExtResource("21_s08uy"),
 "Default": ExtResource("20_bn1jt")
