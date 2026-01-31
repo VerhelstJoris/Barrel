@@ -10,7 +10,16 @@ var drop_transform : Transform3D = Transform3D.IDENTITY
 @export var upward_throw_max_dist_mult : float = 0.4
 @export var downward_throw_max_dist_mult : float = 1.4
 @export var throw_velocity : float = 12.5
+@export var temp_collisions_exceptions_time : float = 0.1
 
+@export_group("Trajectory Preview Settings")
+@export var DEBUG_draw_target_path : bool = false
+var trajectory_renderer : LineRenderer
+@export var trajectory_renderer_scene : PackedScene
+@export var perform_intersect_checks_on_segments : bool = true
+
+
+@export_group("Components")
 @export var rigid_body : CollisionPhysicsBody
 @export var hitboxes : Array[HitboxComponent]
 
@@ -19,13 +28,12 @@ var drop_transform : Transform3D = Transform3D.IDENTITY
 
 enum EThrowableEquipmentState{ Default, Aiming, Throwing} 
 
-@export var temp_collisions_exceptions_time : float = 0.1
 var temporary_collisions_exceptions_to_remove : Array[Node]
 var collision_exception_timer : Timer
 
 var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
 var current_calculated_throw_velocity : Vector3 = Vector3.ZERO
-var DEBUG_draw_target_path : bool = false
+var current_calculated_throw_target : Vector3 = Vector3.ZERO
 
 const aiming_input_context_name : String = "Aiming"
 
@@ -40,9 +48,13 @@ func _ready() -> void:
 	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") *  ProjectSettings.get_setting("physics/3d/default_gravity")
 	print("gravity ", gravity)
 	
+func _process(delta: float) -> void:
+	if(current_throwable_state == EThrowableEquipmentState.Aiming):
+		_draw_throw_trajectory()
+
 func _physics_process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
-		_determine_throw_target()
+		current_calculated_throw_target = _determine_throw_target()
 	
 	if(drop_queued):
 		_drop()
@@ -107,6 +119,10 @@ func _on_equipped(_player : Player) -> void:
 		mesh.set_layer_mask_value(2,true)
 		
 	_change_throwable_state(EThrowableEquipmentState.Default)	
+	
+	if(trajectory_renderer_scene):
+		trajectory_renderer = trajectory_renderer_scene.instantiate()
+		get_tree().root.add_child.call_deferred(trajectory_renderer)
 		
 func _on_unequipped():
 	for hitbox in hitboxes:
@@ -115,6 +131,10 @@ func _on_unequipped():
 	for mesh in meshes:
 		mesh.set_layer_mask_value(1,true)
 		mesh.set_layer_mask_value(2,false)
+		
+	if(trajectory_renderer):
+		trajectory_renderer.queue_free()
+		
 	super()
 	
 func _try_use_equipment(_event : InputEvent) -> void:
@@ -222,18 +242,9 @@ func _determine_throw_target() -> Vector3:
 			DebugDraw3D.draw_sphere(end,0.1,Color.RED, 0)
 	elif DEBUG_draw_target_path:
 		DebugDraw3D.draw_sphere(end,0.1,Color.GREEN, 0)
-	
-	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,end, gravity)
-
-	if(!result.is_empty()):
-		var points: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15 )
-		current_calculated_throw_velocity = result[0].velocity
-		if(DEBUG_draw_target_path):
-			for id in points.size() -1:
-				DebugDraw3D.draw_line(points[id].position,points[id+1].position,Color.BLUE,0)
 
 	return end
-
+	
 func _determine_throw_target_length() -> float:
 	var world_cam : Camera3D = player.player_cam
 	var dir : Vector3 = -world_cam.get_global_basis().z
@@ -248,6 +259,28 @@ func _determine_throw_target_length() -> float:
 	
 	#if the dot product is positive, we are looking up and reduce the distance we can throw
 	return max_throw_distance * mult
+	
+func _draw_throw_trajectory() -> void:
+	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,current_calculated_throw_target, gravity)
+
+	if(!result.is_empty()):
+		var sampled_data: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15 )
+		current_calculated_throw_velocity = result[0].velocity
+		if(DEBUG_draw_target_path):
+			for id in sampled_data.size() -1:
+				DebugDraw3D.draw_line(sampled_data[id].position, sampled_data[id+1].position,Color.BLUE,0)
+
+
+		var trajectory_positions : Array[Vector3]
+		trajectory_positions.resize(sampled_data.size())
+	
+		for id in sampled_data.size() - 1:
+			trajectory_positions[id] = sampled_data[id].position
+	
+		trajectory_positions[sampled_data.size()-1] = current_calculated_throw_target
+
+		if(trajectory_renderer):
+			trajectory_renderer.points = trajectory_positions
 	
 func _decide_target_transform_for_drop() -> bool:
 	drop_transform = Transform3D.IDENTITY

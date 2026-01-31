@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=19 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_471q5"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://cvehamcvspdg4" path="res://Data/Interactions/DA_Interactable_Bottle.tres" id="10_471q5"]
 [ext_resource type="Script" uid="uid://8nctmriibrv5" path="res://Scripts/Gameplay/Components/Visual/OutlineComponent.gd" id="10_kukbf"]
 [ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="13_5mh7m"]
+[ext_resource type="PackedScene" uid="uid://dn5jd7teg3yp8" path="res://Scenes/Character/Equipment/Throwable_Trajectory.tscn" id="17_cbst5"]
 [ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="19_eqah0"]
 [ext_resource type="Resource" uid="uid://bnwpd1ila8vxq" path="res://Data/Input/Equipment/IMC_Throwable_Default.tres" id="20_bn1jt"]
 [ext_resource type="Resource" uid="uid://d4jhubg04nj20" path="res://Data/Input/Equipment/IMC_Throwable_Aiming.tres" id="21_s08uy"]
@@ -43,6 +44,7 @@ surface_material_override/0 = ExtResource("1_xweuc")
 [node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "collision_shape_for_drop_test", "input_receiver")]
 process_mode = 1
 script = ExtResource("1_471q5")
+trajectory_renderer_scene = ExtResource("17_cbst5")
 rigid_body = NodePath("..")
 hitboxes = [NodePath("../HitboxComponent")]
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
@@ -61,7 +63,6 @@ metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
 script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
-take_hitbox_collision_damage = false
 min_collision_impulse = 9.0
 on_death_vfx = ExtResource("6_6pqks")
 death_vfx_spawn_node = NodePath("../DeathVFX_Point")

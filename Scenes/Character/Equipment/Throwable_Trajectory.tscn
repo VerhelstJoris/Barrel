@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dn5jd7teg3yp8"]
+
+[ext_resource type="Script" uid="uid://cmmjaefpx7esy" path="res://addons/LineRenderer/line_renderer.gd" id="1_okkwx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5mh7m"]
+shading_mode = 0
+albedo_color = Color(0.796243, 0.796243, 0.796243, 1)
+
+[node name="LineRenderer3D" type="MeshInstance3D"]
+material_override = SubResource("StandardMaterial3D_5mh7m")
+script = ExtResource("1_okkwx")
+billboard_polys = false
+flip_y_uv = false
+use_precomputed_thickness_arr = false
+start_thickness = 0.0
+growth_rate_per_unit_length = 0.0
+thickness_added_per_unit_length = 0.01
+metadata/_custom_type_script = "uid://cmmjaefpx7esy"

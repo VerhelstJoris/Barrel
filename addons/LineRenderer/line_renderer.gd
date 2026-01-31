@@ -15,6 +15,7 @@ class_name LineRenderer extends MeshInstance3D
 @export var pre_computed_thickness_arr : Array[float]
 @export var start_thickness:float = 0.1
 @export var growth_rate_per_unit_length : float = 2
+@export var thickness_added_per_unit_length : float = 1
 
 var PrevBToAB : Vector3
 var PrevBFromAB : Vector3
@@ -91,7 +92,7 @@ func _reset_vars_for_drawing(_delta : float)->void:
 	current_dist = 0
 	next_dist = 0
 	
-	max_thickness = start_thickness + (start_thickness * (growth_rate_per_unit_length * total_dist))
+	max_thickness = start_thickness + (growth_rate_per_unit_length * total_dist) + (thickness_added_per_unit_length * total_dist)
 	global_scale = get_global_transform().basis.get_scale().length()
 	
 func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
@@ -115,8 +116,8 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 		current_thickness = pre_computed_thickness_arr[index] / global_scale
 		next_thickness = pre_computed_thickness_arr[index + 1] / global_scale
 	else:	
-		current_thickness = lerp(max_thickness, start_thickness, current_alpha) / global_scale
-		next_thickness = lerp(max_thickness, start_thickness, next_alpha) / global_scale
+		current_thickness = lerp(start_thickness, max_thickness, current_alpha) / global_scale
+		next_thickness = lerp(start_thickness, max_thickness, next_alpha) / global_scale
 	
 	var AB:Vector3 = B - A;
 	var dir : Vector3
