@@ -3,6 +3,8 @@ class_name Player extends CharacterBody3D
 @export_group("Components")
 @export var input_receiver : PlayerInputReceiver
 
+@export var throwable_ray : RayCast3D
+
 @export_group("Shape Components")
 @export var standing_shape : CollisionShape3D
 @export var standing_camera_pivot : Node3D

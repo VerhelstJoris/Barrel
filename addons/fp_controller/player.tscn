@@ -96,10 +96,11 @@ _data = {
 &"Uncrouch": ExtResource("31_tvmyk")
 }
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver", "standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("input_receiver", "throwable_ray", "standing_shape", "standing_camera_pivot", "crouching_shape", "crouching_camera_pivot")]
 floor_max_angle = 0.698132
 script = ExtResource("1_5ras8")
 input_receiver = NodePath("InputReceiverComponent")
+throwable_ray = NodePath("CameraPivot/WorldCamera/ThrowableRay")
 standing_shape = NodePath("StandingCollisionShape")
 standing_camera_pivot = NodePath("StandingCameraPivot")
 crouching_shape = NodePath("CrouchingCollisionShape")
@@ -187,6 +188,11 @@ layout_mode = 2
 [node name="InteractRay" type="RayCast3D" parent="CameraPivot/WorldCamera"]
 transform = Transform3D(1, 0, 0, 0, -4.47035e-08, -1, 0, 1, -4.47035e-08, 0, 0, 0)
 target_position = Vector3(0, -1.5, 0)
+
+[node name="ThrowableRay" type="RayCast3D" parent="CameraPivot/WorldCamera"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
+enabled = false
+target_position = Vector3(0, 4, 0)
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")

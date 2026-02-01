@@ -14,5 +14,5 @@ flip_y_uv = false
 use_precomputed_thickness_arr = false
 start_thickness = 0.0
 growth_rate_per_unit_length = 0.0
-thickness_added_per_unit_length = 0.01
+thickness_added_per_unit_length = 0.008
 metadata/_custom_type_script = "uid://cmmjaefpx7esy"
