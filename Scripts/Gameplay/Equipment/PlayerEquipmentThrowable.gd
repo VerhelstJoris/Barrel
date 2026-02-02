@@ -18,7 +18,16 @@ var target_ray : RayCast3D = null
 var trajectory_renderer : LineRenderer
 @export var trajectory_renderer_scene : PackedScene
 @export var check_trajectory_intersect : bool = true
-var trajectory_positions : Array[Vector3]
+
+@export var trajectory_impact_scene : PackedScene
+var trajectory_impact_effect : Node3D
+var trajectory_impact_global_trans : Transform3D = Transform3D.IDENTITY
+
+#used to interpolate the trajectory on non-physics frames
+var physics_ray_start_point : Vector3 = Vector3.ZERO
+var physics_ray_end_point : Vector3 = Vector3.ZERO
+var trajectory_impact_point : Node3D
+var phys_traj_positions : Array[Vector3]
 
 @export_group("Components")
 @export var rigid_body : CollisionPhysicsBody
@@ -34,6 +43,7 @@ var collision_exception_timer : Timer
 
 var current_throwable_state : EThrowableEquipmentState = EThrowableEquipmentState.Default
 var current_calculated_throw_velocity : Vector3 = Vector3.ZERO
+var current_target_is_collision : bool = false
 var current_calculated_throw_target : Vector3 = Vector3.ZERO
 
 const aiming_input_context_name : String = "Aiming"
@@ -47,16 +57,19 @@ func _ready() -> void:
 	drop_equipment_input.connect(_try_drop_equipment)
 	
 	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") *  ProjectSettings.get_setting("physics/3d/default_gravity")
-	print("gravity ", gravity)
 	
 func _process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
+		trajectory_renderer.set_global_position(owner.get_global_position())
 		_draw_throw_trajectory()
-
+		
 func _physics_process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
 		_determine_throw_target()
-	
+	else:
+		if(trajectory_impact_effect):
+			trajectory_impact_effect.visible = false
+		
 	if(drop_queued):
 		_drop()
 		drop_queued = false
@@ -87,7 +100,7 @@ func _add_collisions_exceptions() -> void:
 	
 	if(collision_exception_timer == null):
 		collision_exception_timer = Timer.new()
-		owner.add_child(collision_exception_timer) 
+		owner.add_child(collision_exception_timer)
 	
 	collision_exception_timer.wait_time = temp_collisions_exceptions_time
 	collision_exception_timer.one_shot = true
@@ -121,7 +134,13 @@ func _on_equipped(_player : Player) -> void:
 	
 	if(trajectory_renderer_scene):
 		trajectory_renderer = trajectory_renderer_scene.instantiate()
+		#get_tree().root.add_child.call_deferred(trajectory_renderer)
 		player.player_cam.add_child.call_deferred(trajectory_renderer)
+		
+	if(trajectory_impact_scene):
+		trajectory_impact_effect = trajectory_impact_scene.instantiate()
+		player.player_cam.add_child.call_deferred(trajectory_impact_effect)
+		trajectory_impact_effect.visible = false
 
 	target_ray = _player.throwable_ray
 		
@@ -156,7 +175,6 @@ func _proceed_with_action_from_animation() -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Throwing):
 		throw_queued = true
 		return
-
 
 func _can_enter_aiming_mode( _event : InputEvent) -> bool:
 	if(current_throwable_state != EThrowableEquipmentState.Default):
@@ -236,65 +254,73 @@ func _determine_throw_target() -> void:
 
 	target_ray.target_position.y = ray_length
 	target_ray.force_raycast_update()
-		
+
+	var world_cam : Camera3D = player.player_cam
+	var cam_pos : Vector3 = world_cam.get_global_position()
+	var dir : Vector3 = -world_cam.get_global_basis().z
+	physics_ray_end_point = cam_pos + (dir.normalized() * ray_length)
+	
 	if (target_ray.is_colliding()):
 		current_calculated_throw_target = target_ray.get_collision_point()
+		trajectory_impact_global_trans.origin = current_calculated_throw_target
+		trajectory_impact_global_trans.basis = Basis.from_euler(Quaternion(Vector3.UP, target_ray.get_collision_normal()).get_euler())
 		if(DEBUG_draw_target_path):
 			DebugDraw3D.draw_sphere(current_calculated_throw_target,0.1,Color.RED, 0)
 	else:
-		#set the target point at the end of the 
-		var world_cam : Camera3D = player.player_cam
-		var cam_pos : Vector3 = world_cam.get_global_position()
-		var dir : Vector3 = -world_cam.get_global_basis().z
-		current_calculated_throw_target = cam_pos + (dir.normalized() * ray_length)
+		#set the target point at the end of the ray
+		current_calculated_throw_target = physics_ray_end_point
+		trajectory_impact_global_trans = Transform3D.IDENTITY
 		if DEBUG_draw_target_path:
 			DebugDraw3D.draw_sphere(current_calculated_throw_target,0.1,Color.GREEN, 0)
 	
 	_calculate_trajectory_path_points()
 		
 func _calculate_trajectory_path_points() -> void:
-
 	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,current_calculated_throw_target, gravity)
-
+	physics_ray_start_point = owner.get_global_position()
+	
 	if(result.is_empty()):
-		push_error("Was not able ot calculate path from ", owner.get_global_position(), " to ", current_calculated_throw_target)
+		push_error("Was not able to calculate path from ", owner.get_global_position(), " to ", current_calculated_throw_target)
 		return
 		
-	var sampled_data: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 18 )
+	var sampled_data: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15)
 	current_calculated_throw_velocity = result[0].velocity
 	if(DEBUG_draw_target_path):
 		for id in sampled_data.size() -1:
 			DebugDraw3D.draw_line(sampled_data[id].position, sampled_data[id+1].position,Color.BLUE,0)	
 
 
-	trajectory_positions.clear()
+	phys_traj_positions.clear()
 
 	if(!check_trajectory_intersect):
-		trajectory_positions.resize(sampled_data.size())
+		phys_traj_positions.resize(sampled_data.size())
 
 		for id in sampled_data.size() - 1:
-			trajectory_positions[id] = sampled_data[id].position
+			phys_traj_positions[id] = sampled_data[id].position
 
-		trajectory_positions[sampled_data.size()-1] = current_calculated_throw_target
+		phys_traj_positions[sampled_data.size()-1] = current_calculated_throw_target
 	else:
 		var space_state: PhysicsDirectSpaceState3D = owner.get_world_3d().get_direct_space_state()
-
+		
 		for id in sampled_data.size() - 1:
 			var query := PhysicsRayQueryParameters3D.create(sampled_data[id].position, sampled_data[id +1].position)
 			query.collide_with_bodies = true
 			query.collide_with_areas = false
+			query.hit_from_inside = true
+			query.hit_back_faces = true
 		
 			var ray_hit : Dictionary  = space_state.intersect_ray(query)
 			#if we hit that's the final result of our path, if not, keep going
 			if(ray_hit):
-				trajectory_positions.append(ray_hit.position)
+				phys_traj_positions.append(ray_hit.position)
+				trajectory_impact_global_trans.origin = ray_hit.position
+				trajectory_impact_global_trans.basis = Basis.from_euler(Quaternion(Vector3.UP, ray_hit.normal).get_euler())
 				return
 			else:
-				trajectory_positions.append(sampled_data[id].position)
+				phys_traj_positions.append(sampled_data[id].position)
 				
-		trajectory_positions.append(current_calculated_throw_target)
-
-
+		phys_traj_positions.append(current_calculated_throw_target)
+		
 func _determine_throw_target_length() -> float:
 	var world_cam : Camera3D = player.player_cam
 	var dir : Vector3 = -world_cam.get_global_basis().z
@@ -312,8 +338,15 @@ func _determine_throw_target_length() -> float:
 	
 func _draw_throw_trajectory() -> void:
 	if(trajectory_renderer):
-		trajectory_renderer.points = trajectory_positions
-	
+		trajectory_renderer.points = phys_traj_positions
+		
+	if(trajectory_impact_effect != null):
+		if(trajectory_impact_global_trans != Transform3D.IDENTITY):
+			trajectory_impact_effect.visible = true
+			trajectory_impact_effect.set_global_transform(trajectory_impact_global_trans)
+		else:
+			trajectory_impact_effect.visible = false
+			
 func _decide_target_transform_for_drop() -> bool:
 	drop_transform = Transform3D.IDENTITY
 	if(player == null):

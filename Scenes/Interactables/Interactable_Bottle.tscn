@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=20 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_471q5"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://b6ll43e7dibhk" path="res://Scripts/Gameplay/Components/Damage/HitBoxComponent.gd" id="2_vfrhl"]
 [ext_resource type="PackedScene" uid="uid://c25oryxv4t0us" path="res://Scenes/VFX/Damage/Death/VFX_Prop_Death_Glass.tscn" id="6_6pqks"]
 [ext_resource type="Script" uid="uid://bu4bc7atpf70e" path="res://Scripts/Gameplay/Components/Damage/DeathComponent.gd" id="6_u2t4m"]
+[ext_resource type="PackedScene" uid="uid://djvidhr1o3et2" path="res://Scenes/Character/Equipment/Throwable_Trajectory_Impact.tscn" id="7_5mh7m"]
 [ext_resource type="Script" uid="uid://vancee6lfbu6" path="res://Scripts/Gameplay/Components/Interaction/InteractableComponent.gd" id="8_00ys1"]
 [ext_resource type="Material" uid="uid://dre2y62xrhejm" path="res://Materials/Misc/Outline/Mat_Outline.tres" id="9_471q5"]
 [ext_resource type="Resource" uid="uid://cvehamcvspdg4" path="res://Data/Interactions/DA_Interactable_Bottle.tres" id="10_471q5"]
@@ -45,6 +46,7 @@ surface_material_override/0 = ExtResource("1_xweuc")
 process_mode = 1
 script = ExtResource("1_471q5")
 trajectory_renderer_scene = ExtResource("17_cbst5")
+trajectory_impact_scene = ExtResource("7_5mh7m")
 rigid_body = NodePath("..")
 hitboxes = [NodePath("../HitboxComponent")]
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]

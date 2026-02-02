@@ -1,13 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://dn5jd7teg3yp8"]
 
+[ext_resource type="Material" uid="uid://83sbjmaa2fhn" path="res://Materials/Character/Equipment/Mat_Preview_Unlit.tres" id="1_m5fef"]
 [ext_resource type="Script" uid="uid://cmmjaefpx7esy" path="res://addons/LineRenderer/line_renderer.gd" id="1_okkwx"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5mh7m"]
-shading_mode = 0
-albedo_color = Color(0.796243, 0.796243, 0.796243, 1)
-
 [node name="LineRenderer3D" type="MeshInstance3D"]
-material_override = SubResource("StandardMaterial3D_5mh7m")
+material_override = ExtResource("1_m5fef")
 script = ExtResource("1_okkwx")
 billboard_polys = false
 flip_y_uv = false
