@@ -1,26 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://djvidhr1o3et2"]
+[gd_scene load_steps=4 format=3 uid="uid://djvidhr1o3et2"]
 
-[ext_resource type="ArrayMesh" uid="uid://ocevl004enin" path="res://Meshes/Weapons/Colt_SAA/VFX/VFX_Cylinder_Small.res" id="1_r7gpa"]
-[ext_resource type="Material" uid="uid://83sbjmaa2fhn" path="res://Materials/Character/Equipment/Mat_Preview_Unlit.tres" id="2_r7w0m"]
+[ext_resource type="ArrayMesh" uid="uid://586d3ixcg4sm" path="res://Meshes/VFX/M_VFX_Hit_Marker.res" id="1_r7w0m"]
+[ext_resource type="Shader" uid="uid://gax0o7vdcbsn" path="res://Scenes/Character/Equipment/VFX_Trajectory_Preview.gdshader" id="2_r7w0m"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6wlr"]
+render_priority = 0
+shader = ExtResource("2_r7w0m")
+shader_parameter/Color = Vector3(0.7, 0.7, 0.7)
+shader_parameter/Opacity = 1.0
 
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(450, 0, 0, 0, 450, 0, 0, 0, 450, 0.1, 0.088492155, 0.1)
-mesh = ExtResource("1_r7gpa")
-surface_material_override/0 = ExtResource("2_r7w0m")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-transform = Transform3D(-450, 3.9340248e-05, 0, -3.9340248e-05, -450, 0, 0, 0, 450, -0.1, 0.088492155, 0.1)
-mesh = ExtResource("1_r7gpa")
-surface_material_override/0 = ExtResource("2_r7w0m")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
-transform = Transform3D(450, 0, 0, 0, -450, -3.9340248e-05, 0, 3.9340248e-05, -450, 0.1, 0.088492155, -0.1)
-mesh = ExtResource("1_r7gpa")
-surface_material_override/0 = ExtResource("2_r7w0m")
-
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
-transform = Transform3D(-450, 3.9340244e-05, 0, 3.9340244e-05, 450, -3.9340248e-05, -3.4392335e-12, -3.9340248e-05, -450, -0.1, 0.088492155, -0.1)
-mesh = ExtResource("1_r7gpa")
-surface_material_override/0 = ExtResource("2_r7w0m")
+transform = Transform3D(35, 0, 0, 0, -1.5298986e-06, -35, 0, 35, -1.5298986e-06, 0, 0.025, 0)
+cast_shadow = 0
+mesh = ExtResource("1_r7w0m")
+surface_material_override/0 = SubResource("ShaderMaterial_o6wlr")
