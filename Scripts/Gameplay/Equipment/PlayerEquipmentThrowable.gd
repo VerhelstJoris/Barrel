@@ -21,7 +21,8 @@ var trajectory_renderer : LineRenderer
 
 const trajectory_alpha_shader_param : String = "Opacity"
 var trajectory_alpha_tween : Tween
-@export var trajectory_preview_alpha_tween_time : float = 0.25
+@export var trajectory_preview_alpha_fadein_time : float = 0.25
+@export var trajectory_preview_alpha_fadeout_time : float = 0.1
 
 @export var trajectory_impact_scene : PackedScene
 var trajectory_impact_effect : Node3D
@@ -67,6 +68,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
 		trajectory_renderer.set_global_position(owner.get_global_position())
+		trajectory_renderer.set_global_rotation(owner.get_global_rotation())
 		_draw_throw_trajectory()
 		
 func _physics_process(_delta: float) -> void:
@@ -140,7 +142,6 @@ func _on_equipped(_player : Player) -> void:
 	
 	if(trajectory_renderer_scene):
 		trajectory_renderer = trajectory_renderer_scene.instantiate()
-		#get_tree().root.add_child.call_deferred(trajectory_renderer)
 		player.player_cam.add_child.call_deferred(trajectory_renderer)
 		
 	if(trajectory_impact_scene):
@@ -222,10 +223,15 @@ func _can_exit_aiming() -> bool:
 	return true
 
 func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
-	var prev = current_throwable_state
+	var prev_state = current_throwable_state
+	match current_throwable_state:
+		EThrowableEquipmentState.Aiming:
+			trajectory_alpha_tween = create_tween()
+			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), 0.0, trajectory_preview_alpha_fadeout_time)
+	
 	current_throwable_state = new_state
 	
-	match current_throwable_state:
+	match new_state:
 		EThrowableEquipmentState.Default:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(InputReceiver.default_mapping_context_name ,self, true)
@@ -233,19 +239,24 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
 			trajectory_alpha_tween = create_tween()
-			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, 0.0, 1.0,  trajectory_preview_alpha_tween_time)
+			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), 1.0, trajectory_preview_alpha_fadein_time)
 		EThrowableEquipmentState.Throwing:
 			# when throwing actually happens, already hide existing prompts
 			if(input_receiver):
 				input_receiver._enable_current_HUD_actions(self, false)
 	
-	on_throwable_state_changed.emit(prev, new_state)		
+	on_throwable_state_changed.emit(prev_state, new_state)		
 
 func _set_trajectory_alpha(value : float) -> void:
 	if(trajectory_renderer):
 		trajectory_renderer.set_instance_shader_parameter(trajectory_alpha_shader_param, value)
 
+func _get_trajectory_current_alpha() -> float:
+	if(trajectory_renderer):
+		return trajectory_renderer.get_instance_shader_parameter(trajectory_alpha_shader_param)
 
+	return 0.0
+	
 func _set_trajectory_impact_alpha(value : float) -> void:
 	if(trajectory_impact_effect):
 		for child in trajectory_impact_effect.get_children():
