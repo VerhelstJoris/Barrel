@@ -7,7 +7,6 @@
 render_priority = 0
 shader = ExtResource("2_r7w0m")
 shader_parameter/Color = Vector3(0.7, 0.7, 0.7)
-shader_parameter/Opacity = 1.0
 
 [node name="Node3D" type="Node3D"]
 

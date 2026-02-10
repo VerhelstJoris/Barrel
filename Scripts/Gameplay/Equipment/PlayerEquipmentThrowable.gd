@@ -19,9 +19,15 @@ var trajectory_renderer : LineRenderer
 @export var trajectory_renderer_scene : PackedScene
 @export var check_trajectory_intersect : bool = true
 
+const trajectory_alpha_shader_param : String = "Opacity"
+var trajectory_alpha_tween : Tween
+@export var trajectory_preview_alpha_tween_time : float = 0.25
+
 @export var trajectory_impact_scene : PackedScene
 var trajectory_impact_effect : Node3D
 var trajectory_impact_global_trans : Transform3D = Transform3D.IDENTITY
+var trajectory_impact_alpha_tween : Tween
+@export var trajectory_impact_alpha_tween_time : float = 0.25
 
 #used to interpolate the trajectory on non-physics frames
 var physics_ray_start_point : Vector3 = Vector3.ZERO
@@ -226,13 +232,27 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 		EThrowableEquipmentState.Aiming:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
+			trajectory_alpha_tween = create_tween()
+			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, 0.0, 1.0,  trajectory_preview_alpha_tween_time)
 		EThrowableEquipmentState.Throwing:
 			# when throwing actually happens, already hide existing prompts
 			if(input_receiver):
 				input_receiver._enable_current_HUD_actions(self, false)
 	
 	on_throwable_state_changed.emit(prev, new_state)		
-	
+
+func _set_trajectory_alpha(value : float) -> void:
+	if(trajectory_renderer):
+		trajectory_renderer.set_instance_shader_parameter(trajectory_alpha_shader_param, value)
+
+
+func _set_trajectory_impact_alpha(value : float) -> void:
+	if(trajectory_impact_effect):
+		for child in trajectory_impact_effect.get_children():
+			if child is MeshInstance3D:
+				child.set_instance_shader_parameter(trajectory_alpha_shader_param, value)
+
+
 func _drop() -> void:
 	if(!_decide_target_transform_for_drop()):
 		return
@@ -342,6 +362,9 @@ func _draw_throw_trajectory() -> void:
 		
 	if(trajectory_impact_effect != null):
 		if(trajectory_impact_global_trans != Transform3D.IDENTITY):
+			if( !trajectory_impact_effect.visible && (trajectory_impact_alpha_tween == null || !trajectory_impact_alpha_tween.is_running()) ):
+				trajectory_impact_alpha_tween = create_tween()
+				trajectory_impact_alpha_tween.tween_method(_set_trajectory_impact_alpha, 0.0, 1.0,  trajectory_impact_alpha_tween_time)
 			trajectory_impact_effect.visible = true
 			trajectory_impact_effect.set_global_transform(trajectory_impact_global_trans)
 		else:
