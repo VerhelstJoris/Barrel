@@ -229,6 +229,9 @@ transform = Transform3D(-1, 0, -2.83122e-07, 0, 1, 0, 2.83122e-07, 0, -1, -8, 0,
 
 [node name="PhysicsPropTesting" type="Node" parent="Obstacles"]
 
+[node name="BasicBlock5" parent="Obstacles/PhysicsPropTesting" instance=ExtResource("3_nm1m6")]
+transform = Transform3D(-2.1855695e-07, 0, -0.25, 0, 1, 0, 5, 0, -1.0927847e-08, 4.5589194, 2.08165e-12, 7.8324823)
+
 [node name="TestBottles_Straight" type="Node" parent="Obstacles/PhysicsPropTesting"]
 
 [node name="Prop_Bottle_1M_Test" parent="Obstacles/PhysicsPropTesting/TestBottles_Straight" instance=ExtResource("7_f3jw6")]
@@ -365,11 +368,41 @@ text = "3.5m
 "
 font_size = 40
 
+[node name="Prop_Bottle4" parent="Obstacles/PhysicsPropTesting" instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.640603, 1.0017076, -4.63989)
+
 [node name="PropBarrel" parent="." instance=ExtResource("5_fd0ol")]
 transform = Transform3D(45, 0, 0, 0, -0.81049, 44.9927, 0, -44.9927, -0.81049, -2.20362, 0.991762, -4.77356)
 
 [node name="Prop_Bottle" parent="." instance=ExtResource("7_f3jw6")]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.640603, 1.0017076, -4.63989)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 7.5)
+
+[node name="Prop_Bottle8" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 8.5)
+
+[node name="Prop_Bottle9" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 9.5)
+
+[node name="Prop_Bottle10" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 6.5)
+
+[node name="Prop_Bottle11" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 5.5)
+
+[node name="Prop_Bottle7" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 7)
+
+[node name="Prop_Bottle12" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 6)
+
+[node name="Prop_Bottle4" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583184, 1.0017076, 7.980654)
+
+[node name="Prop_Bottle6" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 9)
+
+[node name="Prop_Bottle13" parent="." instance=ExtResource("7_f3jw6")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 4.583, 1.002, 10)
 
 [node name="Prop_Bottle2" parent="." instance=ExtResource("7_f3jw6")]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 1.44268, 1, -4.63989)
