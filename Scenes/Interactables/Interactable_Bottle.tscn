@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dl55tndc0qxky"]
+[gd_scene load_steps=21 format=3 uid="uid://dl55tndc0qxky"]
 
 [ext_resource type="Script" uid="uid://cqgld2k53jtha" path="res://Scripts/Gameplay/Equipment/PlayerEquipmentThrowable.gd" id="1_471q5"]
 [ext_resource type="ArrayMesh" uid="uid://ca71eekqxmlf5" path="res://Meshes/Props/Bottles/M_Bottle_Brown.res" id="1_bt6bh"]
@@ -21,6 +21,8 @@
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6tjey"]
 points = PackedVector3Array(0.0721023, 0, 0.18837914, 0.050971307, -0.05098542, 0.18837914, 0.048204653, -0.048218764, 0.012135644, 0.06816406, 0, 0.012209417, 0.048204653, 0.048204653, 0.012209417, 0.050971307, 0.050971307, 0.18837914, 0.013692096, 0.013692096, 0.3723319, 0.019366555, 0, 0.3723319, 0.013692096, -0.013706211, 0.3723319, 0, -0.0721023, 0.18837914, 0, -0.01938067, 0.3723319, 0, -0.06817818, 0.012209417, 0, -0.06597614, 0, 0.046637826, -0.046651937, 0, 0.06596204, 0, 0, 0.046637826, 0.046637826, 0, -1.41114e-05, 0.06596204, 0, -1.41114e-05, 0.06816406, 0.012209417, -1.41114e-05, 0.0721023, 0.18837914, 0, 0.019366555, 0.3723319, 0.011730038, 0.011730038, 0.37683204, 0.01658579, 0, 0.37683204, 0.011730038, -0.011744149, 0.37683204, -0.05098542, -0.05098542, 0.18837914, -0.048218764, -0.048218764, 0.012209417, -0.013706211, -0.013706211, 0.3723319, 0, -0.016599901, 0.37683204, -0.011744149, -0.011744149, 0.37683204, -0.046651937, -0.046651937, 0, -0.046651937, 0.046637826, 0, -0.048218764, 0.048204653, 0.012209417, -0.05098542, 0.050971307, 0.18837914, -0.013706211, 0.013692096, 0.3723319, -0.011744149, 0.011730038, 0.37683204, 0, 0.01658579, 0.37683204, -0.0721023, -1.41114e-05, 0.18837914, -0.06817818, -1.41114e-05, 0.012209417, -0.06597614, -1.41114e-05, 0, -0.01938067, 0, 0.3723319, -0.016599901, 0, 0.37683204)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_eqah0"]
 
 [node name="Prop_Bottle" type="RigidBody3D"]
 mass = 2.0
@@ -68,6 +70,13 @@ hitbox = NodePath("../HitboxComponent")
 min_collision_impulse = 9.0
 on_death_vfx = ExtResource("6_6pqks")
 death_vfx_spawn_node = NodePath("../DeathVFX_Point")
+impulse_area = SubResource("SphereShape3D_eqah0")
+apply_radial_impulse = true
+radial_impulse_strength = 4.0
+radial_impulse_fallof_per_distance_unit = 2.0
+apply_radial_damage = true
+radial_damage_strength = 2.5
+radial_damage_fallof_per_distance_unit = 5.0
 
 [node name="InteractableComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "outline")]
 script = ExtResource("8_00ys1")

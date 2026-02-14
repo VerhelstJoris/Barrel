@@ -11,16 +11,23 @@ signal on_hit_direct(_global_pos : Vector3, normal : Vector3,other_object : Obje
 
 var collisions_enabled : bool = true
 
+var bodies_rid_arr : Array[RID]
+var shape_rid_arr : Array[RID]
+
 func _ready() -> void:
 	_register_shape_signals()
 	
 func _register_shape_signals() -> void:
+	shape_rid_arr.resize(shapes_to_register_hits_from.size())
 	for shape in shapes_to_register_hits_from:
 		shape.add_user_signal(damaged_signal_name, ["Hit", "Damage"])
 		shape.connect(damaged_signal_name, _on_shape_hit)
-
+		shape_rid_arr.append(shape.get_rid())
+		
+	bodies_rid_arr.resize(rigidbodies_to_register_collisions_from.size())
 	for rb in rigidbodies_to_register_collisions_from:
 		rb.on_rigidbody_collision.connect(_on_rigidbody_collision)
+		bodies_rid_arr.append(rb.get_rid())
 
 func _on_shape_hit(_hit : Dictionary, _damage : float) -> void:
 	if(collisions_enabled):
