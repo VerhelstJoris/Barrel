@@ -47,6 +47,7 @@ surface_material_override/0 = ExtResource("1_xweuc")
 [node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "collision_shape_for_drop_test", "input_receiver")]
 process_mode = 1
 script = ExtResource("1_471q5")
+throw_velocity = 13.5
 trajectory_renderer_scene = ExtResource("17_cbst5")
 trajectory_impact_scene = ExtResource("7_5mh7m")
 rigid_body = NodePath("..")
