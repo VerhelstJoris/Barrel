@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bldpr8faghm0b"]
 
 [ext_resource type="Script" uid="uid://sudaqvvsc5mo" path="res://Scripts/Gameplay/Input/PlayerInputManager.gd" id="1_52by7"]
-[ext_resource type="Script" uid="uid://c8jwmy0nmndin" path="res://Scripts/Tools/ImGui Debug/Components/PlayerInputManagerDebugnode.gd" id="2_b2s1m"]
+[ext_resource type="Script" uid="uid://c8jwmy0nmndin" path="res://Scripts/Tools/ImGui Debug/Components/Player/PlayerInputManagerDebugnode.gd" id="2_b2s1m"]
 
 [node name="PlayerInputManagerComponent" type="Node"]
 script = ExtResource("1_52by7")

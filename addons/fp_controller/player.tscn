@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://dlbkch6iuy8gn"]
+[gd_scene load_steps=43 format=3 uid="uid://dlbkch6iuy8gn"]
 
 [ext_resource type="Script" uid="uid://dl8q5g0kd57r6" path="res://Scripts/Tools/ImGui Debug/BarrelPlayerSceneDebug.gd" id="1_2gem6"]
 [ext_resource type="Script" uid="uid://os5hx0q5d2" path="res://addons/fp_controller/scripts/player.gd" id="1_5ras8"]
@@ -10,13 +10,14 @@
 [ext_resource type="Script" uid="uid://d2q1lcxkevpei" path="res://Scripts/UI/HUD/HUD_Vignette.gd" id="6_i7lip"]
 [ext_resource type="PackedScene" uid="uid://cooy44h1jqbd2" path="res://Scenes/UI/HUD/HUD_Reticle.tscn" id="7_2fqq0"]
 [ext_resource type="PackedScene" uid="uid://eoo0jp2ntvw5" path="res://Scenes/UI/HUD/HUD_Interactable_Hovered.tscn" id="8_n1qck"]
+[ext_resource type="Script" uid="uid://cy0olm4jju66o" path="res://Scripts/Tools/ImGui Debug/Components/Player/PlayerWorldCameraDebug.gd" id="10_4rh7j"]
 [ext_resource type="Script" uid="uid://bcf8u2ahqcyds" path="res://Scripts/Gameplay/Input/PlayerInputReceiver.gd" id="10_tvmyk"]
 [ext_resource type="PackedScene" uid="uid://bldpr8faghm0b" path="res://Scenes/Components/Input/PlayerInputManagerComponent.tscn" id="12_1y53x"]
 [ext_resource type="Script" uid="uid://1r2i2aponh4x" path="res://Scripts/Gameplay/Input/InputActionMappingContext.gd" id="14_krggn"]
 [ext_resource type="Resource" uid="uid://crg7w5jka1q2l" path="res://Data/Input/Movement/IMC_Movement.tres" id="15_4rh7j"]
 [ext_resource type="Script" uid="uid://dualuy1631ivy" path="res://Scripts/Player/Movement/PlayerStateMachine.gd" id="16_62dvf"]
 [ext_resource type="Script" uid="uid://dgvffrq1m604v" path="res://Scripts/Player/Movement/PlayerMovementComponent.gd" id="16_y16om"]
-[ext_resource type="Script" uid="uid://rflwqd4b4ayy" path="res://Scripts/Tools/ImGui Debug/Components/PlayerMovementComponentDebugNode.gd" id="17_y16om"]
+[ext_resource type="Script" uid="uid://rflwqd4b4ayy" path="res://Scripts/Tools/ImGui Debug/Components/Player/PlayerMovementComponentDebugNode.gd" id="17_y16om"]
 [ext_resource type="Script" uid="uid://cpn2yvmmj6a2f" path="res://Scripts/Player/Movement/MovementStates/MovementState_Walk.gd" id="19_bjt1r"]
 [ext_resource type="PackedScene" uid="uid://dcvc3tin4j7mi" path="res://Scenes/Components/Input/InputReceiverComponent.tscn" id="19_gd45c"]
 [ext_resource type="Script" uid="uid://dyjuhb41dawo7" path="res://Scripts/Player/Movement/MovementStates/MovementState_Sprint.gd" id="20_jajtq"]
@@ -194,9 +195,14 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0
 enabled = false
 target_position = Vector3(0, 4, 0)
 
+[node name="PlayerWorldCameraDebug" type="Node" parent="CameraPivot/WorldCamera" node_paths=PackedStringArray("world_camera")]
+script = ExtResource("10_4rh7j")
+world_camera = NodePath("..")
+metadata/_custom_type_script = "uid://cy0olm4jju66o"
+
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
-ChildNodesToDisplay = [NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode"), NodePath("../InteractorComponent/BarrelInteractorDebugNode")]
+ChildNodesToDisplay = [NodePath("../CameraPivot/WorldCamera/PlayerWorldCameraDebug"), NodePath("../PlayerInputManagerComponent/PlayerInputManagerDebugnode"), NodePath("../InputReceiverComponent/InputReceiverDebugNode"), NodePath("../PlayerMovementComponent/PlayerMovementComponentDebugNode"), NodePath("../InteractorComponent/BarrelInteractorDebugNode")]
 auto_expanded = true
 metadata/_custom_type_script = "uid://dl8q5g0kd57r6"
 

@@ -1,0 +1,48 @@
+class_name PlayerWorldCameraDebug extends BarrelSceneDebugNode
+
+var player : Player
+@export var world_camera : Camera3D
+var fp_camera : Camera3D
+
+func _get_name() -> String:
+	return "PlayerWorldCameraDebug"
+
+func _ready() -> void:
+	super()
+	await owner.ready
+	player = owner as Player
+	fp_camera = player.arms.FP_camera
+	
+func _draw_contents(_delta : float) -> void:
+	super(_delta)
+	
+	ImGui.BeginTable("cam comparison", 3)
+	ImGui.TableSetupColumn("Property")
+	ImGui.TableSetupColumn("World")
+	ImGui.TableSetupColumn("FP")
+	ImGui.TableHeadersRow()
+	
+	ImGui.TableNextColumn()
+	ImGui.Text("World Pos")
+	var pos_color : Color = Color.RED
+	if(world_camera.get_global_position() == fp_camera.get_global_position()):
+		pos_color = Color.GREEN
+	ImGui.TableNextColumn()
+	ImGui.TextColored(pos_color, "%s" % world_camera.get_global_position())
+	ImGui.TableNextColumn()
+	ImGui.TextColored(pos_color, "%s" % fp_camera.get_global_position())
+	ImGui.TableNextRow()
+
+	ImGui.TableNextColumn()
+	ImGui.Text("World Rot")
+	var rot_color : Color = Color.RED
+	if(world_camera.get_global_rotation() == fp_camera.get_global_rotation()):
+		rot_color = Color.GREEN
+	ImGui.TableNextColumn()
+	ImGui.TextColored(rot_color, "%s" % world_camera.get_global_rotation())
+	ImGui.TableNextColumn()
+	ImGui.TextColored(rot_color, "%s" % fp_camera.get_global_rotation())
+	ImGui.TableNextRow()
+	
+	ImGui.EndTable()
+

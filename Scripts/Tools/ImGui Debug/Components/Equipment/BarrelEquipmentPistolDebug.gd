@@ -37,7 +37,6 @@ func _draw_pistol_debug(_delta : float) -> void:
 	ImGui.Text("Max Fan Hammer Delay %f" % pistol.fan_hammer_max_delay)
 	
 
-
 func _on_pistol_action_started(_new_action: int) -> void:
 	if(_new_action == PlayerEquipmentPistol.EPistolActions.None):
 		return
