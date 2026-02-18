@@ -21,6 +21,7 @@ var trajectory_renderer : LineRenderer
 
 const trajectory_alpha_shader_param : String = "Opacity"
 var trajectory_alpha_tween : Tween
+@export var max_trajectory_alpha : float = 0.4
 @export var trajectory_preview_alpha_fadein_time : float = 0.25
 @export var trajectory_preview_alpha_fadeout_time : float = 0.1
 
@@ -28,6 +29,7 @@ var trajectory_alpha_tween : Tween
 var trajectory_impact_effect : Node3D
 var trajectory_impact_global_trans : Transform3D = Transform3D.IDENTITY
 var trajectory_impact_alpha_tween : Tween
+@export var max_trajectory_impact_alpha : float = 0.4
 @export var trajectory_impact_alpha_tween_time : float = 0.25
 
 #used to interpolate the trajectory on non-physics frames
@@ -96,7 +98,7 @@ func _throw() -> void:
 	owner.set_global_transform(reset_transform)
 	
 	rigid_body.set_linear_velocity(current_calculated_throw_velocity)
-	rigid_body.set_angular_velocity(current_calculated_throw_velocity)
+	rigid_body.set_angular_velocity(current_calculated_throw_velocity * 0.25)
 	
 func _add_collisions_exceptions() -> void:
 	if(rigid_body == null):
@@ -239,7 +241,7 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
 			trajectory_alpha_tween = create_tween()
-			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), 1.0, trajectory_preview_alpha_fadein_time)
+			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), max_trajectory_alpha, trajectory_preview_alpha_fadein_time)
 		EThrowableEquipmentState.Throwing:
 			# when throwing actually happens, already hide existing prompts
 			if(input_receiver):
@@ -375,7 +377,7 @@ func _draw_throw_trajectory() -> void:
 		if(trajectory_impact_global_trans != Transform3D.IDENTITY):
 			if( !trajectory_impact_effect.visible && (trajectory_impact_alpha_tween == null || !trajectory_impact_alpha_tween.is_running()) ):
 				trajectory_impact_alpha_tween = create_tween()
-				trajectory_impact_alpha_tween.tween_method(_set_trajectory_impact_alpha, 0.0, 1.0,  trajectory_impact_alpha_tween_time)
+				trajectory_impact_alpha_tween.tween_method(_set_trajectory_impact_alpha, 0.0, max_trajectory_impact_alpha,  trajectory_impact_alpha_tween_time)
 			trajectory_impact_effect.visible = true
 			trajectory_impact_effect.set_global_transform(trajectory_impact_global_trans)
 		else:
