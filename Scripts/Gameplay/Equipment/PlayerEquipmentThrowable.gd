@@ -144,10 +144,12 @@ func _on_equipped(_player : Player) -> void:
 	
 	if(trajectory_renderer_scene):
 		trajectory_renderer = trajectory_renderer_scene.instantiate()
+		_set_trajectory_alpha(0)
 		player.player_cam.add_child.call_deferred(trajectory_renderer)
 		
 	if(trajectory_impact_scene):
 		trajectory_impact_effect = trajectory_impact_scene.instantiate()
+		_set_trajectory_impact_alpha(0)
 		player.player_cam.add_child.call_deferred(trajectory_impact_effect)
 		trajectory_impact_effect.visible = false
 
