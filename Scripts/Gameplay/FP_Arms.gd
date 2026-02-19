@@ -17,10 +17,9 @@ func _align_to_world_camera(align_to : Camera3D ) -> void:
 	var cam_offset : Vector3 = current_transform.origin - fp_cam_transform.origin
 
 	var target_transform : Transform3D = align_to.get_camera_transform()
+	target_transform.scaled(Vector3.ONE * 0.25)
 	
 	target_transform = target_transform.translated(cam_offset)
-
 	set_global_transform(target_transform)
-	set_scale(cached_scale)
 
 	

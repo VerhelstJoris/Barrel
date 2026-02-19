@@ -167,7 +167,7 @@ script = ExtResource("1_1ioya")
 colt_scene = NodePath("Arms_Rig/Skeleton3D/RPropBone/FP_Colt")
 
 [node name="Arms_Rig" type="Node3D" parent="."]
-transform = Transform3D(-100, 8.742278e-06, 3.8213708e-13, 0, -4.371139e-06, 100, 8.742278e-06, 100, 4.371139e-06, 0, 0, 0)
+transform = Transform3D(-100, 1.509958e-05, 6.6002363e-13, 0, -4.371139e-06, 100, 1.509958e-05, 100, 4.371139e-06, 0, 0, 0)
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Arms_Rig"]
 animate_physical_bones = false
@@ -530,7 +530,7 @@ bone_idx = 24
 
 [node name="FP_Camera" type="Camera3D" parent="Arms_Rig/Skeleton3D/CameraBone"]
 unique_name_in_owner = true
-transform = Transform3D(0.01, 4.28862e-10, -1.21259e-09, -1.21259e-09, -1.62041e-09, -0.01, -4.25623e-10, 0.01, -4.37113e-10, -2.00089e-11, -0.000554441, 0)
+transform = Transform3D(1, 4.256228e-08, -1.8604564e-15, 0, -4.371139e-08, -1, -4.256228e-08, 1, -4.371139e-08, -2.00089e-11, -0.000554441, 0)
 cull_mask = 2
 fov = 37.8493
 

@@ -160,15 +160,20 @@ func _on_unequipped():
 		hitbox._set_collisions_enabled(true)
 
 	for mesh in meshes:
-		mesh.set_layer_mask_value(1,true)
 		mesh.set_layer_mask_value(2,false)
+		mesh.set_layer_mask_value(1,true)
 		
 	if(trajectory_renderer):
 		trajectory_renderer.queue_free()
+		
+	if(trajectory_impact_effect):
+		trajectory_impact_effect.queue_free()
 
 	target_ray.enabled = false
 	target_ray = null
-		
+	
+	set_physics_process(false)
+	
 	super()
 	
 func _try_use_equipment(_event : InputEvent) -> void:
@@ -343,6 +348,7 @@ func _calculate_trajectory_path_points() -> void:
 			query.collide_with_areas = false
 			query.hit_from_inside = true
 			query.hit_back_faces = true
+			query.exclude = [self,player]
 		
 			var ray_hit : Dictionary  = space_state.intersect_ray(query)
 			#if we hit that's the final result of our path, if not, keep going

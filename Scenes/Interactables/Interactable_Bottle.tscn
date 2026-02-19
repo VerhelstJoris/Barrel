@@ -47,11 +47,10 @@ surface_material_override/0 = ExtResource("1_xweuc")
 [node name="PlayerEquipmentThrowable" type="Node3D" parent="." node_paths=PackedStringArray("rigid_body", "hitboxes", "meshes", "collision_shape_for_drop_test", "input_receiver")]
 process_mode = 1
 script = ExtResource("1_471q5")
-throw_velocity = 13.5
 trajectory_renderer_scene = ExtResource("17_cbst5")
 max_trajectory_alpha = 0.33
 trajectory_impact_scene = ExtResource("7_5mh7m")
-max_trajectory_impact_alpha = 0.7
+max_trajectory_impact_alpha = 1.0
 rigid_body = NodePath("..")
 hitboxes = [NodePath("../HitboxComponent")]
 meshes = [NodePath("../CollisionShape3D/MeshInstance3D")]
@@ -70,7 +69,7 @@ metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
 script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
-min_collision_impulse = 9.0
+min_collision_impulse = 13.5
 on_death_vfx = ExtResource("6_6pqks")
 death_vfx_spawn_node = NodePath("../DeathVFX_Point")
 impulse_area = SubResource("SphereShape3D_eqah0")

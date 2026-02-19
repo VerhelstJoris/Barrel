@@ -130,10 +130,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695, 0, 1.481, -0.35)
+transform = Transform3D(1, 0, 0, 0, 0.999695, -0.0247067, 0, 0.0247067, 0.999695, 0, 1.481, -0.2)
 
 [node name="WorldCamera" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.9999997, 0, 0, 0, 0.9999997, 0, 0, 0)
 cull_mask = 1048573
 compositor = SubResource("Compositor_krggn")
 current = true
@@ -168,9 +169,12 @@ handle_input_locally = false
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
-[node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
+[node name="Node3D" type="Node3D" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+
+[node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_5qhv4")]
 unique_name_in_owner = true
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 2.08165e-12, 1.20468, 2.08165e-12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.1931374, -0.17492586)
 rotation_order = 0
 
 [node name="CrouchVignette" type="ColorRect" parent="CameraPivot/WorldCamera/SubViewportContainer"]
