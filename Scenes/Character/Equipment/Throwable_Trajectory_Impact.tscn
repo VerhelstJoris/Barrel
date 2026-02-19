@@ -1,17 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://djvidhr1o3et2"]
+[gd_scene load_steps=2 format=3 uid="uid://djvidhr1o3et2"]
 
 [ext_resource type="ArrayMesh" uid="uid://586d3ixcg4sm" path="res://Meshes/VFX/M_VFX_Hit_Marker.res" id="1_r7w0m"]
-[ext_resource type="Shader" uid="uid://gax0o7vdcbsn" path="res://Scenes/Character/Equipment/VFX_Trajectory_Preview.gdshader" id="2_r7w0m"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_o6wlr"]
-render_priority = 0
-shader = ExtResource("2_r7w0m")
-shader_parameter/Color = Vector3(0.7, 0.7, 0.7)
 
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(35, 0, 0, 0, -1.5298986e-06, -35, 0, 35, -1.5298986e-06, 0, 0.025, 0)
+transform = Transform3D(10, 0, 0, 0, -4.371139e-07, -10, 0, 10, -4.371139e-07, 0, 0.025, 0)
 cast_shadow = 0
 mesh = ExtResource("1_r7w0m")
-surface_material_override/0 = SubResource("ShaderMaterial_o6wlr")
