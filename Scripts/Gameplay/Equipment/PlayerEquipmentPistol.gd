@@ -180,16 +180,15 @@ func _find_target_hit() -> Dictionary:
 	var world_cam : Camera3D = player.player_cam
 	var cam_pos : Vector3 = world_cam.get_global_position()
 	var dir : Vector3 = -world_cam.get_global_basis().z
-	var end : Vector3 = cam_pos + (dir.normalized() * raycast_dist)
+	var ray_end : Vector3 = cam_pos + (dir.normalized() * raycast_dist)
 
 	#first perform a raycast from the camera center straight forward
-	var inital_hit : Dictionary = _ray_for_hit_target(cam_pos, end)
-
+	var inital_hit : Dictionary = _ray_for_hit_target(cam_pos, ray_end)
 	if inital_hit:
-		end = inital_hit.position
+		ray_end = inital_hit.position
 
 	# now perform a ray from the muzzle position towards that position
-	var second_hit : Dictionary = _ray_for_hit_target(muzzle_point.global_position, end)
+	var second_hit : Dictionary = _ray_for_hit_target(muzzle_point.global_position, ray_end)
 	if second_hit:
 		return second_hit
 		
@@ -204,6 +203,7 @@ func _ray_for_hit_target(origin :Vector3 , end :Vector3 ) -> Dictionary:
 
 	var query := PhysicsRayQueryParameters3D.create(origin, end)
 	query.collide_with_bodies = true
+	query.exclude = [player]
 
 	return space_state.intersect_ray(query)	
 

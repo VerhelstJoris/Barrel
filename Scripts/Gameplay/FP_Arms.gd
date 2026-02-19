@@ -5,9 +5,11 @@ class_name FPArms extends Node3D
 
 @onready var FP_camera : Camera3D = %FP_Camera
 
+var cached_scale : Vector3
+
 func _ready() -> void:
 	pistol_equipment = NodeUtils._retrieve_node_meta_from_self(PlayerEquipment.equipment_node_name, colt_scene)
-
+	cached_scale = get_scale()
 
 func _align_to_world_camera(align_to : Camera3D ) -> void:
 	var current_transform : Transform3D = get_global_transform()
@@ -19,6 +21,6 @@ func _align_to_world_camera(align_to : Camera3D ) -> void:
 	target_transform = target_transform.translated(cam_offset)
 
 	set_global_transform(target_transform)
-
+	set_scale(cached_scale)
 
 	
