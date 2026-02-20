@@ -8,7 +8,8 @@ class_name PlayerEquipment extends Node
 
 @export var input_receiver : InputReceiver
 
-var player : Player = null
+var player : Player      = null
+var world_transform_node = null
 
 signal on_equipped
 signal on_unequipped
@@ -34,12 +35,14 @@ func _on_start_unholster():
 
 func _on_equipped(in_player : Player):
 	player = in_player
+	world_transform_node = player.equipment_manager._get_equipment_world_pivot_point(slot)
 	on_equipped.emit()
 	
 func _on_unequipped():
 	if(input_receiver):
 		input_receiver.on_available_equipment_actions_cleared.emit(slot)
 	player = null
+	world_transform_node= null
 	on_unequipped.emit()
 	
 func _try_use_equipment(_event : InputEvent):

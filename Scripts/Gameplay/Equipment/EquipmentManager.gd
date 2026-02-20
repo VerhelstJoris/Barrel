@@ -5,6 +5,11 @@ class_name EquipmentManager extends Node
 
 @export var HUD_equipment_input_arr : Array[HUDEquipmentInput]
 
+@export var left_arm_pivot : Node3D
+@export var right_arm_pivot : Node3D
+
+@export var pickup_equipment_scale_modifier : float = 0.25
+
 enum EHolsterState {Hidden , Unholstering, Ready, Holstering}
 enum EEquipmentSlot {None, Left, Right}
 enum EEquipmentType {Permanent , Consumable, Temporary}
@@ -31,7 +36,6 @@ func _ready() -> void:
 	_setup_animation_data()
 	_setup_ui_data()
 	_setup_initial_equipment_data()
-
 	
 func _setup_initial_equipment_data() -> void:
 	current_holster_states[EEquipmentSlot.Left] = EHolsterState.Hidden
@@ -185,7 +189,17 @@ func _get_input_receivers_to_process()-> Array[InputReceiver]:
 		ret.append(current_equipment[EEquipmentSlot.Right].input_receiver)
 	
 	return ret
+
+func _get_equipment_world_pivot_point (from_slot : EEquipmentSlot ) -> Node3D:
+	match from_slot:
+		EEquipmentSlot.Left:
+			return left_arm_pivot
+		EEquipmentSlot.Right:
+			return right_arm_pivot
+		EEquipmentSlot.None:
+			pass		
 	
+	return null
 
 func _can_enter_two_handed_action( from_slot : EEquipmentSlot ) -> bool:
 	if(from_slot == EEquipmentSlot.Right):

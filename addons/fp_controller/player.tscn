@@ -169,13 +169,13 @@ handle_input_locally = false
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
+[node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport" instance=ExtResource("3_5qhv4")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.204125e-13, 0.29828435, -0.043731466)
+rotation_order = 0
+
 [node name="Node3D" type="Node3D" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport"]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
-
-[node name="FP_Arms" parent="CameraPivot/WorldCamera/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_5qhv4")]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.1931374, -0.17492586)
-rotation_order = 0
 
 [node name="CrouchVignette" type="ColorRect" parent="CameraPivot/WorldCamera/SubViewportContainer"]
 material = SubResource("ShaderMaterial_i7lip")
@@ -203,6 +203,14 @@ target_position = Vector3(0, 4, 0)
 script = ExtResource("10_4rh7j")
 world_camera = NodePath("..")
 metadata/_custom_type_script = "uid://cy0olm4jju66o"
+
+[node name="Left_Arm_Pivot" type="Node3D" parent="CameraPivot/WorldCamera"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.9999997, -7.450581e-09, 0, 7.450581e-09, 0.9999997, -0.325, -0.14, 0.049)
+
+[node name="Right_Arm_Pivot" type="Node3D" parent="CameraPivot/WorldCamera"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.9999997, -7.450581e-09, 0, 7.450581e-09, 0.9999997, 0.325, -0.14, 0.049)
 
 [node name="BarrelPlayerSceneDebug" type="Node" parent="." node_paths=PackedStringArray("ChildNodesToDisplay")]
 script = ExtResource("1_2gem6")
@@ -341,11 +349,13 @@ script = ExtResource("40_2w6x1")
 interactor = NodePath("..")
 metadata/_custom_type_script = "uid://eomy6oeduxxk"
 
-[node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player", "HUD_equipment_input_arr")]
+[node name="EquipmentManager" type="Node" parent="." node_paths=PackedStringArray("player", "HUD_equipment_input_arr", "left_arm_pivot", "right_arm_pivot")]
 unique_name_in_owner = true
 script = ExtResource("40_ohefb")
 player = NodePath("..")
 HUD_equipment_input_arr = [NodePath("../CameraPivot/WorldCamera/SubViewportContainer/HUDEquipment_Right"), NodePath("../CameraPivot/WorldCamera/SubViewportContainer/HUDEquipment_Left")]
+left_arm_pivot = NodePath("../CameraPivot/WorldCamera/Left_Arm_Pivot")
+right_arm_pivot = NodePath("../CameraPivot/WorldCamera/Right_Arm_Pivot")
 metadata/_custom_type_script = "uid://cda6d6uhlpkmt"
 
 [editable path="PlayerInputManagerComponent"]

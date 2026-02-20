@@ -84,9 +84,6 @@ func _equip_interact_item_on_interactor(_interactor: InteractorComponent) -> voi
 			push_error("Interactable Component Cannot find equipment node via metadata")
 			return
 		equipment_to_pickup = owner.get_meta(PlayerEquipment.equipment_node_name) as PlayerEquipment
-		equipment_to_pickup.cached_scale = (owner as Node3D).get_global_transform().basis.get_scale()
-
-		(owner as Node3D).scale = (Vector3.ONE * 0.0001)
 		owner.reparent(_interactor.player.arms, false)
 		print((owner as Node3D).get_global_transform().basis.get_scale())
 

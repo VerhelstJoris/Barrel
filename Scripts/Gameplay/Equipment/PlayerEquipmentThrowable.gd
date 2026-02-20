@@ -61,6 +61,8 @@ signal on_throwable_state_changed(prev : EThrowableEquipmentState, new : EThrowa
 
 var gravity : Vector3 = Vector3(0,-9.8,0)
 
+var cached_scale : Vector3
+
 func _ready() -> void:
 	super()
 	drop_equipment_input.connect(_try_drop_equipment)
@@ -92,13 +94,15 @@ func _physics_process(_delta: float) -> void:
 func _throw() -> void:
 	_add_collisions_exceptions()
 	
-	var reset_transform : Transform3D = owner.get_global_transform()
+	var reset_transform : Transform3D = world_transform_node.get_global_transform()
 	player.equipment_manager._remove_equipment_from_slot(slot)
 	owner.reparent(get_tree().root, true)
 	owner.set_global_transform(reset_transform)
-	
+	(owner as Node3D).scale = cached_scale
+
+
 	rigid_body.set_linear_velocity(current_calculated_throw_velocity)
-	rigid_body.set_angular_velocity(current_calculated_throw_velocity * 0.25)
+	rigid_body.set_angular_velocity(current_calculated_throw_velocity * 0.5)
 	
 func _add_collisions_exceptions() -> void:
 	if(rigid_body == null):
@@ -132,6 +136,8 @@ func _on_equipped(_player : Player) -> void:
 	set_physics_process(true)
 	owner.set_rotation(Vector3.ZERO)
 	owner.set_position(Vector3.ZERO)
+	cached_scale = (owner as Node3D).scale
+	(owner as Node3D).scale = cached_scale * _player.equipment_manager.pickup_equipment_scale_modifier
 
 	for hitbox in hitboxes:
 		hitbox._set_collisions_enabled(false)

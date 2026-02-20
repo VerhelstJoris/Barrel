@@ -188,7 +188,7 @@ func _find_target_hit() -> Dictionary:
 		ray_end = inital_hit.position
 
 	# now perform a ray from the muzzle position towards that position
-	var second_hit : Dictionary = _ray_for_hit_target(muzzle_point.global_position, ray_end)
+	var second_hit : Dictionary = _ray_for_hit_target(world_transform_node.global_position, ray_end)
 	if second_hit:
 		return second_hit
 		
