@@ -322,14 +322,15 @@ func _determine_throw_target() -> void:
 	_calculate_trajectory_path_points()
 		
 func _calculate_trajectory_path_points() -> void:
-	var result : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,current_calculated_throw_target, gravity)
-	physics_ray_start_point = owner.get_global_position()
+	var result : Array = TrajectoryLib.fixed_target(world_transform_node.get_global_position(),throw_velocity,current_calculated_throw_target, gravity)
+	var result_visual : Array = TrajectoryLib.fixed_target(owner.get_global_position(),throw_velocity,current_calculated_throw_target, gravity)
+	physics_ray_start_point = world_transform_node.get_global_position()
 	
-	if(result.is_empty()):
-		push_error("Was not able to calculate path from ", owner.get_global_position(), " to ", current_calculated_throw_target)
+	if(result.is_empty() || result_visual.is_empty()):
+		push_error("Was not able to calculate path from ", world_transform_node.get_global_position(), " to ", current_calculated_throw_target)
 		return
 		
-	var sampled_data: Array = TrajectoryLib.samples(owner.get_global_position(),result[0].velocity,gravity,result[0].time, 15)
+	var sampled_data: Array = TrajectoryLib.samples(owner.get_global_position(),result_visual[0].velocity,gravity,result[0].time, 15)
 	current_calculated_throw_velocity = result[0].velocity
 	if(DEBUG_draw_target_path):
 		for id in sampled_data.size() -1:

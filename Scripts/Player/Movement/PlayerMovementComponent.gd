@@ -27,6 +27,9 @@ var _draw_step_debug : bool = false
 var current_gravity_velocity : float = 0
 var current_gravity_time : float = 0
 
+@export_group("Collision Settings")
+@export var impulse_applied_on_rb_collision : float = 1.0
+
 @onready var state_machine: PlayerStateMachine = %BaseMovementStateMachine
 
 var previous_state : MovementState_Base = null
@@ -36,7 +39,7 @@ var player: Player
 func _ready() -> void:
 	await owner.ready
 	player = owner as Player
-	
+			
 func _process(delta: float) -> void:
 	state_machine._update(delta)	
 
@@ -55,6 +58,9 @@ func _physics_process(_delta: float) -> void:
 	if(!stepped_up):
 		player.velocity = current_queued_velocity
 		player.move_and_slide()
+		for id in player.get_slide_collision_count():
+			_on_collided_with(player.get_slide_collision(id), id)
+			
 		stepped_down = _try_stair_step_down(_delta)
 	
 	_stepped_last_frame = stepped_up || stepped_down
@@ -81,8 +87,13 @@ func _try_stair_step_up(_delta : float) -> bool:
 	#  If it hits a step <= max_step_up_height, we can teleport the player on top of the step
 	#  along with their intended motion forward.
 	var down_check_result = KinematicCollision3D.new()
+	
+	
 	if (!player.test_move(step_transform_with_clearance, Vector3(0,-max_step_up_height *2,0), down_check_result)):
 		return	false# didn't hit anything abort
+
+	if(!_can_step_on_object(down_check_result)):
+		return false
 
 	if(_draw_step_debug):
 		DebugDraw3D.draw_sphere(down_check_result.get_position(),0.05, Color(0,1,0))
@@ -111,6 +122,11 @@ func _try_stair_step_up(_delta : float) -> bool:
 		return true
 	return false
 	
+func _can_step_on_object(result : KinematicCollision3D) -> bool:
+	if(result.get_collider() is RigidBody3D):
+		return false
+	return true
+
 func _try_stair_step_down(_delta : float) -> bool:
 	if(!_is_on_floor()):
 		return false
@@ -131,12 +147,13 @@ func _try_stair_step_down(_delta : float) -> bool:
 	var body_test_result = KinematicCollision3D.new()
 	if !player.test_move(player.global_transform, Vector3(0,-max_step_up_height,0), body_test_result):
 		return false
-		
+
+	if(!_can_step_on_object(body_test_result)):
+		return false
+
 	player.position.y += body_test_result.get_travel().y
 	player.apply_floor_snap()
 	return true
-	
-
 	
 func _handle_player_move(_delta : float, current_active_state : MovementState_Base):
 	var new_horizontal_target :Vector2 = _calculate_target_velocity_for_state(current_active_state)
@@ -200,3 +217,8 @@ func _is_current_movement_state(state : PlayerStateMachine.EStateName) -> bool:
 		return current_sm.states_map[state] == current_sm._get_current_active_state()
 		
 	return false	
+
+func _on_collided_with(collision: KinematicCollision3D, _index : int) -> void:
+	var rb : RigidBody3D = collision.get_collider() as RigidBody3D
+	if(rb):
+		rb.apply_impulse( -collision.get_normal(0) * impulse_applied_on_rb_collision ,collision.get_position(0))
