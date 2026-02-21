@@ -69,6 +69,7 @@ metadata/_custom_type_script = "uid://b6ll43e7dibhk"
 [node name="DeathComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "death_vfx_spawn_node")]
 script = ExtResource("6_u2t4m")
 hitbox = NodePath("../HitboxComponent")
+min_direct_damage = 15.0
 min_collision_impulse = 13.5
 min_collision_speed = 6.5
 need_impulse_and_speed_requirements = true
@@ -79,8 +80,8 @@ apply_radial_impulse = true
 radial_impulse_strength = 4.0
 radial_impulse_fallof_per_distance_unit = 2.0
 apply_radial_damage = true
-radial_damage_strength = 2.5
-radial_damage_fallof_per_distance_unit = 5.0
+radial_damage_strength = 25.0
+radial_damage_fallof_per_distance_unit = 40.0
 
 [node name="InteractableComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox", "outline")]
 script = ExtResource("8_00ys1")

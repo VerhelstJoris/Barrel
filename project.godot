@@ -23,7 +23,7 @@ imgui/config="uid://cymx5hoexxule"
 [application]
 
 config/name="Barrel"
-run/main_scene="res://example_scene/sandbox.tscn"
+run/main_scene="uid://bus7tc0ndedol"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -56,7 +56,7 @@ project/assembly_name="Barrel"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/LineRenderer/plugin.cfg", "res://addons/godot_ui_animations/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/input_prompts/plugin.cfg")
+enabled=PackedStringArray("res://addons/LineRenderer/plugin.cfg", "res://addons/godot_ui_animations/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/input_prompts/plugin.cfg", "res://addons/sky_3d/plugin.cfg")
 
 [file_customization]
 

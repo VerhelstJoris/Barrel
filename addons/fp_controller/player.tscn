@@ -66,7 +66,7 @@ shader = ExtResource("5_bn61v")
 shader_parameter/alpha = 0.4
 shader_parameter/inner_radius = 0.72
 shader_parameter/outer_radius = 1.0
-shader_parameter/edge_mult = 0.735
+shader_parameter/edge_mult = 0.71
 shader_parameter/uv_offset = Vector2(0, 0.15)
 shader_parameter/vignette_colour = Vector3(0.08, 0.03, 0)
 
@@ -235,7 +235,7 @@ horizontal_velocity_acceleration = 25.0
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
-impulse_applied_on_rb_collision = 1.5
+impulse_applied_on_rb_collision = 2.0
 
 [node name="BaseMovementStateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
 unique_name_in_owner = true
