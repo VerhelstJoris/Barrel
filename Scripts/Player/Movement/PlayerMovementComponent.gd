@@ -58,11 +58,11 @@ func _physics_process(_delta: float) -> void:
 	if(!stepped_up):
 		player.velocity = current_queued_velocity
 		player.move_and_slide()
+		stepped_down = _try_stair_step_down(_delta)
 		for id in player.get_slide_collision_count():
 			_on_collided_with(player.get_slide_collision(id), id)
-			
-		stepped_down = _try_stair_step_down(_delta)
-	
+
+
 	_stepped_last_frame = stepped_up || stepped_down
 
 func _is_surface_too_steep(normal : Vector3) -> bool:

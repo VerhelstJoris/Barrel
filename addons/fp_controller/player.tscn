@@ -235,6 +235,7 @@ horizontal_velocity_acceleration = 25.0
 max_gravity_velocity = -32.0
 gravity_growth_curve = SubResource("Curve_hwrxm")
 time_reach_max_gravity_velocity = 2.25
+impulse_applied_on_rb_collision = 1.5
 
 [node name="BaseMovementStateMachine" type="Node" parent="PlayerMovementComponent" node_paths=PackedStringArray("states_map")]
 unique_name_in_owner = true
