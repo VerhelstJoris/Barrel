@@ -10,6 +10,10 @@ uniform vec2 color_correction = vec2(0.0, 1.0);
 uniform vec4 ground_color: source_color = vec4(0.3, 0.3, 0.3, 1.0);
 uniform float horizon_offset = 0.0;
 
+group_uniforms sky_noise;
+uniform float sky_noise_amount = 0.009;
+uniform float sky_noise_size = 0.02;
+
 group_uniforms atmosphere;
 uniform float atm_darkness = 0.5;
 uniform float atm_sun_intensity = 18.0;
@@ -486,6 +490,19 @@ void render_grid(vec3 dir, vec3 pole_dir, float rotation_angle, vec4 line_color,
 	color += line_color.rgb * line_color.a * grid;
 }
 
+// dithering
+float interleaved_gradient_noise(vec2 n) {
+    float f = 0.06711056 * n.x + 0.00583715 * n.y;
+    return fract(52.9829189 * fract(f));
+}
+
+vec3 dither_interleaved(vec3 rgb, float levels, vec4 frag_coord) {
+    float noise = interleaved_gradient_noise(frag_coord.xy);
+    noise = noise - 0.5;
+    return rgb + noise / (levels - 1.0);
+}
+
+
 void sky() {
 	float current_time = TIME;
 	vec3 col = vec3(0.0); // Set up the initial sky color which will be added to later to produce the final result.
@@ -496,6 +513,11 @@ void sky() {
 
 	if (sky_visible) {
 		col = render_sky(world_pos, clouds_pos, sun_pos, moon_pos, current_time);
+		col.rgb = dither_interleaved(col.rgb, 1276, FRAGCOORD);
+		
+		float noise = (fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * 2.0;
+		col.rgb += noise * sky_noise_amount * sky_noise_size;
+		col.rgb = clamp(col.rgb, 0.0, 1.0);
 	}
 
 	// Draw overlay grids
