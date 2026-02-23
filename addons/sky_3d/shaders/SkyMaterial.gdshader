@@ -11,8 +11,8 @@ uniform vec4 ground_color: source_color = vec4(0.3, 0.3, 0.3, 1.0);
 uniform float horizon_offset = 0.0;
 
 group_uniforms sky_noise;
-uniform float sky_noise_amount = 0.009;
-uniform float sky_noise_size = 0.02;
+const float sky_noise_amount = 0.03;
+const float sky_noise_size = 0.1;
 
 group_uniforms atmosphere;
 uniform float atm_darkness = 0.5;
@@ -234,7 +234,7 @@ vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult) {
 
 // Clouds
 //------------------------------------------------------------------------------
-const int CUMULUS_STEP = 10;
+const int CUMULUS_STEP = 8;
 
 float sample_cirrus_noise(vec2 coords) {
 	float a = textureLod(cirrus_texture, coords.xy * cirrus_uv + cirrus_position1, 0.0).r;
@@ -244,7 +244,7 @@ float sample_cirrus_noise(vec2 coords) {
 
 float sample_cumulus_noise(vec3 p) {
 	vec3 pos = vec3(p * 0.01);
-	pos.z *= 256.0;
+	pos.z *= 512.0;
 	vec2 offset = vec2(0.317, 0.123);
 	vec4 uv = vec4(0.0);
 	uv.xy = pos.xy + offset * floor(pos.z);
@@ -286,13 +286,24 @@ float calc_cumulus_density(vec3 p, vec3 offset, float t) {
 	return clamp_to_unit(dens);
 }
 
+float posterize(float val, int levels)
+{
+	return round(val * float(levels)) / float(levels);
+}
+
+
 vec4 render_cirrus_clouds(vec3 pos) {
 	pos.xy = pos.xz / pos.y;
 	pos *= cirrus_size;
 	float density = calc_cirrus_density(pos.xy);
 	float sh = clamp_to_unit(exp(-cirrus_absorption * density));
 	float a = clamp_to_unit(density * cirrus_thickness);
-	return vec4(vec3(density*sh) * cirrus_intensity, a);
+	a = smoothstep(0.1,0.2, density) * cirrus_thickness;
+	//float a = smoothstep(0.1,0.2, density * cirrus_thickness) * 0.25;	// make the clouds have harder edges
+
+	vec3 col = vec3(density*sh) * cirrus_intensity;
+	
+	return vec4(col, a);
 }
 
 vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_pos) {
@@ -323,7 +334,10 @@ vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_p
 			a += (1.0 - sh) * (1.0 - a);
 			pos += dir_step;
 		}
-		return vec4(ret.rgb * cumulus_intensity, a);
+
+		
+		vec3 pos_color = vec3(posterize(ret.r * cumulus_intensity,2),posterize(ret.g * cumulus_intensity,2),posterize(ret.b * cumulus_intensity,2) );
+		return vec4(ret.rgb, a);
 	}
 	return vec4(ret.rgb * cumulus_intensity, a);
 }
@@ -414,9 +428,11 @@ vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, fl
 
 	if (cumulus_visible) {
 		vec4 cumulus_clouds = render_cumulus_clouds(vec3(0.0), clouds_pos, angle_mult.z, sun_pos, moon_pos);
-		cumulus_clouds.a = clamp_to_unit(cumulus_clouds.a);
+		cumulus_clouds.a = smoothstep(0.25,0.4,cumulus_clouds.a);	// make the clouds have harder edges
+		
 		vec3 cloud_tint = sun_light_color.rgb;
 		cloud_tint = mix(cloud_tint, clouds_night_color.rgb, angle_mult.w);
+		
 		cumulus_clouds.rgb *= cloud_tint * cumulus_intensity;
 		cumulus_clouds.a = mix(0.0, cumulus_clouds.a, horizonBlend);
 		col.rgb = mix(col.rgb, cumulus_clouds.rgb + mix(vec3(0.0), scatter, cumulus_sky_tint_fade), cumulus_clouds.a);
@@ -501,7 +517,11 @@ vec3 dither_interleaved(vec3 rgb, float levels, vec4 frag_coord) {
     noise = noise - 0.5;
     return rgb + noise / (levels - 1.0);
 }
-
+vec2 random(vec2 uv){
+    uv = vec2( dot(uv, vec2(127.1,311.7) ),
+               dot(uv, vec2(269.5,183.3) ) );
+    return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);
+}
 
 void sky() {
 	float current_time = TIME;
@@ -515,8 +535,11 @@ void sky() {
 		col = render_sky(world_pos, clouds_pos, sun_pos, moon_pos, current_time);
 		col.rgb = dither_interleaved(col.rgb, 1276, FRAGCOORD);
 		
-		float noise = (fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * 2.0;
-		col.rgb += noise * sky_noise_amount * sky_noise_size;
+		vec2 rand = random(FRAGCOORD.xy * TIME);
+		float noise = (fract(sin( dot(FRAGCOORD.xy, vec2(35.9898 * (sin(TIME) + 0.5), 15.002 * (cos(TIME) + 0.5)))) * 43758.5453) - 0.5) * 2.0;
+		float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);
+
+		col.rgb += (noise * sky_noise_amount * sky_noise_size * (1.0 - horizonBlend));
 		col.rgb = clamp(col.rgb, 0.0, 1.0);
 	}
 
