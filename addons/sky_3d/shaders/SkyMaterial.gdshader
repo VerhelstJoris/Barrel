@@ -39,9 +39,6 @@ uniform vec3 atm_sun_partial_mie_phase = vec3(0.36, 1.64, 1.6);
 group_uniforms moon;
 uniform vec4 moon_color: source_color = vec4(1.0);
 uniform sampler2D moon_texture: source_color, repeat_disable;
-uniform vec3 moon_texture_alignment = vec3(7.0, 1.4, 4.8);
-uniform bool moon_texture_flip_u;
-uniform bool moon_texture_flip_v;
 uniform float moon_size = 0.07;
 
 group_uniforms moon_mie;
@@ -152,17 +149,6 @@ vec2 calc_equirect_uv(vec3 norm) {
 	float u = flipu * ((atan(norm.y, norm.x) + PI) * INV_TAU); // 0 to 1 horizontally
 	float v = -flipv * (acos(norm.z) * INV_PI); // 0 (north pole) to 1 (south pole)
 	return vec2(u, v);
-}
-
-vec3 sample_moon_texture(vec3 dir) {
-	dir = moon_matrix * dir * create_rotation_matrix(moon_texture_alignment);
-	dir.x = -dir.x;
-	dir.z = -dir.z;
-	float flipu = moon_texture_flip_u ? 1.0 : -1.0;
-	float flipv = moon_texture_flip_v ? 1.0 : -1.0;
-	float u = 0.5 + flipu * atan(dir.z, dir.x) * INV_TAU; // Longitude
-	float v = 0.5 + flipv * asin(dir.y) * INV_PI; // Latitude
-	return texture(moon_texture, vec2(u, v)).rgb;
 }
 
 float calc_disk_mask(vec3 norm, vec3 coords, lowp float size) {
@@ -376,8 +362,8 @@ vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, fl
 	vec3 moon_normal = normalize(world_pos * moon_intersect - moon_pos);
 
 	float moon_ndotl = clamp(dot(moon_normal, sun_pos), 0.0, 1.0);
-	vec3 moon_tex = sample_moon_texture(moon_normal);
-	vec3 moon_output = moon_mask * moon_ndotl * exp2(1.0) * moon_tex * moon_color.rgb;
+	vec3 moon_output = moon_mask * moon_ndotl * exp2(1.0) * moon_color.rgb;
+	
 	float moonMask = (1.0 - moon_mask);
 
 	// Deep space
@@ -539,7 +525,7 @@ void sky() {
 		float noise = (fract(sin( dot(FRAGCOORD.xy, vec2(35.9898 * (sin(TIME) + 0.5), 15.002 * (cos(TIME) + 0.5)))) * 43758.5453) - 0.5) * 2.0;
 		float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);
 
-		col.rgb += (noise * sky_noise_amount * sky_noise_size * (1.0 - horizonBlend));
+		col.rgb += (noise * sky_noise_amount * sky_noise_size);
 		col.rgb = clamp(col.rgb, 0.0, 1.0);
 	}
 
