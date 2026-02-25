@@ -556,6 +556,13 @@ func _update_moon_light_energy() -> void:
 			sky_material.set_shader_parameter("atm_horizon_light_tint", atm_horizon_light_tint)
 			fog_material.set_shader_parameter("atm_horizon_light_tint", atm_horizon_light_tint)
 
+@export var atm_horizon_night_tint := Color(0.980392, 0.635294, 0.462745, 1.0) :
+	set(value):
+		atm_horizon_night_tint = value
+		if is_scene_built:
+			sky_material.set_shader_parameter("atm_horizon_night_tint", atm_horizon_night_tint)
+			fog_material.set_shader_parameter("atm_horizon_night_tint", atm_horizon_night_tint)
+
 
 ## Use moon phase angle for night-time Mie scattering intensity instead of the sun position.
 ## Enabling this will prevent the moon from scattering light into the fog and sky atmosphere.

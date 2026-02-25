@@ -19,6 +19,7 @@ uniform float atm_darkness = .5;
 uniform float atm_sun_intensity = 30.;
 uniform vec4 atm_day_tint: source_color = vec4(.78, .85, .98, 1.);
 uniform vec4 atm_horizon_light_tint: source_color = vec4(.98, .73, .49, 1.);
+uniform vec4 atm_horizon_night_tint: source_color = vec4(.98, .73, .49, 1.);
 uniform vec4 atm_night_tint: source_color = vec4(.16, .2, .25, 1.);
 uniform vec3 atm_level_params = vec3(1., 0., 0.);
 uniform float atm_thickness = .7;
@@ -41,7 +42,7 @@ uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 
 // Atmosphere
 //------------------------------------------------------------------------------
-vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult, float depth) {
+vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult, float depth, float horizon_night_blend) {
 	vec3 beta_mie = atm_beta_mie;
 	vec3 beta_ray = atm_beta_ray * atm_thickness;
 
@@ -59,7 +60,7 @@ vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult, float dept
 	vec3 scatter = atm_sun_intensity * (BRMT * final_extc_factor) * atm_day_tint.rgb * mult.y;
 	scatter = mix(scatter, scatter * (1.0 - extc_factor), atm_darkness);
 
-	vec3 lcol = mix(atm_day_tint.rgb, atm_horizon_light_tint.rgb, mult.x);
+	vec3 lcol = mix(atm_day_tint.rgb, mix(atm_horizon_light_tint.rgb, atm_horizon_night_tint.rgb,horizon_night_blend) , mult.x);
 	vec3 nscatter = (1.0 - extc_factor) * atm_night_tint.rgb * clamp_to_unit(depth * fog_rayleigh_depth);
 	nscatter += calc_mie_phase(mu.y, atm_moon_partial_mie_phase) *
 		atm_moon_mie_tint.rgb * atm_moon_mie_intensity * 0.005 * clamp_to_unit(depth * fog_mie_depth);
@@ -137,9 +138,11 @@ void fragment() {
 	fog_factor *= calc_fog_distance(linear_depth);
 
 	vec2 mu = vec2(dot(sun_direction, worldPos), dot(moon_direction, worldPos));
+	float horizon_color_blend = 1.0 - max(dot(sun_direction,worldPos),0.0);
+
 	float sr, sm;
 	calc_simple_optical_depth(worldPos.y + atm_level_params.z, sr, sm, atm_level_params.xy);
-	vec3 scatter = calc_atmospheric_scatter(sr, sm, mu.xy, angle_mult.xyz, linear_depth);
+	vec3 scatter = calc_atmospheric_scatter(sr, sm, mu.xy, angle_mult.xyz, linear_depth, horizon_color_blend);
 
 	vec3 tint =  scatter;
 	vec4 fog_color = vec4(tint.rgb, fog_factor);

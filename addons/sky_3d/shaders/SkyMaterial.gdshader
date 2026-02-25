@@ -19,6 +19,7 @@ uniform float atm_darkness = 0.5;
 uniform float atm_sun_intensity = 18.0;
 uniform vec4 atm_day_tint: source_color = vec4(0.808, 0.91, 1.0, 1.0);
 uniform vec4 atm_horizon_light_tint: source_color = vec4(0.98, 0.635, 0.463, 1.0);
+uniform vec4 atm_horizon_night_tint: source_color = vec4(0.98, 0.635, 0.463, 1.0);
 uniform vec4 atm_night_tint: source_color = vec4 (0.041, 0.049, 0.061, 0.245);
 uniform vec3 atm_level_params = vec3(1.0, 0.0, 0.0);
 uniform float atm_thickness = 0.7;
@@ -193,7 +194,7 @@ float simple_sphere_intersect(vec3 ray_dir, vec3 sphere_pos, float radius) {
 // Atmosphere
 //------------------------------------------------------------------------------
 
-vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult) {
+vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult, float horizon_night_blend) {
 	vec3 beta_mie = atm_beta_mie;
 	vec3 beta_ray = atm_beta_ray * atm_thickness;
 
@@ -210,12 +211,12 @@ vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult) {
 	vec3 scatter = atm_sun_intensity * (BRMT * final_extc_factor) * atm_day_tint.rgb * mult.y;
 	scatter = mix(scatter, scatter * (1.0 - extc_factor), atm_darkness);
 
-	vec3 lcol =  mix(atm_day_tint.rgb, atm_horizon_light_tint.rgb, mult.x);
-	vec3 nscatter = (1.0 - extc_factor) * atm_night_tint.rgb;
-	nscatter += calc_mie_phase(mu.y, atm_moon_partial_mie_phase) *
+	vec3 lcol =  mix(atm_day_tint.rgb, mix(atm_horizon_light_tint.rgb, atm_horizon_night_tint.rgb, horizon_night_blend), mult.x);
+	vec3 night_scatter = (1.0 - extc_factor) * atm_night_tint.rgb;
+	night_scatter += calc_mie_phase(mu.y, atm_moon_partial_mie_phase) *
 		atm_moon_mie_tint.rgb * atm_moon_mie_intensity * 0.005;
 
-	return (scatter * lcol) + nscatter;
+	return (scatter * lcol) + night_scatter;
 }
 
 // Clouds
@@ -346,11 +347,15 @@ vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, fl
 	calc_simple_optical_depth(world_pos.y + atm_level_params.z - horizon_offset, sr, sm, atm_level_params.xy);
 
 	world_pos.y -= horizon_offset;
-	float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);
-	float horizonBlendCumulus = clamp_to_unit((world_pos.y + 0.01) * 50.0);
+	float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);				//used to fade things out that are closer to the horizon for a depth effect
+	float horizonBlendCumulus = clamp_to_unit((world_pos.y + 0.01) * 50.0);		//used to fade things out that are closer to the horizon for a depth effect
 
-	vec3 scatter = calc_atmospheric_scatter(sr, sm, mu.xy, angle_mult.xyz);
+
+	float horizon_color_blend = 1.0 - max(dot(sun_pos,world_pos),0.0);
+
+	vec3 scatter = calc_atmospheric_scatter(sr, sm, mu.xy, angle_mult.xyz, horizon_color_blend);
 	col.rgb += scatter.rgb;
+
 
 	// Sun
 	vec3 sun_disk = calc_disk_mask(world_pos, sun_pos, sun_disk_size) * sun_disk_color.rgb * scatter.rgb;
