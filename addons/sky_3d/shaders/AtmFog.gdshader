@@ -37,6 +37,12 @@ uniform float atm_moon_mie_intensity = .7;
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 
+group_uniforms sky_noise;
+const float sky_noise_amount = 0.03;
+const float sky_noise_size = 0.1;
+
+
+
 #include "Common.gdshaderinc"
 
 
@@ -147,7 +153,15 @@ void fragment() {
 	vec3 tint =  scatter;
 	vec4 fog_color = vec4(tint.rgb, fog_factor);
 	fog_color = vec4((fog_color.rgb), clamp_to_unit(fog_color.a));
+	
+	vec2 rand = random(FRAGCOORD.xy * TIME);
+	float noise = (fract(sin( dot(FRAGCOORD.xy, vec2(35.9898 * (sin(TIME) + 0.5), 15.002 * (cos(TIME) + 0.5)))) * 43758.5453) - 0.5) * 2.0;
+
+	fog_color.rgb += (noise * sky_noise_amount * sky_noise_size);
+	fog_color.rgb = clamp(fog_color.rgb, 0.0, 1.0);
+	
 	fog_color.rgb = apply_photo_tonemap(fog_color.rgb, color_correction.y, color_correction.x);
+
 
 	ALBEDO = fog_color.rgb;
 	ALPHA = fog_color.a;

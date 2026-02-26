@@ -50,6 +50,12 @@ void calc_simple_optical_depth(float y, out float sr, out float sm, vec2 params)
 	sm = y * MIE_ZENITH_LENGTH;
 }
 
+vec2 random(vec2 uv){
+    uv = vec2( dot(uv, vec2(127.1,311.7) ),
+               dot(uv, vec2(269.5,183.3) ) );
+    return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);
+}
+
 // Paper based (Unused)
 void calc_optical_depth(float y, out float sr, out float sm, vec2 params) {
 	y = max(0.0, y);

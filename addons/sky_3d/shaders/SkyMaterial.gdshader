@@ -508,11 +508,6 @@ vec3 dither_interleaved(vec3 rgb, float levels, vec4 frag_coord) {
     noise = noise - 0.5;
     return rgb + noise / (levels - 1.0);
 }
-vec2 random(vec2 uv){
-    uv = vec2( dot(uv, vec2(127.1,311.7) ),
-               dot(uv, vec2(269.5,183.3) ) );
-    return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);
-}
 
 void sky() {
 	float current_time = TIME;
@@ -528,7 +523,6 @@ void sky() {
 		
 		vec2 rand = random(FRAGCOORD.xy * TIME);
 		float noise = (fract(sin( dot(FRAGCOORD.xy, vec2(35.9898 * (sin(TIME) + 0.5), 15.002 * (cos(TIME) + 0.5)))) * 43758.5453) - 0.5) * 2.0;
-		float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);
 
 		col.rgb += (noise * sky_noise_amount * sky_noise_size);
 		col.rgb = clamp(col.rgb, 0.0, 1.0);

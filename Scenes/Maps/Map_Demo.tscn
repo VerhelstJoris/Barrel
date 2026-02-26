@@ -148,7 +148,7 @@ shadow_enabled = true
 transform = Transform3D(0, -0.8979587, 0.44007978, 0.94309336, 0.1463389, 0.2985965, -0.3325281, 0.41503632, 0.84685886, 0.44007978, 0.2985965, 0.84685886)
 layers = 3
 light_color = Color(0.572549, 0.776471, 0.956863, 1)
-light_energy = 0.0
+light_energy = 0.2
 light_angular_distance = 1.0
 
 [node name="SkyDome" type="Node" parent="Sky3D"]
