@@ -5,6 +5,6 @@ albedo_color = Color(1, 0.541176, 0.0784314, 1)
 roughness = 0.0
 emission_enabled = true
 emission = Color(0.555551, 0.226638, 4.81308e-08, 1)
-emission_energy_multiplier = 6.0
+emission_energy_multiplier = 2.0
 disable_receive_shadows = true
 grow_amount = 2.17
