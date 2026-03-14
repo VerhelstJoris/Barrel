@@ -15,7 +15,10 @@ data_*/
 mono_crash.*.json
 /.idea
 
-/Reference			#ignore the reference folder
-*.fbx				# ignore fbx as godot imports them into .res/.tres
-!Origin/*.fbx			# do include .fbx from origin
+/Reference/*
+
+*.fbx
+!/Origin/*.fbx
 *.import
+
+
