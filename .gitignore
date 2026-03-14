@@ -16,4 +16,5 @@ mono_crash.*.json
 /.idea
 
 *.fbx
+!Origin/*.fbx
 *.import
