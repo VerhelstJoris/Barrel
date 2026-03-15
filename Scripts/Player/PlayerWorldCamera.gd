@@ -24,7 +24,7 @@ func _ready() -> void:
 		get_compositor().compositor_effects[0].effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# Handling camera in '_process' so that camera movement is framerate independent
 		_handle_camera_motion()
