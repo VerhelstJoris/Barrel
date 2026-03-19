@@ -1,36 +1,3 @@
-[gd_scene load_steps=3 format=3 uid="uid://bp7nyfexdkbri"]
-
-[ext_resource type="Script" uid="uid://547ntu3et701" path="res://Scripts/Animation/Colt/SkeletonRevolverBoneCacheModifier.gd" id="1_mmsnr"]
-[ext_resource type="Script" uid="uid://bthbdif7kukap" path="res://Scripts/Tools/ImGui Debug/Components/BarrelBoneCacheModifierDebugNode.gd" id="2_ee6bm"]
-
-[node name="SkeletonBoneCacheModifier" type="SkeletonModifier3D"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-accessibility_name = ""
-accessibility_description = ""
-accessibility_live = 0
-accessibility_controls_nodes = Array[NodePath]([])
-accessibility_described_by_nodes = Array[NodePath]([])
-accessibility_labeled_by_nodes = Array[NodePath]([])
-accessibility_flow_to_nodes = Array[NodePath]([])
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-active = true
-influence = 1.0
-script = ExtResource("1_mmsnr")
-metadata/_custom_type_script = "uid://547ntu3et701"
-
-[node name="BarrelBoneCacheModifierDebugNode" type="Node" parent="."]
-script = ExtResource("2_ee6bm")
-metadata/_custom_type_script = "uid://bthbdif7kukap"
+version https://git-lfs.github.com/spec/v1
+oid sha256:ffcf7307891e6fdea31ea5962869ef9feb1a417b91bf7ab6a74df5862dd601e0
+size 1374

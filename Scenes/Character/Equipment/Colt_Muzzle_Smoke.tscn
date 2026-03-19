@@ -1,28 +1,3 @@
-[gd_scene load_steps=6 format=3 uid="uid://baf5l2l4osd2a"]
-
-[ext_resource type="Shader" uid="uid://ptkpnelb3y0f" path="res://Materials/Shaders/VFX/VFX_Muzzle_Smoke_Shader.tres" id="1_ev6sx"]
-[ext_resource type="Script" uid="uid://cmmjaefpx7esy" path="res://addons/LineRenderer/line_renderer.gd" id="2_sbko3"]
-[ext_resource type="Script" uid="uid://bogighcxele3d" path="res://Scripts/Tools/ImGui Debug/Components/LineRendererDebugNode.gd" id="3_gabsc"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_kiwjb"]
-render_priority = 0
-shader = ExtResource("1_ev6sx")
-
-[sub_resource type="ImmediateMesh" id="ImmediateMesh_kiwjb"]
-
-[node name="Muzzle_Smoke_Trail" type="MeshInstance3D" node_paths=PackedStringArray("replace_start_point")]
-layers = 2
-material_override = SubResource("ShaderMaterial_kiwjb")
-cast_shadow = 0
-lod_bias = 0.001
-gi_mode = 0
-mesh = SubResource("ImmediateMesh_kiwjb")
-script = ExtResource("2_sbko3")
-replace_start_point = NodePath("")
-start_thickness = 0.0
-metadata/_custom_type_script = "uid://cmmjaefpx7esy"
-
-[node name="LineRendererDebugNode" type="Node" parent="." node_paths=PackedStringArray("line")]
-script = ExtResource("3_gabsc")
-line = NodePath("..")
-metadata/_custom_type_script = "uid://bogighcxele3d"
+version https://git-lfs.github.com/spec/v1
+oid sha256:9df453fc77169ce0bddb81962a847f36fb0636273ba8932c3fb0dce44c170bb5
+size 1238

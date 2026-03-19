@@ -1,27 +1,3 @@
-[gd_scene load_steps=2 format=3 uid="uid://cooy44h1jqbd2"]
-
-[ext_resource type="Texture2D" uid="uid://bquxwbstlpgay" path="res://Textures/UI/HUD/HUD_Reticle_backdrop.png" id="2_sgm2s"]
-
-[node name="CenterContainer" type="CenterContainer"]
-clip_contents = true
-custom_minimum_size = Vector2(15, 15)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -64.0
-offset_top = -64.0
-offset_right = 64.0
-offset_bottom = 64.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="."]
-custom_minimum_size = Vector2(90, 90)
-layout_mode = 2
-
-[node name="Backdrop" type="TextureRect" parent="MarginContainer"]
-layout_mode = 2
-texture = ExtResource("2_sgm2s")
-expand_mode = 3
+version https://git-lfs.github.com/spec/v1
+oid sha256:e77efdc086da546587475488c0044b1e47095ffd56449992d24ed8d10154b324
+size 761

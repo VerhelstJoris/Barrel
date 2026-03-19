@@ -1,0 +1,878 @@
+{
+  "Version": "20260300",
+  "Thumbnail": {
+    "ProjectThumbnail": "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"
+  },
+  "TerrainBase": {
+    "MaxPreviewTextureSize": 4096,
+    "GlobalWorldSeed": 0,
+    "Seed": 0,
+    "TerrainScale": {
+      "X": 2048,
+      "Y": 2048
+    },
+    "TerrainWidth": 2048,
+    "TerrainHeight": 2048,
+    "Precision": "Meter_1_2",
+    "ProceduralWorldScale": 1.0,
+    "ScaleTexturesWithWorld": false,
+    "ScaleObjectsWithWorld": false,
+    "IsStandardVersion": true,
+    "SeamlessX": false,
+    "SeamlessXBlendSize": 1.0,
+    "SeamlessOperationX": "Average",
+    "SeamlessZ": false,
+    "SeamlessZBlendSize": 1.0,
+    "SeamlessOperationZ": "Average",
+    "BaseShape": {
+      "$type": "BaseShapeClassic",
+      "Seed": 0,
+      "Strength": 0.40896934,
+      "StartLevel": 2,
+      "NoiseHeight": {
+        "Min": 0.0,
+        "Max": 250.0
+      },
+      "OffsetX": 0.0,
+      "OffsetZ": 0.0,
+      "AnchorX": 0.0,
+      "AnchorZ": 0.0,
+      "Rotation": 0.0
+    },
+    "BaseShapeSeed": 0,
+    "Cutoff": {
+      "Min": 0.0,
+      "Max": 0.0
+    },
+    "GeneralStrength": 0.046530545,
+    "OffsetX": 0.0,
+    "OffsetZ": 0.0,
+    "LevelStep": {
+      "Active": [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+      "Levels": [0.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0]
+    },
+    "HighDetailAreaMode": "None",
+    "HighDetailCameraScale": {
+      "X": 1.0,
+      "Y": 1.0
+    },
+    "HighDetailPosition": {
+      "X": 512.0,
+      "Y": 512.0
+    },
+    "HighDetailScale": {
+      "X": 1024.0,
+      "Y": 1024.0
+    },
+    "MaxPreviewPrecision": "Precision_4096",
+    "ShowOutline": false,
+    "PreviewPrecision": 0,
+    "HighDetailAreaObject": {
+      "Area": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Width": 1024.0,
+        "Height": 1024.0
+      },
+      "Position": {
+        "X": 512.0,
+        "Y": 512.0
+      },
+      "Scale": {
+        "X": 1024.0,
+        "Y": 1024.0
+      },
+      "Rotation": 0.0,
+      "Blending": 1.0,
+      "BlendSize": 0.0,
+      "BlendRoundness": 0.0,
+      "ShowRotation": true,
+      "RotationEnabled": false,
+      "XYScalingEnabled": true,
+      "RelativeEditing": false,
+      "EditingEnabled": false
+    },
+    "HighDetailArea": {
+      "X": 512.0,
+      "Y": 512.0,
+      "Width": 1024.0,
+      "Height": 1024.0
+    },
+    "PreviewPadding": 0,
+    "TestPadding": 0,
+    "MaxPadding": 1024,
+    "ExportAlignment": 64,
+    "FixSeams": true,
+    "OnlyOneArea": false,
+    "Symmetry": false,
+    "StepCount": 11,
+    "PreviewEnabled": false
+  },
+  "BiomeSettings": {
+    "HandleGenerator": {
+      "HandleIndex": 134
+    },
+    "Biomes": {
+      "Items": [
+        {
+          "$type": "Biome",
+          "Distribution": {
+            "RootDistribution": {
+              "$type": "biomedistribution",
+              "internalList": [],
+              "Value": 1.0,
+              "Handle": 8,
+              "Operation": "Multiply",
+              "Enabled": true,
+              "ClampResult": false,
+              "Effects": {
+                "Items": [],
+                "Handle": 9,
+                "Enabled": true,
+                "Name": "Effects"
+              },
+              "BlendValue": 1.0
+            }
+          },
+          "Name": "Dunes",
+          "Handle": 7,
+          "Enabled": true,
+          "Filters": {
+            "Items": [
+              {
+                "$type": "FilterProperties",
+                "Settings": {
+                  "Filter": {
+                    "$type": "FilterStrata",
+                    "Seed": 0,
+                    "Spacing": 0.5,
+                    "Direction": 0.0,
+                    "Tilt": 40.0,
+                    "Width": {
+                      "Min": 0.2,
+                      "Max": 0.6
+                    },
+                    "Rotation": 15.0,
+                    "Iterations": 6,
+                    "Octaves": 4,
+                    "Lacunarity": 4.0,
+                    "Gain": 0.2,
+                    "LevelStep": {
+                      "Active": [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+                      "Levels": [0.0,0.0,0.0,0.0,0.0,0.0,100.0,30.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+                    },
+                    "GeneralStrength": 14.039662,
+                    "OperationCompare": "All",
+                    "Invert": false,
+                    "ChannelTypes": "Default"
+                  },
+                  "Enabled": true
+                },
+                "Distribution": {
+                  "RootDistribution": {
+                    "$type": "biomedistribution",
+                    "internalList": [],
+                    "Value": 1.0,
+                    "Handle": 36,
+                    "Operation": "Multiply",
+                    "Enabled": true,
+                    "ClampResult": false,
+                    "Effects": {
+                      "Items": [],
+                      "Handle": 37,
+                      "Enabled": true,
+                      "Name": "Effects"
+                    },
+                    "BlendValue": 1.0
+                  }
+                },
+                "Handle": 38,
+                "Name": "Effect - Strata"
+              },
+              {
+                "$type": "FilterProperties",
+                "Settings": {
+                  "Filter": {
+                    "$type": "FilterSmooth",
+                    "Strength": 1.0,
+                    "Radius": 4.0,
+                    "LevelStep": {
+                      "Active": [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+                      "Levels": [0.0,0.0,0.0,0.0,3.125,6.25,12.5,25.0,50.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0]
+                    },
+                    "GeneralStrength": 100.0,
+                    "OperationCompare": "All",
+                    "Invert": false,
+                    "ChannelTypes": "Default"
+                  },
+                  "Enabled": true
+                },
+                "Distribution": {
+                  "RootDistribution": {
+                    "$type": "biomedistribution",
+                    "internalList": [],
+                    "Value": 1.0,
+                    "Handle": 48,
+                    "Operation": "Multiply",
+                    "Enabled": true,
+                    "ClampResult": false,
+                    "Effects": {
+                      "Items": [],
+                      "Handle": 49,
+                      "Enabled": true,
+                      "Name": "Effects"
+                    },
+                    "BlendValue": 1.0
+                  }
+                },
+                "Handle": 50,
+                "Name": "Effect - Smooth"
+              }
+            ],
+            "Handle": 10,
+            "Enabled": true,
+            "Name": "Filters"
+          },
+          "TextureProperties": {
+            "Items": [
+              {
+                "$type": "TextureProperties",
+                "Settings": {
+                  "Color": "969696FF",
+                  "Metalness": 0.0,
+                  "Roughness": 1.0,
+                  "UseSatelliteImage": true,
+                  "EnableEmission": false,
+                  "EmissionStrength": 1.0,
+                  "TextureType": "None",
+                  "Saturation": 1.0,
+                  "Contrast": 1.0,
+                  "Brightness": 1.0,
+                  "NormalStrength": 1.0,
+                  "FlipNormalY": false,
+                  "IsGloss": false,
+                  "TileSize": 1.0,
+                  "TileRotation": 0.0,
+                  "TileOffset": {
+                    "X": 0.0,
+                    "Y": 0.0
+                  },
+                  "TriplanarProjection": false,
+                  "StochasticDistribution": false,
+                  "HeightBlending": false,
+                  "HeightBlendingSmoothness": 0.1,
+                  "DisplacementEnabled": true,
+                  "HeightScale": 0.1,
+                  "GradientEnabled": false,
+                  "GradientStrength": 1.0,
+                  "InvertGradient": false,
+                  "GradientSaturation": 1.0,
+                  "GradientContrast": 1.0,
+                  "GradientBrightness": 1.0,
+                  "MaxWorkingTextures": 0
+                },
+                "Distribution": {
+                  "RootDistribution": {
+                    "$type": "biomedistribution",
+                    "internalList": [],
+                    "Value": 1.0,
+                    "Handle": 25,
+                    "Operation": "Multiply",
+                    "Enabled": true,
+                    "ClampResult": false,
+                    "Effects": {
+                      "Items": [],
+                      "Handle": 26,
+                      "Enabled": true,
+                      "Name": "Effects"
+                    },
+                    "BlendValue": 1.0
+                  }
+                },
+                "Enabled": true,
+                "Handle": 24,
+                "Name": "Color"
+              }
+            ],
+            "Handle": 11,
+            "Enabled": true,
+            "Name": "Materials"
+          },
+          "ObjectProperties": {
+            "Items": [],
+            "Handle": 12,
+            "Enabled": true,
+            "Name": "Objects"
+          },
+          "SimulationProperties": {
+            "Items": [],
+            "Handle": 13,
+            "Enabled": true,
+            "Name": "Simulations"
+          },
+          "PreviewColor": "16CEB0FF",
+          "OverwriteObjects": true,
+          "OverwriteFilters": true,
+          "FilterBlending": 0.0,
+          "GlobalObjectScale": 1.0
+        },
+        {
+          "$type": "Biome",
+          "Distribution": {
+            "RootDistribution": {
+              "$type": "biomedistribution",
+              "internalList": [],
+              "Value": 1.0,
+              "Handle": 60,
+              "Operation": "Multiply",
+              "Enabled": true,
+              "ClampResult": false,
+              "Effects": {
+                "Items": [],
+                "Handle": 61,
+                "Enabled": true,
+                "Name": "Effects"
+              },
+              "BlendValue": 1.0
+            }
+          },
+          "Name": "Biome",
+          "Handle": 59,
+          "Enabled": true,
+          "Filters": {
+            "Items": [],
+            "Handle": 62,
+            "Enabled": true,
+            "Name": "Filters"
+          },
+          "TextureProperties": {
+            "Items": [],
+            "Handle": 63,
+            "Enabled": true,
+            "Name": "Materials"
+          },
+          "ObjectProperties": {
+            "Items": [],
+            "Handle": 64,
+            "Enabled": true,
+            "Name": "Objects"
+          },
+          "SimulationProperties": {
+            "Items": [],
+            "Handle": 65,
+            "Enabled": true,
+            "Name": "Simulations"
+          },
+          "PreviewColor": "FE9619FF",
+          "OverwriteObjects": true,
+          "OverwriteFilters": true,
+          "FilterBlending": 0.0,
+          "GlobalObjectScale": 1.0
+        }
+      ],
+      "Handle": 0,
+      "Enabled": true,
+      "Name": "Biomes"
+    },
+    "BiomeLayers": {
+      "Area": {
+        "$type": "WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Settings.BaseTerrainLayer, WorldCreator3.Core]]",
+        "Area": {
+          "X": -3.4028235E+38,
+          "Y": -3.4028235E+38,
+          "Width": 0.0,
+          "Height": 0.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [],
+      "Handle": 1,
+      "Enabled": true,
+      "Name": "Biome Paint Layers"
+    },
+    "TerrainLayers": {
+      "Area": {
+        "$type": "WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Settings.BaseTerrainLayer, WorldCreator3.Core]]",
+        "Area": {
+          "X": 0.0,
+          "Y": 0.0,
+          "Width": 2048.0,
+          "Height": 2048.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [
+        {
+          "$type": "TerrainLayerPrimitive",
+          "HeightScale": 150.0,
+          "BaseShape": {
+            "$type": "BaseShapeGradient",
+            "Curve": 0.98122406,
+            "Center": 1.0,
+            "Tiling": 1.0,
+            "TilingOffset": 0.0
+          },
+          "Enabled": true,
+          "Created": false,
+          "Name": "Primitive",
+          "RotateImage": false,
+          "UsesColorMap": false,
+          "UsesHeightMap": true,
+          "IsModel": false,
+          "Handle": 57,
+          "MaskTypeSetting": "None",
+          "MaskLayerReference": {
+            "Handle": -1
+          },
+          "ShowMask": false,
+          "Operation": "Add",
+          "HeightOffset": 0.0,
+          "HeightBlending": 1.0,
+          "SnapToLevelStep": true,
+          "MultipleSteps": false,
+          "LevelStep": 5,
+          "LevelSteps": {
+            "Active": [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+            "Levels": [0.0,0.0,0.0,0.0,100.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+          },
+          "Area": {
+            "$type": "TerrainLayerArea",
+            "Area": {
+              "X": 0.0,
+              "Y": 0.0,
+              "Width": 2048.0,
+              "Height": 2048.0
+            },
+            "Position": {
+              "X": 1024.0,
+              "Y": 1024.0
+            },
+            "Scale": {
+              "X": 2048.0,
+              "Y": 2048.0
+            },
+            "Rotation": 270.0,
+            "Blending": 0.31305033,
+            "BlendSize": 0.0,
+            "BlendRoundness": 0.0,
+            "ShowRotation": true,
+            "RotationEnabled": true,
+            "XYScalingEnabled": true,
+            "RelativeEditing": false,
+            "EditingEnabled": true
+          }
+        }
+      ],
+      "Handle": 2,
+      "Enabled": true,
+      "Name": "Shape Layers"
+    },
+    "MaskLayers": {
+      "Area": {
+        "$type": "WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Generating.MaskLayer, WorldCreator3.Core]]",
+        "Area": {
+          "X": -3.4028235E+38,
+          "Y": -3.4028235E+38,
+          "Width": 0.0,
+          "Height": 0.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [],
+      "Handle": 3,
+      "Enabled": true,
+      "Name": "Mask Layers"
+    },
+    "HoleLayers": {
+      "Area": {
+        "$type": "WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Generating.MaskLayer, WorldCreator3.Core]]",
+        "Area": {
+          "X": -3.4028235E+38,
+          "Y": -3.4028235E+38,
+          "Width": 0.0,
+          "Height": 0.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [],
+      "Handle": 4,
+      "Enabled": true,
+      "Name": "Hole Layers"
+    },
+    "SimulationLayers": {
+      "Area": {
+        "$type": "WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Generating.SimulationLayer, WorldCreator3.Core]]",
+        "Area": {
+          "X": -3.4028235E+38,
+          "Y": -3.4028235E+38,
+          "Width": 0.0,
+          "Height": 0.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [],
+      "Handle": 5,
+      "Enabled": true,
+      "Name": "Simulation Layers"
+    },
+    "Objects": {
+      "Area": {
+        "$type": "ContainerElementArea`1.WorldCreator3.Settings.ContainerElementArea`1+MoveableFolderArea[[WorldCreator3.Generating.SceneObject, WorldCreator3.Core]]",
+        "Area": {
+          "X": -3.4028235E+38,
+          "Y": -3.4028235E+38,
+          "Width": 0.0,
+          "Height": 0.0
+        },
+        "RotationEnabled": true,
+        "XYScalingEnabled": false,
+        "RelativeEditing": false,
+        "EditingEnabled": true
+      },
+      "Items": [],
+      "Handle": 6,
+      "Enabled": true,
+      "Name": "Scene"
+    },
+    "TerrainEnabled": true,
+    "BiomeColor": 4.09099
+  },
+  "Scene": {
+    "SunAngleHorizontal": 0.57,
+    "SunAngleVertical": 0.16,
+    "SunSize": 0.07,
+    "ShadowSoftness": 0.2,
+    "SunStrength": 1.0,
+    "SunDirection": {
+      "X": -0.8764002,
+      "Y": 0.24868989,
+      "Z": 0.4124027
+    },
+    "SkyStrength": 1.0,
+    "EnvironmentMapEnabled": false,
+    "BackgroundStrength": 1.0,
+    "Rotation": 0.0,
+    "EnvironmentLighting": false,
+    "EnvironmentLightingStrength": 1.0,
+    "ProgressiveSpeed": 0.0,
+    "CloudsEnabled": false,
+    "CloudColor": "FFFFFFFF",
+    "CloudQuality": 1.0,
+    "CloudScattering": 0.65,
+    "CloudCoverage": 0.88,
+    "CloudDensity": 2.0,
+    "CloudScale": 0.22,
+    "CloudDetailScale": 0.71,
+    "CloudHeight": 0.16,
+    "CloudHeightOffset": 0.27,
+    "CloudBorder": 0.0,
+    "CloudAtmosphere": 0.0,
+    "CloudAtmosphereHeight": 0.63,
+    "CloudSkylightFactor": 0.0,
+    "CloudWeatherScale": 1.0,
+    "CloudOffsetX": 0.0,
+    "CloudOffsetZ": 0.0,
+    "WaterEnabled": false,
+    "WaterHeight": 0.1,
+    "WaterOffset": 0.08,
+    "WaterClarity": 0.65,
+    "WaterColor": "008B93FF",
+    "WaterFoam": true,
+    "WaterFoamRange": {
+      "Min": 0.0,
+      "Max": 0.15
+    },
+    "WaterFoamColor": "FFFFFFFF",
+    "AtmosphereStrength": 0.5,
+    "AtmosphereScale": 1.0,
+    "AtmosphereHeight": 1.0,
+    "ClampAtmosphereColor": false,
+    "ReferenceObjectEnabled": true,
+    "ReferenceObjectScale": 1.8,
+    "ReferenceObjectPosition": {
+      "X": 0.0,
+      "Y": 0.0
+    },
+    "MaxLightBounces": 3,
+    "RussianRouletteScaling": 1.0,
+    "MaxRenderedObjects": 16777216,
+    "PerformanceTarget": false,
+    "TargetFPS": 30,
+    "PixelDistance": "PixelsPerFrame_1",
+    "DenoiserEnabled": false,
+    "DenoiserQuality": "Fast",
+    "SamplesPerDenoiserStep": 1,
+    "FastSamples": 1,
+    "DenoiserBlending": 1.0,
+    "LimitRendererSamples": false,
+    "Samples": 100,
+    "ScreenshotFormat": {
+      "$type": "ExportInfoPng",
+      "BitDepth": "BitDepth8",
+      "Is16Bit": false,
+      "CompressionLevel": "Default",
+      "Extension": "png"
+    },
+    "TransparentBackground": false,
+    "HDRExport": false,
+    "SoilHeight": 0.02,
+    "SoilColor": "969696FF",
+    "GroundPlate": false,
+    "GroundPlateOffset": 0.0,
+    "GroundPlateColor": "969696FF",
+    "MipBias": 0.0,
+    "HeightBlendingSmoothness": 0.1,
+    "DisplacementEnabled": false,
+    "MaxDisplacementDistance": 2.0,
+    "DisplacementQuality": 0.5,
+    "MaxDisplacementBounces": 2,
+    "TextureDisplacementBlending": 0.0,
+    "MainCamera": {
+      "Position": {
+        "X": 0.049931142,
+        "Y": -1.5435759,
+        "Z": -0.85861164
+      },
+      "Direction": {
+        "X": 0.36545646,
+        "Y": 0.53770554,
+        "Z": 0.7598121
+      },
+      "UseMainCameraSettings": false,
+      "FieldOfView": 90.0,
+      "LUTEnabled": false,
+      "TonemappingOperator": "ACES_Simple",
+      "AgXPreset": "Neutral",
+      "WhitePoint": 1.0,
+      "LegacyColorOutput": false,
+      "Exposure": 1.0,
+      "Vignette": 0.0,
+      "Brightness": 1.0,
+      "Contrast": 1.0,
+      "Saturation": 1.0,
+      "Sharpen": 0.0,
+      "DofEnabled": false,
+      "FocalDistance": 1000.0,
+      "ApertureRadius": 4.0,
+      "Bloom": false,
+      "BloomStart": 0.0,
+      "BloomStrength": 0.3,
+      "BloomSamples": 50.0,
+      "Width": 1920,
+      "Height": 1080,
+      "AnimationName": "Animation",
+      "SamplesPerFrame": 32,
+      "AnimationLengthMs": 3000,
+      "AnimationFPS": 30,
+      "ShowUI": false,
+      "Handle": 281474976710655,
+      "Enabled": true,
+      "Name": "Main Camera",
+      "Transform": "0,0,0|0,0,0|0,0,0,1|0",
+      "ScalingAllowed": false
+    },
+    "ActiveCamera": 281474976710655
+  },
+  "Seeds": [],
+  "Export": {
+    "ProjectPresets": {
+      "Items": [
+        {
+          "$type": "ExportPreset",
+          "FlipX": false,
+          "FlipY": false,
+          "PreserveFirstSplatLayer": true,
+          "UseProjectPrecision": true,
+          "Precision": "Meter_1",
+          "Position": {
+            "X": 1024.0,
+            "Y": 1024.0
+          },
+          "Scale": {
+            "X": 2048.0,
+            "Y": 2048.0
+          },
+          "Area": {
+            "$type": "TerrainLayerArea",
+            "Area": {
+              "X": 0.0,
+              "Y": 0.0,
+              "Width": 2048.0,
+              "Height": 2048.0
+            },
+            "Position": {
+              "X": 1024.0,
+              "Y": 1024.0
+            },
+            "Scale": {
+              "X": 2048.0,
+              "Y": 2048.0
+            },
+            "Rotation": 0.0,
+            "Blending": 1.0,
+            "BlendSize": 0.0,
+            "BlendRoundness": 0.0,
+            "ShowRotation": true,
+            "RotationEnabled": false,
+            "XYScalingEnabled": false,
+            "RelativeEditing": false,
+            "EditingEnabled": false
+          },
+          "Items": [
+            {
+              "$type": "HeightmapExportPipeline",
+              "Name": "Height Map",
+              "AutoNormalization": true,
+              "MinHeight": -300.0,
+              "MaxHeight": 500.0,
+              "SingleChannel": false,
+              "GameEngine": "Unity",
+              "GameEngineScaling": 0.0,
+              "ExportItemCount": 1,
+              "WritesMesh": false,
+              "UsedDataTypes": "Height",
+              "ExportInfos": [
+                {
+                  "$type": "ExportInfoASC",
+                  "Scaling": 1.0,
+                  "Northing": 0,
+                  "Easting": 200000,
+                  "Extension": "asc"
+                },
+                {
+                  "$type": "ExportInfoBmp",
+                  "Extension": "bmp"
+                },
+                {
+                  "$type": "ExportInfoExr",
+                  "HeightExport": true,
+                  "BitDepth": "Float32",
+                  "Normalize": true,
+                  "UseTrueHeight": true,
+                  "Extension": "exr"
+                },
+                {
+                  "$type": "ExportInfoJpeg",
+                  "Quality": 95,
+                  "Extension": "jpg"
+                },
+                {
+                  "$type": "ExportInfoPng",
+                  "BitDepth": "BitDepth8",
+                  "Is16Bit": false,
+                  "CompressionLevel": "Default",
+                  "Extension": "png"
+                },
+                {
+                  "$type": "ExportInfoR16",
+                  "Extension": "r16"
+                },
+                {
+                  "$type": "ExportInfoRaw",
+                  "BitDepth": "Int16",
+                  "Normalize": true,
+                  "UseTrueHeight": true,
+                  "ByteOrder": "BigEndian",
+                  "Channels": "All",
+                  "Interleaved": true,
+                  "Extension": "raw"
+                },
+                {
+                  "$type": "ExportInfoTarga",
+                  "Compression": false,
+                  "Extension": "tga"
+                },
+                {
+                  "$type": "ExportInfoTiff",
+                  "HeightExport": true,
+                  "BitDepth": "Int8",
+                  "CompressionLevel": "Deflate",
+                  "Normalize": false,
+                  "UseTrueHeight": true,
+                  "Extension": "tif"
+                },
+                {
+                  "$type": "ExportInfoWebP",
+                  "Lossless": true,
+                  "CompressionLevel": "Default",
+                  "Extension": "webp"
+                },
+                {
+                  "$type": "ExportInfoXYZ",
+                  "Scaling": 1.0,
+                  "Northing": 0,
+                  "Easting": 200000,
+                  "Extension": "xyz"
+                }
+              ],
+              "Format": {
+                "$type": "ExportInfoPng",
+                "BitDepth": "BitDepth16",
+                "Is16Bit": true,
+                "CompressionLevel": "Smallest",
+                "Extension": "png"
+              },
+              "NamingConvention": "#PROJECT_#TYPE_#WIDTHx#HEIGHT_#X_#Y.#EXT",
+              "SplitValue": 8192,
+              "TileOrder": "TopToBottom",
+              "PartialTileBehaviour": "Clamp",
+              "IncludeBorderPixel": false,
+              "Resample": false,
+              "ResampleValue": 1024,
+              "FlipX": false,
+              "FlipY": false,
+              "Transpose": false,
+              "IsOutputArray": false,
+              "Info": 0.0,
+              "WriterCount": 1,
+              "Handle": 0,
+              "Enabled": true
+            }
+          ],
+          "Handle": 100,
+          "Enabled": true,
+          "Name": "Export Preset"
+        }
+      ],
+      "Handle": 14,
+      "Enabled": true,
+      "Name": "Folder"
+    },
+    "UseCustomExportFolder": false,
+    "CustomExportFolder": "C:\\Users\\megaj\\Documents/World Creator/Export/",
+    "UseCustomSyncFolder": false,
+    "CustomSyncFolder": "C:\\Users\\megaj\\Documents/World Creator/Sync/",
+    "Area": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Width": 1.0,
+      "Height": 1.0
+    }
+  },
+  "ProjectType": "WorkingFileAbsolutePaths",
+  "CameraPosition": {
+    "X": 0.049931142,
+    "Y": -1.5435759,
+    "Z": -0.85861164
+  },
+  "CameraDirection": {
+    "X": 0.36545646,
+    "Y": 0.53770554,
+    "Z": 0.7598121
+  }
+}

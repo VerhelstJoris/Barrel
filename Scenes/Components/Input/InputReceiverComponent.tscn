@@ -1,12 +1,3 @@
-[gd_scene load_steps=3 format=3 uid="uid://dcvc3tin4j7mi"]
-
-[ext_resource type="Script" uid="uid://mjfa6lofa7kw" path="res://Scripts/Gameplay/Input/InputReceiver.gd" id="1_udjsc"]
-[ext_resource type="Script" uid="uid://lyu3pqqeaklk" path="res://Scripts/Tools/ImGui Debug/Components/InputReceiverDebugNode.gd" id="2_k32k2"]
-
-[node name="InputReceiverComponent" type="Node"]
-script = ExtResource("1_udjsc")
-metadata/_custom_type_script = "uid://mjfa6lofa7kw"
-
-[node name="InputReceiverDebugNode" type="Node" parent="."]
-script = ExtResource("2_k32k2")
-metadata/_custom_type_script = "uid://lyu3pqqeaklk"
+version https://git-lfs.github.com/spec/v1
+oid sha256:07469a91339aeb66efdff583abbb9b61419efb5b727a4d1c5f8a7c5866436c8a
+size 602

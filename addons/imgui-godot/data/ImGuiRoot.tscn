@@ -1,6 +1,3 @@
-[gd_scene load_steps=2 format=3 uid="uid://dugmpnsxaagba"]
-
-[ext_resource type="Script" uid="uid://cb343in1pmuvo" path="res://addons/imgui-godot/scripts/ImGuiRoot.gd" id="1_lney5"]
-
-[node name="ImGuiRoot" type="Node"]
-script = ExtResource("1_lney5")
+version https://git-lfs.github.com/spec/v1
+oid sha256:fbcfbafb3c69cb75b6de471b41efe093addcd74527d1b2ffd71ca6ef05347952
+size 250
