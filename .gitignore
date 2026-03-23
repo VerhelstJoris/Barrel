@@ -23,3 +23,4 @@ mono_crash.*.json
 
 
 /addons/terrain_3d/demo
+addons/wc_bridge/WorldCreatorBridge.tscn
