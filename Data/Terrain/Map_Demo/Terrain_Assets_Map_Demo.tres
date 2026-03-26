@@ -1,0 +1,39 @@
+[gd_resource type="Terrain3DAssets" load_steps=7 format=3 uid="uid://bai2mlqlkfb30"]
+
+[ext_resource type="Texture2D" uid="uid://i7fdaq4yxyas" path="res://Data/Terrain/Map_Demo/Tex_Terrain_Map_Demo_Albedo.tex" id="1_ww0oo"]
+[ext_resource type="Texture2D" uid="uid://b3uyn0l3woym2" path="res://Data/Terrain/Map_Demo/Tex_Terrain_Map_Demo_Normal.tex" id="2_nrfih"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dxtvg"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 128.0
+distance_fade_max_distance = 96.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_nuwgb"]
+generated_type = 1
+height_offset = 0.5
+material_override = SubResource("StandardMaterial3D_dxtvg")
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_iiiwn"]
+name = ""
+albedo_color = Color(0.5882353, 0.5372549, 0.41568628, 1)
+albedo_texture = ExtResource("1_ww0oo")
+normal_texture = ExtResource("2_nrfih")
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_puhlb"]
+name = ""
+id = 1
+albedo_color = Color(0.5568628, 0.3254902, 0.047058824, 1)
+albedo_texture = ExtResource("1_ww0oo")
+normal_texture = ExtResource("2_nrfih")
+
+[resource]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_nuwgb")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_iiiwn"), SubResource("Terrain3DTextureAsset_puhlb")])

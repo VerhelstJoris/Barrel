@@ -112,7 +112,7 @@ graph_offset = Vector2(2, -177)
 animation = &"AL_FP_Character/A_FP_Idle_Pose"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-462.3969, -95.620346)
+graph_offset = Vector2(-462.397, -95.6203)
 nodes/output/position = Vector2(820, 260)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_em04p")
 nodes/Animation/position = Vector2(340, 280)

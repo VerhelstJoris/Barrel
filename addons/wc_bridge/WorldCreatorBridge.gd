@@ -113,6 +113,7 @@ func _on_sync_terrain_button_pressed():
 	# 4. Read and import the heightmap tiles
 	_import_heightmap_tiles(xml_path, metadata, terrain_name, resource_dir, vertex_spacing, world_scale, height_scale) 
 		
+	metadata = null
 	print("=== IMPORT COMPLETE ===\n")
 
 # Helper function to read and parse the XML file

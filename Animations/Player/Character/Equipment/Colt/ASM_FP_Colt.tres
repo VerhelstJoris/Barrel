@@ -157,7 +157,7 @@ mix_mode = 1
 fadeout_time = 0.05
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fbbjj"]
-graph_offset = Vector2(-495.62732, -182.43471)
+graph_offset = Vector2(-495.627, -182.435)
 nodes/output/position = Vector2(820, 260)
 "nodes/Cock Hammer/node" = SubResource("AnimationNodeAnimation_x6cgn")
 "nodes/Cock Hammer/position" = Vector2(100, 400)

@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="InputActionMappingContext" load_steps=25 format=3 uid="uid://crg7w5jka1q2l"]
 
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_38a4m"]
-[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_d2ut6"]
+[ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_38a4m"]
 [ext_resource type="Script" uid="uid://dp2ih4w84ct0t" path="res://Scripts/Helpers/ExposedSignalConnector.gd" id="3_x8u4y"]
 [ext_resource type="Resource" uid="uid://4smgbek3h2dt" path="res://Data/Input/Movement/IA_Move_Back.tres" id="4_hwpox"]
 [ext_resource type="Resource" uid="uid://cckwe6jdwb54d" path="res://Data/Input/Movement/IA_Move_Forward.tres" id="5_sfs6c"]

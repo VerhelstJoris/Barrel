@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const ImporterScene = preload("res://addons/wc_bridge/WorldCreatorBridge.tscn")
+const ImporterScene = preload("res://addons/wc_bridge/TestScene.tscn")
 
 var importer_instance: Control
 
