@@ -2,37 +2,21 @@
 extends Path3D
 
 @export var fence_scene1 : PackedScene
-@export var fence_scene2 : PackedScene
 
 @export var created_path_objects : Node3D
-@export var terrain: Node3D
-@export var spacing: float = 0.3:
-	set(value):
-		spacing = value
-		if Engine.is_editor_hint() and is_inside_tree():
-			spawn_fences() 
+@export var terrain: Terrain3D
 
-@export var height_offset : float = 0.0: 
-	set(value):
-		height_offset = value
-		if Engine.is_editor_hint() and is_inside_tree():
-			spawn_fences() 
 
-@export var enable_random_rotation := true:
-	set(value):
-		enable_random_rotation = value
-		if Engine.is_editor_hint() and is_inside_tree():
-			spawn_fences() 
+@export var spacing: float = 0.3
+@export var height_offset : float = 0.0
+@export var enable_random_rotation := true
+
+
+@export_tool_button("Regenerate path", "Callable") var regenerate_action = _regenerate
 
 var is_updating : bool = false
 
-func _ready():
-	curve.connect("changed", Callable(self, "_on_curve_changed"))
-
-	adjust_curve_with_terrain_data()
-	spawn_fences()
-
-func _on_curve_changed() -> void:
+func _regenerate() -> void:
 	if is_updating:
 		return
 	is_updating = true
@@ -43,7 +27,7 @@ func _on_curve_changed() -> void:
 	is_updating = false
 
 func adjust_curve_with_terrain_data() -> void:
-	if terrain == null or terrain.data == null:
+	if terrain == null:
 		push_error("No Valid Terrain3D")
 		return
 
@@ -56,25 +40,25 @@ func adjust_curve_with_terrain_data() -> void:
 	for i in range(curve.point_count):
 		var point = curve.get_point_position(i)
 		var terrain_height : float = get_terrain_height(point)
-
+#
 		if !is_nan(terrain_height) and !is_inf(terrain_height):
 			var new_point = Vector3(point.x, terrain_height + height_offset, point.z)
 			curve.set_point_position(i, new_point)
-			print("✅ Punt aangepast:", new_point)
 		else:
-			push_error("⚠️ Ongeldige hoogte voor punt " + str(point) + ", behoud originele hoogte.")
+			push_error("NO valid height for" + str(point) + ", fallback to previous")
 
-func get_terrain_height(_global_position: Vector3) -> float:
+func get_terrain_height(point_pos: Vector3) -> float:
 	if terrain == null or terrain.data == null:
 		push_error("no valid Terrain3D or Terrain3D Data")
 		return global_position.y  
 
-	global_position = to_global(global_position)
+		
+	var point_global_pos : Vector3 = to_global(point_pos)
 
-	var height: float = terrain.data.get_height(global_position) * terrain.scale.y
+	var height: float = terrain.data.get_height(point_global_pos) * terrain.scale.y
 
 	if is_nan(height) or is_inf(height):
-		push_error("NO valid height for" + str(global_position) + ", fallback to 0")
+		push_error("NO valid height for" + str(point_global_pos) + ", fallback to 0")
 		return 0.0
 
 	return height
@@ -87,32 +71,32 @@ func spawn_fences() -> void:
 	for child in created_path_objects.get_children():
 		child.queue_free()
 
+	created_path_objects.set_global_transform(get_global_transform())
+
 	var current_distance : float = 0.0
 
 	while current_distance < curve.get_baked_length():
-		var pos = curve.sample_baked(current_distance)
-		var next_pos = curve.sample_baked(current_distance + 0.1)
-
-		pos = to_global(pos)
-		next_pos = to_global(next_pos)
-
+		var pos : Vector3= curve.sample_baked(current_distance)
+		var next_pos : Vector3 = curve.sample_baked(current_distance + 0.1)
+		
 		var terrain_height : float = get_terrain_height(pos)
 		if !is_nan(terrain_height) and !is_inf(terrain_height):
 			pos.y = terrain_height + height_offset  # Pas de hoogte van het hek aan op de terrain hoogte
 
-		var direction = (next_pos - pos).normalized()
+		var direction : Vector3 = (next_pos - pos).normalized()
 		direction.y = 0
 
-		var fence_instance = (fence_scene1 if randf() < 0.5 else fence_scene2).instantiate()
+		var fence_instance: Node = fence_scene1.instantiate()
 
 		if direction.length() > 0:
-			var new_basis = Basis.looking_at(direction, Vector3.UP)
-			var new_transform = Transform3D(new_basis, pos)
+			var new_basis : Basis = Basis.looking_at(direction, Vector3.UP)
+			var new_transform : Transform3D = Transform3D(new_basis, pos)
 			fence_instance.transform = new_transform
 		else:
 			fence_instance.position = pos
 
-		created_path_objects.add_child(fence_instance)
+		created_path_objects.add_child(fence_instance, true, )
+		fence_instance.owner = created_path_objects
 
 		if enable_random_rotation:
 			fence_instance.rotate_y(randf_range(0.0, 2.0 * PI))
