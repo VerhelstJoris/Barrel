@@ -1,27 +1,27 @@
 @tool
 extends Path3D
 
-@export var fence_scene1 : PackedScene
-@export var fence_beam_scene : PackedScene
-@export var default_beam_length : float = 10.0
 
 @export var created_path_objects : Node3D
 @export var terrain: Terrain3D
 
+@export_tool_button("Regenerate Path", "Callable") var regenerate_action = _regenerate
 
+@export_group("Beam Settings")
+@export var fence_beam_scene : PackedScene
+@export var default_beam_length : float = 10.0
+@export var tilt_beams : bool = false
+
+@export_group("Pole Settings")
+@export var fence_scene1 : PackedScene
 @export var spacing: float = 0.3
 @export var height_offset : float = 0.0
-
-@export_group("Rotation")
 @export var point_up : bool = false
 @export var enable_random_rotation : bool = true
 
 
-@export_tool_button("Regenerate Path", "Callable") var regenerate_action = _regenerate
-
 var is_updating : bool = false
 var point_alpha_distance_dictionary : Dictionary[int, float]
-
 
 func _regenerate() -> void:
 	if is_updating:
@@ -145,24 +145,31 @@ func _fill_curve_segment(start_id : int, end_id, _full_dist : float, end_segment
 		
 		#create a post at the new spot
 		_create_object_at(fence_scene1,new_segment_pos, new_seg_direction)
-		
-		if(fence_beam_scene):
-			#create a beam in between the previous and this post
-			var beam : Node3D = _create_object_at(fence_beam_scene,(new_segment_pos + prev_seg_pos) /2, new_seg_direction)
-			
-			if(beam):
-				beam.set_scale(Vector3(1, 1,beam_scale_mult))
+
+		#create beam inbetween last and this post
+		_create_beam(prev_seg_pos,new_segment_pos, beam_scale_mult , distance_per_item_avg_needed)
 		
 		prev_seg_pos = new_segment_pos
 		
-	#create a beam at the very final segment	
-	if(fence_beam_scene):
-		#create a beam in between the previous and this post
-		var beam : Node3D = _create_object_at(fence_beam_scene,(prev_seg_pos + end_pos) /2, (prev_seg_pos - end_pos).normalized())
-
-		if(beam):
-			beam.set_scale(Vector3(1, 1,beam_scale_mult))
+	#create a beam at the very final segment
+	_create_beam(prev_seg_pos, end_pos, beam_scale_mult, distance_per_item_avg_needed)
 		
+func _create_beam(start_pos: Vector3 , end_pos : Vector3, scale_mult : float, beam_dist : float ) -> void:
+	if(fence_beam_scene == null):
+		return
+		
+	var beam : Node3D = _create_object_at(fence_beam_scene,(start_pos + end_pos) / 2 , (start_pos - end_pos).normalized())
+	
+	if(beam):
+		beam.set_scale(Vector3(1, 1,scale_mult))
+		
+		if(tilt_beams):
+			var height_diff : float = start_pos.y - end_pos.y
+			var angle : float = atan(height_diff / beam_dist)
+			
+			beam.set_rotation(Vector3(angle, beam.rotation.y, beam.rotation.z))
+		
+	
 
 func _determine_object_pos_on_terrain(world_pos : Vector3) -> Vector3:
 	var new_pos : Vector3 = world_pos
