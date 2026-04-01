@@ -8,13 +8,13 @@ extends Path3D
 @export_group("Beam Settings")
 @export var fence_beam_scene: PackedScene
 @export var default_beam_length: float = 10.0
+@export var beam_offset : float = 5.0
 @export var tilt_beams: bool = false
 @export_group("Pole Settings")
 @export var fence_scene1: PackedScene
 @export var spacing: float = 0.3
 @export var height_offset: float = 0.0
 @export var point_up: bool = false
-@export var enable_random_rotation: bool = true
 
 var is_updating: bool = false
 var point_alpha_distance_dictionary: Dictionary[int, float]
@@ -121,8 +121,9 @@ func _fill_curve_segment(start_id: int, end_id, _full_dist: float, end_segment: 
 
 	#create object at start
 	var direction: Vector3 = (end_pos - pos).normalized()
-	_create_object_at(fence_scene1, _determine_object_pos_on_terrain(pos, height_offset), direction)
+	_create_post(_determine_object_pos_on_terrain(pos, height_offset), direction)
 
+	
 	var amount_needed_rounded: int = round(distance_on_curve_between / spacing)
 
 	var distance_per_item_avg_needed: float = distance_on_curve_between / amount_needed_rounded
@@ -144,8 +145,8 @@ func _fill_curve_segment(start_id: int, end_id, _full_dist: float, end_segment: 
 		var new_fence_post_pos: Vector3  = new_fence_post_terrain_pos+ Vector3(0, height_offset,0)
 		
 		#create a post at the new spot
-		_create_object_at(fence_scene1, new_fence_post_pos, next_fence_lookat_direction)
-
+		_create_post(_determine_object_pos_on_terrain(new_fence_post_pos, height_offset), next_fence_lookat_direction)
+		
 		#create beam inbetween last and this post
 		_create_beam(prev_post_terrain_pos, new_fence_post_terrain_pos, distance_per_item_avg_needed)
 
@@ -159,7 +160,8 @@ func _create_beam(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -> vo
 	if(fence_beam_scene == null):
 		return
 
-	var beam: Node3D = _create_object_at(fence_beam_scene, (start_pos + end_pos) / 2, (start_pos - end_pos).normalized())
+	var new_beam_pos : Vector3 = ((start_pos + end_pos) / 2) + Vector3(0,beam_offset,0)
+	var beam: Node3D = _create_object_at(fence_beam_scene,new_beam_pos , (start_pos - end_pos).normalized())
 
 	if(beam):
 		var beam_scale_mult: float = start_pos.distance_to(end_pos) / default_beam_length
@@ -169,8 +171,9 @@ func _create_beam(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -> vo
 			var height_diff: float = start_pos.y - end_pos.y
 			var angle: float = atan(height_diff / beam_dist)
 			beam.set_rotation(Vector3(angle, beam.rotation.y, beam.rotation.z))
-
-
+			
+func _create_post(_pos : Vector3, _look_at : Vector3) -> void:
+	_create_object_at(fence_scene1, _pos, _look_at)
 
 func _determine_object_pos_on_terrain(world_pos: Vector3, _height_offset: float = 0.0) -> Vector3:
 	var new_pos: Vector3 = world_pos
@@ -196,11 +199,8 @@ func _create_object_at(packed_scene: PackedScene, pos: Vector3, _look_at: Vector
 		new_instance.position = pos
 
 	created_path_objects.add_child(new_instance, true)
-	new_instance.owner = created_path_objects
-
-	if enable_random_rotation:
-		new_instance.rotate_y(randf_range(0.0, 2.0 * PI))
-
+	new_instance.owner = get_tree().edited_scene_root
+	
 	return new_instance
 
 
