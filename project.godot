@@ -72,6 +72,13 @@ folder_colors={
 "res://addons/": "red"
 }
 
+[importer_defaults]
+
+animation_library={
+&"blender/nodes/cameras": false,
+&"nodes/root_scale": 100.0
+}
+
 [input]
 
 move_forward={

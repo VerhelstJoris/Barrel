@@ -23,14 +23,14 @@ lod0_range = 128.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_iiiwn"]
 name = ""
-albedo_color = Color(0.5882353, 0.5372549, 0.41568628, 1)
+albedo_color = Color(0.588235, 0.537255, 0.415686, 1)
 albedo_texture = ExtResource("1_ww0oo")
 normal_texture = ExtResource("2_nrfih")
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_puhlb"]
 name = ""
 id = 1
-albedo_color = Color(0.5568628, 0.3254902, 0.047058824, 1)
+albedo_color = Color(0.556863, 0.32549, 0.0470588, 1)
 albedo_texture = ExtResource("1_ww0oo")
 normal_texture = ExtResource("2_nrfih")
 

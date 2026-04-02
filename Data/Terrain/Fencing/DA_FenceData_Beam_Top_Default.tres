@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="FenceBeamData" load_steps=3 format=3 uid="uid://3oiqsjy0xonx"]
+
+[ext_resource type="Script" uid="uid://ceaynhgynpgsd" path="res://Scripts/Tools/Terrain/FenceBeamData.gd" id="1_jrbbs"]
+[ext_resource type="PackedScene" uid="uid://cw5624je3ayhy" path="res://Scenes/Environment/Fences/Fencing/FencePost_Default.tscn" id="1_jvnju"]
+
+[resource]
+script = ExtResource("1_jrbbs")
+beam_variations_weighting = Dictionary[PackedScene, float]({
+ExtResource("1_jvnju"): 1.0
+})
+beam_offset = 1.2
+tilt_beams = true
+metadata/_custom_type_script = "uid://ceaynhgynpgsd"
