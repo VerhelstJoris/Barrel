@@ -166,7 +166,17 @@ func _create_beam(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -> vo
 			
 			
 func _determine_post_scene() -> PackedScene:
-	return fence_data.post_data.post_variations_weighting_map.keys()[0]
+	if(fence_data.post_data == null):
+		push_error("No pole data to select from")
+		return null
+
+	if(fence_data.post_data.post_variations_weighting_map.is_empty()):
+		push_error("Pole Data is empty, there are no scenes to select from!")
+		return null
+		
+	var rand_index : int = CommonAlgorithms._weighted_random_from_weights(fence_data.post_data.post_variations_weighting_map.values())
+	return fence_data.post_data.post_variations_weighting_map.keys()[rand_index]
+	
 
 func _determine_beam_scene() -> PackedScene:
 	return fence_data.beam_data_arr[0].beam_variations_weighting.keys()[0]
@@ -205,3 +215,5 @@ func _create_object_at(packed_scene: PackedScene, pos: Vector3, _look_at: Vector
 
 func randf_range(min_val: float, max_val: float) -> float:
 	return min_val + (max_val - min_val) * randf()
+	
+	
