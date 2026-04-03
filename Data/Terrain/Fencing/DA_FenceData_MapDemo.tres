@@ -1,12 +1,13 @@
-[gd_resource type="Resource" script_class="FencePathData" load_steps=5 format=3 uid="uid://bm0lq2ua4d01g"]
+[gd_resource type="Resource" script_class="FencePathData" load_steps=6 format=3 uid="uid://bm0lq2ua4d01g"]
 
 [ext_resource type="Script" uid="uid://ceaynhgynpgsd" path="res://Scripts/Tools/Terrain/FenceBeamData.gd" id="1_ckhnq"]
 [ext_resource type="Script" uid="uid://b58kryey46xw7" path="res://Scripts/Tools/Terrain/FencePathData.gd" id="1_p2owb"]
 [ext_resource type="Resource" uid="uid://3oiqsjy0xonx" path="res://Data/Terrain/Fencing/DA_FenceData_Beam_Top_Default.tres" id="2_fa5my"]
+[ext_resource type="Resource" uid="uid://cs72d00ocwe5y" path="res://Data/Terrain/Fencing/DA_FenceData_Beam_Bottom_Default.tres" id="3_fa5my"]
 [ext_resource type="Resource" uid="uid://cq3omf34iska1" path="res://Data/Terrain/Fencing/DA_FenceData_Post_Default.tres" id="4_fa5my"]
 
 [resource]
 script = ExtResource("1_p2owb")
-beam_data_arr = Array[ExtResource("1_ckhnq")]([ExtResource("2_fa5my")])
+beam_data_arr = Array[ExtResource("1_ckhnq")]([ExtResource("2_fa5my"), ExtResource("3_fa5my")])
 post_data = ExtResource("4_fa5my")
 metadata/_custom_type_script = "uid://b58kryey46xw7"

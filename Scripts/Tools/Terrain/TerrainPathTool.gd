@@ -144,29 +144,30 @@ func _fill_curve_segment(start_id: int, end_id, _full_dist: float, end_segment: 
 		_create_post(new_fence_post_pos, next_fence_lookat_direction)
 		
 		#create beam inbetween last and this post
-		_create_beam(prev_post_terrain_pos, new_fence_post_terrain_pos, distance_per_item_avg_needed)
+		_create_beam_set(prev_post_terrain_pos, new_fence_post_terrain_pos, distance_per_item_avg_needed)
 
 		prev_post_terrain_pos = new_fence_post_terrain_pos
 
 	#create a beam at the very final segment
-	_create_beam(prev_post_terrain_pos, _determine_object_pos_on_terrain(end_pos), distance_per_item_avg_needed)
+	_create_beam_set(prev_post_terrain_pos, _determine_object_pos_on_terrain(end_pos), distance_per_item_avg_needed)
 
 
-func _create_beam(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -> void:
-	if(fence_data.beam_data_arr == null):
+func _create_beam_set(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -> void:
+	if(fence_data.beam_data_arr == null || fence_data.beam_data_arr.is_empty()):
 		return
 
-	var new_beam_pos : Vector3 = ((start_pos + end_pos) / 2) + Vector3(0,fence_data.beam_data_arr[0].beam_offset,0)
-	var beam: Node3D = _create_object_at(_determine_beam_scene(),new_beam_pos , (start_pos - end_pos).normalized())
-
-	if(beam):
-		var beam_scale_mult: float = start_pos.distance_to(end_pos) / fence_data.beam_data_arr[0].default_beam_length
-		beam.set_scale(Vector3(1, 1, beam_scale_mult))
-
-		if(fence_data.beam_data_arr[0].tilt_beams):
-			var height_diff: float = start_pos.y - end_pos.y
-			var angle: float = atan(height_diff / beam_dist)
-			beam.set_rotation(Vector3(angle, beam.rotation.y, beam.rotation.z))
+	for beam_layer_id in range(fence_data.beam_data_arr.size()):
+		var new_beam_pos : Vector3 = ((start_pos + end_pos) / 2) + Vector3(0,fence_data.beam_data_arr[beam_layer_id].beam_offset,0)
+		var beam: Node3D = _create_object_at(_determine_beam_scene(fence_data.beam_data_arr[beam_layer_id]),new_beam_pos , (start_pos - end_pos).normalized())
+	
+		if(beam):
+			var beam_scale_mult: float = start_pos.distance_to(end_pos) / fence_data.beam_data_arr[beam_layer_id].default_beam_length
+			beam.set_scale(Vector3(1, 1, beam_scale_mult))
+	
+			if(fence_data.beam_data_arr[beam_layer_id].tilt_beams):
+				var height_diff: float = start_pos.y - end_pos.y
+				var angle: float = atan(height_diff / beam_dist)
+				beam.set_rotation(Vector3(angle, beam.rotation.y, beam.rotation.z))
 			
 			
 func _determine_post_scene() -> PackedScene:
@@ -182,8 +183,17 @@ func _determine_post_scene() -> PackedScene:
 	return fence_data.post_data.post_variations_weighting_map.keys()[rand_index]
 	
 
-func _determine_beam_scene() -> PackedScene:
-	return fence_data.beam_data_arr[0].beam_variations_weighting.keys()[0]
+func _determine_beam_scene(beam_data : FenceBeamData) -> PackedScene:
+	if(beam_data == null):
+		push_error("No beam data to select from!")
+		return null
+		
+	if(beam_data.beam_variations_weighting.is_empty()):
+		push_error("Beam data map has no beams to select from!")
+		return null
+
+	var rand_index : int = CommonAlgorithms._weighted_random_from_weights(beam_data.beam_variations_weighting.values())
+	return beam_data.beam_variations_weighting.keys()[rand_index]
 			
 func _create_post(_pos : Vector3, _look_at : Vector3) -> void:
 	var new_post : Node3D = _create_object_at(_determine_post_scene(), _pos, _look_at)

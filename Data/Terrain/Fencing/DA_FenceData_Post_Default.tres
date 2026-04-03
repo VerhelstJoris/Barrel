@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="FencePoleData" load_steps=7 format=3 uid="uid://cq3omf34iska1"]
 
-[ext_resource type="PackedScene" uid="uid://cw5624je3ayhy" path="res://Scenes/Environment/Fences/Fencing/FencePost_Default.tscn" id="1_3gyut"]
+[ext_resource type="PackedScene" uid="uid://cw5624je3ayhy" path="res://Scenes/Environment/Fences/Posts/FencePost_Default.tscn" id="1_3gyut"]
 [ext_resource type="Script" uid="uid://dbnp2imf0oe58" path="res://Scripts/Tools/Terrain/FencePoleData.gd" id="1_od3kw"]
-[ext_resource type="PackedScene" uid="uid://js7tvgop7mkw" path="res://Scenes/Environment/Fences/Fencing/FencePost_Var_1.tscn" id="2_up4dw"]
-[ext_resource type="PackedScene" uid="uid://cg7w42kiw3co8" path="res://Scenes/Environment/Fences/Fencing/FencePost_Var_2.tscn" id="3_g1e5i"]
-[ext_resource type="PackedScene" uid="uid://bj6do5ngm802e" path="res://Scenes/Environment/Fences/Fencing/FencePost_Var_3.tscn" id="4_44bic"]
-[ext_resource type="PackedScene" uid="uid://bxgyuw1683m3d" path="res://Scenes/Environment/Fences/Fencing/FencePost_Var_4.tscn" id="5_vnqlo"]
+[ext_resource type="PackedScene" uid="uid://js7tvgop7mkw" path="res://Scenes/Environment/Fences/Posts/FencePost_Var_1.tscn" id="2_up4dw"]
+[ext_resource type="PackedScene" uid="uid://cg7w42kiw3co8" path="res://Scenes/Environment/Fences/Posts/FencePost_Var_2.tscn" id="3_g1e5i"]
+[ext_resource type="PackedScene" uid="uid://bj6do5ngm802e" path="res://Scenes/Environment/Fences/Posts/FencePost_Var_3.tscn" id="4_44bic"]
+[ext_resource type="PackedScene" uid="uid://bxgyuw1683m3d" path="res://Scenes/Environment/Fences/Posts/FencePost_Var_4.tscn" id="5_vnqlo"]
 
 [resource]
 script = ExtResource("1_od3kw")
