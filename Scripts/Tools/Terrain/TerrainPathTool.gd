@@ -61,6 +61,10 @@ func spawn_fences() -> void:
 	if(point_alpha_distance_dictionary.is_empty() || point_alpha_distance_dictionary.keys().size() != curve.point_count):
 		push_error("Point Distance Map filled in incorrectly!")
 		return
+		
+	if(fence_data.post_data == null):
+		push_error("No Post Data assigned")
+		return
 
 	for id in range(curve.point_count -1 ):
 		_fill_curve_segment(id, id +1, full_distance, false)
@@ -182,7 +186,22 @@ func _determine_beam_scene() -> PackedScene:
 	return fence_data.beam_data_arr[0].beam_variations_weighting.keys()[0]
 			
 func _create_post(_pos : Vector3, _look_at : Vector3) -> void:
-	_create_object_at(_determine_post_scene(), _pos, _look_at)
+	var new_post : Node3D = _create_object_at(_determine_post_scene(), _pos, _look_at)
+	
+	if(new_post == null):
+		push_error("Failed to create Post!")
+		return
+
+
+	match (fence_data.post_data.random_rotation):
+		FencePoleData.ERotationRandomization.FULLY:
+			new_post.rotate_y(randf_range(0.0, 2.0 * PI))
+		FencePoleData.ERotationRandomization.QUARTER:
+			new_post.rotate_y(deg_to_rad((randi() %4) * 90.0))
+
+	if(fence_data.post_data.random_added_rotation_range_deg != Vector2.ZERO):
+		new_post.rotate_y(deg_to_rad(randf_range(fence_data.post_data.random_added_rotation_range_deg.x, fence_data.post_data.random_added_rotation_range_deg.y)))
+
 
 func _determine_object_pos_on_terrain(world_pos: Vector3, _height_offset: float = 0.0) -> Vector3:
 	var new_pos: Vector3 = world_pos
@@ -211,8 +230,7 @@ func _create_object_at(packed_scene: PackedScene, pos: Vector3, _look_at: Vector
 	new_instance.owner = get_tree().edited_scene_root
 	
 	return new_instance
-
-
+	
 func randf_range(min_val: float, max_val: float) -> float:
 	return min_val + (max_val - min_val) * randf()
 	
