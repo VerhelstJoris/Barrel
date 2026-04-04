@@ -16,4 +16,5 @@ ExtResource("4_ladyl"): 1.0
 })
 beam_offset = 1.2
 tilt_beams = true
+random_added_rotation_range_deg = Vector2(-1.5, 1.5)
 metadata/_custom_type_script = "uid://ceaynhgynpgsd"

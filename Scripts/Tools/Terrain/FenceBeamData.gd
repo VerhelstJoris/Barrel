@@ -4,3 +4,4 @@ class_name FenceBeamData extends Resource
 @export var default_beam_length: float = 10.0
 @export var beam_offset : float = 5.0
 @export var tilt_beams: bool = false
+@export var random_added_rotation_range_deg : Vector2 = Vector2.ZERO

@@ -168,8 +168,11 @@ func _create_beam_set(start_pos: Vector3, end_pos: Vector3, beam_dist: float ) -
 				var height_diff: float = start_pos.y - end_pos.y
 				var angle: float = atan(height_diff / beam_dist)
 				beam.set_rotation(Vector3(angle, beam.rotation.y, beam.rotation.z))
-			
-			
+
+			if(fence_data.beam_data_arr[beam_layer_id].random_added_rotation_range_deg != Vector2.ZERO):
+				beam.rotate_x(deg_to_rad(randf_range(fence_data.beam_data_arr[beam_layer_id].random_added_rotation_range_deg.x, fence_data.beam_data_arr[beam_layer_id].random_added_rotation_range_deg.y)))
+
+
 func _determine_post_scene() -> PackedScene:
 	if(fence_data.post_data == null):
 		push_error("No pole data to select from")
@@ -182,7 +185,6 @@ func _determine_post_scene() -> PackedScene:
 	var rand_index : int = CommonAlgorithms._weighted_random_from_weights(fence_data.post_data.post_variations_weighting_map.values())
 	return fence_data.post_data.post_variations_weighting_map.keys()[rand_index]
 	
-
 func _determine_beam_scene(beam_data : FenceBeamData) -> PackedScene:
 	if(beam_data == null):
 		push_error("No beam data to select from!")
@@ -202,7 +204,6 @@ func _create_post(_pos : Vector3, _look_at : Vector3) -> void:
 		push_error("Failed to create Post!")
 		return
 
-
 	match (fence_data.post_data.random_rotation):
 		FencePoleData.ERotationRandomization.FULLY:
 			new_post.rotate_y(randf_range(0.0, 2.0 * PI))
@@ -221,8 +222,7 @@ func _determine_object_pos_on_terrain(world_pos: Vector3, _height_offset: float 
 		new_pos.y = terrain_height + _height_offset
 
 	return new_pos
-
-
+	
 func _create_object_at(packed_scene: PackedScene, pos: Vector3, _look_at: Vector3) -> Node3D:
 	var new_instance: Node = packed_scene.instantiate()
 
