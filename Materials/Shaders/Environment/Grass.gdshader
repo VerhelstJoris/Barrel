@@ -24,21 +24,21 @@ uniform float wind_ao_affect = 0.1;
 
 void vertex() {
 	bottom_to_top = 1.0 - UV.y;
-	
+
 	vec2 wind_position = NODE_POSITION_WORLD.xz / 10.0;
   	wind_position -= TIME * wind_direction * wind_strength;
 
   	current_wind_bend = texture(wind_noise, wind_position).x;
-	
+
 	current_wind_bend *= wind_strength;
 	current_wind_bend *= bottom_to_top * 2.0;
-	
+
 	mat4 inv_model = inverse(MODEL_MATRIX);
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
 
   	VERTEX.xz += current_wind_bend * local_direction;
-	
-	VERTEX.xz += blade_bend * pow(bottom_to_top, 2.0) * local_direction;
+
+	VERTEX.xz += blade_bend * pow(bottom_to_top, 2.0);	// bend the blade in the direction this is positioned in
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
 	VERTEX *= mix(size_small, size_large, patch_factor);
@@ -51,7 +51,7 @@ void fragment() {
 	{
 		NORMAL = -NORMAL;
 	}
-	
+
 	AO = bottom_to_top - (current_wind_bend * wind_ao_affect);
 	AO_LIGHT_AFFECT = 1.0;
 
