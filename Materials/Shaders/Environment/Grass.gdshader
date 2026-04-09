@@ -15,6 +15,8 @@ varying float patch_factor;
 
 varying float bottom_to_top;
 
+varying float vertex_move_amount;
+
 //wind related
 uniform sampler2D wind_noise;
 uniform float wind_strength = 0.1;
@@ -22,7 +24,24 @@ uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
 uniform float wind_ao_affect = 0.1;
 
+uniform float low_lod_division_amount = 2;
+
+uniform float min_lod_distance = 8.0f;
+uniform float max_lod_distance = 12.0f;
+
 void vertex() {
+	vec3 world_camera = (INV_VIEW_MATRIX * vec4(vec3(0.0), 1.0)).xyz;
+	vec3 world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float dist = distance(world_position.xyz, world_camera);
+
+	bottom_to_top = 1.0 - UV.y;
+	float floored_uv = 1.0 - floor(bottom_to_top +0.1);
+	float rounded = 1.0 - round(UV.y);
+	float added = smoothstep(min_lod_distance,max_lod_distance, dist) * (bottom_to_top * floored_uv);
+	added = (added / low_lod_division_amount) * vertex_move_amount;
+	VERTEX.y -= added;
+	UV.y += added;
+
 	bottom_to_top = 1.0 - UV.y;
 
 	vec2 wind_position = NODE_POSITION_WORLD.xz / 10.0;
@@ -37,7 +56,6 @@ void vertex() {
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
 
   	VERTEX.xz += current_wind_bend * local_direction;
-
 	VERTEX.xz += blade_bend * pow(bottom_to_top, 2.0);	// bend the blade in the direction this is positioned in
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;

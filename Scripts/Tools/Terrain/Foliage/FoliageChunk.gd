@@ -16,6 +16,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var grass_fade_out_start := 10.0
 @export var grass_fade_out_end := 20.0
 
+const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 
 var current_lod : EFoliageLOD = EFoliageLOD.NONE
 
@@ -42,15 +43,6 @@ func _process(_delta: float) -> void:
 	else:
 		_change_LOD(EFoliageLOD.LOW)
 
-	#var start_to_mid = smoothstep(impostor_fade_in_start, impostor_fade_in_end, camera_distance)
-	#var mid_to_end = smoothstep(grass_fade_out_start, grass_fade_out_end, camera_distance)
-#
-	#$Grass.visible = mid_to_end < 1.0
-	#$Impostor.visible = start_to_mid >= 0.0
-#
-	## Interpolate
-	#$Impostor.set_instance_shader_parameter("alpha", start_to_mid)
-	#$Grass.set_instance_shader_parameter("alpha", 1.0 - mid_to_end)
 		
 func _change_LOD(new_lod : EFoliageLOD) -> void:
 	if(current_lod == new_lod):
@@ -60,11 +52,11 @@ func _change_LOD(new_lod : EFoliageLOD) -> void:
 	
 	match new_lod:
 		EFoliageLOD.LOW:
-			print("change lod to low")
 			foliage_multimesh.multimesh.mesh = low_LOD_mesh
+			foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 0.0)
 		EFoliageLOD.HIGH:
-			print("change lod to high")
 			foliage_multimesh.multimesh.mesh = high_LOD_mesh
+			foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 1.0)
 		EFoliageLOD.TEX:
 			pass
 		EFoliageLOD.NONE:
