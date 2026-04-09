@@ -25,6 +25,8 @@ func _ready() -> void:
 		push_error("No Valid multimesh assigned on Foliage Chunk : ", owner.name)
 		return
 		
+	foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 1.0)
+
 	set_process(true)	
 		
 

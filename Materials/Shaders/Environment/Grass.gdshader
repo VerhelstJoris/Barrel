@@ -15,7 +15,7 @@ varying float patch_factor;
 
 varying float bottom_to_top;
 
-varying float vertex_move_amount;
+uniform float vertex_move_amount=1.0;
 
 //wind related
 uniform sampler2D wind_noise;
@@ -24,7 +24,7 @@ uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
 uniform float wind_ao_affect = 0.1;
 
-uniform float low_lod_division_amount = 2;
+uniform float low_lod_division_amount = 2.0;
 
 uniform float min_lod_distance = 8.0f;
 uniform float max_lod_distance = 12.0f;

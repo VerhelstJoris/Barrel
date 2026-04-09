@@ -4,6 +4,8 @@ var player : Player
 @export var world_camera : Camera3D
 var fp_camera : Camera3D
 
+var draw_wireframe : bool = false
+
 func _get_name() -> String:
 	return "PlayerWorldCameraDebug"
 
@@ -45,4 +47,15 @@ func _draw_contents(_delta : float) -> void:
 	ImGui.TableNextRow()
 	
 	ImGui.EndTable()
+
+	_draw_render_mode_options()
+
+func _draw_render_mode_options() -> void:
+	var render_mode : Array[bool] = [draw_wireframe]
+	if(ImGui.Checkbox("Show Wireframe?", render_mode)):
+		draw_wireframe = render_mode[0]
+		if(draw_wireframe):
+			get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
+		else:
+			get_viewport().debug_draw = Viewport.DEBUG_DRAW_DISABLED
 
