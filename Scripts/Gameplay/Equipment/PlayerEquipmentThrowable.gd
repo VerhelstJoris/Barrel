@@ -22,6 +22,8 @@ var trajectory_renderer : LineRenderer
 const trajectory_alpha_shader_param : String = "Opacity"
 var trajectory_alpha_tween : Tween
 @export var max_trajectory_alpha : float = 0.4
+@export var max_trajectory_alpha_impact : float = 0.8
+@export var trajectory_preview_alpha_fade_impact_time : float = 0.05
 @export var trajectory_preview_alpha_fadein_time : float = 0.25
 @export var trajectory_preview_alpha_fadeout_time : float = 0.1
 
@@ -239,12 +241,26 @@ func _can_be_dropped() -> bool:
 func _can_exit_aiming() -> bool:
 	return true
 
+func _tween_trajectory_alpha(target_val : float, time : float) -> void:
+	if(trajectory_alpha_tween):
+		trajectory_alpha_tween.stop()
+
+	var current_val : float = _get_trajectory_current_alpha()
+	if(current_val == target_val):
+		return
+		
+	trajectory_alpha_tween = create_tween()
+	trajectory_alpha_tween.tween_method(_set_trajectory_alpha, current_val, target_val, time)
+
 func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
-	var prev_state = current_throwable_state
-	match current_throwable_state:
+	var prev_state : EThrowableEquipmentState= current_throwable_state
+	match prev_state:
 		EThrowableEquipmentState.Aiming:
-			trajectory_alpha_tween = create_tween()
-			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), 0.0, trajectory_preview_alpha_fadeout_time)
+			_tween_trajectory_alpha(0.0,trajectory_preview_alpha_fadeout_time)
+		EThrowableEquipmentState.Throwing:
+			pass
+		EThrowableEquipmentState.Default:
+			pass	
 	
 	current_throwable_state = new_state
 	
@@ -255,8 +271,7 @@ func _change_throwable_state( new_state : EThrowableEquipmentState) -> void:
 		EThrowableEquipmentState.Aiming:
 			if(input_receiver):
 				input_receiver._change_current_input_mapping_context(aiming_input_context_name ,self, true)
-			trajectory_alpha_tween = create_tween()
-			trajectory_alpha_tween.tween_method(_set_trajectory_alpha, _get_trajectory_current_alpha(), max_trajectory_alpha, trajectory_preview_alpha_fadein_time)
+			_tween_trajectory_alpha(max_trajectory_alpha, trajectory_preview_alpha_fadein_time)
 		EThrowableEquipmentState.Throwing:
 			# when throwing actually happens, already hide existing prompts
 			if(input_receiver):
@@ -394,15 +409,25 @@ func _determine_throw_target_length() -> float:
 	return max_throw_distance * mult
 	
 func _draw_throw_trajectory() -> void:
-	if(trajectory_impact_effect != null):
-		if(trajectory_impact_global_trans != Transform3D.IDENTITY):
+	if(trajectory_impact_global_trans != Transform3D.IDENTITY):
+		if(trajectory_impact_effect != null):
 			if( !trajectory_impact_effect.visible && (trajectory_impact_alpha_tween == null || !trajectory_impact_alpha_tween.is_running()) ):
 				trajectory_impact_alpha_tween = create_tween()
 				trajectory_impact_alpha_tween.tween_method(_set_trajectory_impact_alpha, 0.0, max_trajectory_impact_alpha,  trajectory_impact_alpha_tween_time)
+			
 			trajectory_impact_effect.visible = true
 			trajectory_impact_effect.set_global_transform(trajectory_impact_global_trans)
-		else:
+		
+		if(trajectory_alpha_tween == null || !trajectory_alpha_tween.is_running()):
+			_tween_trajectory_alpha(max_trajectory_alpha_impact, trajectory_preview_alpha_fade_impact_time)
+	else:
+		if(trajectory_impact_effect != null):
 			trajectory_impact_effect.visible = false
+			
+		if(trajectory_alpha_tween == null || !trajectory_alpha_tween.is_running()):
+			_tween_trajectory_alpha(max_trajectory_alpha, trajectory_preview_alpha_fade_impact_time)
+				
+				
 			
 func _decide_target_transform_for_drop() -> bool:
 	drop_transform = Transform3D.IDENTITY
