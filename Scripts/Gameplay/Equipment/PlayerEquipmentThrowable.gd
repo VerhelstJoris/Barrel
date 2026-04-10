@@ -26,6 +26,7 @@ var trajectory_alpha_tween : Tween
 @export var trajectory_preview_alpha_fadeout_time : float = 0.1
 
 @export var trajectory_impact_scene : PackedScene
+@export var draw_trajectory_impact : bool = true
 var trajectory_impact_effect : Node3D
 var trajectory_impact_global_trans : Transform3D = Transform3D.IDENTITY
 var trajectory_impact_alpha_tween : Tween
@@ -71,8 +72,9 @@ func _ready() -> void:
 	
 func _process(_delta: float) -> void:
 	if(current_throwable_state == EThrowableEquipmentState.Aiming):
-		trajectory_renderer.set_global_position(owner.get_global_position())
-		trajectory_renderer.set_global_rotation(owner.get_global_rotation())
+		if(trajectory_renderer):	
+			trajectory_renderer.set_global_position(player.player_cam.get_global_position())
+			trajectory_renderer.set_global_rotation(player.player_cam.get_global_rotation())
 		_draw_throw_trajectory()
 		
 func _physics_process(_delta: float) -> void:
@@ -153,7 +155,7 @@ func _on_equipped(_player : Player) -> void:
 		_set_trajectory_alpha(0)
 		player.player_cam.add_child.call_deferred(trajectory_renderer)
 		
-	if(trajectory_impact_scene):
+	if(trajectory_impact_scene && draw_trajectory_impact):
 		trajectory_impact_effect = trajectory_impact_scene.instantiate()
 		_set_trajectory_impact_alpha(0)
 		player.player_cam.add_child.call_deferred(trajectory_impact_effect)
@@ -363,12 +365,19 @@ func _calculate_trajectory_path_points() -> void:
 				phys_traj_positions.append(ray_hit.position)
 				trajectory_impact_global_trans.origin = ray_hit.position
 				trajectory_impact_global_trans.basis = Basis.from_euler(Quaternion(Vector3.UP, ray_hit.normal).get_euler())
-				return
+				break
 			else:
 				phys_traj_positions.append(sampled_data[id].position)
 				
 		phys_traj_positions.append(current_calculated_throw_target)
 		
+	for id in range(phys_traj_positions.size()):
+		phys_traj_positions[id] = player.player_cam.to_local(phys_traj_positions[id])
+		
+	if(trajectory_renderer):
+		trajectory_renderer.points = phys_traj_positions
+
+
 func _determine_throw_target_length() -> float:
 	var world_cam : Camera3D = player.player_cam
 	var dir : Vector3 = -world_cam.get_global_basis().z
@@ -385,9 +394,6 @@ func _determine_throw_target_length() -> float:
 	return max_throw_distance * mult
 	
 func _draw_throw_trajectory() -> void:
-	if(trajectory_renderer):
-		trajectory_renderer.points = phys_traj_positions
-		
 	if(trajectory_impact_effect != null):
 		if(trajectory_impact_global_trans != Transform3D.IDENTITY):
 			if( !trajectory_impact_effect.visible && (trajectory_impact_alpha_tween == null || !trajectory_impact_alpha_tween.is_running()) ):
