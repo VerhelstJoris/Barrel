@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="FenceBeamData" load_steps=6 format=3 uid="uid://3oiqsjy0xonx"]
 
-[ext_resource type="Script" uid="uid://ceaynhgynpgsd" path="res://Scripts/Tools/Terrain/FenceBeamData.gd" id="1_jrbbs"]
+[ext_resource type="Script" path="res://Scripts/Tools/Terrain/TerrainPath/FenceBeamData.gd" id="1_jrbbs"]
 [ext_resource type="PackedScene" uid="uid://celuli1mlafb8" path="res://Scenes/Environment/Fences/Beams/FenceBeam_Default.tscn" id="1_jvnju"]
 [ext_resource type="PackedScene" uid="uid://qf1yy3ln8b2i" path="res://Scenes/Environment/Fences/Beams/FenceBeam_Var_1.tscn" id="2_una10"]
 [ext_resource type="PackedScene" uid="uid://bhxbuqolbkn7s" path="res://Scenes/Environment/Fences/Beams/FenceBeam_Var_2.tscn" id="3_n8v0u"]
