@@ -4,9 +4,6 @@ class_name FoliageChunk extends Node3D
 
 enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
-
-@export var foliage_multimesh : MultiMeshInstance3D
-
 @export var high_LOD_mesh : Mesh
 @export var low_LOD_mesh : Mesh
 @export var grass_material :Material
@@ -25,12 +22,12 @@ var current_lod : EFoliageLOD = EFoliageLOD.NONE
 
 var rd : RenderingDevice
 
+var instance_RID
 var scenario_RID
 
-var multimesh_RID
-var created_high_LOD_multimesh
-
-var test_storage_buffer_RID : RID
+var created_multimesh_RID : RID
+var created_multimesh_buffer_RID : RID
+var created_multimesh_command_buffer_RID : RID
 
 var shader_RID : RID
 var uniform_set_RID : RID
@@ -40,64 +37,32 @@ var height_buffer_RID : RID
 var compute_active : bool = false
 
 func _ready() -> void:
-	if(foliage_multimesh == null):
-		push_error("No Valid multimesh assigned on Foliage Chunk : ", owner.name)
-		return
-		
-	foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 1.0)
-
-	set_process(true)	
-
-	scenario_RID =  get_world_3d().scenario
-	
 	_setup_compute_pipeline()
-
-	var _packedArr : PackedFloat32Array = PackedFloat32Array([0.027,0.0,1.0,2.331,0.0,1.0,0.0,0.0,-1.0,0.0,0.027,-3.764])
 	
 
 func _process(_delta: float) -> void:
 	#RenderingServer.call_on_render_thread(_render_process.bind(_delta, rd))
-	#var camera_pos
-#
-	#if Engine.is_editor_hint():
-	#	camera_pos = EditorInterface.get_editor_viewport_3d().get_camera_3d().global_position
-	#else:
-	#	camera_pos = get_viewport().get_camera_3d().global_position
-#
-	#var camera_distance_squared : float = global_position.distance_squared_to(camera_pos)
-#
-	#if camera_distance_squared < lod_switch_distance_squared:
-	#	_change_LOD(EFoliageLOD.HIGH)
-	#else:
-	#	_change_LOD(EFoliageLOD.LOW)
+	var _camera_pos : Vector3
+
+	if Engine.is_editor_hint():
+		_camera_pos = EditorInterface.get_editor_viewport_3d().get_camera_3d().global_position
+	else:
+		_camera_pos = get_viewport().get_camera_3d().global_position
+
 	if(!compute_active):
 		RenderingServer.call_on_render_thread(_execute_compute_test)
-
 		
-func _change_LOD(new_lod : EFoliageLOD) -> void:
-	if(current_lod == new_lod):
-		return
-	
-	current_lod = new_lod
-	
-	match new_lod:
-		EFoliageLOD.LOW:
-			foliage_multimesh.multimesh.mesh = low_LOD_mesh
-			foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 0.0)
-		EFoliageLOD.HIGH:
-			foliage_multimesh.multimesh.mesh = high_LOD_mesh
-			foliage_multimesh.set_instance_shader_parameter(vertex_move_amount_shader_parameter, 1.0)
-		EFoliageLOD.TEX:
-			pass
-		EFoliageLOD.NONE:
-			pass
-			
+		
 func _render_process(_delta : float, _rd : RenderingDevice) -> void:
 	return
 	
 func _setup_compute_pipeline()	-> void:
 	rd = RenderingServer.get_rendering_device()
 
+	scenario_RID = get_world_3d().scenario
+
+	instance_RID = RenderingServer.instance_create()
+	
 	#load shader
 	var shader_file := load("res://Materials/Shaders/Environment/compute_grass_positions.glsl")
 	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
@@ -114,10 +79,9 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	multimesh_uniform.binding = 0
 
-	var command_buffer_RID = _create_new_multimesh(rd)
-	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_high_LOD_multimesh)
+	_create_new_multimesh(rd)
+	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
 	multimesh_uniform.add_id(buffer_rid)
-	
 	uniform_set_RID = rd.uniform_set_create([multimesh_uniform], shader_RID, 0)
 	
 	# Create a compute pipeline
@@ -128,9 +92,11 @@ func _setup_compute_pipeline()	-> void:
 	rd.compute_list_dispatch(compute_list, 1, 1, 1)
 	rd.compute_list_end()
 
-	#has to be called or it's not visible for some reason reason
-	RenderingServer.multimesh_set_visible_instances(created_high_LOD_multimesh, 1)
+	#has to be called or it's not visible for some reason
+	RenderingServer.multimesh_set_visible_instances(created_multimesh_RID, 1)
 	
+	set_process(true)
+
 
 func _exit_tree() -> void:
 	rd.free_rid(shader_RID)
@@ -171,44 +137,36 @@ func _init_existing_texture_data(_rd : RenderingDevice)-> RID:
 	
 	return _rd.texture_create(heightmap_format, RDTextureView.new(), [image.get_data()])
 
-func _create_new_multimesh(_rd : RenderingDevice) -> RID:
-	created_high_LOD_multimesh =RenderingServer.multimesh_create()
-	RenderingServer.multimesh_allocate_data(created_high_LOD_multimesh, 1 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
+func _create_new_multimesh(_rd : RenderingDevice) -> void:
+	created_multimesh_RID =RenderingServer.multimesh_create()
+	RenderingServer.multimesh_allocate_data(created_multimesh_RID, 1 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
-	RenderingServer.multimesh_set_mesh(created_high_LOD_multimesh, high_LOD_mesh.get_rid())
-	var instance = RenderingServer.instance_create()
-	var scenario = get_world_3d().scenario
+	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
 	
 	var aabb : Vector3 = Vector3(512.0, 1000.0, 512.0)
-	RenderingServer.instance_set_custom_aabb(instance, AABB(foliage_multimesh.get_global_position() , aabb))
-	RenderingServer.instance_set_transform(instance, foliage_multimesh.get_global_transform())
-	RenderingServer.instance_set_scenario(instance, scenario)
-	RenderingServer.instance_set_base(instance, created_high_LOD_multimesh)
-	RenderingServer.instance_geometry_set_flag(instance, RenderingServer.InstanceFlags.INSTANCE_FLAG_USE_DYNAMIC_GI, true)
-	RenderingServer.instance_geometry_set_cast_shadows_setting(instance, RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_OFF)
+	RenderingServer.instance_set_custom_aabb(instance_RID, AABB(get_global_position() , aabb))
+	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
+	RenderingServer.instance_set_scenario(instance_RID, scenario_RID)
+	RenderingServer.instance_set_base(instance_RID, created_multimesh_RID)
+	RenderingServer.instance_geometry_set_flag(instance_RID, RenderingServer.InstanceFlags.INSTANCE_FLAG_USE_DYNAMIC_GI, true)
+	RenderingServer.instance_geometry_set_cast_shadows_setting(instance_RID, RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_OFF)
 	
-	#var foundBuffer = RenderingServer.multimesh_get_buffer(created_high_LOD_multimesh);
+	created_multimesh_buffer_RID = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
 	
-	#var packedArr : PackedFloat32Array = PackedFloat32Array([0.027,0.0,1.0,2.331,0.0,1.0,0.0,0.0,-1.0,0.0,0.027,-3.764])
 	var packedArr : PackedFloat32Array = PackedFloat32Array([0,0,0,0,0,0,0,0,0,0,0,0])
 	#set new buffer
-	RenderingServer.multimesh_set_buffer(created_high_LOD_multimesh, packedArr);
+	RenderingServer.multimesh_set_buffer(created_multimesh_RID, packedArr);
 
-	var commandBuffer = RenderingServer.multimesh_get_command_buffer_rd_rid(created_high_LOD_multimesh);
-
-	return commandBuffer
+	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
 	
 func _execute_compute_test()->void:
 	compute_active = true
 	
 	#this would be where we pass player transform through or updated textures
-	var foundBuffer = RenderingServer.multimesh_get_buffer(created_high_LOD_multimesh);
-
-	print("process test: " , foundBuffer)	
-
+	
 	rd = RenderingServer.get_rendering_device()
 
-	var compute_list = rd.compute_list_begin()
+	var compute_list : int = rd.compute_list_begin()
 	
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
