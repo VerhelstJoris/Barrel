@@ -60,19 +60,23 @@ func _fill_region(region_id : Vector2i, region : Terrain3DRegion) -> void:
 	
 	var region_size_meters : float = region.region_size * terrain_node.vertex_spacing
 	var half_size : Vector2 = Vector2(region_size_meters * 0.5, region_size_meters * 0.5)
-	var pos : Vector2 = ((region_id) * region_size_meters) + half_size
-	region_parent_node.global_position = Vector3(pos.x, 0, pos.y)
+	var region_parent_pos : Vector2 = ((region_id) * region_size_meters) + half_size
+	region_parent_node.global_position = Vector3(region_parent_pos.x, 0, region_parent_pos.y)
 
 	region_parent_node.name = chunk_parent_node.name + "_Region_" + str(region_id.x) + "_" + str(region_id.y)
 	
-	_create_chunk_at(region_id,region_size_meters,region_parent_node)
+	var cells_needed : int = ceil(region_size_meters / chunk_size)
+	
+	for row_id in range(cells_needed):
+		for col_id in range(cells_needed):
+			pass
+			#var chunk_pos : Vector2 = ((region_id) * region_size_meters) + Vector2(row_id * chunk_size, col_id	* chunk_size)
+			#_create_chunk_at(chunk_pos,region_parent_node)
+		
 
-func _create_chunk_at(region_id : Vector2i, region_size : float, parent_node : Node3D) -> Node3D:
+func _create_chunk_at(pos : Vector2, parent_node : Node3D) -> Node3D:
 	var new_instance: Node3D = chunk_scene.instantiate()
 	
-	var half_size : Vector2 = Vector2(region_size * 0.5, region_size * 0.5)
-	var pos : Vector2 = ((region_id) * region_size) + half_size
-
 	parent_node.add_child(new_instance, true)
 	new_instance.owner = get_tree().edited_scene_root
 
