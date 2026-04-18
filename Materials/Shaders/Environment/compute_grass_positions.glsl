@@ -5,17 +5,23 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 // the heightmap texture, used to sample the height
-//layout(binding = 0, set = 0, rgba32f) uniform restrict readonly image2D HEIGHTMAP_TEXTURE;
-//layout(binding = 1, set = 0, float) uniform restrict readonly float VERTEX_SPACING;
+layout(binding = 0, set = 0, rgba32f) uniform restrict readonly image2D HEIGHTMAP_TEXTURE;
 
-//layout(std430, binding = 0) restrict buffer CommandBuffer { int data[]; } COMMAND_BUFFER;
-
-
-// output position array
-layout(set = 0, binding = 0, std430) restrict buffer Positions {
+// multimesh data buffer allowing us to directly edit the amount of instances from the compute shader
+layout(set = 0, binding = 1, std430) restrict buffer Transforms {
     float data[];
 }
-OutPositions;
+GRASS_TRANSFORMS;
+
+// multimesh command buffer allowing us to directly edit the amount of instances from the compute shader
+layout(std430,set = 0, binding = 2) restrict buffer CommandBuffer { int data[]; } COMMAND_BUFFER;
+
+layout(set = 0, binding = 3, std430) restrict buffer Parameters {
+    float TERRAIN_VERTEX_SPACING;
+    float TERRAIN_HEIGHT;
+
+    float TARGET_DENSITY;
+} PARAMETERS;
 
 //Color Terrain3DData::get_pixel(const MapType p_map_type, const Vector3 &p_global_position) const {
 //	if (p_map_type < 0 || p_map_type >= TYPE_MAX) {
@@ -67,22 +73,36 @@ OutPositions;
 
 // The code we want to execute in each invocation
 void main() 
-{
-   // point to start trying with
-	//var packedArr : PackedFloat32Array = PackedFloat32Array([0.027,0.0,1.0,2.331,0.0,1.0,0.0,0.0,-1.0,0.0,0.027,-3.764])
+{  
+    float Rows = sqrt(PARAMETERS.TARGET_DENSITY);    
 
-    //OUTPUTGRASSPOSITIONS.data[12] = float[12](0.027,0.0,1.0,2.331,0.0,1.0,0.0,0.0,-1.0,0.0,0.027,-3.764);
-   OutPositions.data[0]= 0.027;
-   OutPositions.data[1]= 0.0;
-   OutPositions.data[2]= 1.0;
-   OutPositions.data[3]= 2.231;
-   OutPositions.data[4]= 0.0;
-   OutPositions.data[5]= 1.0;
-   OutPositions.data[6]= 0.0;
-   OutPositions.data[7]= 0.0;
-   OutPositions.data[8]= -1.0;
-   OutPositions.data[9]= 0.0;
-   OutPositions.data[10]= 0.027;
-   OutPositions.data[11]= -3.764;
+    const float Offset = (1.0/Rows);
+    int current_blade = 0;
 
+    for(int row_ID = 0; row_ID < Rows; row_ID++)
+    {
+        float x = row_ID * Offset;
+        for(int col_ID = 0; col_ID < Rows; col_ID++)
+        {
+            float z = col_ID * Offset;
+
+            int id_offset = current_blade * 12;
+            GRASS_TRANSFORMS.data[0 + id_offset]= 1;
+            GRASS_TRANSFORMS.data[1 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[2 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[3 + id_offset]= x;
+            GRASS_TRANSFORMS.data[4 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[5 + id_offset]= 1.0;
+            GRASS_TRANSFORMS.data[6 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[7 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[8 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[9 + id_offset]= 0.0;
+            GRASS_TRANSFORMS.data[10 + id_offset]= 1.0;
+            GRASS_TRANSFORMS.data[11 + id_offset]= z;
+
+            current_blade++;
+        }
+    }
+
+    COMMAND_BUFFER.data[1] = current_blade;
 }
