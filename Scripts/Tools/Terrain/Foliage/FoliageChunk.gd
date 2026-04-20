@@ -13,7 +13,11 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var grass_fade_out_start := 10.0
 @export var grass_fade_out_end := 20.0
 
+@export var terrain_node : Terrain3D
 @export var height_map_tex : Texture2D
+
+@export var max_foliage_individual_random_offset : float = 0.2
+
 
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 
@@ -103,7 +107,10 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_command_buffer_uniform.add_id(created_multimesh_command_buffer_RID)
 
 	# parameter buffer
-	var params_arr_float : PackedByteArray = PackedFloat32Array([4.0, 100.0, 100.0]).to_byte_array()
+	var vertex_spacing : float = 4.0
+	if(terrain_node):
+		vertex_spacing = terrain_node.vertex_spacing
+	var params_arr_float : PackedByteArray = PackedFloat32Array([vertex_spacing, 100.0, 100.0, max_foliage_individual_random_offset]).to_byte_array()
 	var parameter_buffer := rd.storage_buffer_create(params_arr_float.size(), params_arr_float)
 
 	var parameter_uniform_block = RDUniform.new()

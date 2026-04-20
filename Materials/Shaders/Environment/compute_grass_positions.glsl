@@ -21,6 +21,7 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
     float TERRAIN_HEIGHT;
 
     float TARGET_DENSITY;
+    float MAX_BLADE_RANDOM_OFFSET;
 } PARAMETERS;
 
 //Color Terrain3DData::get_pixel(const MapType p_map_type, const Vector3 &p_global_position) const {
@@ -71,6 +72,47 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
 //	}
 //}
 
+float get_height(vec2 pos)
+{
+   return 0.0;
+}
+        
+float random2D(vec2 uv) {
+    return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+        
+mat3 rot_z(float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+
+    return mat3(
+    c, s, 0.0,
+    -s, c, 0.0,
+    0.0, 0.0, 1.0);
+}
+
+mat3 rot_y(float angle) 
+{
+    float s = sin(angle);
+    float c = cos(angle);
+
+    return mat3(
+    c, 0.0, -s,
+    0.0, 1.0, 0.0,
+    s, 0.0, c);
+}        
+        
+mat3 rot_x(float angle)
+{
+    float s = sin(angle);
+    float c = cos(angle);
+    
+    return mat3(
+    1.0, 0.0, 0.0,
+    0.0, c, s,
+    0.0, -s, c);
+}
+        
 // The code we want to execute in each invocation
 void main() 
 {  
@@ -85,20 +127,34 @@ void main()
         for(int col_ID = 0; col_ID < Rows; col_ID++)
         {
             float z = col_ID * Offset;
-
+            float final_x = fract(x + random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET); 
+            float final_z = fract(z + random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET); 
+                    
+            vec2 final_pos = vec2(final_x, final_z);
+            float scale =  1.0;
+            float random_rot = random2D(final_pos);
             int id_offset = current_blade * 12;
-            GRASS_TRANSFORMS.data[0 + id_offset]= 1;
-            GRASS_TRANSFORMS.data[1 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[2 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[3 + id_offset]= x;
-            GRASS_TRANSFORMS.data[4 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[5 + id_offset]= 1.0;
-            GRASS_TRANSFORMS.data[6 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[7 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[8 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[9 + id_offset]= 0.0;
-            GRASS_TRANSFORMS.data[10 + id_offset]= 1.0;
-            GRASS_TRANSFORMS.data[11 + id_offset]= z;
+                
+            highp mat3 rot_scale_matrix = mat3(scale) * rot_y(random_rot);
+                
+            // fill in the transforms    
+            GRASS_TRANSFORMS.data[0 + id_offset]= rot_scale_matrix[0][0];
+            GRASS_TRANSFORMS.data[1 + id_offset]= rot_scale_matrix[0][1];
+            GRASS_TRANSFORMS.data[2 + id_offset]= rot_scale_matrix[0][2];
+                
+            GRASS_TRANSFORMS.data[3 + id_offset]= final_x ;     // X-POS
+                
+            GRASS_TRANSFORMS.data[4 + id_offset]= rot_scale_matrix[1][0];
+            GRASS_TRANSFORMS.data[5 + id_offset]= rot_scale_matrix[1][1];
+            GRASS_TRANSFORMS.data[6 + id_offset]= rot_scale_matrix[1][2];
+                
+            GRASS_TRANSFORMS.data[7 + id_offset]= get_height(final_pos);   // Y-POS
+                
+            GRASS_TRANSFORMS.data[8 + id_offset]=  rot_scale_matrix[2][0];
+            GRASS_TRANSFORMS.data[9 + id_offset]=  rot_scale_matrix[2][1];
+            GRASS_TRANSFORMS.data[10 + id_offset]= rot_scale_matrix[2][2];
+                
+            GRASS_TRANSFORMS.data[11 + id_offset]= final_z;     // Z-POS
 
             current_blade++;
         }
