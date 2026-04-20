@@ -16,7 +16,9 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var terrain_node : Terrain3D
 @export var height_map_tex : Texture2D
 
+@export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
+@export var max_foliage_tilt_degrees : float = 15.0
 
 
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
@@ -110,7 +112,10 @@ func _setup_compute_pipeline()	-> void:
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
-	var params_arr_float : PackedByteArray = PackedFloat32Array([vertex_spacing, 100.0, 100.0, max_foliage_individual_random_offset]).to_byte_array()
+		
+	var params_arr_float : PackedByteArray = PackedFloat32Array(
+		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees)]
+		 ).to_byte_array()
 	var parameter_buffer := rd.storage_buffer_create(params_arr_float.size(), params_arr_float)
 
 	var parameter_uniform_block = RDUniform.new()

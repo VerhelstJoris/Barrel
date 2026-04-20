@@ -22,6 +22,7 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
 
     float TARGET_DENSITY;
     float MAX_BLADE_RANDOM_OFFSET;
+    float MAX_BLADE_TILT_RAD;    
 } PARAMETERS;
 
 //Color Terrain3DData::get_pixel(const MapType p_map_type, const Vector3 &p_global_position) const {
@@ -77,6 +78,11 @@ float get_height(vec2 pos)
    return 0.0;
 }
         
+float get_scale(vec2 pos)
+{
+   return 1.0;
+}
+        
 float random2D(vec2 uv) {
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123);
 }
@@ -115,28 +121,33 @@ mat3 rot_x(float angle)
         
 // The code we want to execute in each invocation
 void main() 
-{  
-    float Rows = sqrt(PARAMETERS.TARGET_DENSITY);    
+{
+    float Rows = PARAMETERS.TARGET_DENSITY * PARAMETERS.TERRAIN_VERTEX_SPACING;    
 
-    const float Offset = (1.0/Rows);
-    int current_blade = 0;
-
+    const float Offset = (1.0/PARAMETERS.TARGET_DENSITY);
+    int current_blade = 0, id_offset =0;
+            
+    float x,z, final_x, final_z, scale, random_rot_x, random_rot_y;
+    vec2 final_pos;
+    mat3 rot_scale_matrix;
+        
     for(int row_ID = 0; row_ID < Rows; row_ID++)
     {
-        float x = row_ID * Offset;
+        x = row_ID * Offset;
         for(int col_ID = 0; col_ID < Rows; col_ID++)
         {
-            float z = col_ID * Offset;
-            float final_x = fract(x + random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET); 
-            float final_z = fract(z + random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET); 
+            z = col_ID * Offset;
+            final_x = x + (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)); 
+            final_z = z + (fract( + random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)); 
                     
-            vec2 final_pos = vec2(final_x, final_z);
-            float scale =  1.0;
-            float random_rot = random2D(final_pos);
-            int id_offset = current_blade * 12;
+            final_pos = vec2(final_x, final_z);
+            scale = get_scale(final_pos);
+            random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * PARAMETERS.MAX_BLADE_TILT_RAD;
+            random_rot_y = random2D(final_pos) * 3.14159;
+            rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);
                 
-            highp mat3 rot_scale_matrix = mat3(scale) * rot_y(random_rot);
-                
+            id_offset = current_blade * 12;
+
             // fill in the transforms    
             GRASS_TRANSFORMS.data[0 + id_offset]= rot_scale_matrix[0][0];
             GRASS_TRANSFORMS.data[1 + id_offset]= rot_scale_matrix[0][1];
