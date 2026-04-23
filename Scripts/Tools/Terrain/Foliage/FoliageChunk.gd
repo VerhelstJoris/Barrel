@@ -16,6 +16,8 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var terrain_node : Terrain3D
 @export var height_map_tex : Texture2D
 
+@export var num_work_groups_xz : int = 4
+
 @export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
@@ -130,7 +132,6 @@ func _setup_compute_pipeline()	-> void:
 	var compute_list := rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
-	rd.compute_list_dispatch(compute_list, 1, 1, 1)
 	rd.compute_list_end()
 	
 	set_process(true)
@@ -158,7 +159,13 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 
 func _create_new_multimesh(_rd : RenderingDevice) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
-	RenderingServer.multimesh_allocate_data(created_multimesh_RID, 1000 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
+	#calculate an estimated instance count to pass through
+
+	var vertex_spacing : float = 4.0
+	if(terrain_node):
+		vertex_spacing = terrain_node.vertex_spacing
+	var estimated_count : int = num_work_groups_xz * num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing
+	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
 	
@@ -181,7 +188,6 @@ func _execute_compute_test()->void:
 	compute_active = true
 	
 	#this would be where we pass player transform through or updated textures
-	
 	rd = RenderingServer.get_rendering_device()
 
 	var compute_list : int = rd.compute_list_begin()
@@ -189,7 +195,8 @@ func _execute_compute_test()->void:
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
 	
-	rd.compute_list_dispatch(compute_list,1,1,1)
+	rd.compute_list_dispatch(compute_list,num_work_groups_xz,1,num_work_groups_xz)
 	rd.compute_list_end()
+
 
 	compute_active = false
