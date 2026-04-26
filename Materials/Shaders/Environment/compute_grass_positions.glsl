@@ -7,6 +7,12 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 // the heightmap texture, used to sample the height
 layout(binding = 0, set = 0, rgba32f) uniform restrict readonly image2D HEIGHTMAP_TEXTURE;
 
+// the terrain heights at specific pixels of the terrain height texture, to be interpolated for individual positions
+layout(set = 0, binding = 0, std430) writeonly buffer HeightPositions {
+float data[];
+}
+HEIGHT_DATA;        
+        
 // multimesh data buffer allowing us to directly edit the amount of instances from the compute shader
 layout(set = 0, binding = 1, std430) writeonly buffer Transforms {
     float data[];

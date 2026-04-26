@@ -21,6 +21,10 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
 
+@export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action = _generate_height_data
+@export_group("runtime data - DO NOT EDIT MANUALY")
+@export var height_array : PackedFloat32Array
+
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 
 var current_lod : EFoliageLOD = EFoliageLOD.NONE
@@ -43,12 +47,19 @@ var compute_active : bool = false
 
 var initialized : bool = false
 
+func _generate_height_data() -> void:
+	height_array.clear()
+	height_array.resize(high_lod_num_work_groups_xz*high_lod_num_work_groups_xz)
+	for row in high_lod_num_work_groups_xz:
+		for col in high_lod_num_work_groups_xz:
+			height_array.append(1.0)
+		
+
 func _preview_in_editor() -> void:
 	if(initialized):
 		RenderingServer.call_on_render_thread(_cleanup)
 	else:
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
-
 	
 func _ready() -> void:
 	if(!Engine.is_editor_hint()):
