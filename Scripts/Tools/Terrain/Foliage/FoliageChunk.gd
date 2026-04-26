@@ -44,13 +44,15 @@ var compute_active : bool = false
 var initialized : bool = false
 
 func _preview_in_editor() -> void:
-	_cleanup()
-	RenderingServer.call_on_render_thread(_setup_compute_pipeline)
+	if(initialized):
+		RenderingServer.call_on_render_thread(_cleanup)
+	else:
+		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 
 	
 func _ready() -> void:
 	if(!Engine.is_editor_hint()):
-		_cleanup()
+		RenderingServer.call_on_render_thread(_cleanup)
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 		
 func _process(_delta: float) -> void:
@@ -139,18 +141,17 @@ func _exit_tree() -> void:
 	_cleanup()
 	
 func _cleanup() -> void:
-	_try_free_rid(rd,shader_RID)
-	_try_free_rid(rd,uniform_set_RID)
+	if(created_multimesh_RID.is_valid()):
+		RenderingServer.multimesh_allocate_data(created_multimesh_RID, 0 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
+
 	_try_free_rid(rd,pipeline_RID)
-	_try_free_rid(rd,height_buffer_RID)
-	_try_free_rid(rd,created_multimesh_RID)
-	_try_free_rid(rd,created_multimesh_buffer_RID)
-	_try_free_rid(rd,created_multimesh_command_buffer_RID)
-	if(rd != null):
-		rd.free()
-		
+	_try_free_rid(rd,uniform_set_RID)
+	_try_free_rid(rd,shader_RID)
+	
 	initialized = false
 	compute_active = false
+	
+	set_process(false)
 
 func _try_free_rid(_rd : RenderingDevice, rid : RID) -> void:
 	if(_rd == null):
@@ -175,11 +176,11 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 
 func _create_new_multimesh(_rd : RenderingDevice) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
-	#calculate an estimated instance count to pass through
 
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
+	#calculate an estimated instance count to pass through
 	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
@@ -201,6 +202,9 @@ func _setup_terrain_uniform(_rd : RenderingDevice) -> void:
 	pass
 
 func _execute_compute_test()->void:
+	if(!pipeline_RID.is_valid() || !uniform_set_RID.is_valid()):
+		return
+	
 	compute_active = true
 	
 	#this would be where we pass player transform through or updated textures
