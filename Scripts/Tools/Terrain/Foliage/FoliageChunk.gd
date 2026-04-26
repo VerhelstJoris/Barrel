@@ -3,25 +3,23 @@ class_name FoliageChunk extends Node3D
 
 enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
+@export_tool_button("preview in Editor", "Callable") var preview_action = _preview_in_editor
+
+@export_group("Setup Data")
+@export var positions_compute_shader : RDShaderFile
 @export var high_LOD_mesh : Mesh
 @export var low_LOD_mesh : Mesh
 @export var grass_material :Material
 
-@export var lod_switch_distance_squared := 100.0
-@export var impostor_fade_in_start := 5.0
-@export var impostor_fade_in_end := 10.0
-@export var grass_fade_out_start := 10.0
-@export var grass_fade_out_end := 20.0
-
 @export var terrain_node : Terrain3D
 @export var height_map_tex : Texture2D
 
-@export var num_work_groups_xz : int = 4
+@export_group("Customizable Parameters")
+@export var high_lod_num_work_groups_xz : int = 4
 
 @export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
-
 
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 
@@ -45,11 +43,16 @@ var compute_active : bool = false
 
 var initialized : bool = false
 
+func _preview_in_editor() -> void:
+	_cleanup()
+	RenderingServer.call_on_render_thread(_setup_compute_pipeline)
+
+	
 func _ready() -> void:
 	if(!Engine.is_editor_hint()):
-		_setup_compute_pipeline()
-	
-
+		_cleanup()
+		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
+		
 func _process(_delta: float) -> void:
 	#RenderingServer.call_on_render_thread(_render_process.bind(_delta, rd))
 	var _camera_pos : Vector3
@@ -62,10 +65,6 @@ func _process(_delta: float) -> void:
 	if(!compute_active && initialized):
 		RenderingServer.call_on_render_thread(_execute_compute_test)
 		
-		
-func _render_process(_delta : float, _rd : RenderingDevice) -> void:
-	return
-	
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
 		return
@@ -82,8 +81,7 @@ func _setup_compute_pipeline()	-> void:
 		return
 
 	#load shader
-	var shader_file : Resource = load("res://Materials/Shaders/Environment/compute_grass_positions.glsl")
-	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
+	var shader_spirv: RDShaderSPIRV = positions_compute_shader.get_spirv()
 	shader_RID = rd.shader_create_from_spirv(shader_spirv)
 	
 	if(!shader_RID.is_valid()):
@@ -136,14 +134,32 @@ func _setup_compute_pipeline()	-> void:
 	
 	set_process(true)
 	initialized = true
-
-
+	
 func _exit_tree() -> void:
-	rd.free_rid(shader_RID)
-	rd.free_rid(uniform_set_RID)
-	rd.free_rid(pipeline_RID)
-	rd.free_rid(height_buffer_RID)
-	rd.free()
+	_cleanup()
+	
+func _cleanup() -> void:
+	_try_free_rid(rd,shader_RID)
+	_try_free_rid(rd,uniform_set_RID)
+	_try_free_rid(rd,pipeline_RID)
+	_try_free_rid(rd,height_buffer_RID)
+	_try_free_rid(rd,created_multimesh_RID)
+	_try_free_rid(rd,created_multimesh_buffer_RID)
+	_try_free_rid(rd,created_multimesh_command_buffer_RID)
+	if(rd != null):
+		rd.free()
+		
+	initialized = false
+	compute_active = false
+
+func _try_free_rid(_rd : RenderingDevice, rid : RID) -> void:
+	if(_rd == null):
+		return
+		
+	if(!rid.is_valid()):
+		return
+		
+	_rd.free_rid(rid)
 	
 func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	var image := tex.get_image()
@@ -164,7 +180,7 @@ func _create_new_multimesh(_rd : RenderingDevice) -> void:
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
-	var estimated_count : int = num_work_groups_xz * num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing
+	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
@@ -195,7 +211,7 @@ func _execute_compute_test()->void:
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
 	
-	rd.compute_list_dispatch(compute_list,num_work_groups_xz,1,num_work_groups_xz)
+	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
 	rd.compute_list_end()
 
 
