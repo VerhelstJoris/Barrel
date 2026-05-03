@@ -3,10 +3,7 @@
 #extension GL_NV_compute_shader_derivatives : enable
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-
-// the heightmap texture, used to sample the height
-layout(binding = 0, set = 0, rgba32f) uniform restrict readonly image2D HEIGHTMAP_TEXTURE;
-
+        
 // the terrain heights at specific pixels of the terrain height texture, to be interpolated for individual positions
 layout(set = 0, binding = 0, std430) writeonly buffer HeightPositions {
 float data[];
@@ -33,7 +30,8 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
         
 float get_height(vec2 pos)
 {
-   return 0.0;
+    uint current_index = gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z;
+    return HEIGHT_DATA.data[current_index];
 }
         
 float get_scale(vec2 pos)

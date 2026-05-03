@@ -4,6 +4,7 @@ class_name FoliageChunk extends Node3D
 enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
 @export_tool_button("preview in Editor", "Callable") var preview_action = _preview_in_editor
+@export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action = _generate_height_data
 
 @export_group("Setup Data")
 @export var positions_compute_shader : RDShaderFile
@@ -21,7 +22,6 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
 
-@export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action = _generate_height_data
 @export_group("runtime data - DO NOT EDIT MANUALY")
 @export var height_array : PackedFloat32Array
 
@@ -41,7 +41,6 @@ var created_multimesh_command_buffer_RID : RID
 var shader_RID : RID
 var uniform_set_RID : RID
 var pipeline_RID : RID
-var height_buffer_RID : RID
 
 var compute_active : bool = false
 
@@ -49,11 +48,12 @@ var initialized : bool = false
 
 func _generate_height_data() -> void:
 	height_array.clear()
-	height_array.resize(high_lod_num_work_groups_xz*high_lod_num_work_groups_xz)
-	for row in high_lod_num_work_groups_xz:
-		for col in high_lod_num_work_groups_xz:
-			height_array.append(1.0)
-		
+	var elem_per_dim : int = high_lod_num_work_groups_xz +1
+	height_array.resize( elem_per_dim * elem_per_dim)
+	for row in elem_per_dim:
+		for col in elem_per_dim:
+			var current_index : int = row * elem_per_dim + col
+			height_array[current_index]= sin(row) + cos(col) + 1.0
 
 func _preview_in_editor() -> void:
 	if(initialized):
@@ -100,11 +100,12 @@ func _setup_compute_pipeline()	-> void:
 	if(!shader_RID.is_valid()):
 		return
 	
-	#texture binding
-	var tex_uniform = RDUniform.new()
-	tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	tex_uniform.binding = 0
-	tex_uniform.add_id(_init_existing_texture_data(rd, height_map_tex))
+	#height data binding
+	var height_data_uniform = RDUniform.new()
+	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	height_data_uniform.binding = 0
+	var input_bytes := height_array.to_byte_array()
+	height_data_uniform.add_id(rd.storage_buffer_create(input_bytes.size(), input_bytes))
 	
 	#storage buffer binding
 	var multimesh_transform_buffer_uniform := RDUniform.new()
@@ -136,7 +137,7 @@ func _setup_compute_pipeline()	-> void:
 	parameter_uniform_block.binding = 3
 	parameter_uniform_block.add_id(parameter_buffer)
 	
-	uniform_set_RID = rd.uniform_set_create([tex_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block], shader_RID, 0)
+	uniform_set_RID = rd.uniform_set_create([height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block], shader_RID, 0)
 	
 	# Create a compute pipeline
 	pipeline_RID = rd.compute_pipeline_create(shader_RID)
