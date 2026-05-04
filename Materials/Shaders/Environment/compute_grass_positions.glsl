@@ -5,7 +5,7 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
         
 // the terrain heights at specific pixels of the terrain height texture, to be interpolated for individual positions
-layout(set = 0, binding = 0, std430) writeonly buffer HeightPositions {
+layout(set = 0, binding = 0, std430) readonly buffer HeightPositions {
 float data[];
 }
 HEIGHT_DATA;        
@@ -27,11 +27,25 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
     float MAX_BLADE_RANDOM_OFFSET;
     float MAX_BLADE_TILT_RAD;    
 } PARAMETERS;
-        
-float get_height(vec2 pos)
+
+float biLerp(float a, float b, float c, float d, float s, float t)
 {
-    uint current_index = gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z;
-    return HEIGHT_DATA.data[current_index];
+    float x = mix(a, b, t);
+    float y = mix(c, d, t);
+    return mix(x, y, s);
+}        
+        
+float get_height_at_chunk_pos(vec2 chunk_pos, float A, float B, float C, float D)
+{
+    // Chunk pos is a value between [0 0] and [1 1]   
+    // A = [0 0]
+    // B = [0 1]
+    // C = [1 0]
+    // D = [1 1]
+            
+    float XLerp1 = mix(A,B,chunk_pos.x);
+    float XLerp2 = mix(C,D,chunk_pos.x);    
+    return mix(XLerp1,XLerp2,chunk_pos.y);
 }
         
 float get_scale(vec2 pos)
@@ -85,12 +99,18 @@ void main()
     int current_blade =0;
     int id_offset =0;
             
-    float x_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x;
-    float z_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z;
+    float x_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - ( PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5);
+    float z_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - ( PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
         
-    float x,z, final_x, final_z, scale, random_rot_x, random_rot_y;
+    float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
     mat3 rot_scale_matrix;
+            
+    float height_A, height_B, height_C, height_D;
+    height_A = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
+    height_B = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
+    height_C = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
+    height_D = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
 
     const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.y * gl_NumWorkGroups.z);
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
@@ -101,8 +121,10 @@ void main()
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
             z = col_ID * Offset;
-            final_x = x + (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)) + x_group_offset;
-            final_z = z + (fract(random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)) + z_group_offset;
+            group_x = mod(x + (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)), PARAMETERS.TERRAIN_VERTEX_SPACING);
+            final_x = group_x + x_group_offset;
+            group_z = mod(z + (fract(random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)),PARAMETERS.TERRAIN_VERTEX_SPACING);
+            final_z = group_z + z_group_offset;
     
             final_pos = vec2(final_x, final_z);
             scale = get_scale(final_pos);
@@ -123,7 +145,7 @@ void main()
             GRASS_TRANSFORMS.data[5 + id_offset]= rot_scale_matrix[1][1];
             GRASS_TRANSFORMS.data[6 + id_offset]= rot_scale_matrix[1][2];
     
-            GRASS_TRANSFORMS.data[7 + id_offset]= get_height(final_pos);   // Y-POS
+            GRASS_TRANSFORMS.data[7 + id_offset]= get_height_at_chunk_pos(vec2(group_x, group_z) / PARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);   // Y-POS
     
             GRASS_TRANSFORMS.data[8 + id_offset]=  rot_scale_matrix[2][0];
             GRASS_TRANSFORMS.data[9 + id_offset]=  rot_scale_matrix[2][1];

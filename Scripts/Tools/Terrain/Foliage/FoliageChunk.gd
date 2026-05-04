@@ -7,13 +7,13 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action = _generate_height_data
 
 @export_group("Setup Data")
+@export var chunk_transform_centered : bool = false
 @export var positions_compute_shader : RDShaderFile
 @export var high_LOD_mesh : Mesh
 @export var low_LOD_mesh : Mesh
 @export var grass_material :Material
 
 @export var terrain_node : Terrain3D
-@export var height_map_tex : Texture2D
 
 @export_group("Customizable Parameters")
 @export var high_lod_num_work_groups_xz : int = 4
@@ -22,7 +22,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
 
-@export_group("runtime data - DO NOT EDIT MANUALY")
+@export_group("runtime data - DO NOT EDIT MANUALLY")
 @export var height_array : PackedFloat32Array
 
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
@@ -50,10 +50,27 @@ func _generate_height_data() -> void:
 	height_array.clear()
 	var elem_per_dim : int = high_lod_num_work_groups_xz +1
 	height_array.resize( elem_per_dim * elem_per_dim)
-	for row in elem_per_dim:
-		for col in elem_per_dim:
-			var current_index : int = row * elem_per_dim + col
-			height_array[current_index]= sin(row) + cos(col) + 1.0
+	
+	if(terrain_node):
+		print("vertex spacing : ", terrain_node.vertex_spacing)
+		for row in elem_per_dim:
+			for col in elem_per_dim:
+				var current_index : int = row * elem_per_dim + col
+				var chunk_pixel_coord : Vector2i
+				if(chunk_transform_centered):
+					chunk_pixel_coord = Vector2i( 
+						int((global_position.x - (terrain_node.vertex_spacing * high_lod_num_work_groups_xz * 0.5) )/ terrain_node.vertex_spacing) ,
+						int((global_position.z - (terrain_node.vertex_spacing * high_lod_num_work_groups_xz * 0.5) )/ terrain_node.vertex_spacing) )
+				else:
+					chunk_pixel_coord = Vector2i(int(global_position.x / terrain_node.vertex_spacing) ,int(global_position.z / terrain_node.vertex_spacing) )
+				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * terrain_node.vertex_spacing, 0, (chunk_pixel_coord.y + col) * terrain_node.vertex_spacing)
+				height_array[current_index] = terrain_node.data.get_height(corresponding_world_pos)
+				print("height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, " : " , height_array[current_index])
+	else:
+		for row in elem_per_dim:
+			for col in elem_per_dim:
+				var current_index : int = row * elem_per_dim + col
+				height_array[current_index]= current_index
 
 func _preview_in_editor() -> void:
 	if(initialized):
