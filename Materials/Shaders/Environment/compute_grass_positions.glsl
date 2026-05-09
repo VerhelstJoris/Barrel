@@ -19,7 +19,7 @@ GRASS_TRANSFORMS;
 // multimesh command buffer allowing us to directly edit the amount of instances from the compute shader
 layout(std430,set = 0, binding = 2) restrict writeonly buffer CommandBuffer { int data[]; } COMMAND_BUFFER;
 
-layout(set = 0, binding = 3, std430) restrict buffer Parameters {
+layout(set = 0, binding = 3, std430) restrict readonly buffer Parameters {
     float TERRAIN_VERTEX_SPACING;
     float TERRAIN_HEIGHT;
 
@@ -33,6 +33,17 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
 
 
 layout(set = 0,binding = 4, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
+        
+layout(set = 0, binding = 5, std430) restrict readonly buffer PlayerData
+{
+   float X_POS;     
+   float Y_POS;     
+   float Z_POS;
+        
+   float X_DEG;
+   float Y_DEG;
+   float Z_DEG;
+} PLAYERDATA;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {

@@ -46,6 +46,11 @@ var shader_RID : RID
 var uniform_set_RID : RID
 var pipeline_RID : RID
 
+#player transform data
+var player_transform_data_arr : PackedFloat32Array
+var player_transform_data_buffer_RID : RID
+var player_transform_to_pass : Transform3D
+
 var compute_active : bool = false
 
 var initialized : bool = false
@@ -94,15 +99,19 @@ func _ready() -> void:
 		
 func _process(_delta: float) -> void:
 	#RenderingServer.call_on_render_thread(_render_process.bind(_delta, rd))
-	var _camera_pos : Vector3
+	var _cam_transform : Transform3D
 
 	if Engine.is_editor_hint():
-		_camera_pos = EditorInterface.get_editor_viewport_3d().get_camera_3d().global_position
+		_cam_transform = EditorInterface.get_editor_viewport_3d().get_camera_3d().global_transform
 	else:
-		_camera_pos = get_viewport().get_camera_3d().global_position
-
+		_cam_transform = get_viewport().get_camera_3d().global_transform
+	
+	if(player_transform_to_pass.is_equal_approx(_cam_transform)):
+		return
+		
 	if(!compute_active && initialized):
-		RenderingServer.call_on_render_thread(_execute_compute_test)
+		player_transform_to_pass = _cam_transform
+		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
@@ -148,7 +157,7 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_command_buffer_uniform.binding = 2
 	multimesh_command_buffer_uniform.add_id(created_multimesh_command_buffer_RID)
 
-	# parameter buffer
+	# parameter binding
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
@@ -169,8 +178,20 @@ func _setup_compute_pipeline()	-> void:
 	mask_tex_uniform.binding = 4
 	mask_tex_uniform.add_id(_init_existing_texture_data(rd, chunk_mask))
 
+	#player data binding
+	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
+	player_transform_data_buffer_RID = rd.storage_buffer_create(player_data_arr.size(), player_data_arr)
+
+	var player_data_uniform = RDUniform.new()
+	player_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	player_data_uniform.binding = 5
+	player_data_uniform.add_id(player_transform_data_buffer_RID)
+
 	#add all uniforms bindings into the set
-	uniform_set_RID = rd.uniform_set_create([height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block, mask_tex_uniform], shader_RID, 0)
+	uniform_set_RID = rd.uniform_set_create(
+			[height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block, mask_tex_uniform, player_data_uniform]
+			, shader_RID, 0)
 	
 	# Create a compute pipeline
 	pipeline_RID = rd.compute_pipeline_create(shader_RID)
@@ -246,7 +267,7 @@ func _create_new_multimesh(_rd : RenderingDevice) -> void:
 func _setup_terrain_uniform(_rd : RenderingDevice) -> void:
 	pass
 
-func _execute_compute_test()->void:
+func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	if(!pipeline_RID.is_valid() || !uniform_set_RID.is_valid()):
 		return
 	
@@ -255,8 +276,23 @@ func _execute_compute_test()->void:
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 
-	var compute_list : int = rd.compute_list_begin()
 	
+	if(player_transform_data_buffer_RID.is_valid()):
+		player_transform_data_arr[0] = _player_cam_transform_world.origin.x
+		player_transform_data_arr[1] = _player_cam_transform_world.origin.y
+		player_transform_data_arr[2] = _player_cam_transform_world.origin.z
+
+		var cam_rot : Vector3 = _player_cam_transform_world.basis.get_euler()
+		player_transform_data_arr[3] = cam_rot.x
+		player_transform_data_arr[4] = cam_rot.y
+		player_transform_data_arr[5] = cam_rot.z
+
+
+		var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
+		rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
+	
+	var compute_list : int = rd.compute_list_begin()
+
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
 	
