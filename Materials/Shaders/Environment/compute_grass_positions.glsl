@@ -25,8 +25,14 @@ layout(set = 0, binding = 3, std430) restrict buffer Parameters {
 
     float TARGET_DENSITY;
     float MAX_BLADE_RANDOM_OFFSET;
-    float MAX_BLADE_TILT_RAD;    
+    float MAX_BLADE_TILT_RAD;
+
+    float MIN_BLADE_SCALE;
+
 } PARAMETERS;
+
+
+layout(set = 0,binding = 4, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
@@ -48,9 +54,11 @@ float get_height_at_chunk_pos(vec2 chunk_pos, float A, float B, float C, float D
     return mix(XLerp1,XLerp2,chunk_pos.y);
 }
         
-float get_scale(vec2 pos)
+float get_scale(vec2 chunk_pos, ivec2 image_size, float max_size)
 {
-   return 1.0;
+    vec2 normalized_final_pos = chunk_pos / max_size;
+    ivec2 image_pos = ivec2(normalized_final_pos * image_size);
+    return imageLoad(FOLIAGE_MASK, image_pos).r;    
 }
         
 float random2D(vec2 uv) {
@@ -98,9 +106,11 @@ void main()
         
     int current_blade =0;
     int id_offset =0;
-            
-    float x_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - ( PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5);
-    float z_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - ( PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
+        
+    vec2 half_offset = vec2(PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5, PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
+    float x_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - half_offset.x;
+    float z_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - half_offset.y;
+        
         
     float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
@@ -112,6 +122,10 @@ void main()
     height_C = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
     height_D = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
 
+    ivec2 mask_size = imageSize(FOLIAGE_MASK);
+    float max_length = gl_NumWorkGroups.x * PARAMETERS.TERRAIN_VERTEX_SPACING;    
+    float x_offset_rand, z_offset_rand;    
+        
     const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.y * gl_NumWorkGroups.z);
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
             
@@ -121,13 +135,21 @@ void main()
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
             z = col_ID * Offset;
-            group_x = mod(x + (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)), PARAMETERS.TERRAIN_VERTEX_SPACING);
+            x_offset_rand = (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET));   
+            group_x = mod(x + x_offset_rand, PARAMETERS.TERRAIN_VERTEX_SPACING);
             final_x = group_x + x_group_offset;
-            group_z = mod(z + (fract(random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET)),PARAMETERS.TERRAIN_VERTEX_SPACING);
+                    
+            z_offset_rand = (fract(random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET));
+            group_z = mod(z + z_offset_rand,PARAMETERS.TERRAIN_VERTEX_SPACING);
             final_z = group_z + z_group_offset;
     
             final_pos = vec2(final_x, final_z);
-            scale = get_scale(final_pos);
+            scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, max_length);
+                
+            if(scale < PARAMETERS.MIN_BLADE_SCALE)
+            {
+                continue;
+            }
             random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * PARAMETERS.MAX_BLADE_TILT_RAD;
             random_rot_y = random2D(final_pos) * 3.14159;
             rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);

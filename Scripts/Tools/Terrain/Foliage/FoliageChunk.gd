@@ -11,6 +11,8 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var positions_compute_shader : RDShaderFile
 @export var high_LOD_mesh : Mesh
 @export var low_LOD_mesh : Mesh
+
+@export var chunk_mask : Texture2D
 @export var grass_material :Material
 
 @export var terrain_node : Terrain3D
@@ -21,6 +23,8 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
+
+@export var min_grass_blade_scale : float = 0.2
 
 @export_group("runtime data - DO NOT EDIT MANUALLY")
 @export var height_array : PackedFloat32Array
@@ -64,8 +68,13 @@ func _generate_height_data() -> void:
 				else:
 					chunk_pixel_coord = Vector2i(int(global_position.x / terrain_node.vertex_spacing) ,int(global_position.z / terrain_node.vertex_spacing) )
 				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * terrain_node.vertex_spacing, 0, (chunk_pixel_coord.y + col) * terrain_node.vertex_spacing)
-				height_array[current_index] = terrain_node.data.get_height(corresponding_world_pos)
-				print("height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, " : " , height_array[current_index])
+				var found_height : float = terrain_node.data.get_height(corresponding_world_pos)
+				if(found_height == NAN):
+					push_error("NO height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, ", Defaulting to 0!")
+					height_array[current_index] = 0
+					continue
+				height_array[current_index] = found_height
+				print("height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, " : " , found_height)
 	else:
 		for row in elem_per_dim:
 			for col in elem_per_dim:
@@ -145,7 +154,7 @@ func _setup_compute_pipeline()	-> void:
 		vertex_spacing = terrain_node.vertex_spacing
 		
 	var params_arr_float : PackedByteArray = PackedFloat32Array(
-		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees)]
+		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale]
 		 ).to_byte_array()
 	var parameter_buffer := rd.storage_buffer_create(params_arr_float.size(), params_arr_float)
 
@@ -154,7 +163,14 @@ func _setup_compute_pipeline()	-> void:
 	parameter_uniform_block.binding = 3
 	parameter_uniform_block.add_id(parameter_buffer)
 	
-	uniform_set_RID = rd.uniform_set_create([height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block], shader_RID, 0)
+	#mask binding
+	var mask_tex_uniform = RDUniform.new()
+	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	mask_tex_uniform.binding = 4
+	mask_tex_uniform.add_id(_init_existing_texture_data(rd, chunk_mask))
+
+	#add all uniforms bindings into the set
+	uniform_set_RID = rd.uniform_set_create([height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block, mask_tex_uniform], shader_RID, 0)
 	
 	# Create a compute pipeline
 	pipeline_RID = rd.compute_pipeline_create(shader_RID)
@@ -195,13 +211,13 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	var image := tex.get_image()
 	image.convert(Image.FORMAT_RGBAF)
 	
-	var heightmap_format := RDTextureFormat.new()
-	heightmap_format.width = image.get_width()
-	heightmap_format.height = image.get_height()
-	heightmap_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT + RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT + RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
-	heightmap_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
+	var tex_format := RDTextureFormat.new()
+	tex_format.width = image.get_width()
+	tex_format.height = image.get_height()
+	tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT + RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT + RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
+	tex_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
 	
-	return _rd.texture_create(heightmap_format, RDTextureView.new(), [image.get_data()])
+	return _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
 
 func _create_new_multimesh(_rd : RenderingDevice) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
