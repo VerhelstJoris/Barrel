@@ -40,9 +40,9 @@ layout(set = 0, binding = 5, std430) restrict readonly buffer PlayerData
    float Y_POS;     
    float Z_POS;
         
-   float X_DEG;
-   float Y_DEG;
-   float Z_DEG;
+   float X_ROT;
+   float Y_ROT;
+   float Z_ROT;
 } PLAYERDATA;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
@@ -107,6 +107,34 @@ mat3 rot_x(float angle)
     0.0, c, s,
     0.0, -s, c);
 }
+
+float closest_if_between(float val, float low, float high)
+{
+    if (val > low && val < high)
+    {
+        return val < ((high - low) / 2.0 + low) ? low : high;
+    }
+        
+    return val;
+}
+        
+float get_rot_biased_towards_player(vec2 blade_pos)
+{
+   float rand_angle = random2D(blade_pos) * 3.14159;    // RANGE [-PI, PI]
+
+   vec2 target_dir = vec2(PLAYERDATA.X_POS - blade_pos.x, PLAYERDATA.Z_POS - blade_pos.y);
+        
+   float angle_towards_player = atan(target_dir.y, target_dir.x);   // range [-PI, PI]
+   float angle_away_from_player = angle_towards_player + 3.14159;  // range [0, 2 * PI]   
+        
+   //if our random angle is similar to the angle towards the player, angle it away a bit     
+   const float offset = 0.5;
+   rand_angle = closest_if_between(rand_angle,angle_towards_player - offset, angle_towards_player + offset);
+   rand_angle = closest_if_between(rand_angle,angle_away_from_player - offset, angle_away_from_player + offset);
+        
+   return rand_angle;
+}
+        
         
 // The code we want to execute in each invocation
 void main() 
@@ -162,7 +190,7 @@ void main()
                 continue;
             }
             random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * PARAMETERS.MAX_BLADE_TILT_RAD;
-            random_rot_y = random2D(final_pos) * 3.14159;
+            random_rot_y = get_rot_biased_towards_player(final_pos);
             rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);
     
             id_offset = int( group_offset + (current_blade * 12) );

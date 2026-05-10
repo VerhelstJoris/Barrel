@@ -130,6 +130,9 @@ func _setup_compute_pipeline()	-> void:
 
 	#load shader
 	var shader_spirv: RDShaderSPIRV = positions_compute_shader.get_spirv()
+	if(!shader_spirv):
+		push_error("FAILED TO LOAD SHADER: ", positions_compute_shader.to_string())
+		return
 	shader_RID = rd.shader_create_from_spirv(shader_spirv)
 	
 	if(!shader_RID.is_valid()):
@@ -278,9 +281,9 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 
 	
 	if(player_transform_data_buffer_RID.is_valid()):
-		player_transform_data_arr[0] = _player_cam_transform_world.origin.x
-		player_transform_data_arr[1] = _player_cam_transform_world.origin.y
-		player_transform_data_arr[2] = _player_cam_transform_world.origin.z
+		player_transform_data_arr[0] = _player_cam_transform_world.origin.x - self.get_global_position().x
+		player_transform_data_arr[1] = _player_cam_transform_world.origin.y - self.get_global_position().y
+		player_transform_data_arr[2] = _player_cam_transform_world.origin.z - self.get_global_position().z
 
 		var cam_rot : Vector3 = _player_cam_transform_world.basis.get_euler()
 		player_transform_data_arr[3] = cam_rot.x
