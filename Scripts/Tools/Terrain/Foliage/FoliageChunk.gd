@@ -9,6 +9,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export_group("Setup Data")
 @export var chunk_transform_centered : bool = false
 @export var positions_compute_shader : RDShaderFile
+@export var transfer_compute_shader : RDShaderFile
 @export var high_LOD_mesh : Mesh
 @export var low_LOD_mesh : Mesh
 
@@ -42,9 +43,15 @@ var created_multimesh_RID : RID
 var created_multimesh_buffer_RID : RID
 var created_multimesh_command_buffer_RID : RID
 
-var shader_RID : RID
-var uniform_set_RID : RID
-var pipeline_RID : RID
+var compute_pos_shader_RID : RID
+var transfer_shader_RID : RID
+
+var uniform_set_primary_RID : RID
+var uniform_set_secondary_RID : RID
+var pipeline_primary_RID : RID
+var pipeline_secondary_RID : RID
+
+var secondary_transform_buffer_RID : RID
 
 #player transform data
 var player_transform_data_arr : PackedFloat32Array
@@ -128,16 +135,17 @@ func _setup_compute_pipeline()	-> void:
 	if(!instance_RID.is_valid()):
 		return
 
-	#load shader
-	var shader_spirv: RDShaderSPIRV = positions_compute_shader.get_spirv()
-	if(!shader_spirv):
+	#load shaders
+	compute_pos_shader_RID = _load_shader_from_file(positions_compute_shader)
+	if(!compute_pos_shader_RID.is_valid()):
 		push_error("FAILED TO LOAD SHADER: ", positions_compute_shader.to_string())
 		return
-	shader_RID = rd.shader_create_from_spirv(shader_spirv)
 	
-	if(!shader_RID.is_valid()):
+	transfer_shader_RID = _load_shader_from_file(transfer_compute_shader)
+	if(!transfer_shader_RID.is_valid()):
+		push_error("FAILED TO LOAD SHADER: ", transfer_compute_shader.to_string())
 		return
-	
+		
 	#height data binding
 	var height_data_uniform = RDUniform.new()
 	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
@@ -150,7 +158,11 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	multimesh_transform_buffer_uniform.binding = 1
 
-	_create_new_multimesh(rd)
+	var vertex_spacing : float = 4.0
+	if(terrain_node):
+		vertex_spacing = terrain_node.vertex_spacing
+	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
+	_create_new_multimesh(rd,estimated_count, vertex_spacing)
 	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
 	multimesh_transform_buffer_uniform.add_id(buffer_rid)
 
@@ -161,10 +173,6 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_command_buffer_uniform.add_id(created_multimesh_command_buffer_RID)
 
 	# parameter binding
-	var vertex_spacing : float = 4.0
-	if(terrain_node):
-		vertex_spacing = terrain_node.vertex_spacing
-		
 	var params_arr_float : PackedByteArray = PackedFloat32Array(
 		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale]
 		 ).to_byte_array()
@@ -192,16 +200,25 @@ func _setup_compute_pipeline()	-> void:
 	player_data_uniform.add_id(player_transform_data_buffer_RID)
 
 	#add all uniforms bindings into the set
-	uniform_set_RID = rd.uniform_set_create(
+	uniform_set_primary_RID = rd.uniform_set_create(
 			[height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block, mask_tex_uniform, player_data_uniform]
-			, shader_RID, 0)
-	
+			, compute_pos_shader_RID, 0)
+
+
+	var transform_array_uniform = RDUniform.new()
+	transform_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	transform_array_uniform.binding = 0
+	secondary_transform_buffer_RID = rd.storage_buffer_create(estimated_count,PackedByteArray())
+	transform_array_uniform.add_id(secondary_transform_buffer_RID)
+
+	uniform_set_secondary_RID = rd.uniform_set_create(
+		[transform_array_uniform, multimesh_transform_buffer_uniform ,multimesh_command_buffer_uniform]
+		, transfer_shader_RID, 0)
+
 	# Create a compute pipeline
-	pipeline_RID = rd.compute_pipeline_create(shader_RID)
-	var compute_list := rd.compute_list_begin()
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
-	rd.compute_list_end()
+	# don't actually run them or anything yet
+	pipeline_primary_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
+	pipeline_secondary_RID = rd.compute_pipeline_create(transfer_shader_RID)
 	
 	set_process(true)
 	initialized = true
@@ -213,9 +230,10 @@ func _cleanup() -> void:
 	if(created_multimesh_RID.is_valid()):
 		RenderingServer.multimesh_allocate_data(created_multimesh_RID, 0 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 
-	_try_free_rid(rd,pipeline_RID)
-	_try_free_rid(rd,uniform_set_RID)
-	_try_free_rid(rd,shader_RID)
+	_try_free_rid(rd, pipeline_primary_RID)
+	_try_free_rid(rd, uniform_set_primary_RID)
+	_try_free_rid(rd, compute_pos_shader_RID)
+	_try_free_rid(rd, transfer_shader_RID)
 	
 	initialized = false
 	compute_active = false
@@ -231,6 +249,14 @@ func _try_free_rid(_rd : RenderingDevice, rid : RID) -> void:
 		
 	_rd.free_rid(rid)
 	
+func _load_shader_from_file(file : RDShaderFile) -> RID:
+	var spirv: RDShaderSPIRV = file.get_spirv()
+	if(!spirv):
+		push_error("FAILED TO LOAD SHADER: ", file.to_string())
+		return RID()
+		
+	return rd.shader_create_from_spirv(spirv)
+	
 func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	var image := tex.get_image()
 	image.convert(Image.FORMAT_RGBAF)
@@ -243,15 +269,11 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	
 	return _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
 
-func _create_new_multimesh(_rd : RenderingDevice) -> void:
+func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _vertex_spacing : float) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
-
-	var vertex_spacing : float = 4.0
-	if(terrain_node):
-		vertex_spacing = terrain_node.vertex_spacing
+	
 	#calculate an estimated instance count to pass through
-	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
-	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
+	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
 	
@@ -271,7 +293,7 @@ func _setup_terrain_uniform(_rd : RenderingDevice) -> void:
 	pass
 
 func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
-	if(!pipeline_RID.is_valid() || !uniform_set_RID.is_valid()):
+	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid()):
 		return
 	
 	compute_active = true
@@ -296,10 +318,17 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	
 	var compute_list : int = rd.compute_list_begin()
 
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_RID, 0)
-	
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_primary_RID, 0)
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	
+	## wait until the first shader is done
+	rd.compute_list_add_barrier(compute_list)
+#
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_secondary_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_secondary_RID, 0)
+	rd.compute_list_dispatch(compute_list, 1,1,1)
+	
 	rd.compute_list_end()
 
 
