@@ -36,6 +36,8 @@ var current_lod : EFoliageLOD = EFoliageLOD.NONE
 
 var rd : RenderingDevice
 
+var RID_arr : Array[RID]
+
 var instance_RID
 var scenario_RID
 
@@ -131,28 +133,35 @@ func _setup_compute_pipeline()	-> void:
 	
 	if(!scenario_RID.is_valid()):
 		return
-	
+	RID_arr.append(scenario_RID)
+
 	instance_RID = RenderingServer.instance_create()
 	if(!instance_RID.is_valid()):
 		return
-
+	RID_arr.append(instance_RID)	
+		
 	#load shaders
 	compute_pos_shader_RID = _load_shader_from_file(positions_compute_shader)
 	if(!compute_pos_shader_RID.is_valid()):
 		push_error("FAILED TO LOAD SHADER: ", positions_compute_shader.to_string())
 		return
-	
+	RID_arr.append(compute_pos_shader_RID)
+
+
 	transfer_shader_RID = _load_shader_from_file(transfer_compute_shader)
 	if(!transfer_shader_RID.is_valid()):
 		push_error("FAILED TO LOAD SHADER: ", transfer_compute_shader.to_string())
 		return
-		
+	RID_arr.append(transfer_shader_RID)
+	
 	#height data binding
 	var height_data_uniform = RDUniform.new()
 	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	height_data_uniform.binding = 0
 	var input_bytes := height_array.to_byte_array()
-	height_data_uniform.add_id(rd.storage_buffer_create(input_bytes.size(), input_bytes))
+	var height_data_RID : RID = rd.storage_buffer_create(input_bytes.size(), input_bytes)
+	RID_arr.append(height_data_RID)
+	height_data_uniform.add_id(height_data_RID)
 	
 	#multimesh storage buffer binding
 	var multimesh_transform_buffer_uniform := RDUniform.new()
@@ -162,10 +171,11 @@ func _setup_compute_pipeline()	-> void:
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
-	var estimated_per_chunk : int = foliage_target_density_sq_m * vertex_spacing * vertex_spacing
+	var estimated_per_chunk : int = int(foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
 	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * estimated_per_chunk)
 	_create_new_multimesh(rd,estimated_count, vertex_spacing)
 	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
+	RID_arr.append(buffer_rid)
 	multimesh_transform_buffer_uniform.add_id(buffer_rid)
 
 	#Blade count per group binding
@@ -174,6 +184,7 @@ func _setup_compute_pipeline()	-> void:
 	blade_count_array_uniform.binding = 2
 	
 	blade_count_buffer_RID = rd.storage_buffer_create(high_lod_num_work_groups_xz*high_lod_num_work_groups_xz * 4) #*4 to account for int size
+	RID_arr.append(blade_count_buffer_RID)
 	blade_count_array_uniform.add_id(blade_count_buffer_RID)	
 	
 	#multimesh command buffer binding
@@ -186,23 +197,25 @@ func _setup_compute_pipeline()	-> void:
 	var float_params_arr : PackedByteArray =  PackedFloat32Array(
 		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale, 100.0]
 		 ).to_byte_array()
-	var fparameter_buffer                  := rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
+	var fparameter_buffer_RID :RID = rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
+	RID_arr.append(fparameter_buffer_RID)
 
 	var float_parameter_uniform_block = RDUniform.new()
 	float_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	float_parameter_uniform_block.binding = 3
-	float_parameter_uniform_block.add_id(fparameter_buffer)
+	float_parameter_uniform_block.add_id(fparameter_buffer_RID)
 	
 	#int parameter binding
 	var int_params_arr : PackedByteArray =  PackedInt32Array(
 													  [estimated_per_chunk]
 												).to_byte_array()
-	var iparameter_buffer := rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
+	var iparameter_buffer_RID :RID = rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
+	RID_arr.append(iparameter_buffer_RID)
 
 	var int_parameter_uniform_block = RDUniform.new()
 	int_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	int_parameter_uniform_block.binding = 4
-	int_parameter_uniform_block.add_id(iparameter_buffer)	
+	int_parameter_uniform_block.add_id(iparameter_buffer_RID)	
 	
 	#mask binding
 	var mask_tex_uniform = RDUniform.new()
@@ -214,6 +227,7 @@ func _setup_compute_pipeline()	-> void:
 	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
 	player_transform_data_buffer_RID = rd.storage_buffer_create(player_data_arr.size(), player_data_arr)
+	RID_arr.append(player_transform_data_buffer_RID)
 
 	var player_data_uniform = RDUniform.new()
 	player_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
@@ -226,22 +240,28 @@ func _setup_compute_pipeline()	-> void:
 	transform_array_uniform.binding = 1
 	# *45 for 12 elements of a transform with size 4 (float)
 	secondary_transform_buffer_RID = rd.storage_buffer_create(estimated_count * 48,PackedByteArray())
+	RID_arr.append(secondary_transform_buffer_RID)
 	transform_array_uniform.add_id(secondary_transform_buffer_RID)	
 
 	#add all uniforms bindings into the set
 	uniform_set_primary_RID = rd.uniform_set_create(
 			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform_block, mask_tex_uniform, player_data_uniform, int_parameter_uniform_block]
 			, compute_pos_shader_RID, 0)
-	
+	RID_arr.append(uniform_set_primary_RID)
+
 	uniform_set_secondary_RID = rd.uniform_set_create(
 		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform_block]
 		, transfer_shader_RID, 0)
+	RID_arr.append(uniform_set_secondary_RID)
 
+	
 	# Create a compute pipeline
 	# don't actually run them or anything yet
 	pipeline_primary_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
+	RID_arr.append(pipeline_primary_RID)
 	pipeline_secondary_RID = rd.compute_pipeline_create(transfer_shader_RID)
-	
+	RID_arr.append(pipeline_secondary_RID)
+
 	set_process(true)
 	initialized = true
 	
@@ -252,10 +272,9 @@ func _cleanup() -> void:
 	if(created_multimesh_RID.is_valid()):
 		RenderingServer.multimesh_allocate_data(created_multimesh_RID, 0 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 
-	_try_free_rid(rd, pipeline_primary_RID)
-	_try_free_rid(rd, uniform_set_primary_RID)
-	_try_free_rid(rd, compute_pos_shader_RID)
-	_try_free_rid(rd, transfer_shader_RID)
+	for rid_to_free in RID_arr:
+		_try_free_rid(rd, rid_to_free)
+	RID_arr.clear()	
 	
 	initialized = false
 	compute_active = false
@@ -288,12 +307,13 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	tex_format.height = image.get_height()
 	tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT + RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT + RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
 	tex_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
-	
-	return _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
+	var tex_RID = _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
+	RID_arr.append(tex_RID)
+	return tex_RID
 
 func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _vertex_spacing : float) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
-	
+	RID_arr.append(created_multimesh_RID)
 	#calculate an estimated instance count to pass through
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
@@ -308,8 +328,10 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	RenderingServer.instance_geometry_set_cast_shadows_setting(instance_RID, RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_OFF)
 	
 	created_multimesh_buffer_RID = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
+	RID_arr.append(created_multimesh_buffer_RID)
 
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
+	RID_arr.append(created_multimesh_command_buffer_RID)
 
 func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid()):
