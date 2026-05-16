@@ -16,10 +16,12 @@ layout(set = 0, binding = 1, std430) writeonly buffer Transforms {
 }
 GRASS_TRANSFORMS;
 
-// multimesh command buffer allowing us to directly edit the amount of instances from the compute shader
-layout(std430,set = 0, binding = 2) restrict writeonly buffer CommandBuffer { int data[]; } COMMAND_BUFFER;
-
-layout(set = 0, binding = 3, std430) restrict readonly buffer Parameters {
+// array detailing how many grassblades are actually present in a specific         
+layout(set = 0, binding = 2, std430) writeonly buffer BladeAmounts {
+    int data[];
+} BLADESPERGROUP;
+        
+layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
     float TERRAIN_VERTEX_SPACING;
     float TERRAIN_HEIGHT;
 
@@ -28,13 +30,18 @@ layout(set = 0, binding = 3, std430) restrict readonly buffer Parameters {
     float MAX_BLADE_TILT_RAD;
 
     float MIN_BLADE_SCALE;
-
-} PARAMETERS;
-
-
-layout(set = 0,binding = 4, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
+    float RESERVEDPERGROUP;
+} FPARAMETERS;
         
-layout(set = 0, binding = 5, std430) restrict readonly buffer PlayerData
+layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
+{
+    int MAX_BLADES_PER_GROUP;    
+} IPARAMETERS;
+
+
+layout(set = 0,binding = 5, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
+        
+layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
 {
    float X_POS;     
    float Y_POS;     
@@ -139,33 +146,33 @@ float get_rot_biased_towards_player(vec2 blade_pos)
 // The code we want to execute in each invocation
 void main() 
 {
-    float rows = PARAMETERS.TARGET_DENSITY * PARAMETERS.TERRAIN_VERTEX_SPACING;    
+    float rows = FPARAMETERS.TARGET_DENSITY * FPARAMETERS.TERRAIN_VERTEX_SPACING;    
 
-    const float Offset = (1.0/PARAMETERS.TARGET_DENSITY);
+    const float Offset = (1.0/FPARAMETERS.TARGET_DENSITY);
         
     int current_blade =0;
     int id_offset =0;
         
-    vec2 half_offset = vec2(PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5, PARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
-    float x_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - half_offset.x;
-    float z_group_offset = PARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - half_offset.y;
-        
+    const vec2 half_offset = vec2(FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5, FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
+    const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - half_offset.x;
+    const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - half_offset.y;
         
     float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
     mat3 rot_scale_matrix;
             
-    float height_A, height_B, height_C, height_D;
-    height_A = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
-    height_B = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
-    height_C = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
-    height_D = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
+    const float height_A = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
+    const float height_B = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
+    const float height_C = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
+    const float height_D = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
 
-    ivec2 mask_size = imageSize(FOLIAGE_MASK);
-    float max_length = gl_NumWorkGroups.x * PARAMETERS.TERRAIN_VERTEX_SPACING;    
+    const ivec2 mask_size = imageSize(FOLIAGE_MASK);
+    const float max_length = gl_NumWorkGroups.x * FPARAMETERS.TERRAIN_VERTEX_SPACING;    
     float x_offset_rand, z_offset_rand;    
         
-    const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.y * gl_NumWorkGroups.z);
+    const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.z);
+    const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
+        
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
             
     for(int row_ID = 0; row_ID < rows; row_ID++)
@@ -174,22 +181,22 @@ void main()
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
             z = col_ID * Offset;
-            x_offset_rand = (fract(random2D(vec2(z,x)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET));   
-            group_x = mod(x + x_offset_rand, PARAMETERS.TERRAIN_VERTEX_SPACING);
+            x_offset_rand = (fract(random2D(vec2(z,x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));   
+            group_x = mod(x + x_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
             final_x = group_x + x_group_offset;
                     
-            z_offset_rand = (fract(random2D(vec2(final_x,z)) * PARAMETERS.MAX_BLADE_RANDOM_OFFSET));
-            group_z = mod(z + z_offset_rand,PARAMETERS.TERRAIN_VERTEX_SPACING);
+            z_offset_rand = (fract(random2D(vec2(final_x,z)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
+            group_z = mod(z + z_offset_rand,FPARAMETERS.TERRAIN_VERTEX_SPACING);
             final_z = group_z + z_group_offset;
     
             final_pos = vec2(final_x, final_z);
             scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, max_length);
                 
-            if(scale < PARAMETERS.MIN_BLADE_SCALE)
+            if(scale < FPARAMETERS.MIN_BLADE_SCALE)
             {
                 continue;
             }
-            random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * PARAMETERS.MAX_BLADE_TILT_RAD;
+            random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
             random_rot_y = get_rot_biased_towards_player(final_pos);
             rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);
     
@@ -206,7 +213,7 @@ void main()
             GRASS_TRANSFORMS.data[5 + id_offset]= rot_scale_matrix[1][1];
             GRASS_TRANSFORMS.data[6 + id_offset]= rot_scale_matrix[1][2];
     
-            GRASS_TRANSFORMS.data[7 + id_offset]= get_height_at_chunk_pos(vec2(group_x, group_z) / PARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);   // Y-POS
+            GRASS_TRANSFORMS.data[7 + id_offset]= get_height_at_chunk_pos(vec2(group_x, group_z) / FPARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);   // Y-POS
     
             GRASS_TRANSFORMS.data[8 + id_offset]=  rot_scale_matrix[2][0];
             GRASS_TRANSFORMS.data[9 + id_offset]=  rot_scale_matrix[2][1];
@@ -217,6 +224,6 @@ void main()
             current_blade++;
         }
     }
-        
-    COMMAND_BUFFER.data[1] = int(total_work_groups * current_blade);
+
+    BLADESPERGROUP.data[group_id_arr] = current_blade;
 }

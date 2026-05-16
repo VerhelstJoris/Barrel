@@ -52,6 +52,7 @@ var pipeline_primary_RID : RID
 var pipeline_secondary_RID : RID
 
 var secondary_transform_buffer_RID : RID
+var blade_count_buffer_RID : RID
 
 #player transform data
 var player_transform_data_arr : PackedFloat32Array
@@ -153,40 +154,60 @@ func _setup_compute_pipeline()	-> void:
 	var input_bytes := height_array.to_byte_array()
 	height_data_uniform.add_id(rd.storage_buffer_create(input_bytes.size(), input_bytes))
 	
-	#storage buffer binding
+	#multimesh storage buffer binding
 	var multimesh_transform_buffer_uniform := RDUniform.new()
 	multimesh_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	multimesh_transform_buffer_uniform.binding = 1
+	multimesh_transform_buffer_uniform.binding = 0
 
 	var vertex_spacing : float = 4.0
 	if(terrain_node):
 		vertex_spacing = terrain_node.vertex_spacing
-	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
+	var estimated_per_chunk : int = foliage_target_density_sq_m * vertex_spacing * vertex_spacing
+	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * estimated_per_chunk)
 	_create_new_multimesh(rd,estimated_count, vertex_spacing)
 	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
 	multimesh_transform_buffer_uniform.add_id(buffer_rid)
 
-	#command buffer binding
+	#Blade count per group binding
+	var blade_count_array_uniform = RDUniform.new()
+	blade_count_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	blade_count_array_uniform.binding = 2
+	
+	blade_count_buffer_RID = rd.storage_buffer_create(high_lod_num_work_groups_xz*high_lod_num_work_groups_xz * 4) #*4 to account for int size
+	blade_count_array_uniform.add_id(blade_count_buffer_RID)	
+	
+	#multimesh command buffer binding
 	var multimesh_command_buffer_uniform := RDUniform.new()
 	multimesh_command_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	multimesh_command_buffer_uniform.binding = 2
+	multimesh_command_buffer_uniform.binding = 3
 	multimesh_command_buffer_uniform.add_id(created_multimesh_command_buffer_RID)
-
-	# parameter binding
-	var params_arr_float : PackedByteArray = PackedFloat32Array(
-		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale]
+	
+	# float parameter binding
+	var float_params_arr : PackedByteArray =  PackedFloat32Array(
+		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale, 100.0]
 		 ).to_byte_array()
-	var parameter_buffer := rd.storage_buffer_create(params_arr_float.size(), params_arr_float)
+	var fparameter_buffer                  := rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
 
-	var parameter_uniform_block = RDUniform.new()
-	parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	parameter_uniform_block.binding = 3
-	parameter_uniform_block.add_id(parameter_buffer)
+	var float_parameter_uniform_block = RDUniform.new()
+	float_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	float_parameter_uniform_block.binding = 3
+	float_parameter_uniform_block.add_id(fparameter_buffer)
+	
+	#int parameter binding
+	var int_params_arr : PackedByteArray =  PackedInt32Array(
+													  [estimated_per_chunk]
+												).to_byte_array()
+	var iparameter_buffer := rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
+
+	var int_parameter_uniform_block = RDUniform.new()
+	int_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	int_parameter_uniform_block.binding = 4
+	int_parameter_uniform_block.add_id(iparameter_buffer)	
 	
 	#mask binding
 	var mask_tex_uniform = RDUniform.new()
 	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	mask_tex_uniform.binding = 4
+	mask_tex_uniform.binding = 5
 	mask_tex_uniform.add_id(_init_existing_texture_data(rd, chunk_mask))
 
 	#player data binding
@@ -196,23 +217,24 @@ func _setup_compute_pipeline()	-> void:
 
 	var player_data_uniform = RDUniform.new()
 	player_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	player_data_uniform.binding = 5
+	player_data_uniform.binding = 6
 	player_data_uniform.add_id(player_transform_data_buffer_RID)
+
+	#sparse tranform buffer pre-condensed
+	var transform_array_uniform = RDUniform.new()
+	transform_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	transform_array_uniform.binding = 1
+	# *45 for 12 elements of a transform with size 4 (float)
+	secondary_transform_buffer_RID = rd.storage_buffer_create(estimated_count * 48,PackedByteArray())
+	transform_array_uniform.add_id(secondary_transform_buffer_RID)	
 
 	#add all uniforms bindings into the set
 	uniform_set_primary_RID = rd.uniform_set_create(
-			[height_data_uniform, multimesh_transform_buffer_uniform, multimesh_command_buffer_uniform, parameter_uniform_block, mask_tex_uniform, player_data_uniform]
+			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform_block, mask_tex_uniform, player_data_uniform, int_parameter_uniform_block]
 			, compute_pos_shader_RID, 0)
-
-
-	var transform_array_uniform = RDUniform.new()
-	transform_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	transform_array_uniform.binding = 0
-	secondary_transform_buffer_RID = rd.storage_buffer_create(estimated_count,PackedByteArray())
-	transform_array_uniform.add_id(secondary_transform_buffer_RID)
-
+	
 	uniform_set_secondary_RID = rd.uniform_set_create(
-		[transform_array_uniform, multimesh_transform_buffer_uniform ,multimesh_command_buffer_uniform]
+		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform_block]
 		, transfer_shader_RID, 0)
 
 	# Create a compute pipeline
@@ -288,9 +310,6 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	created_multimesh_buffer_RID = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
 
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
-	
-func _setup_terrain_uniform(_rd : RenderingDevice) -> void:
-	pass
 
 func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid()):
@@ -301,7 +320,6 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 
-	
 	if(player_transform_data_buffer_RID.is_valid()):
 		player_transform_data_arr[0] = _player_cam_transform_world.origin.x - self.get_global_position().x
 		player_transform_data_arr[1] = _player_cam_transform_world.origin.y - self.get_global_position().y
@@ -312,7 +330,6 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 		player_transform_data_arr[4] = cam_rot.y
 		player_transform_data_arr[5] = cam_rot.z
 
-
 		var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
 		rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
 	
@@ -321,15 +338,14 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_primary_RID, 0)
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
-	
-	## wait until the first shader is done
+
+	# wait until the first shader is done
 	rd.compute_list_add_barrier(compute_list)
-#
+
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_secondary_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_secondary_RID, 0)
-	rd.compute_list_dispatch(compute_list, 1,1,1)
-	
-	rd.compute_list_end()
+	rd.compute_list_dispatch(compute_list, high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
 
+	rd.compute_list_end()
 
 	compute_active = false
