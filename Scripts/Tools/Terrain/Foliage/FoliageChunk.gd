@@ -8,6 +8,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
 @export_group("Setup Data")
 @export var chunk_transform_centered : bool = false
+@export var chunk_dimenstion_size_m : float = 200.0
 @export var positions_compute_shader : RDShaderFile
 @export var transfer_compute_shader : RDShaderFile
 @export var high_LOD_mesh : Mesh
@@ -65,21 +66,29 @@ var compute_active : bool = false
 
 var initialized : bool = false
 
+func _get_vertex_spacing() -> float:
+	if(!terrain_node):
+		push_error("Terrain node is null, cannot retrieve vertex spacing, returning default value")
+		return 4.0
+		
+	return terrain_node.vertex_spacing
+
 func _generate_height_data() -> void:
 	height_array.clear()
-	var elem_per_dim : int = high_lod_num_work_groups_xz +1
+	var vertex_spacing :float = _get_vertex_spacing()
+	
+	var elem_per_dim : int = int(chunk_dimenstion_size_m / vertex_spacing) +1
 	height_array.resize( elem_per_dim * elem_per_dim)
 	
 	if(terrain_node):
-		print("vertex spacing : ", terrain_node.vertex_spacing)
 		for row in elem_per_dim:
 			for col in elem_per_dim:
 				var current_index : int = row * elem_per_dim + col
 				var chunk_pixel_coord : Vector2i
 				if(chunk_transform_centered):
 					chunk_pixel_coord = Vector2i( 
-						int((global_position.x - (terrain_node.vertex_spacing * high_lod_num_work_groups_xz * 0.5) )/ terrain_node.vertex_spacing) ,
-						int((global_position.z - (terrain_node.vertex_spacing * high_lod_num_work_groups_xz * 0.5) )/ terrain_node.vertex_spacing) )
+						int( (global_position.x - (chunk_dimenstion_size_m * 0.5) )/ terrain_node.vertex_spacing) ,
+						int( (global_position.z - (chunk_dimenstion_size_m * 0.5) )/ terrain_node.vertex_spacing) )
 				else:
 					chunk_pixel_coord = Vector2i(int(global_position.x / terrain_node.vertex_spacing) ,int(global_position.z / terrain_node.vertex_spacing) )
 				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * terrain_node.vertex_spacing, 0, (chunk_pixel_coord.y + col) * terrain_node.vertex_spacing)
@@ -107,6 +116,20 @@ func _ready() -> void:
 		RenderingServer.call_on_render_thread(_cleanup)
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 		
+func _contruct_multimesh_bounding_box() ->AABB:
+	var extra_offset : float = 100
+	
+	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,500,-chunk_dimenstion_size_m - extra_offset )
+	#offset by half the size towards 0
+	var bb_pos : Vector3 = Vector3( (abs(global_position.x) - ((chunk_dimenstion_size_m + extra_offset) * 0.5)) * signf(global_position.x),
+	0,
+	(abs(global_position.z) - ((chunk_dimenstion_size_m + extra_offset) * 0.5)) * signf(global_position.z))
+	
+	var bounding_box : AABB = AABB(bb_pos, bb_size)
+	print("box ", bounding_box, " center ", bounding_box.get_center() ," pos : ", bb_pos , " end ", bounding_box.end)
+	return bounding_box
+
+
 func _process(_delta: float) -> void:
 	#RenderingServer.call_on_render_thread(_render_process.bind(_delta, rd))
 	var _cam_transform : Transform3D
@@ -119,6 +142,8 @@ func _process(_delta: float) -> void:
 	if(player_transform_to_pass.is_equal_approx(_cam_transform)):
 		return
 		
+	DebugDraw3D.draw_aabb(_contruct_multimesh_bounding_box(), Color.GREEN,0)
+	
 	if(!compute_active && initialized):
 		player_transform_to_pass = _cam_transform
 		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass))
@@ -168,9 +193,7 @@ func _setup_compute_pipeline()	-> void:
 	multimesh_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	multimesh_transform_buffer_uniform.binding = 0
 
-	var vertex_spacing : float = 4.0
-	if(terrain_node):
-		vertex_spacing = terrain_node.vertex_spacing
+	var vertex_spacing : float = _get_vertex_spacing()
 	var estimated_per_chunk : int = int(foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
 	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * estimated_per_chunk)
 	_create_new_multimesh(rd,estimated_count, vertex_spacing)
@@ -207,7 +230,7 @@ func _setup_compute_pipeline()	-> void:
 	
 	#int parameter binding
 	var int_params_arr : PackedByteArray =  PackedInt32Array(
-													  [estimated_per_chunk]
+													  [estimated_per_chunk , int(chunk_dimenstion_size_m / vertex_spacing)]
 												).to_byte_array()
 	var iparameter_buffer_RID :RID = rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
 	RID_arr.append(iparameter_buffer_RID)
@@ -307,10 +330,10 @@ func _init_existing_texture_data(_rd : RenderingDevice, tex: Texture2D)-> RID:
 	tex_format.height = image.get_height()
 	tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT + RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT + RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
 	tex_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
-	var tex_RID = _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
+	var tex_RID : RID = _rd.texture_create(tex_format, RDTextureView.new(), [image.get_data()])
 	RID_arr.append(tex_RID)
 	return tex_RID
-
+	
 func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _vertex_spacing : float) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
 	RID_arr.append(created_multimesh_RID)
@@ -318,10 +341,11 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	high_LOD_mesh.surface_set_material(0,grass_material)
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
-	
-	var aabb : Vector3 = Vector3(512.0, 1000.0, 512.0)
-	RenderingServer.instance_set_custom_aabb(instance_RID, AABB(get_global_position() , aabb))
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
+	var created_aabb : AABB = _contruct_multimesh_bounding_box()
+	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,created_aabb)
+	RenderingServer.instance_set_custom_aabb(instance_RID, created_aabb)
+	
 	RenderingServer.instance_set_scenario(instance_RID, scenario_RID)
 	RenderingServer.instance_set_base(instance_RID, created_multimesh_RID)
 	RenderingServer.instance_geometry_set_flag(instance_RID, RenderingServer.InstanceFlags.INSTANCE_FLAG_USE_DYNAMIC_GI, true)
@@ -334,29 +358,16 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
 func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
-	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid()):
+	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid() || !uniform_set_secondary_RID.is_valid()):
 		return
 	
 	compute_active = true
 	
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
+	_update_player_data_buffer(rd, _player_cam_transform_world)
 
-	if(player_transform_data_buffer_RID.is_valid()):
-		player_transform_data_arr[0] = _player_cam_transform_world.origin.x - self.get_global_position().x
-		player_transform_data_arr[1] = _player_cam_transform_world.origin.y - self.get_global_position().y
-		player_transform_data_arr[2] = _player_cam_transform_world.origin.z - self.get_global_position().z
-
-		var cam_rot : Vector3 = _player_cam_transform_world.basis.get_euler()
-		player_transform_data_arr[3] = cam_rot.x
-		player_transform_data_arr[4] = cam_rot.y
-		player_transform_data_arr[5] = cam_rot.z
-
-		var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
-		rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
-	
 	var compute_list : int = rd.compute_list_begin()
-
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_primary_RID, 0)
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
@@ -371,3 +382,19 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	rd.compute_list_end()
 
 	compute_active = false
+
+func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_world: Transform3D) -> void:
+	if(!player_transform_data_buffer_RID.is_valid()):
+		return
+
+	player_transform_data_arr[0] = _player_cam_transform_world.origin.x - self.get_global_position().x
+	player_transform_data_arr[1] = _player_cam_transform_world.origin.y - self.get_global_position().y
+	player_transform_data_arr[2] = _player_cam_transform_world.origin.z - self.get_global_position().z
+	
+	var cam_rot : Vector3 = _player_cam_transform_world.basis.get_euler()
+	player_transform_data_arr[3] = cam_rot.x
+	player_transform_data_arr[4] = cam_rot.y
+	player_transform_data_arr[5] = cam_rot.z
+	
+	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
+	_rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)

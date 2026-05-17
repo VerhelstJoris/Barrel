@@ -31,6 +31,7 @@ layout(std430,set = 0, binding = 3) restrict writeonly buffer CommandBuffer
 layout(set = 0, binding = 4, std430) restrict readonly buffer IParameters
 {
     int MAX_BLADES_PER_GROUP;
+    int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;    
 } IPARAMETERS;
 
         

@@ -35,7 +35,8 @@ layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
         
 layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
 {
-    int MAX_BLADES_PER_GROUP;    
+    int MAX_BLADES_PER_GROUP;
+    int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
 } IPARAMETERS;
 
 
@@ -141,89 +142,103 @@ float get_rot_biased_towards_player(vec2 blade_pos)
         
    return rand_angle;
 }
-        
-        
-// The code we want to execute in each invocation
-void main() 
-{
-    float rows = FPARAMETERS.TARGET_DENSITY * FPARAMETERS.TERRAIN_VERTEX_SPACING;    
 
+
+int fill_chunk_segment(ivec2 segment_local_coord)
+{
+    float rows = FPARAMETERS.TARGET_DENSITY * FPARAMETERS.TERRAIN_VERTEX_SPACING;
+    
     const float Offset = (1.0/FPARAMETERS.TARGET_DENSITY);
-        
+    
     int current_blade =0;
     int id_offset =0;
-        
-    const vec2 half_offset = vec2(FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.x * 0.5, FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_NumWorkGroups.z * 0.5);
+    
+    const float chunk_size_dim = FPARAMETERS.TERRAIN_VERTEX_SPACING * IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;    
+    const float half_chunk_size_dim =chunk_size_dim * 0.5;
+    const vec2 half_offset = vec2(half_chunk_size_dim, half_chunk_size_dim);
     const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - half_offset.x;
     const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - half_offset.y;
-        
+    
     float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
     mat3 rot_scale_matrix;
-            
-    const float height_A = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
-    const float height_B = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + gl_WorkGroupID.z];
-    const float height_C = HEIGHT_DATA.data[gl_WorkGroupID.x * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
-    const float height_D = HEIGHT_DATA.data[(gl_WorkGroupID.x +1) * (gl_NumWorkGroups.x +1) + (gl_WorkGroupID.z +1)];
-
+    
+    const float height_A = HEIGHT_DATA.data[segment_local_coord.x * (IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM.x +1) + segment_local_coord.y];
+    const float height_B = HEIGHT_DATA.data[(segment_local_coord.x +1) * (IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM.x +1) + segment_local_coord.y];
+    const float height_C = HEIGHT_DATA.data[segment_local_coord.x * (IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM.x +1) + (segment_local_coord.y +1)];
+    const float height_D = HEIGHT_DATA.data[(segment_local_coord.x +1) * (IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM.x +1) + (segment_local_coord.y +1)];
+    
     const ivec2 mask_size = imageSize(FOLIAGE_MASK);
-    const float max_length = gl_NumWorkGroups.x * FPARAMETERS.TERRAIN_VERTEX_SPACING;    
-    float x_offset_rand, z_offset_rand;    
-        
+    const float max_length = gl_NumWorkGroups.x * FPARAMETERS.TERRAIN_VERTEX_SPACING;
+    float x_offset_rand, z_offset_rand;
+    
     const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.z);
     const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
-        
+    
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
-            
+    
     for(int row_ID = 0; row_ID < rows; row_ID++)
     {
         x = row_ID * Offset;
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
             z = col_ID * Offset;
-            x_offset_rand = (fract(random2D(vec2(z,x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));   
+            x_offset_rand = (fract(random2D(vec2(z,x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
             group_x = mod(x + x_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
             final_x = group_x + x_group_offset;
-                    
+            
             z_offset_rand = (fract(random2D(vec2(final_x,z)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
             group_z = mod(z + z_offset_rand,FPARAMETERS.TERRAIN_VERTEX_SPACING);
             final_z = group_z + z_group_offset;
-    
+            
             final_pos = vec2(final_x, final_z);
-            scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, max_length);
-                
+            scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, chunk_size_dim);
+            
             if(scale < FPARAMETERS.MIN_BLADE_SCALE)
             {
                 continue;
             }
+                
             random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
             random_rot_y = get_rot_biased_towards_player(final_pos);
             rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);
-    
+            
             id_offset = int( group_offset + (current_blade * 12) );
-    
+            
             // fill in the transforms    
             GRASS_TRANSFORMS.data[0 + id_offset]= rot_scale_matrix[0][0];
             GRASS_TRANSFORMS.data[1 + id_offset]= rot_scale_matrix[0][1];
             GRASS_TRANSFORMS.data[2 + id_offset]= rot_scale_matrix[0][2];
-    
+            
             GRASS_TRANSFORMS.data[3 + id_offset]= final_x ;     // X-POS
-    
+            
             GRASS_TRANSFORMS.data[4 + id_offset]= rot_scale_matrix[1][0];
             GRASS_TRANSFORMS.data[5 + id_offset]= rot_scale_matrix[1][1];
             GRASS_TRANSFORMS.data[6 + id_offset]= rot_scale_matrix[1][2];
-    
+            
             GRASS_TRANSFORMS.data[7 + id_offset]= get_height_at_chunk_pos(vec2(group_x, group_z) / FPARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);   // Y-POS
-    
+            
             GRASS_TRANSFORMS.data[8 + id_offset]=  rot_scale_matrix[2][0];
             GRASS_TRANSFORMS.data[9 + id_offset]=  rot_scale_matrix[2][1];
             GRASS_TRANSFORMS.data[10 + id_offset]= rot_scale_matrix[2][2];
-    
+            
             GRASS_TRANSFORMS.data[11 + id_offset]= final_z;     // Z-POS
-    
+            
             current_blade++;
         }
-    }
-
-    BLADESPERGROUP.data[group_id_arr] = current_blade;
+    }    
+        
+    return current_blade;
+}        
+        
+// The code we want to execute in each invocation
+void main() 
+{
+    const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
+        
+    int workgroup_blades =0;
+    workgroup_blades = workgroup_blades + fill_chunk_segment(ivec2(gl_WorkGroupID.x,gl_WorkGroupID.z));
+        
+    BLADESPERGROUP.data[group_id_arr] = workgroup_blades;
 }
+        
