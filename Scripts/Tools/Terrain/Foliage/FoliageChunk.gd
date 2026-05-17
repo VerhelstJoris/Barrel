@@ -117,16 +117,15 @@ func _ready() -> void:
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 		
 func _contruct_multimesh_bounding_box() ->AABB:
-	var extra_offset : float = 100
+	var extra_offset : float = 5
 	
-	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,500,-chunk_dimenstion_size_m - extra_offset )
+	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,500,chunk_dimenstion_size_m + extra_offset)
 	#offset by half the size towards 0
-	var bb_pos : Vector3 = Vector3( (abs(global_position.x) - ((chunk_dimenstion_size_m + extra_offset) * 0.5)) * signf(global_position.x),
+	var bb_pos : Vector3 = Vector3( -(chunk_dimenstion_size_m + extra_offset) * 0.5,
 	0,
-	(abs(global_position.z) - ((chunk_dimenstion_size_m + extra_offset) * 0.5)) * signf(global_position.z))
+	-(chunk_dimenstion_size_m + extra_offset) * 0.5)
 	
 	var bounding_box : AABB = AABB(bb_pos, bb_size)
-	print("box ", bounding_box, " center ", bounding_box.get_center() ," pos : ", bb_pos , " end ", bounding_box.end)
 	return bounding_box
 
 
@@ -142,8 +141,6 @@ func _process(_delta: float) -> void:
 	if(player_transform_to_pass.is_equal_approx(_cam_transform)):
 		return
 		
-	DebugDraw3D.draw_aabb(_contruct_multimesh_bounding_box(), Color.GREEN,0)
-	
 	if(!compute_active && initialized):
 		player_transform_to_pass = _cam_transform
 		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass))
