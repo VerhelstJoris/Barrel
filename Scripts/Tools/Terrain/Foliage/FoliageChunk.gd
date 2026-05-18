@@ -62,6 +62,10 @@ var player_transform_data_arr : PackedFloat32Array
 var player_transform_data_buffer_RID : RID
 var player_transform_to_pass : Transform3D
 
+# segment coord data
+var segment_coord_data_arr : PackedInt32Array
+var segment_coord_data_buffer_RID : RID
+
 var compute_active : bool = false
 
 var initialized : bool = false
@@ -220,10 +224,10 @@ func _setup_compute_pipeline()	-> void:
 	var fparameter_buffer_RID :RID = rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
 	RID_arr.append(fparameter_buffer_RID)
 
-	var float_parameter_uniform_block = RDUniform.new()
-	float_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	float_parameter_uniform_block.binding = 3
-	float_parameter_uniform_block.add_id(fparameter_buffer_RID)
+	var float_parameter_uniform = RDUniform.new()
+	float_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	float_parameter_uniform.binding = 3
+	float_parameter_uniform.add_id(fparameter_buffer_RID)
 	
 	#int parameter binding
 	var int_params_arr : PackedByteArray =  PackedInt32Array(
@@ -232,10 +236,10 @@ func _setup_compute_pipeline()	-> void:
 	var iparameter_buffer_RID :RID = rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
 	RID_arr.append(iparameter_buffer_RID)
 
-	var int_parameter_uniform_block = RDUniform.new()
-	int_parameter_uniform_block.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	int_parameter_uniform_block.binding = 4
-	int_parameter_uniform_block.add_id(iparameter_buffer_RID)	
+	var int_parameter_uniform = RDUniform.new()
+	int_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	int_parameter_uniform.binding = 4
+	int_parameter_uniform.add_id(iparameter_buffer_RID)	
 	
 	#mask binding
 	var mask_tex_uniform = RDUniform.new()
@@ -254,6 +258,17 @@ func _setup_compute_pipeline()	-> void:
 	player_data_uniform.binding = 6
 	player_data_uniform.add_id(player_transform_data_buffer_RID)
 
+	# array with coordinates of segments to draw
+	segment_coord_data_arr.resize(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz *2)
+	var segment_coord_packed_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
+	segment_coord_data_buffer_RID = rd.storage_buffer_create(segment_coord_packed_arr.size(), segment_coord_packed_arr)
+	RID_arr.append(segment_coord_data_buffer_RID)	
+	
+	var segments_coord_uniform : RDUniform = RDUniform.new()
+	segments_coord_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	segments_coord_uniform.binding = 7
+	segments_coord_uniform.add_id(segment_coord_data_buffer_RID)
+	
 	#sparse tranform buffer pre-condensed
 	var transform_array_uniform = RDUniform.new()
 	transform_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
@@ -265,12 +280,12 @@ func _setup_compute_pipeline()	-> void:
 
 	#add all uniforms bindings into the set
 	uniform_set_primary_RID = rd.uniform_set_create(
-			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform_block, mask_tex_uniform, player_data_uniform, int_parameter_uniform_block]
+			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform]
 			, compute_pos_shader_RID, 0)
 	RID_arr.append(uniform_set_primary_RID)
 
 	uniform_set_secondary_RID = rd.uniform_set_create(
-		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform_block]
+		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform]
 		, transfer_shader_RID, 0)
 	RID_arr.append(uniform_set_secondary_RID)
 
@@ -363,7 +378,8 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
-
+	_update_segments_to_draw_buffer(rd, _player_cam_transform_world)
+	
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_primary_RID, 0)
@@ -395,3 +411,7 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 	
 	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
 	_rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
+	
+func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D) -> void:
+	if(!segment_coord_data_buffer_RID.is_valid()):
+		return

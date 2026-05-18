@@ -39,7 +39,6 @@ layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
     int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
 } IPARAMETERS;
 
-
 layout(set = 0,binding = 5, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
         
 layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
@@ -52,6 +51,12 @@ layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
    float Y_ROT;
    float Z_ROT;
 } PLAYERDATA;
+
+// array detailing which chunk segments should actually be drawn, size is double the amount of workgroups for [x,z] section coordintate      
+layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
+int data[];
+} SEGMENTSTODRAW;
+        
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
