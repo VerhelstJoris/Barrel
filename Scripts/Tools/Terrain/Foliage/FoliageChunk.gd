@@ -415,3 +415,16 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D) -> void:
 	if(!segment_coord_data_buffer_RID.is_valid()):
 		return
+		
+	#start by calculating the segment we are currently in
+	var playerdiff : Vector2 = Vector2(  _player_cam_transform_world.origin.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), _player_cam_transform_world.origin.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
+
+	var vertex_spacing : float = _get_vertex_spacing()
+	var player_current_segment : Vector2i = Vector2i( int(ceil(playerdiff.x / vertex_spacing)) -1 ,int(ceil(playerdiff.y / vertex_spacing)) -1)
+	
+	segment_coord_data_arr[0] = player_current_segment.x
+	segment_coord_data_arr[1] = player_current_segment.y
+	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
+	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
+	
+		

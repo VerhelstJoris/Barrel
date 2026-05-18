@@ -161,8 +161,8 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     const float chunk_size_dim = FPARAMETERS.TERRAIN_VERTEX_SPACING * IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;    
     const float half_chunk_size_dim =chunk_size_dim * 0.5;
     const vec2 half_offset = vec2(half_chunk_size_dim, half_chunk_size_dim);
-    const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.x - half_offset.x;
-    const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * gl_WorkGroupID.z - half_offset.y;
+    const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.x - half_offset.x;
+    const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.y - half_offset.y;
     
     float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
@@ -242,7 +242,9 @@ void main()
     const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
         
     int workgroup_blades =0;
-    workgroup_blades = workgroup_blades + fill_chunk_segment(ivec2(gl_WorkGroupID.x,gl_WorkGroupID.z));
+    ivec2 segment_coord =  ivec2(SEGMENTSTODRAW.data[group_id_arr*2], SEGMENTSTODRAW.data[(group_id_arr*2)+1]);
+        
+    workgroup_blades = workgroup_blades + fill_chunk_segment(segment_coord);
         
     BLADESPERGROUP.data[group_id_arr] = workgroup_blades;
 }
