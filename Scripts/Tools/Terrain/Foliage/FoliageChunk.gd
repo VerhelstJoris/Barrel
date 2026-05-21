@@ -134,20 +134,21 @@ func _contruct_multimesh_bounding_box() ->AABB:
 
 
 func _process(_delta: float) -> void:
-	#RenderingServer.call_on_render_thread(_render_process.bind(_delta, rd))
-	var _cam_transform : Transform3D
-
+	var viewport : Viewport
 	if Engine.is_editor_hint():
-		_cam_transform = EditorInterface.get_editor_viewport_3d().get_camera_3d().global_transform
+		viewport = EditorInterface.get_editor_viewport_3d()
 	else:
-		_cam_transform = get_viewport().get_camera_3d().global_transform
+		viewport = get_viewport()
+
+	var cam : Camera3D = viewport.get_camera_3d()
+	var cam_transform : Transform3D = cam.global_transform
 	
-	if(player_transform_to_pass.is_equal_approx(_cam_transform)):
+	if(player_transform_to_pass.is_equal_approx(cam_transform)):
 		return
 		
 	if(!compute_active && initialized):
-		player_transform_to_pass = _cam_transform
-		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass))
+		player_transform_to_pass = cam_transform
+		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
@@ -369,7 +370,7 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
-func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
+func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D)->void:
 	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid() || !uniform_set_secondary_RID.is_valid()):
 		return
 	
@@ -378,7 +379,7 @@ func _update_compute_data(_player_cam_transform_world: Transform3D)->void:
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
-	_update_segments_to_draw_buffer(rd, _player_cam_transform_world)
+	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
 	
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
@@ -412,19 +413,94 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
 	_rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
 	
-func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D) -> void:
+func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D, _player_cam : Camera3D) -> void:
 	if(!segment_coord_data_buffer_RID.is_valid()):
 		return
 		
+
+	var vertex_spacing : float = _get_vertex_spacing()		
 	#start by calculating the segment we are currently in
 	var playerdiff : Vector2 = Vector2(  _player_cam_transform_world.origin.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), _player_cam_transform_world.origin.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
-
-	var vertex_spacing : float = _get_vertex_spacing()
-	var player_current_segment : Vector2i = Vector2i( int(ceil(playerdiff.x / vertex_spacing)) -1 ,int(ceil(playerdiff.y / vertex_spacing)) -1)
 	
-	segment_coord_data_arr[0] = player_current_segment.x
-	segment_coord_data_arr[1] = player_current_segment.y
+	var player_current_sub_id_pos : Vector2 = Vector2(playerdiff.x / vertex_spacing, playerdiff.y / vertex_spacing)
+	var player_current_segment_id : Vector2i = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
+	
+	#find the vector that describe the 'edges' of the camera	
+	_find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, chunk_dimenstion_size_m / vertex_spacing)
+	
+	segment_coord_data_arr[0] = player_current_segment_id.x
+	segment_coord_data_arr[1] = player_current_segment_id.y
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
 	
-		
+# returns 	
+func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, max_segments_per_side : int) -> Vector3:
+	
+	var cam_frustrum : Array[Plane] = _camera.get_frustum()
+	var cam_forward : Vector3 = _camera.get_global_transform().basis.x
+	
+	var left_pos : Vector3 = cam_frustrum[2].project(_camera.get_global_position() -cam_forward)
+	var right_pos : Vector3 = cam_frustrum[4].project(_camera.get_global_position() +cam_forward)
+	
+	var amount_per_edge : int = 5
+	
+	var found_left_segments : Array[Vector2i] = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),amount_per_edge, max_segments_per_side)
+	for found_id in range(min(found_left_segments.size(), amount_per_edge)):
+		segment_coord_data_arr[found_id *2 +2] = found_left_segments[found_id].x
+		segment_coord_data_arr[found_id *2 +3] = found_left_segments[found_id].y
+
+	var found_right_segments : Array[Vector2i] = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),amount_per_edge, max_segments_per_side)
+	for found_id in range(min(found_right_segments.size(), amount_per_edge)):
+		segment_coord_data_arr[found_id * 2 +2 + (amount_per_edge * 2) ] = found_right_segments[found_id].x
+		segment_coord_data_arr[found_id * 2 +3 + (amount_per_edge * 2)] = found_right_segments[found_id].y		
+
+	return Vector3.ZERO
+
+# use the DDA algorithm to find the edges 	
+func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, amount_to_find : int, max_segment_id : int) -> Array[Vector2i]:
+	var ret_arr : Array[Vector2i]
+	ret_arr.resize(amount_to_find)
+	dir.y = 0
+	dir = dir.normalized()
+
+	# setup data
+	var ray_unit_step_size : Vector2 = Vector2(sqrt(1 + (dir.z / dir.x) * (dir.z / dir.x)), sqrt(1 + (dir.x / dir.z) * (dir.x / dir.z)))
+	var step_unit_dir : Vector2i = Vector2(sign(dir.x), sign(dir.z))
+
+	#iteration data
+	var current_tile_to_check : Vector2i = Vector2i(int(grid_start_pos.x),int(grid_start_pos.y))	# no sub-tile-coord
+	var current_ray_length_per_dim : Vector2	
+
+	# need to calculate how much or our ray is in the starting cell for both x/y
+	if(dir.x < 0):
+		current_ray_length_per_dim.x = (grid_start_pos.x - current_tile_to_check.x) * ray_unit_step_size.x
+	else:
+		current_ray_length_per_dim.x = ((current_tile_to_check.x +1) - grid_start_pos.x) * ray_unit_step_size.x
+	
+	if(dir.z < 0):
+		current_ray_length_per_dim.y = (grid_start_pos.y - current_tile_to_check.y) * ray_unit_step_size.y
+	else:
+		current_ray_length_per_dim.y = ((current_tile_to_check.y +1) - grid_start_pos.y) * ray_unit_step_size.y
+
+	var current_distance : float =0
+	var max_distance : float = 50
+	var amount_found : int = 0
+	while current_distance < max_distance && amount_found < amount_to_find:
+		#step towards current shortest direction
+		if(current_ray_length_per_dim.x < current_ray_length_per_dim.y):
+			current_tile_to_check.x += step_unit_dir.x
+			current_distance = current_ray_length_per_dim.x
+			current_ray_length_per_dim.x += ray_unit_step_size.x
+		else:
+			current_tile_to_check.y += step_unit_dir.y
+			current_distance = current_ray_length_per_dim.y
+			current_ray_length_per_dim.y += ray_unit_step_size.y
+
+		# we've hit the edge of our chunk -> abort
+		if(current_tile_to_check.x < 0 || current_tile_to_check.y < 0 || current_tile_to_check.x > max_segment_id || current_tile_to_check.y > max_segment_id):
+			return ret_arr
+
+		ret_arr[amount_found] = current_tile_to_check
+		amount_found = amount_found +1
+
+	return ret_arr
