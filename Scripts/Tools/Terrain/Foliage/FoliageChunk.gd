@@ -63,7 +63,16 @@ var player_transform_data_buffer_RID : RID
 var player_transform_to_pass : Transform3D
 
 # segment coord data
+var segments_per_dim : int = 0
 var segment_coord_data_arr : PackedInt32Array
+var segment_work_data_arr : Array[Vector2i]
+var segment_found_edges_left : Array[Vector2i]
+var segment_found_edges_right : Array[Vector2i]
+var segment_center_edges : Array[Vector2i]
+
+var segments_filled_map : Dictionary[Vector2i, int]
+var update_counter : int = 0
+
 var segment_coord_data_buffer_RID : RID
 
 var compute_active : bool = false
@@ -116,6 +125,15 @@ func _preview_in_editor() -> void:
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 	
 func _ready() -> void:
+	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
+	segment_work_data_arr.resize(segments_per_dim*segments_per_dim)
+	segment_found_edges_left.resize(segments_per_dim)
+	segment_found_edges_right.resize(segments_per_dim)
+	segment_center_edges.resize(segments_per_dim)
+	for row in range(segments_per_dim):
+		for col in range(segments_per_dim):
+			segments_filled_map[Vector2i(row,col)] = 0
+
 	if(!Engine.is_editor_hint()):
 		RenderingServer.call_on_render_thread(_cleanup)
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
@@ -376,6 +394,8 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	
 	compute_active = true
 	
+	update_counter += 1
+	
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
@@ -424,42 +444,128 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	
 	var player_current_sub_id_pos : Vector2 = Vector2(playerdiff.x / vertex_spacing, playerdiff.y / vertex_spacing)
 	var player_current_segment_id : Vector2i = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
+
+	#reset the working data from last frame
+	segment_work_data_arr.fill(Vector2i.MIN)
+	segment_found_edges_left.fill(Vector2i.MIN)
+	segment_found_edges_right.fill(Vector2i.MIN)
 	
-	#find the vector that describe the 'edges' of the camera	
-	_find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, chunk_dimenstion_size_m / vertex_spacing)
+	segment_work_data_arr[0] = player_current_segment_id
+	var segments_found : int = 1
+	#find the vector that describe the 'edges' of the camera
+	segments_found += _find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, segments_per_dim)
 	
-	segment_coord_data_arr[0] = player_current_segment_id.x
-	segment_coord_data_arr[1] = player_current_segment_id.y
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
-	
+
+const compass_directions : Array[Vector2i] = [Vector2i(0,-1),Vector2i(1,-1), Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1)]	#clockwise directions starting with NORTH
+
 # returns 	
-func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, max_segments_per_side : int) -> Vector3:
-	
+func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
 	var cam_forward : Vector3 = _camera.get_global_transform().basis.x
 	
 	var left_pos : Vector3 = cam_frustrum[2].project(_camera.get_global_position() -cam_forward)
 	var right_pos : Vector3 = cam_frustrum[4].project(_camera.get_global_position() +cam_forward)
-	
-	var amount_per_edge : int = 5
-	
-	var found_left_segments : Array[Vector2i] = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),amount_per_edge, max_segments_per_side)
-	for found_id in range(min(found_left_segments.size(), amount_per_edge)):
-		segment_coord_data_arr[found_id *2 +2] = found_left_segments[found_id].x
-		segment_coord_data_arr[found_id *2 +3] = found_left_segments[found_id].y
 
-	var found_right_segments : Array[Vector2i] = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),amount_per_edge, max_segments_per_side)
-	for found_id in range(min(found_right_segments.size(), amount_per_edge)):
-		segment_coord_data_arr[found_id * 2 +2 + (amount_per_edge * 2) ] = found_right_segments[found_id].x
-		segment_coord_data_arr[found_id * 2 +3 + (amount_per_edge * 2)] = found_right_segments[found_id].y		
+	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),max_segments_per_side, true)
+	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, false)
+	var center_found_amount : int = 0
+	
+	var total_edge_points_found : int = left_found_amount + right_found_amount + center_found_amount
 
-	return Vector3.ZERO
+	# find all the segments in between those 2 ends
+	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
+	
+	var end_id : int = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side)
+	
+	var compass_index : int = ((int(round( atan2(cam_forward.z, cam_forward.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
+	#var total_points_found : int =_flood_fill_work_data(compass_index,total_edge_points_found + 1, edge_amount_prioritize_per_side, max_segments_per_side)
+	
+	return 0
+
+
+func _flood_fill_work_data(compass_id : int, offset : int, edge_amount_to_prioritize : int,  max_segments_per_side : int) -> int:
+	#contruct an array of direction to check
+	var prev_id : int = compass_id -1  if compass_id-1 > 0 else  7
+	var query_directions : Array[Vector2i] = [compass_directions[compass_id], compass_directions[prev_id], compass_directions[ (compass_id +1) % 8]]
+	
+	var current_write_id : int = offset
+	var current_read_id : int = 0
+	var max_possible_tests : int = max_segments_per_side* max_segments_per_side
+	while current_write_id < max_possible_tests && current_read_id < current_write_id:
+		var segment_to_check : Vector2i = segment_work_data_arr[current_read_id] + query_directions[0]
+		current_read_id+=1
+
+		# chances are the next element in the edge is this, if so, skip it
+		# how to do this more intelligently
+		if(segment_to_check == segment_work_data_arr[current_read_id]+query_directions[0]):	
+			continue
+
+		if(segment_to_check.x < 0 ||segment_to_check.y < 0 || segment_to_check.x >= max_segments_per_side || segment_to_check.y >= max_segments_per_side ):
+			continue
+
+		# checking if the segment is already in the array has a massive performance impact
+		if segments_filled_map[segment_to_check] == update_counter:	
+			continue
+
+		segments_filled_map[segment_to_check] = update_counter
+		segment_work_data_arr[current_write_id] = segment_to_check
+		current_write_id +=1
+
+	return current_write_id
+	
+
+func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_found : int, center_edges_found : int,  edge_cell_amount_to_prioritize_per_side : int) -> int:
+	#interleave those segments in the work array so when we iterate to fill in the 'polygon' we do it somewhat in the order of closeness to player
+	
+	var read_index_data : Dictionary[String, int] = {"Left" : 0, "Right":0, "Center":0}
+	var final_write_id : int = 0
+
+	var amount_to_write_prioritized : int = min(edge_cell_amount_to_prioritize_per_side * 2, left_edges_found + right_edges_found + center_edges_found)
+	final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, 1,amount_to_write_prioritized, read_index_data)
+
+	var amount_to_write_post_prio : int = left_edges_found + right_edges_found + center_edges_found - amount_to_write_prioritized	
+
+	if(amount_to_write_post_prio > 0):
+		var post_prioritize_write_offset : int = 1 + (edge_cell_amount_to_prioritize_per_side * edge_cell_amount_to_prioritize_per_side)
+		final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, post_prioritize_write_offset, amount_to_write_post_prio, read_index_data)
+
+	return final_write_id
+	
+func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_found : int, _center_edges_found : int, write_offset : int , amount_to_write: int,  read_index_data: Dictionary[String, int]) -> int:
+	var read_left_id  :int = read_index_data["Left"]
+	var read_right_id  :int = read_index_data["Right"]
+	var read_center_id : int = read_index_data["Center"]
+	var write_id : int = 0
+	for current_point_id in range(amount_to_write):
+		#determine where in the work array to write to
+		write_id = current_point_id + write_offset
+
+		if(current_point_id % 2 == 0):
+		#try left first
+			if(read_left_id < left_edges_found):
+				segment_work_data_arr[write_id] = segment_found_edges_left[read_left_id]
+				read_left_id += 1
+			elif(read_right_id < right_edges_found):
+				segment_work_data_arr[write_id] = segment_found_edges_right[read_right_id]
+				read_right_id += 1
+		else:
+		#try right first
+			if(read_right_id < right_edges_found):
+				segment_work_data_arr[write_id] = segment_found_edges_right[read_right_id]
+				read_right_id += 1
+			elif(read_left_id < left_edges_found):
+				segment_work_data_arr[write_id] = segment_found_edges_left[read_left_id]
+				read_left_id += 1
+	
+	read_index_data["Left"] = read_left_id
+	read_index_data["Right"] = read_right_id
+	read_index_data["Center"] = read_center_id
+	return write_id
 
 # use the DDA algorithm to find the edges 	
-func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, amount_to_find : int, max_segment_id : int) -> Array[Vector2i]:
-	var ret_arr : Array[Vector2i]
-	ret_arr.resize(amount_to_find)
+func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segment_id : int, is_left_edge : bool) ->int:
 	dir.y = 0
 	dir = dir.normalized()
 
@@ -485,7 +591,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, amount_to_
 	var current_distance : float =0
 	var max_distance : float = 50
 	var amount_found : int = 0
-	while current_distance < max_distance && amount_found < amount_to_find:
+	while current_distance < max_distance && amount_found < max_segment_id:
 		#step towards current shortest direction
 		if(current_ray_length_per_dim.x < current_ray_length_per_dim.y):
 			current_tile_to_check.x += step_unit_dir.x
@@ -498,9 +604,14 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, amount_to_
 
 		# we've hit the edge of our chunk -> abort
 		if(current_tile_to_check.x < 0 || current_tile_to_check.y < 0 || current_tile_to_check.x > max_segment_id || current_tile_to_check.y > max_segment_id):
-			return ret_arr
+			return amount_found
 
-		ret_arr[amount_found] = current_tile_to_check
-		amount_found = amount_found +1
+		segments_filled_map[current_tile_to_check] = update_counter
+		if(is_left_edge):
+			segment_found_edges_left[amount_found] = current_tile_to_check
+		else:
+			segment_found_edges_right[amount_found] = current_tile_to_check
+	
+		amount_found +=1
 
-	return ret_arr
+	return amount_found
