@@ -443,17 +443,16 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	var playerdiff : Vector2 = Vector2(  _player_cam_transform_world.origin.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), _player_cam_transform_world.origin.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
 	
 	var player_current_sub_id_pos : Vector2 = Vector2(playerdiff.x / vertex_spacing, playerdiff.y / vertex_spacing)
-	var player_current_segment_id : Vector2i = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
+	var player_current_segment : Vector2i   = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
 
 	#reset the working data from last frame
 	segment_work_data_arr.fill(Vector2i.MIN)
 	segment_found_edges_left.fill(Vector2i.MIN)
 	segment_found_edges_right.fill(Vector2i.MIN)
+	segment_center_edges.fill(Vector2i.MIN)
 	
-	segment_work_data_arr[0] = player_current_segment_id
-	var segments_found : int = 1
 	#find the vector that describe the 'edges' of the camera
-	segments_found += _find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, segments_per_dim)
+	var segments_found: int = _find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
 	
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
@@ -461,7 +460,7 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 const compass_directions : Array[Vector2i] = [Vector2i(0,-1),Vector2i(1,-1), Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1)]	#clockwise directions starting with NORTH
 
 # returns 	
-func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, max_segments_per_side : int) -> int:
+func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
 	var cam_forward : Vector3 = _camera.get_global_transform().basis.x
 	
@@ -470,7 +469,7 @@ func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_p
 
 	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),max_segments_per_side, true)
 	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, false)
-	var center_found_amount : int = 0
+	var center_found_amount : int = _find_center_edge_line(_player_current_segment, max_segments_per_side)
 	
 	var total_edge_points_found : int = left_found_amount + right_found_amount + center_found_amount
 
@@ -478,6 +477,7 @@ func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_p
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	
 	var end_id : int = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side)
+	print("INTERLEAVED ARRAY ", segment_work_data_arr.slice(0, end_id +1))
 	
 	var compass_index : int = ((int(round( atan2(cam_forward.z, cam_forward.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
 	#var total_points_found : int =_flood_fill_work_data(compass_index,total_edge_points_found + 1, edge_amount_prioritize_per_side, max_segments_per_side)
@@ -523,7 +523,7 @@ func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_
 	var final_write_id : int = 0
 
 	var amount_to_write_prioritized : int = min(edge_cell_amount_to_prioritize_per_side * 2, left_edges_found + right_edges_found + center_edges_found)
-	final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, 1,amount_to_write_prioritized, read_index_data)
+	final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, 0,amount_to_write_prioritized, read_index_data)
 
 	var amount_to_write_post_prio : int = left_edges_found + right_edges_found + center_edges_found - amount_to_write_prioritized	
 
@@ -533,7 +533,7 @@ func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_
 
 	return final_write_id
 	
-func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_found : int, _center_edges_found : int, write_offset : int , amount_to_write: int,  read_index_data: Dictionary[String, int]) -> int:
+func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_found : int, center_edges_found : int, write_offset : int , amount_to_write: int,  read_index_data: Dictionary[String, int]) -> int:
 	var read_left_id  :int = read_index_data["Left"]
 	var read_right_id  :int = read_index_data["Right"]
 	var read_center_id : int = read_index_data["Center"]
@@ -541,6 +541,11 @@ func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_
 	for current_point_id in range(amount_to_write):
 		#determine where in the work array to write to
 		write_id = current_point_id + write_offset
+
+		if(read_center_id < center_edges_found):
+			segment_work_data_arr[write_id] = segment_center_edges[read_center_id]
+			read_center_id += 1
+			continue
 
 		if(current_point_id % 2 == 0):
 		#try left first
@@ -615,3 +620,15 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 		amount_found +=1
 
 	return amount_found
+
+func _find_center_edge_line(_player_current_segment : Vector2i, max_segment_id : int) -> int:
+	var write_id : int = 0
+	if(_is_segment_valid_in_chunk(_player_current_segment, max_segment_id)):
+		segment_center_edges[write_id] = _player_current_segment
+		segments_filled_map[_player_current_segment] = update_counter
+		write_id += 1
+		
+	return write_id	
+
+func _is_segment_valid_in_chunk(segment_to_check : Vector2i, max_segments_per_side : int) -> bool:
+		return segment_to_check.x >= 0 && segment_to_check.y >= 0 &&  segment_to_check.x < max_segments_per_side && segment_to_check.y < max_segments_per_side
