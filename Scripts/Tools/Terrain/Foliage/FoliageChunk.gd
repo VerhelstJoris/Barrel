@@ -452,15 +452,19 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	segment_center_edges.fill(Vector2i.MIN)
 	
 	#find the vector that describe the 'edges' of the camera
-	var segments_found: int = _find_camera_edge_vector_additive(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
+	var segments_filled_in : int = _fill_work_array_with_current_segments_data(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
 	
+	#fill in 
+	for found_segment_id in range(min(segments_filled_in, high_lod_num_work_groups_xz * high_lod_num_work_groups_xz)):
+		segment_coord_data_arr[found_segment_id *2 ] = segment_work_data_arr[found_segment_id].x
+		segment_coord_data_arr[found_segment_id *2 +1 ] = segment_work_data_arr[found_segment_id].y
+		
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
 
 const compass_directions : Array[Vector2i] = [Vector2i(0,-1),Vector2i(1,-1), Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1)]	#clockwise directions starting with NORTH
 
-# returns 	
-func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
+func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
 	var cam_forward : Vector3 = _camera.get_global_transform().basis.x
 	
@@ -471,67 +475,62 @@ func _find_camera_edge_vector_additive(_camera : Camera3D, _player_segment_sub_p
 	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, false)
 	var center_found_amount : int = _find_center_edge_line(_player_current_segment, max_segments_per_side)
 	
-	var total_edge_points_found : int = left_found_amount + right_found_amount + center_found_amount
-
 	# find all the segments in between those 2 ends
-	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
+	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz - 1
+	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
 	
-	var end_id : int = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side)
-	print("INTERLEAVED ARRAY ", segment_work_data_arr.slice(0, end_id +1))
+	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side, post_priotitize_offset)
+	var end_write_id : int =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
 	
-	var compass_index : int = ((int(round( atan2(cam_forward.z, cam_forward.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
-	#var total_points_found : int =_flood_fill_work_data(compass_index,total_edge_points_found + 1, edge_amount_prioritize_per_side, max_segments_per_side)
-	
-	return 0
+	return end_write_id + 1 
 
 
-func _flood_fill_work_data(compass_id : int, offset : int, edge_amount_to_prioritize : int,  max_segments_per_side : int) -> int:
+func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, post_prioritize_write_offset : int,  max_segments_per_side : int) -> int:
 	#contruct an array of direction to check
-	var prev_id : int = compass_id -1  if compass_id-1 > 0 else  7
-	var query_directions : Array[Vector2i] = [compass_directions[compass_id], compass_directions[prev_id], compass_directions[ (compass_id +1) % 8]]
+	var compass_index : int = ((int(round( atan2(camera_forward.z, camera_forward.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
+	var prev_id : int = compass_index -1  if compass_index-1 > 0 else  7
+	var query_directions : Array[Vector2i] = [compass_directions[compass_index], compass_directions[prev_id], compass_directions[ (compass_index +1) % 8]]
 	
-	var current_write_id : int = offset
+	var current_write_id : int = write_offsets.x
 	var current_read_id : int = 0
-	var max_possible_tests : int = max_segments_per_side* max_segments_per_side
+	var max_possible_tests : int = max_segments_per_side * max_segments_per_side
 	while current_write_id < max_possible_tests && current_read_id < current_write_id:
 		var segment_to_check : Vector2i = segment_work_data_arr[current_read_id] + query_directions[0]
 		current_read_id+=1
 
-		# chances are the next element in the edge is this, if so, skip it
-		# how to do this more intelligently
-		if(segment_to_check == segment_work_data_arr[current_read_id]+query_directions[0]):	
+		if(!_is_segment_valid_in_chunk(segment_to_check, max_segments_per_side)):
 			continue
 
-		if(segment_to_check.x < 0 ||segment_to_check.y < 0 || segment_to_check.x >= max_segments_per_side || segment_to_check.y >= max_segments_per_side ):
-			continue
-
-		# checking if the segment is already in the array has a massive performance impact
+		# checking if the segment is already in the array has a massive performance impact if we do it via array.contains
+		# instead we have a map with all possible combinations we can check
 		if segments_filled_map[segment_to_check] == update_counter:	
 			continue
 
 		segments_filled_map[segment_to_check] = update_counter
 		segment_work_data_arr[current_write_id] = segment_to_check
+
+		#update the write id, make sure we don't accidentally 
 		current_write_id +=1
+		if(current_write_id == post_prioritize_write_offset && write_offsets.y > post_prioritize_write_offset):
+			current_write_id = write_offsets.y +1
 
 	return current_write_id
 	
 
-func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_found : int, center_edges_found : int,  edge_cell_amount_to_prioritize_per_side : int) -> int:
+func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_found : int, center_edges_found : int,  edge_cell_amount_to_prioritize_per_side , non_prioritized_offset : int) -> Vector2i:
 	#interleave those segments in the work array so when we iterate to fill in the 'polygon' we do it somewhat in the order of closeness to player
-	
 	var read_index_data : Dictionary[String, int] = {"Left" : 0, "Right":0, "Center":0}
-	var final_write_id : int = 0
+	var return_index_write_offset : Vector2i = Vector2i.ZERO
 
 	var amount_to_write_prioritized : int = min(edge_cell_amount_to_prioritize_per_side * 2, left_edges_found + right_edges_found + center_edges_found)
-	final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, 0,amount_to_write_prioritized, read_index_data)
+	return_index_write_offset.x = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, 0,amount_to_write_prioritized, read_index_data)
 
 	var amount_to_write_post_prio : int = left_edges_found + right_edges_found + center_edges_found - amount_to_write_prioritized	
 
 	if(amount_to_write_post_prio > 0):
-		var post_prioritize_write_offset : int = 1 + (edge_cell_amount_to_prioritize_per_side * edge_cell_amount_to_prioritize_per_side)
-		final_write_id = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, post_prioritize_write_offset, amount_to_write_post_prio, read_index_data)
+		return_index_write_offset.y = _write_edge_data_chunk_into_work_array(left_edges_found, right_edges_found, center_edges_found, non_prioritized_offset, amount_to_write_post_prio, read_index_data)
 
-	return final_write_id
+	return return_index_write_offset
 	
 func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_found : int, center_edges_found : int, write_offset : int , amount_to_write: int,  read_index_data: Dictionary[String, int]) -> int:
 	var read_left_id  :int = read_index_data["Left"]
