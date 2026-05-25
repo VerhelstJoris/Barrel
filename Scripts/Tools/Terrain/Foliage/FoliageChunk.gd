@@ -476,7 +476,7 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var center_found_amount : int = _find_center_edge_line(_player_current_segment, max_segments_per_side)
 	
 	# find all the segments in between those 2 ends
-	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz - 1
+	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
 	
 	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side, post_priotitize_offset)
@@ -494,25 +494,38 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 	var current_write_id : int = write_offsets.x
 	var current_read_id : int = 0
 	var max_possible_tests : int = max_segments_per_side * max_segments_per_side
+	var direction_amount_query : int = 1
 	while current_write_id < max_possible_tests && current_read_id < current_write_id:
-		var segment_to_check : Vector2i = segment_work_data_arr[current_read_id] + query_directions[0]
+		# how many directions should we query?
+		# if this is an edge, only 1, otherwise all 3
+		if( (current_read_id > write_offsets.y && write_offsets.y > post_prioritize_write_offset) || # are we past the second block of edge ids
+			(current_read_id > write_offsets.x && current_read_id < post_prioritize_write_offset) 	# are we past the second block of edge ids
+		):
+			direction_amount_query = 3
+		else:
+			direction_amount_query = 1
+		
+		var start_segment : Vector2i = segment_work_data_arr[current_read_id]
 		current_read_id+=1
-
-		if(!_is_segment_valid_in_chunk(segment_to_check, max_segments_per_side)):
-			continue
-
-		# checking if the segment is already in the array has a massive performance impact if we do it via array.contains
-		# instead we have a map with all possible combinations we can check
-		if segments_filled_map[segment_to_check] == update_counter:	
-			continue
-
-		segments_filled_map[segment_to_check] = update_counter
-		segment_work_data_arr[current_write_id] = segment_to_check
-
-		#update the write id, make sure we don't accidentally 
-		current_write_id +=1
-		if(current_write_id == post_prioritize_write_offset && write_offsets.y > post_prioritize_write_offset):
-			current_write_id = write_offsets.y +1
+		
+		for query_id in range(direction_amount_query):
+			var segment_to_check : Vector2i = start_segment + query_directions[query_id]
+	
+			if(!_is_segment_valid_in_chunk(segment_to_check, max_segments_per_side)):
+				continue
+	
+			# checking if the segment is already in the array has a massive performance impact if we do it via array.contains
+			# instead we have a map with all possible combinations we can check
+			if segments_filled_map[segment_to_check] == update_counter:	
+				continue
+	
+			segments_filled_map[segment_to_check] = update_counter
+			segment_work_data_arr[current_write_id] = segment_to_check
+	
+			#update the write id, make sure we don't accidentally 
+			current_write_id +=1
+			if(current_write_id == post_prioritize_write_offset && write_offsets.y > post_prioritize_write_offset):
+				current_write_id = write_offsets.y +1
 
 	return current_write_id
 	
