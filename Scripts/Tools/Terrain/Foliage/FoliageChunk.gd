@@ -470,17 +470,18 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	
 	var left_pos : Vector3 = cam_frustrum[2].project(_camera.get_global_position() -cam_forward)
 	var right_pos : Vector3 = cam_frustrum[4].project(_camera.get_global_position() +cam_forward)
-
+	print("try find edge of vision")
 	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),max_segments_per_side, true)
-	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, false)
-	var center_found_amount : int = _find_center_edge_line(_player_current_segment, max_segments_per_side)
+	var right_found_amount : int =  _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, false)
+	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side)
 	
 	# find all the segments in between those 2 ends
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
 	
 	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side, post_priotitize_offset)
-	var end_write_id : int =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
+	var end_write_id : int = index_write_offsets.y
+	#end_write_id =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
 	
 	return end_write_id + 1 
 
@@ -529,7 +530,6 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 
 	return current_write_id
 	
-
 func _interleave_edge_data_into_work_array(left_edges_found : int , right_edges_found : int, center_edges_found : int,  edge_cell_amount_to_prioritize_per_side , non_prioritized_offset : int) -> Vector2i:
 	#interleave those segments in the work array so when we iterate to fill in the 'polygon' we do it somewhat in the order of closeness to player
 	var read_index_data : Dictionary[String, int] = {"Left" : 0, "Right":0, "Center":0}
@@ -582,7 +582,7 @@ func _write_edge_data_chunk_into_work_array(left_edges_found : int, right_edges_
 	return write_id
 
 # use the DDA algorithm to find the edges 	
-func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segment_id : int, is_left_edge : bool) ->int:
+func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segment_per_side : int, is_left_edge : bool) ->int:
 	dir.y = 0
 	dir = dir.normalized()
 
@@ -604,24 +604,29 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 		current_ray_length_per_dim.y = (grid_start_pos.y - current_tile_to_check.y) * ray_unit_step_size.y
 	else:
 		current_ray_length_per_dim.y = ((current_tile_to_check.y +1) - grid_start_pos.y) * ray_unit_step_size.y
-
+	
 	var current_distance : float =0
+	# TODO: properly calculate the max possible distance we could travel in a chunk before we should abort
 	var max_distance : float = 50
 	var amount_found : int = 0
-	while current_distance < max_distance && amount_found < max_segment_id:
+	while current_distance < max_distance && amount_found < max_segment_per_side:
 		#step towards current shortest direction
 		if(current_ray_length_per_dim.x < current_ray_length_per_dim.y):
 			current_tile_to_check.x += step_unit_dir.x
-			current_distance = current_ray_length_per_dim.x
+			current_distance += current_ray_length_per_dim.x
 			current_ray_length_per_dim.x += ray_unit_step_size.x
 		else:
 			current_tile_to_check.y += step_unit_dir.y
-			current_distance = current_ray_length_per_dim.y
+			current_distance += current_ray_length_per_dim.y
 			current_ray_length_per_dim.y += ray_unit_step_size.y
 
 		# we've hit the edge of our chunk -> abort
-		if(current_tile_to_check.x < 0 || current_tile_to_check.y < 0 || current_tile_to_check.x > max_segment_id || current_tile_to_check.y > max_segment_id):
-			return amount_found
+		if(!_is_segment_valid_in_chunk(current_tile_to_check, max_segment_per_side)):
+			if(current_distance > max_distance):
+				return amount_found
+			else:
+				continue
+
 
 		segments_filled_map[current_tile_to_check] = update_counter
 		if(is_left_edge):
@@ -633,14 +638,49 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 
 	return amount_found
 
-func _find_center_edge_line(_player_current_segment : Vector2i, max_segment_id : int) -> int:
+func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_per_side : int) -> int:
 	var write_id : int = 0
-	if(_is_segment_valid_in_chunk(_player_current_segment, max_segment_id)):
+	if(_is_segment_valid_in_chunk(_player_current_segment, max_segment_per_side)):
 		segment_center_edges[write_id] = _player_current_segment
 		segments_filled_map[_player_current_segment] = update_counter
 		write_id += 1
+		return write_id
 		
+	var left_start : Vector2i = segment_found_edges_left[0]
+	var right_start : Vector2i = segment_found_edges_right[0]
+	
+	if( (left_start.x == right_start.x ) || (left_start.y == right_start.y) ):
+		write_id += _add_center_edge_line(left_start, right_start, write_id, max_segment_per_side)
+	elif(left_start != Vector2i.MIN && right_start != Vector2i.MIN):
+		var target_corner : Vector2i =  (left_start + right_start /2).snappedi(max_segment_per_side-1)
+		#add the corner
+		segment_center_edges[write_id] = target_corner
+		segments_filled_map[target_corner] = update_counter
+		write_id +=1
+		
+		write_id += _add_center_edge_line(target_corner, left_start, write_id, max_segment_per_side)
+		write_id += _add_center_edge_line(target_corner, right_start, write_id , max_segment_per_side)
+	else:
+		push_error("Failed to add edges as our left (", left_start, ") and right (" , right_start, ") starting points are not valid")
+	
 	return write_id	
+	
+func _add_center_edge_line(from : Vector2i, to : Vector2i, write_offset : int, max_segments_per_side : int) -> int:
+	var dir : Vector2i = (to - from).sign()
+	var amount_added : int = 0
+	var amount_needed : int = int((to - from).length())
+	for id in range(amount_needed):
+		var to_add : Vector2i = from + (id * dir)
+		if(!_is_segment_valid_in_chunk(to_add, max_segments_per_side)):
+			push_error("TRYING TO ADD ", to_add, " AS A CENTER EDGE SEGMENT BETWEEN ", from , " AND ", to)
+			return amount_added
+			
+		if(segments_filled_map[to_add] != update_counter):
+			segment_center_edges[write_offset + amount_added] = to_add
+			segments_filled_map[to_add] = update_counter
+			amount_added+=1
+
+	return amount_added
 
 func _is_segment_valid_in_chunk(segment_to_check : Vector2i, max_segments_per_side : int) -> bool:
 		return segment_to_check.x >= 0 && segment_to_check.y >= 0 &&  segment_to_check.x < max_segments_per_side && segment_to_check.y < max_segments_per_side
