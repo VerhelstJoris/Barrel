@@ -437,7 +437,6 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	if(!segment_coord_data_buffer_RID.is_valid()):
 		return
 		
-
 	var vertex_spacing : float = _get_vertex_spacing()		
 	#start by calculating the segment we are currently in
 	var playerdiff : Vector2 = Vector2(  _player_cam_transform_world.origin.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), _player_cam_transform_world.origin.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
@@ -466,13 +465,18 @@ const compass_directions : Array[Vector2i] = [Vector2i(0,-1),Vector2i(1,-1), Vec
 
 func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
-	var cam_forward : Vector3 = _camera.get_global_transform().basis.x
+	var cam_forward : Vector3 = -_camera.get_global_transform().basis.z
 	
-	var left_pos : Vector3 = cam_frustrum[2].project(_camera.get_global_position() -cam_forward)
-	var right_pos : Vector3 = cam_frustrum[4].project(_camera.get_global_position() +cam_forward)
-	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(left_pos - _camera.get_global_position()),max_segments_per_side, segment_found_edges_left)
-	var right_found_amount : int =  _find_ray_intersect_grid(_player_segment_sub_pos, Vector3(right_pos - _camera.get_global_position()),max_segments_per_side, segment_found_edges_right)
+	var left_dir : Vector3 = cam_frustrum[2].normal.cross(Vector3.UP)
+	var right_dir : Vector3 =  cam_frustrum[4].normal.cross(-Vector3.UP)
+
+	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,max_segments_per_side, segment_found_edges_left)
+	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
 	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side)
+	
+	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 5),_camera.get_global_position() + (cam_forward * 5) + (left_dir * 10), Color.YELLOW)
+	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 5),_camera.get_global_position() + (cam_forward * 5) + (left_dir * 10), Color.PURPLE)
+	print("LEFT : ", left_found_amount , " ", segment_found_edges_left[0], " CENTER ", center_found_amount, " " , segment_center_edges[0], " RIGHT ", right_found_amount, " ", segment_found_edges_right[0])
 	# find all the segments in between those 2 ends
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
@@ -530,7 +534,7 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 	
 func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, left_edges_found : int , right_edges_found : int, center_edges_found : int,  edge_cell_amount_to_prioritize_per_side , non_prioritized_offset : int) -> Vector2i:
 	#interleave those segments in the work array so when we iterate to fill in the 'polygon' we do it somewhat in the order of closeness to player
-	const large_float : float = 900000000
+	const large_float : float = 99999999999
 	var return_index_write_offset : Vector2i = Vector2i.ZERO
 
 	var amount_to_write_prioritized : int = min(edge_cell_amount_to_prioritize_per_side * 2, left_edges_found + right_edges_found + center_edges_found)
@@ -563,7 +567,7 @@ func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, le
 			if(left_id < left_edges_found):
 				left_dist = player_current_segment.distance_squared_to(segment_found_edges_left[left_id])
 			else:
-				left_dist = large_float	
+				left_dist = large_float
 		elif(smallest_distance == center_dist):
 			segment_work_data_arr[prio_write_id] = segment_center_edges[center_id]
 			center_id +=1
@@ -578,7 +582,8 @@ func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, le
 				right_dist = player_current_segment.distance_squared_to(segment_found_edges_right[right_id])
 			else:
 				right_dist = large_float
-		
+
+
 		prio_write_id +=1
 		return_index_write_offset.x +=1
 		
