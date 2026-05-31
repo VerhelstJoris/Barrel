@@ -439,7 +439,9 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 		
 	var vertex_spacing : float = _get_vertex_spacing()		
 	#start by calculating the segment we are currently in
-	var playerdiff : Vector2 = Vector2(  _player_cam_transform_world.origin.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), _player_cam_transform_world.origin.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
+	const backward_offset : float = 0.5
+	var player_start_pos : Vector3 = _player_cam_transform_world.origin + (_player_cam_transform_world.basis.z * backward_offset)
+	var playerdiff : Vector2 = Vector2(  player_start_pos.x- (global_position.x - (chunk_dimenstion_size_m * 0.5)), player_start_pos.z- (global_position.z - (chunk_dimenstion_size_m * 0.5)) )
 	
 	var player_current_sub_id_pos : Vector2 = Vector2(playerdiff.x / vertex_spacing, playerdiff.y / vertex_spacing)
 	var player_current_segment : Vector2i   = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
@@ -474,9 +476,9 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
 	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side)
 	
-	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 5),_camera.get_global_position() + (cam_forward * 5) + (left_dir * 10), Color.YELLOW)
-	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 5),_camera.get_global_position() + (cam_forward * 5) + (left_dir * 10), Color.PURPLE)
-	print("LEFT : ", left_found_amount , " ", segment_found_edges_left[0], " CENTER ", center_found_amount, " " , segment_center_edges[0], " RIGHT ", right_found_amount, " ", segment_found_edges_right[0])
+	#DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (left_dir * 10), Color.YELLOW)
+	#DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (right_dir * 10), Color.PURPLE)
+	#print("LEFT : ", left_found_amount , " ", segment_found_edges_left[0], " CENTER ", center_found_amount, " " , segment_center_edges[0], " RIGHT ", right_found_amount, " ", segment_found_edges_right[0])
 	# find all the segments in between those 2 ends
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
