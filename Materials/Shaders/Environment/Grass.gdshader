@@ -9,38 +9,48 @@ uniform float blade_bend = 0.5;
 uniform vec3 color_small: source_color = vec3(0.3, 0.6, 0.1);
 uniform vec3 color_large: source_color = vec3(0.9, 0.9, 0.2);
 
+//patchiness
+group_uniforms patchiness;
 uniform sampler2D patch_noise;
 uniform float patch_scale = 5.0;
 varying float patch_factor;
-
-varying float bottom_to_top;
-
-uniform float vertex_move_amount=1.0;
+group_uniforms;
 
 //wind related
+group_uniforms wind_movement;
 uniform sampler2D wind_noise;
 uniform float wind_strength = 0.1;
 uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
 uniform float wind_ao_affect = 0.1;
+group_uniforms;
 
+// LOD related
+group_uniforms LOD_division;
+uniform bool LOD_divide = true;
+varying float bottom_to_top;
+uniform float vertex_move_amount=1.0;
 uniform float low_lod_division_amount = 2.0;
-
 uniform float min_lod_distance = 8.0f;
 uniform float max_lod_distance = 12.0f;
+group_uniforms;
 
-void vertex() {
-	vec3 world_camera = (INV_VIEW_MATRIX * vec4(vec3(0.0), 1.0)).xyz;
-	vec3 world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	float dist = distance(world_position.xyz, world_camera);
+void vertex()
+{
+	if(LOD_divide)
+	{
+		vec3 world_camera = (INV_VIEW_MATRIX * vec4(vec3(0.0), 1.0)).xyz;
+		vec3 world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		float dist = distance(world_position.xyz, world_camera);
 
-	bottom_to_top = 1.0 - UV.y;
-	float floored_uv = 1.0 - floor(bottom_to_top +0.1);
-	float rounded = 1.0 - round(UV.y);
-	float added = smoothstep(min_lod_distance,max_lod_distance, dist) * (bottom_to_top * floored_uv);
-	added = (added / low_lod_division_amount) * vertex_move_amount;
-	VERTEX.y -= added;
-	UV.y += added;
+		bottom_to_top = 1.0 - UV.y;
+		float floored_uv = 1.0 - floor(bottom_to_top +0.1);
+		float rounded = 1.0 - round(UV.y);
+		float added = smoothstep(min_lod_distance,max_lod_distance, dist) * (bottom_to_top * floored_uv);
+		added = (added / low_lod_division_amount) * vertex_move_amount;
+		VERTEX.y -= added;
+		UV.y += added;
+	}
 
 	bottom_to_top = 1.0 - UV.y;
 
@@ -55,11 +65,11 @@ void vertex() {
 	mat4 inv_model = inverse(MODEL_MATRIX);
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
 
-  	//VERTEX.xz += current_wind_bend * local_direction;
-	//VERTEX.xz += blade_bend * pow(bottom_to_top, 2.0);	// bend the blade in the direction this is positioned in
+  	VERTEX.xz += current_wind_bend * local_direction;
+	VERTEX.xz += blade_bend * pow(bottom_to_top, 2.0);	// bend the blade in the direction this is positioned in
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
-	//VERTEX *= mix(size_small, size_large, patch_factor);
+	VERTEX *= mix(size_small, size_large, patch_factor);
 
 	NORMAL = mix(NORMAL, vec3(0.0, 1.0, 0.0), bottom_to_top);
 }
