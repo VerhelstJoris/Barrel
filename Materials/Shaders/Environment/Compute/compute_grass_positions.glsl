@@ -23,14 +23,16 @@ layout(set = 0, binding = 2, std430) writeonly buffer BladeAmounts {
         
 layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
     float TERRAIN_VERTEX_SPACING;
-    float TERRAIN_HEIGHT;
 
     float TARGET_DENSITY;
     float MAX_BLADE_RANDOM_OFFSET;
     float MAX_BLADE_TILT_RAD;
 
     float MIN_BLADE_SCALE;
-    float RESERVEDPERGROUP;
+        
+    float DIST_THRESH_CLOSE;    
+    float DIST_THRESH_MED;    
+    float DIST_THRESH_FAR;    
 } FPARAMETERS;
         
 layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
@@ -148,6 +150,15 @@ float get_rot_biased_towards_player(vec2 blade_pos)
    return rand_angle;
 }
 
+bool should_skip_grass_id(int x_id ,int z_id, int dist_threshold_id)
+{
+   // layout id over small squares of 2X2 with following ID order
+   //   3   1        
+   //   0   2   
+   // then skip the ID if it's smaller than the dist_threshold_id       
+   return ((x_id %2) * 2) + ( (z_id %2) * (((1 - (x_id %2)) *4) -1)) < dist_threshold_id;
+}
+        
 
 int fill_chunk_segment(ivec2 segment_local_coord)
 {
@@ -160,10 +171,10 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     
     const float chunk_size_dim = FPARAMETERS.TERRAIN_VERTEX_SPACING * IPARAMETERS.AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;    
     const float half_chunk_size_dim =chunk_size_dim * 0.5;
+    const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.x - half_chunk_size_dim;
+    const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.y - half_chunk_size_dim;
     const vec2 half_offset = vec2(half_chunk_size_dim, half_chunk_size_dim);
-    const float x_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.x - half_offset.x;
-    const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.y - half_offset.y;
-    
+
     float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
     vec2 final_pos;
     mat3 rot_scale_matrix;
@@ -181,12 +192,34 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
     
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
-    
+        
+    //calculate the dist between the player and this segment    
+    const float distance_segment_player =  length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
+    int skip_id = 0;    
+    if(distance_segment_player > FPARAMETERS.DIST_THRESH_CLOSE)
+    {
+        skip_id = 1;
+        if(distance_segment_player > FPARAMETERS.DIST_THRESH_MED)
+        {
+            skip_id = 2;
+            if (distance_segment_player > FPARAMETERS.DIST_THRESH_FAR)
+            {
+                skip_id = 3;
+            }
+        }
+    }
+
+        
     for(int row_ID = 0; row_ID < rows; row_ID++)
     {
         x = row_ID * Offset;
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
+            if(should_skip_grass_id(row_ID, col_ID, skip_id))
+            {
+               continue;     
+            }
+
             z = col_ID * Offset;
             x_offset_rand = (fract(random2D(vec2(z,x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
             group_x = mod(x + x_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
@@ -198,7 +231,7 @@ int fill_chunk_segment(ivec2 segment_local_coord)
             
             final_pos = vec2(final_x, final_z);
             scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, chunk_size_dim);
-            
+                
             if(scale < FPARAMETERS.MIN_BLADE_SCALE)
             {
                 continue;

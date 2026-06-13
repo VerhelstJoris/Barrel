@@ -11,20 +11,23 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var chunk_dimenstion_size_m : float = 200.0
 @export var positions_compute_shader : RDShaderFile
 @export var transfer_compute_shader : RDShaderFile
-@export var high_LOD_mesh : Mesh
-@export var low_LOD_mesh : Mesh
+@export var foliage_mesh_high_LOD : Mesh
+@export var foliage_mesh_low_LOD : Mesh
 
 @export var chunk_mask : Texture2D
-@export var grass_material :Material
+@export var grass_material_high_LOD :Material
+@export var grass_material_low_LOD :Material
 
 @export var terrain_node : Terrain3D
 
 @export_group("Customizable Parameters")
 @export var high_lod_num_work_groups_xz : int = 4
-
+	
 @export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
+# In ascending order, at what distances from the player should a segment of grass blades draw 1/2/3 blades less per 4
+@export var distance_threshold_vec : Vector3 = Vector3(8,16,32)
 
 @export var min_grass_blade_scale : float = 0.2
 
@@ -244,7 +247,8 @@ func _setup_compute_pipeline()	-> void:
 	
 	# float parameter binding
 	var float_params_arr : PackedByteArray =  PackedFloat32Array(
-		[vertex_spacing, 100.0, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale, 100.0]
+		[vertex_spacing, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale,
+		distance_threshold_vec.x, distance_threshold_vec.y, distance_threshold_vec.z]
 		 ).to_byte_array()
 	var fparameter_buffer_RID :RID = rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
 	RID_arr.append(fparameter_buffer_RID)
@@ -376,8 +380,8 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	RID_arr.append(created_multimesh_RID)
 	#calculate an estimated instance count to pass through
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
-	high_LOD_mesh.surface_set_material(0,grass_material)
-	RenderingServer.multimesh_set_mesh(created_multimesh_RID, high_LOD_mesh.get_rid())
+	foliage_mesh_high_LOD.surface_set_material(0, grass_material_high_LOD)
+	RenderingServer.multimesh_set_mesh(created_multimesh_RID, foliage_mesh_high_LOD.get_rid())
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
 	var created_aabb : AABB = _contruct_multimesh_bounding_box()
 	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,created_aabb)
