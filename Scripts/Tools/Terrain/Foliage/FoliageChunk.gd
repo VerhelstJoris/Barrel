@@ -505,12 +505,12 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var left_dir : Vector3 = cam_frustrum[2].normal.cross(Vector3.UP)
 	var right_dir : Vector3 =  cam_frustrum[4].normal.cross(-Vector3.UP)
 
-	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,max_segments_per_side, segment_found_edges_left)
-	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
+	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,cam_forward,max_segments_per_side, segment_found_edges_left)
+	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,cam_forward,max_segments_per_side, segment_found_edges_right)
 	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side)
 	
-	#DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (left_dir * 10), Color.YELLOW)
-	#DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (right_dir * 10), Color.PURPLE)
+	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (left_dir * 10), Color.YELLOW)
+	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (right_dir * 10), Color.PURPLE)
 	
 	# find all the segments in between those 2 ends
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
@@ -634,7 +634,7 @@ func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, le
 	return return_index_write_offset
 
 # use the DDA algorithm to find the edges 	
-func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segment_per_side : int, arr_to_edit : Array[Vector2i]) ->int:
+func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, camera_forward : Vector3, max_segment_per_side : int, arr_to_edit : Array[Vector2i]) ->int:
 	dir.y = 0
 	dir = dir.normalized()
 
@@ -681,18 +681,20 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 					var start_corner : Vector2i = _clamp_outside_segment_to_closest_corner(start_tile, max_segment_id)
 					
 					var direction_to_check :=Vector2i.ZERO
-					if(abs(dir.x) > abs(dir.z)):
-						direction_to_check.x = sign(dir.x)
+					if(abs(camera_forward.x) > abs(camera_forward.z)):
+						direction_to_check.x = sign(camera_forward.x)
 					else:
-						direction_to_check.y = sign(dir.z)
+						direction_to_check.y = sign(camera_forward.z)
 					
-					var end_corner : Vector2i =start_corner + (direction_to_check * max_segment_id)
+					var end_corner : Vector2i = _clamp_outside_segment_to_closest_corner(start_corner + (direction_to_check * max_segment_id), max_segment_id)
 					amount_found += _add_edge_segments_between_points(start_corner, end_corner, amount_found, max_segment_per_side, arr_to_edit)
 				return amount_found
 			else:
 				continue
 
 
+		# explicitly don't check for if it's already been updated
+		# we assume this tile is needed
 		segments_filled_map[current_tile_to_check] = update_counter
 		arr_to_edit[amount_found] = current_tile_to_check
 	
@@ -748,7 +750,7 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 		
 		write_id +=  combined_amount_found
 	else:
-		push_error("Failed to add edges as our left (", left_start, ") and right (" , right_start, ") starting points are not valid")
+			push_error("Failed to add edges as our left (", left_start, ") and right (" , right_start, ") starting points are not valid")
 	
 	return write_id	
 	
@@ -761,10 +763,11 @@ func _add_edge_segments_between_points(from : Vector2i, to : Vector2i, write_off
 		if(!_is_segment_valid_in_chunk(to_add, max_segments_per_side)):
 			return amount_added
 			
-		if(segments_filled_map[to_add] != update_counter):
-			arr_to_edit[write_offset + amount_added] = to_add
-			segments_filled_map[to_add] = update_counter
-			amount_added+=1
+		# explicitly don't check for if it's already been updated
+		# we assume this tile is needed
+		arr_to_edit[write_offset + amount_added] = to_add
+		segments_filled_map[to_add] = update_counter
+		amount_added+=1
 
 	return amount_added
 
