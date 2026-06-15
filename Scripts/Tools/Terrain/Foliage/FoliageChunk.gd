@@ -20,6 +20,8 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
 @export var terrain_node : Terrain3D
 
+@export var visibility_notifier : VisibleOnScreenNotifier3D
+
 @export_group("Customizable Parameters")
 @export var high_lod_num_work_groups_xz : int = 4
 	
@@ -50,6 +52,7 @@ var scenario_RID
 var created_multimesh_RID : RID
 var created_multimesh_buffer_RID : RID
 var created_multimesh_command_buffer_RID : RID
+var created_multimesh_AABB : AABB
 
 var compute_pos_shader_RID : RID
 var transfer_shader_RID : RID
@@ -150,14 +153,25 @@ func _ready() -> void:
 func _contruct_multimesh_bounding_box() ->AABB:
 	var extra_offset : float = 5
 	
-	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,500,chunk_dimenstion_size_m + extra_offset)
-	#offset by half the size towards 0
-	var bb_pos : Vector3 = Vector3( -(chunk_dimenstion_size_m + extra_offset) * 0.5,
-	0,
-	-(chunk_dimenstion_size_m + extra_offset) * 0.5)
+	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,100,chunk_dimenstion_size_m + extra_offset)
 	
-	var bounding_box : AABB = AABB(bb_pos, bb_size)
-	return bounding_box
+	#the position of the AABB is not the center but rather the 'start' 
+	# the start is the 'most negative' point
+	var chunk_world_id : Vector2 = Vector2( (global_position.x + (sign(global_position.x) * chunk_dimenstion_size_m*0.5)) / chunk_dimenstion_size_m,
+	(global_position.z + + (sign(global_position.z) * chunk_dimenstion_size_m*0.5)) / chunk_dimenstion_size_m)
+	
+	var bb_pos : Vector3 = Vector3.ZERO
+	if(chunk_world_id.x > 0):
+		bb_pos.x = chunk_dimenstion_size_m * (chunk_world_id.x -1)
+	else:
+		bb_pos.x = chunk_dimenstion_size_m * chunk_world_id.x
+	
+	if(chunk_world_id.y > 0):
+		bb_pos.z = chunk_dimenstion_size_m * (chunk_world_id.y -1)
+	else:	
+		bb_pos.z = chunk_dimenstion_size_m * chunk_world_id.y
+	
+	return AABB(bb_pos, bb_size)
 
 
 func _process(_delta: float) -> void:
@@ -172,7 +186,10 @@ func _process(_delta: float) -> void:
 	
 	if(player_transform_to_pass.is_equal_approx(cam_transform)):
 		return
-		
+
+	if(!visibility_notifier.is_on_screen()):
+		return
+
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
 		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam))
@@ -383,9 +400,13 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	foliage_mesh_high_LOD.surface_set_material(0, grass_material_high_LOD)
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, foliage_mesh_high_LOD.get_rid())
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
-	var created_aabb : AABB = _contruct_multimesh_bounding_box()
-	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,created_aabb)
-	RenderingServer.instance_set_custom_aabb(instance_RID, created_aabb)
+	created_multimesh_AABB = _contruct_multimesh_bounding_box()
+	if(visibility_notifier):
+		visibility_notifier.aabb = created_multimesh_AABB
+	else:
+		push_error("No Visiblity notifier hooked up to foliage chunk ", name)
+	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,created_multimesh_AABB)
+	RenderingServer.instance_set_custom_aabb(instance_RID, created_multimesh_AABB)
 	
 	RenderingServer.instance_set_scenario(instance_RID, scenario_RID)
 	RenderingServer.instance_set_base(instance_RID, created_multimesh_RID)
@@ -401,7 +422,7 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D)->void:
 	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid() || !uniform_set_secondary_RID.is_valid()):
 		return
-	
+		
 	compute_active = true
 	
 	update_counter += 1
