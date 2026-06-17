@@ -509,9 +509,6 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,cam_forward,max_segments_per_side, segment_found_edges_right)
 	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side)
 	
-	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (left_dir * 10), Color.YELLOW)
-	DebugDraw3D.draw_line(_camera.get_global_position() + (cam_forward * 1),_camera.get_global_position() + (cam_forward * 1) + (right_dir * 10), Color.PURPLE)
-	
 	# find all the segments in between those 2 ends
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = high_lod_num_work_groups_xz * high_lod_num_work_groups_xz
@@ -678,16 +675,22 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, camera_for
 		if(!_is_segment_valid_in_chunk(current_tile_to_check, max_segment_per_side)):
 			if(current_distance > max_distance):
 				if(amount_found == 0):
-					var start_corner : Vector2i = _clamp_outside_segment_to_closest_corner(start_tile, max_segment_id)
+					var start_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(start_tile, max_segment_id)
 					
 					var direction_to_check :=Vector2i.ZERO
-					if(abs(camera_forward.x) > abs(camera_forward.z)):
-						direction_to_check.x = sign(camera_forward.x)
+					if(_is_corner_segment(start_edge_segment, max_segment_id)):
+						if(abs(dir.x) > abs(dir.z)):
+							direction_to_check.x = sign(dir.x)
+						else:
+							direction_to_check.y = sign(dir.z)
 					else:
-						direction_to_check.y = sign(camera_forward.z)
+						if(start_edge_segment.x == 1 || start_edge_segment.x == max_segment_id):
+							direction_to_check.y = sign(dir.y)
+						else:
+							direction_to_check.x = sign(dir.x)
 					
-					var end_corner : Vector2i = _clamp_outside_segment_to_closest_corner(start_corner + (direction_to_check * max_segment_id), max_segment_id)
-					amount_found += _add_edge_segments_between_points(start_corner, end_corner, amount_found, max_segment_per_side, arr_to_edit)
+					var end_corner : Vector2i = _clamp_outside_segment_to_closest_edge(start_edge_segment + (direction_to_check * max_segment_id), max_segment_id)
+					amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit)
 				return amount_found
 			else:
 				continue
@@ -774,7 +777,10 @@ func _add_edge_segments_between_points(from : Vector2i, to : Vector2i, write_off
 func _get_compass_direction_index(direction : Vector2) -> int:
 	return ((int(round( atan2(direction.y, direction.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
 
-func _clamp_outside_segment_to_closest_corner(to_clamp: Vector2i , max_segment_id : int) -> Vector2i:
+func _is_corner_segment(segment : Vector2i, max_segment_id : int) -> bool:
+	return ( segment.x == 1 || segment.x == max_segment_id ) &&  ( segment.y == 1 || segment.y == max_segment_id )
+
+func _clamp_outside_segment_to_closest_edge(to_clamp: Vector2i , max_segment_id : int) -> Vector2i:
 	#guarantee each element is inside [0 , max_segments_per_side -1]
 	return Vector2i(clamp(to_clamp.x, 0, max_segment_id), clamp(to_clamp.y, 0, max_segment_id))
 	
