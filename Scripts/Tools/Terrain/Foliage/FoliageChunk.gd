@@ -37,7 +37,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export var height_array : PackedFloat32Array
 
 
-const DEBUG_print_edge_data : bool = false
+@export var DEBUG_print_edge_data : bool = true
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 const large_float_dist : float = 99999999999
 
@@ -525,6 +525,8 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var cam_forward : Vector3 = -_camera.get_global_transform().basis.z
 	end_write_id =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
 	
+	if(DEBUG_print_edge_data):
+		print("total : ", segment_work_data_arr.slice(0, end_write_id +1))
 	return end_write_id + 1 
 
 
@@ -683,7 +685,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 		if(!_is_segment_valid_in_chunk(current_tile_to_check, max_segment_per_side)):
 			if(current_distance > max_distance):
 				if(amount_found == 0):
-					var start_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(current_tile_to_check, max_segment_id)
+					var start_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(start_tile, max_segment_id)
 					
 					var direction_to_check :=Vector2i.ZERO
 					if(_is_corner_segment(start_edge_segment, max_segment_id)):
@@ -692,6 +694,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 						else:
 							direction_to_check.y = sign(dir.z)
 					else:
+						var end_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(current_tile_to_check, max_segment_id)
 						if(start_edge_segment.x == 1 || start_edge_segment.x == max_segment_id):
 							direction_to_check.y = sign(dir.y)
 						else:
@@ -699,7 +702,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 					
 					var end_corner : Vector2i = _clamp_outside_segment_to_closest_edge(start_edge_segment + (direction_to_check * max_segment_id), max_segment_id)
 					if(DEBUG_print_edge_data):
-						print("no valid start edge found, go from edge segment ", start_edge_segment, " to ", end_corner)
+						print("no valid start edge found, go from edge segment ", start_edge_segment, " to ", end_corner, " player is in ", start_tile)
 					amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit)
 				return amount_found
 			else:

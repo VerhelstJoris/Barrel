@@ -7,15 +7,20 @@ var tool_open :bool = false;
 
 signal draw_player_debug(_delta)
 signal draw_favourited_debug(_delta)
+signal draw_environment_debug(_delta)
 
+var environment_node : BarrelEnvironmentDebugNode
+
+func _ready() -> void:
+	environment_node = BarrelEnvironmentDebugNode.new()
+	draw_environment_debug.connect(environment_node._draw)
 
 func _input(event: InputEvent) -> void:
 	if(event.is_action_pressed(debug_toggle_input)):
 		_toggle_window()
 	elif(event.is_action_pressed(debug_toggle_mouse_capture)):
 		_toggle_mouse_capture()
-
-	
+		
 func _toggle_window() -> void:
 	tool_open = !tool_open
 	if(tool_open):
@@ -39,6 +44,7 @@ func _process(_delta: float) -> void:
 				draw_player_debug.emit(_delta)
 				ImGui.EndTabItem()
 			if(ImGui.BeginTabItem("Environment")):
+				draw_environment_debug.emit(_delta)
 				ImGui.EndTabItem()
 			if(ImGui.BeginTabItem("Favourites")):
 				draw_favourited_debug.emit(_delta)
@@ -46,3 +52,6 @@ func _process(_delta: float) -> void:
 			ImGui.EndTabBar()	
 			
 		ImGui.End()
+		
+func _get_environment_node() -> BarrelEnvironmentDebugNode:
+	return environment_node
