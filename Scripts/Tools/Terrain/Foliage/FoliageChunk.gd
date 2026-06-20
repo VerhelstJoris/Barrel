@@ -82,6 +82,10 @@ var segment_center_edges : PackedInt32Array
 var segment_center_corner_edges_left : PackedInt32Array
 var segment_center_corner_edges_right : PackedInt32Array
 
+var segments_found_left : int
+var segments_found_right : int
+var segments_found_center : int
+
 var segments_filled_map : Dictionary[Vector2i, int]
 var update_counter : int = 0
 
@@ -507,20 +511,20 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var right_dir : Vector3 =  cam_frustrum[4].normal.cross(-Vector3.UP)
 	if(DEBUG_print_edge_data):
 		print("===========================")
-	var left_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,max_segments_per_side, segment_found_edges_left)
+	segments_found_left = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,max_segments_per_side, segment_found_edges_left)
 	if(DEBUG_print_edge_data):
-		print("L : ", left_found_amount, " == ", segment_found_edges_left.slice(0, left_found_amount *2))
-	var right_found_amount : int = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
+		print("L : ", segments_found_left, " == ", segment_found_edges_left.slice(0, segments_found_left *2))
+	segments_found_right = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
 	if(DEBUG_print_edge_data):
-		print("R : ", right_found_amount, " == ", segment_found_edges_right.slice(0, right_found_amount *2))
-	var center_found_amount : int = _find_center_edge_segments(_player_current_segment, max_segments_per_side) 	# find all the segments in between those 2 ends
+		print("R : ", segments_found_right, " == ", segment_found_edges_right.slice(0, segments_found_right *2))
+	segments_found_center = _find_center_edge_segments(_player_current_segment, max_segments_per_side) 	# find all the segments in between those 2 ends
 	if(DEBUG_print_edge_data):
-		print("C : ", center_found_amount, " ==  ", segment_center_edges.slice(0, center_found_amount *2))
+		print("C : ", segments_found_center, " ==  ", segment_center_edges.slice(0, segments_found_center *2))
 
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = edge_amount_prioritize_per_side * edge_amount_prioritize_per_side
 
-	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(_player_current_segment, left_found_amount, right_found_amount, center_found_amount, edge_amount_prioritize_per_side, post_priotitize_offset)
+	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(_player_current_segment, segments_found_left, segments_found_right, segments_found_center, edge_amount_prioritize_per_side, post_priotitize_offset)
 	var end_write_id : int = index_write_offsets.y
 	var cam_forward : Vector3 = -_camera.get_global_transform().basis.z
 	end_write_id =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
