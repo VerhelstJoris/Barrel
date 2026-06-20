@@ -14,6 +14,10 @@ var table_draw_right : bool = true
 var table_draw_right_color : Array[float] = [0,1,0]
 var table_draw_center : bool = true
 var table_draw_center_color : Array[float] = [1,0,1]
+var table_draw_flood_fill : bool = true
+var table_draw_fill_color : Array[float] = [1,1,0]
+var table_draw_conflicts : bool = true
+var table_draw_conflict_col : Array[float] = [0,1,1]
 
 var table_x_draw_range : Array[int] = [0,50]
 var table_y_draw_range : Array[int] = [0,50]
@@ -57,16 +61,18 @@ func _draw_chunk_table() -> void:
 	var left_col : Color = Color(table_draw_left_color[0],table_draw_left_color[1],table_draw_left_color[2],1)
 
 	ImGui.SameLine()
-	if(ImGui.Checkbox("Show Left", draw_left_arr)):
+	if(ImGui.Checkbox("Left   ", draw_left_arr)):
 		table_draw_left = draw_left_arr[0]
 	ImGui.SameLine()
-	
+	ImGui.Spacing()
+	ImGui.SameLine()
+
 	ImGui.ColorEdit3("Right",table_draw_right_color, ImGui.ColorEditFlags_NoInputs | ImGui.ColorEditFlags_NoLabel)
 	var right_col : Color = Color(table_draw_right_color[0],table_draw_right_color[1],table_draw_right_color[2],1)
 
 	ImGui.SameLine()
 	var draw_right_arr : Array[bool] = [table_draw_right]
-	if(ImGui.Checkbox("Show Right", draw_right_arr)):
+	if(ImGui.Checkbox("Right   ", draw_right_arr)):
 		table_draw_right = draw_right_arr[0]
 	ImGui.SameLine()
 	
@@ -75,33 +81,79 @@ func _draw_chunk_table() -> void:
 
 	ImGui.SameLine()
 	var draw_center_arr : Array[bool] = [table_draw_center]
-	if(ImGui.Checkbox("Show Center", draw_center_arr)):
-		table_draw_center = draw_center_arr[0]
+	if(ImGui.Checkbox("Center   ", draw_center_arr)):
+		table_draw_center = draw_center_arr[0]	
 		
-	ImGui.PushItemWidth(75)	
+	ImGui.SameLine()
+	ImGui.ColorEdit3("Flood",table_draw_fill_color, ImGui.ColorEditFlags_NoInputs | ImGui.ColorEditFlags_NoLabel)
+	var fill_col : Color = Color(table_draw_fill_color[0],table_draw_fill_color[1],table_draw_fill_color[2],1)
+
+	ImGui.SameLine()
+	var draw_fill_arr : Array[bool] = [table_draw_flood_fill]
+	if(ImGui.Checkbox("Fill   ", draw_fill_arr)):
+		table_draw_flood_fill = draw_fill_arr[0]	
+		
+	ImGui.SameLine()
+	ImGui.ColorEdit3("Conflict",table_draw_conflict_col, ImGui.ColorEditFlags_NoInputs | ImGui.ColorEditFlags_NoLabel)
+	var conflict_col : Color = Color(table_draw_conflict_col[0],table_draw_conflict_col[1],table_draw_conflict_col[2],1)
+
+	ImGui.SameLine()
+	var table_draw_conflict_arr : Array[bool] = [table_draw_conflicts]
+	if(ImGui.Checkbox("Conflict   ", table_draw_conflict_arr)):
+		table_draw_conflicts = table_draw_conflict_arr[0]
+
+	_draw_table_range()
+	
+	ImGui.SetWindowFontScale(0.925)
+	ImGui.BeginTable("Segments", segments_per_dim, ImGui.TableFlags_SizingFixedFit | ImGui.TableFlags_ScrollX)
+	var current_cell : Vector2i = Vector2i.ZERO
+	for row in range(table_y_draw_range[1],table_y_draw_range[0] -1,-1):
+		for col in range(table_x_draw_range[0] -1,table_x_draw_range[1]):
+			current_cell = Vector2i(row, col)
+			var in_left : bool = false
+			var in_right : bool = false
+			var in_center : bool = false
+			var in_amount : int = 0
+			
+			if(table_draw_left && left_copy_arr.has(current_cell)):
+				in_left = true
+				in_amount +=1
+				
+			if(table_draw_right && right_copy_arr.has(current_cell)):
+				in_right = true
+				in_amount +=1
+					
+			if(table_draw_center && center_copy_arr.has(current_cell)):
+				in_center = true
+				in_amount +=1
+					
+
+			if(table_draw_conflicts && in_amount > 1):
+				ImGui.TextColored(conflict_col ,"!")
+			elif(in_left):
+				ImGui.TextColored(left_col, "L")
+			elif(in_right):
+				ImGui.TextColored(right_col, "R")
+			elif(in_center):
+				ImGui.TextColored(center_col, "C")
+			elif(table_draw_flood_fill && chunk.segment_work_data_arr.has(current_cell)):
+				ImGui.TextColored(fill_col, "F")
+			else:
+				ImGui.Text("-")	
+				
+			ImGui.TableNextColumn()
+		ImGui.TableNextRowEx(0,0)	
+	ImGui.EndTable()
+	ImGui.SetWindowFontScale(1.0)
+
+func _draw_table_range() -> void:
+	ImGui.PushItemWidth(75)
 	ImGui.InputInt2("X: ",table_x_draw_range)
 	ImGui.SameLine()
 	ImGui.InputInt2("Y: ",table_y_draw_range)
 	ImGui.PopItemWidth()
 	ImGui.Separator()
 	
-	ImGui.BeginTable("Segments", segments_per_dim)
-	var current_cell : Vector2i = Vector2i.ZERO
-	for row in range(table_y_draw_range[1],table_y_draw_range[0] -1,-1):
-		for col in range(table_x_draw_range[0] -1,table_x_draw_range[1]):
-			current_cell = Vector2i(row, col)
-			if(table_draw_left && left_copy_arr.has(current_cell)):
-				ImGui.TextColored(left_col, "L")
-			elif(table_draw_right && right_copy_arr.has(current_cell)):
-				ImGui.TextColored(right_col, "R")
-			elif(table_draw_center && center_copy_arr.has(current_cell)):
-				ImGui.TextColored(center_col, "C")
-			else:
-				ImGui.Text(".")	
-			ImGui.TableNextColumn()
-		ImGui.TableNextRow()
-	ImGui.EndTable()
-
 func _cache_copy_of_array(amount : int, copy_from_arr : PackedInt32Array, copy_to_arr : Array[Vector2i]) -> void:
 	for id in range(amount):
 		copy_to_arr[id] = Vector2i(copy_from_arr[2* id], copy_from_arr[(2*id) +1])
