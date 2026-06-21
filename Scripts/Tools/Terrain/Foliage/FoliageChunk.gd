@@ -85,6 +85,7 @@ var segment_center_corner_edges_right : PackedInt32Array
 var segments_found_left : int
 var segments_found_right : int
 var segments_found_center : int
+var flood_fill_query_directions : Array[Vector2i] = [Vector2i.ZERO, Vector2i.ZERO,Vector2i.ZERO]
 
 var segments_filled_map : Dictionary[Vector2i, int]
 var update_counter : int = 0
@@ -502,7 +503,6 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
 
-const compass_directions : Array[Vector2i] = [Vector2i(0,-1),Vector2i(1,-1), Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1)]	#clockwise directions starting with NORTH
 
 func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
@@ -533,12 +533,14 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 		print("total : ", segment_work_data_arr.slice(0, end_write_id +1))
 	return end_write_id + 1 
 
+const compass_directions : Array[Vector2i] = [Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1), Vector2i(0,-1),Vector2i(1,-1)]	#clockwise directions starting with EAST
 
 func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, post_prioritize_write_offset : int,  max_segments_per_side : int) -> int:
 	#contruct an array of direction to check
 	var compass_index : int = _get_compass_direction_index(Vector2( camera_forward.x, camera_forward.z))
 	var prev_id : int = compass_index -1  if compass_index-1 > 0 else  7
-	var query_directions : Array[Vector2i] = [compass_directions[compass_index], compass_directions[prev_id], compass_directions[ (compass_index +1) % 8]]
+
+	flood_fill_query_directions = [compass_directions[compass_index], compass_directions[prev_id], compass_directions[ (compass_index +1) % 8]]
 	
 	var current_write_id : int = write_offsets.x
 	var current_read_id : int = 0
@@ -557,8 +559,8 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 		var start_segment : Vector2i = segment_work_data_arr[current_read_id]
 		current_read_id+=1
 		
-		for query_id in range(direction_amount_query):
-			var segment_to_check : Vector2i = start_segment + query_directions[query_id]
+		for query_id in range(0,direction_amount_query):
+			var segment_to_check : Vector2i = start_segment + flood_fill_query_directions[query_id]
 	
 			if(!_is_segment_valid_in_chunk(segment_to_check, max_segments_per_side)):
 				continue

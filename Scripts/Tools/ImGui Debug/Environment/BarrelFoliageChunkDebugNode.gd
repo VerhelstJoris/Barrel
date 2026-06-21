@@ -14,6 +14,7 @@ var table_draw_right : bool = true
 var table_draw_right_color : Array[float] = [0,1,0]
 var table_draw_center : bool = true
 var table_draw_center_color : Array[float] = [1,0,1]
+
 var table_draw_flood_fill : bool = true
 var table_draw_fill_color : Array[float] = [1,1,0]
 var table_draw_conflicts : bool = true
@@ -103,13 +104,16 @@ func _draw_chunk_table() -> void:
 		table_draw_conflicts = table_draw_conflict_arr[0]
 
 	_draw_table_range()
+	ImGui.SameLine()
+	_draw_table_flood_directions()
+	ImGui.Separator()
 	
 	ImGui.SetWindowFontScale(0.925)
 	ImGui.BeginTable("Segments", segments_per_dim, ImGui.TableFlags_SizingFixedFit | ImGui.TableFlags_ScrollX)
 	var current_cell : Vector2i = Vector2i.ZERO
-	for row in range(table_y_draw_range[1],table_y_draw_range[0] -1,-1):
-		for col in range(table_x_draw_range[0] -1,table_x_draw_range[1]):
-			current_cell = Vector2i(row, col)
+	for row in range(table_y_draw_range[0] ,table_y_draw_range[1],):
+		for col in range(table_x_draw_range[0],table_x_draw_range[1]):
+			current_cell = Vector2i(col, row)
 			var in_left : bool = false
 			var in_right : bool = false
 			var in_center : bool = false
@@ -152,21 +156,23 @@ func _draw_table_range() -> void:
 	ImGui.SameLine()
 	ImGui.InputInt2("Y: ",table_y_draw_range)
 	ImGui.PopItemWidth()
-	ImGui.Separator()
+	
+func _draw_table_flood_directions() -> void:
+	ImGui.Text("Query Dir: {}, {}, {}".format([ str(chunk.flood_fill_query_directions[0]), str(chunk.flood_fill_query_directions[1]), str(chunk.flood_fill_query_directions[2]) ], "{}" ))
 	
 func _cache_copy_of_array(amount : int, copy_from_arr : PackedInt32Array, copy_to_arr : Array[Vector2i]) -> void:
 	for id in range(amount):
 		copy_to_arr[id] = Vector2i(copy_from_arr[2* id], copy_from_arr[(2*id) +1])
 	
 func _draw_current_data() -> void:
-	_draw_found_arr(chunk.segments_found_left,left_copy_arr, "L" )
-	_draw_found_arr(chunk.segments_found_right,right_copy_arr, "R" )
-	_draw_found_arr(chunk.segments_found_center,center_copy_arr, "C" )
+	_draw_found_arr(chunk.segments_found_left,left_copy_arr, "L" , Color(table_draw_left_color[0],table_draw_left_color[1],table_draw_left_color[2],1))
+	_draw_found_arr(chunk.segments_found_right,right_copy_arr, "R" , Color(table_draw_right_color[0],table_draw_right_color[1],table_draw_right_color[2],1))
+	_draw_found_arr(chunk.segments_found_center,center_copy_arr, "C",Color(table_draw_center_color[0],table_draw_center_color[1],table_draw_center_color[2],1) )
 	
-func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String) -> void:
+func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String, color: Color) -> void:
 	var segments : String = ""
 	for id in range(0,found_amount):
 		segments += str(arr[id])
 
-	ImGui.Text("{} : {} == {}".format([prepend, found_amount, segments], "{}"))
+	ImGui.TextColored(color, "{} : {} == {}".format([prepend, found_amount, segments], "{}"))
 	
