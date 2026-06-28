@@ -174,5 +174,7 @@ func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String
 	for id in range(0,found_amount):
 		segments += str(arr[id])
 
-	ImGui.TextColored(color, "{} : {} == {}".format([prepend, found_amount, segments], "{}"))
+	ImGui.PushStyleColor(ImGui.Col_Text, color)	
+	ImGui.TextWrapped("{} : {} == {}".format([prepend, found_amount, segments], "{}"))
+	ImGui.PopStyleColor()
 	
