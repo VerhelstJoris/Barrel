@@ -36,8 +36,6 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export_group("runtime data - DO NOT EDIT MANUALLY")
 @export var height_array : PackedFloat32Array
 
-
-@export var DEBUG_print_edge_data : bool = true
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 const large_float_dist : float = 99999999999
 
@@ -509,17 +507,9 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	
 	var left_dir : Vector3 = cam_frustrum[2].normal.cross(Vector3.UP)
 	var right_dir : Vector3 =  cam_frustrum[4].normal.cross(-Vector3.UP)
-	if(DEBUG_print_edge_data):
-		print("===========================")
 	segments_found_left = _find_ray_intersect_grid(_player_segment_sub_pos,left_dir ,max_segments_per_side, segment_found_edges_left)
-	if(DEBUG_print_edge_data):
-		print("L : ", segments_found_left, " == ", segment_found_edges_left.slice(0, segments_found_left *2))
 	segments_found_right = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
-	if(DEBUG_print_edge_data):
-		print("R : ", segments_found_right, " == ", segment_found_edges_right.slice(0, segments_found_right *2))
 	segments_found_center = _find_center_edge_segments(_player_current_segment, max_segments_per_side) 	# find all the segments in between those 2 ends
-	if(DEBUG_print_edge_data):
-		print("C : ", segments_found_center, " ==  ", segment_center_edges.slice(0, segments_found_center *2))
 
 	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
 	var post_priotitize_offset : int = edge_amount_prioritize_per_side * edge_amount_prioritize_per_side
@@ -529,8 +519,6 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	var cam_forward : Vector3 = -_camera.get_global_transform().basis.z
 	end_write_id =_flood_fill_work_data(cam_forward,index_write_offsets, post_priotitize_offset, max_segments_per_side)
 	
-	if(DEBUG_print_edge_data):
-		print("total : ", segment_work_data_arr.slice(0, end_write_id +1))
 	return end_write_id + 1 
 
 const compass_directions : Array[Vector2i] = [Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1), Vector2i(0,-1),Vector2i(1,-1)]	#clockwise directions starting with EAST
@@ -693,23 +681,20 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 				if(amount_found == 0):
 					var start_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(start_tile, max_segment_id)
 					
-					var direction_to_check :=Vector2i.ZERO
+					var direction_to_check := Vector2i.ZERO
 					if(_is_corner_segment(start_edge_segment, max_segment_id)):
 						if(abs(dir.x) > abs(dir.z)):
 							direction_to_check.x = sign(dir.x)
 						else:
 							direction_to_check.y = sign(dir.z)
 					else:
-						var end_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(current_tile_to_check, max_segment_id)
 						if(start_edge_segment.x == 1 || start_edge_segment.x == max_segment_id):
-							direction_to_check.y = sign(dir.y)
+							direction_to_check.y = sign(dir.z)
 						else:
 							direction_to_check.x = sign(dir.x)
 					
 					var end_corner : Vector2i = _clamp_outside_segment_to_closest_edge(start_edge_segment + (direction_to_check * max_segment_id), max_segment_id)
-					if(DEBUG_print_edge_data):
-						print("no valid start edge found, go from edge segment ", start_edge_segment, " to ", end_corner, " player is in ", start_tile)
-					amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit)
+					amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit, true, true)
 				return amount_found
 			else:
 				continue
@@ -739,9 +724,9 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 	
 	if( (left_start.x == right_start.x ) || (left_start.y == right_start.y) ):
 		if( _player_current_segment.distance_squared_to(left_start) < _player_current_segment.distance_squared_to(right_start)):
-			write_id += _add_edge_segments_between_points(left_start, right_start, write_id, max_segment_per_side, segment_center_edges)
+			write_id += _add_edge_segments_between_points(left_start, right_start, write_id, max_segment_per_side, segment_center_edges, false)
 		else:
-			write_id += _add_edge_segments_between_points(right_start, left_start, write_id, max_segment_per_side, segment_center_edges)
+			write_id += _add_edge_segments_between_points(right_start, left_start, write_id, max_segment_per_side, segment_center_edges, false)
 	elif(left_start != Vector2i.MIN && right_start != Vector2i.MIN):
 		var target_corner : Vector2i =  (left_start + right_start /2).snappedi(max_segment_per_side-1)
 		#add the corner itself
@@ -784,11 +769,14 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 	
 	return write_id	
 	
-func _add_edge_segments_between_points(from : Vector2i, to : Vector2i, write_offset : int, max_segments_per_side : int, arr_to_edit : PackedInt32Array) -> int:
+func _add_edge_segments_between_points(from : Vector2i, to : Vector2i, write_offset : int, max_segments_per_side : int, arr_to_edit : PackedInt32Array, include_start: bool = true, include_end : bool= false) -> int:
 	var dir : Vector2i = (to - from).sign()
 	var amount_added : int = 0
 	var amount_needed : int = int((to - from).length())
-	for id in range(amount_needed):
+	if(include_end):
+		amount_needed +=1
+
+	for id in range(0 if include_start else 1, amount_needed):
 		var to_add : Vector2i = from + (id * dir)
 		if(!_is_segment_valid_in_chunk(to_add, max_segments_per_side)):
 			return amount_added
@@ -806,7 +794,7 @@ func _get_compass_direction_index(direction : Vector2) -> int:
 	return ((int(round( atan2(direction.y, direction.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
 
 func _is_corner_segment(segment : Vector2i, max_segment_id : int) -> bool:
-	return ( segment.x == 1 || segment.x == max_segment_id ) &&  ( segment.y == 1 || segment.y == max_segment_id )
+	return ( segment.x == 0 || segment.x == max_segment_id ) &&  ( segment.y == 0 || segment.y == max_segment_id )
 
 func _clamp_outside_segment_to_closest_edge(to_clamp: Vector2i , max_segment_id : int) -> Vector2i:
 	#guarantee each element is inside [0 , max_segments_per_side -1]
