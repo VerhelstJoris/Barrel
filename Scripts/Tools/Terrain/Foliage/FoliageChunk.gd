@@ -39,7 +39,6 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 const large_float_dist : float = 99999999999
 
-
 var current_lod : EFoliageLOD = EFoliageLOD.NONE
 
 var rd : RenderingDevice
@@ -142,11 +141,11 @@ func _preview_in_editor() -> void:
 func _ready() -> void:
 	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
 	segment_work_data_arr.resize(segments_per_dim*segments_per_dim)
-	segment_found_edges_left.resize(segments_per_dim * 2)
-	segment_found_edges_right.resize(segments_per_dim *2)
+	segment_found_edges_left.resize(segments_per_dim *  3)
+	segment_found_edges_right.resize(segments_per_dim * 3)
 	segment_center_edges.resize(segments_per_dim *2 * 2)
 	segment_center_corner_edges_left.resize(segments_per_dim * 2)
-	segment_center_corner_edges_right.resize(segments_per_dim *2)
+	segment_center_corner_edges_right.resize(segments_per_dim * 2)
 	for row in range(segments_per_dim):
 		for col in range(segments_per_dim):
 			segments_filled_map[Vector2i(row,col)] = 0
@@ -177,8 +176,7 @@ func _contruct_multimesh_bounding_box() ->AABB:
 		bb_pos.z = chunk_dimenstion_size_m * chunk_world_id.y
 	
 	return AABB(bb_pos, bb_size)
-
-
+	
 func _process(_delta: float) -> void:
 	var viewport : Viewport
 	if Engine.is_editor_hint():
@@ -500,8 +498,7 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 		
 	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
 	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
-
-
+	
 func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
 	
@@ -645,7 +642,6 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 	var step_unit_dir : Vector2i = Vector2(sign(dir.x), sign(dir.z))
 
 	#iteration data
-	var start_tile : Vector2i = Vector2i(int(grid_start_pos.x),int(grid_start_pos.y))
 	var current_tile_to_check : Vector2i = Vector2i(int(grid_start_pos.x),int(grid_start_pos.y))	# no sub-tile-coord
 	var current_ray_length_per_dim : Vector2	
 
@@ -678,23 +674,31 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 		# we've hit the edge of our chunk -> abort
 		if(!_is_segment_valid_in_chunk(current_tile_to_check, max_segment_per_side)):
 			if(current_distance > max_distance):
+				var start_edge_segment :Vector2i
+				var include_start : bool = false
 				if(amount_found == 0):
-					var start_edge_segment : Vector2i = _clamp_outside_segment_to_closest_edge(start_tile, max_segment_id)
-					
-					var direction_to_check := Vector2i.ZERO
-					if(_is_corner_segment(start_edge_segment, max_segment_id)):
-						if(abs(dir.x) > abs(dir.z)):
-							direction_to_check.x = sign(dir.x)
-						else:
-							direction_to_check.y = sign(dir.z)
+					start_edge_segment = _clamp_outside_segment_to_closest_edge(current_tile_to_check, max_segment_id)
+					include_start = true
+				else:
+					#use the last tile added 
+					start_edge_segment = Vector2i(arr_to_edit[2* (amount_found-1)],arr_to_edit[(2* (amount_found-1)) +1])
+					include_start = false
+
+
+				var direction_to_check := Vector2i.ZERO
+				if(_is_corner_segment(start_edge_segment, max_segment_id)):
+					if(abs(dir.x) > abs(dir.z)):
+						direction_to_check.x = sign(dir.x)
 					else:
-						if(start_edge_segment.x == 1 || start_edge_segment.x == max_segment_id):
-							direction_to_check.y = sign(dir.z)
-						else:
-							direction_to_check.x = sign(dir.x)
-					
-					var end_corner : Vector2i = _clamp_outside_segment_to_closest_edge(start_edge_segment + (direction_to_check * max_segment_id), max_segment_id)
-					amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit, true, true)
+						direction_to_check.y = sign(dir.z)
+				else:
+					if(start_edge_segment.x == 1 || start_edge_segment.x == max_segment_id):
+						direction_to_check.y = sign(dir.z)
+					else:
+						direction_to_check.x = sign(dir.x)
+				
+				var end_corner : Vector2i = _clamp_outside_segment_to_closest_edge(start_edge_segment + (direction_to_check * max_segment_id), max_segment_id)
+				amount_found += _add_edge_segments_between_points(start_edge_segment, end_corner, amount_found, max_segment_per_side, arr_to_edit, include_start, true)
 				return amount_found
 			else:
 				continue
@@ -736,8 +740,8 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 		write_id +=1
 		
 		#check left and right and of the corner until the end point and interleave them
-		var left_corner_amount_found : int = _add_edge_segments_between_points(target_corner, left_start, 0, max_segment_per_side, segment_center_corner_edges_left)
-		var right_corner_amount_found : int = _add_edge_segments_between_points(target_corner, right_start, 0 , max_segment_per_side,segment_center_corner_edges_right)
+		var left_corner_amount_found : int = _add_edge_segments_between_points(target_corner, left_start, 0, max_segment_per_side, segment_center_corner_edges_left, true ,false)
+		var right_corner_amount_found : int = _add_edge_segments_between_points(target_corner, right_start, 0 , max_segment_per_side,segment_center_corner_edges_right, false, false)
 		var combined_amount_found : int = left_corner_amount_found + right_corner_amount_found
 
 		var left_dist : float = large_float_dist
@@ -748,6 +752,7 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 			right_dist = _player_current_segment.distance_squared_to(Vector2i(segment_center_corner_edges_right[0],segment_center_corner_edges_right[1]))
 		var left_write_id : int = 0
 		var right_write_id : int = 0
+		
 		for center_write_id in range(combined_amount_found):
 			var center_write_offset : int = 2* (center_write_id + write_id)
 			if(left_dist < right_dist):
@@ -755,13 +760,15 @@ func _find_center_edge_segments(_player_current_segment : Vector2i, max_segment_
 				segment_center_edges[center_write_offset ] =   segment_center_corner_edges_left[left_write_offset]
 				segment_center_edges[center_write_offset +1] = segment_center_corner_edges_left[left_write_offset +1]
 				left_write_id +=1
+				left_write_offset +=2
 				left_dist = _player_current_segment.distance_squared_to( Vector2i(segment_center_corner_edges_left[left_write_offset] ,segment_center_corner_edges_left[left_write_offset +1]))
 			else:
-				var right_write_offset : int = 2*  left_write_id
+				var right_write_offset : int = 2*  right_write_id
 				segment_center_edges[center_write_offset ] = segment_center_corner_edges_right[right_write_offset]
 				segment_center_edges[center_write_offset +1] = segment_center_corner_edges_right[right_write_offset +1 ]
 				right_write_id +=1
-				right_dist = _player_current_segment.distance_squared_to(Vector2i(segment_center_corner_edges_right[right_write_id], segment_center_corner_edges_right[right_write_id + 1]))
+				right_write_offset +=2
+				right_dist = _player_current_segment.distance_squared_to(Vector2i(segment_center_corner_edges_right[right_write_offset], segment_center_corner_edges_right[right_write_offset + 1]))
 		
 		write_id +=  combined_amount_found
 	else:
