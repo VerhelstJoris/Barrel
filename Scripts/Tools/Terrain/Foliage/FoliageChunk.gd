@@ -141,8 +141,8 @@ func _preview_in_editor() -> void:
 func _ready() -> void:
 	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
 	segment_work_data_arr.resize(segments_per_dim*segments_per_dim)
-	segment_found_edges_left.resize(segments_per_dim *  3)
-	segment_found_edges_right.resize(segments_per_dim * 3)
+	segment_found_edges_left.resize(segments_per_dim *  4)
+	segment_found_edges_right.resize(segments_per_dim * 4)
 	segment_center_edges.resize(segments_per_dim *2 * 2)
 	segment_center_corner_edges_left.resize(segments_per_dim * 2)
 	segment_center_corner_edges_right.resize(segments_per_dim * 2)
@@ -660,7 +660,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 	# TODO: properly calculate the max possible distance we could travel in a chunk before we should abort
 	var max_distance : float = max_segment_per_side  * _get_vertex_spacing()
 	var amount_found : int = 0
-	while current_distance < max_distance && amount_found < max_segment_per_side:
+	while amount_found < max_segment_per_side *2:
 		#step towards current shortest direction
 		if(current_ray_length_per_dim.x < current_ray_length_per_dim.y):
 			current_tile_to_check.x += step_unit_dir.x
@@ -702,8 +702,7 @@ func _find_ray_intersect_grid(grid_start_pos : Vector2, dir: Vector3, max_segmen
 				return amount_found
 			else:
 				continue
-
-
+		
 		# explicitly don't check for if it's already been updated
 		# we assume this tile is needed
 		segments_filled_map[current_tile_to_check] = update_counter

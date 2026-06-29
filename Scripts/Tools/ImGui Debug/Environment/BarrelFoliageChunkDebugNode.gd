@@ -30,9 +30,9 @@ func _ready() -> void:
 	segments_per_dim = int(chunk.chunk_dimenstion_size_m / chunk._get_vertex_spacing())
 	table_x_draw_range[1] = segments_per_dim
 	table_y_draw_range[1] = segments_per_dim
-	left_copy_arr.resize(segments_per_dim)
-	center_copy_arr.resize(segments_per_dim *2)
-	right_copy_arr.resize(segments_per_dim)
+	left_copy_arr.resize(segments_per_dim*2)
+	center_copy_arr.resize(segments_per_dim *4)
+	right_copy_arr.resize(segments_per_dim*2)
 	
 func _get_name() -> String:
 	return chunk.name
