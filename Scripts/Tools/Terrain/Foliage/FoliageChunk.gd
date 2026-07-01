@@ -69,6 +69,12 @@ var player_transform_data_arr : PackedFloat32Array
 var player_transform_data_buffer_RID : RID
 var player_transform_to_pass : Transform3D
 
+#current foliage benders data
+var current_benders_arr : Array[FoliageBender]
+var current_bender_data_buffer_RID : RID
+const max_foliage_benders_per_chunk : int = 10
+var current_bender_packed_arr : PackedByteArray
+
 # segment coord data
 var segments_per_dim : int = 0
 var segment_coord_data_arr : PackedInt32Array
@@ -317,6 +323,17 @@ func _setup_compute_pipeline()	-> void:
 	segments_coord_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	segments_coord_uniform.binding = 7
 	segments_coord_uniform.add_id(segment_coord_data_buffer_RID)
+
+	##current blade bender data binding
+	# a float is 4 bytes, we are saving 4 pieces of data per bender [Pos, Radius] and the shader itself will only worry about 'max_foliage_benders_per_chunk' at a time
+	current_bender_packed_arr.resize(4*4*max_foliage_benders_per_chunk)
+	current_bender_data_buffer_RID = rd.storage_buffer_create(4* 4 *max_foliage_benders_per_chunk, current_bender_packed_arr)
+	RID_arr.append(current_bender_data_buffer_RID)	
+
+	var bender_data_uniform : RDUniform = RDUniform.new()
+	bender_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	bender_data_uniform.binding = 8
+	bender_data_uniform.add_id(current_bender_data_buffer_RID)
 	
 	#sparse tranform buffer pre-condensed
 	var transform_array_uniform = RDUniform.new()
@@ -329,7 +346,7 @@ func _setup_compute_pipeline()	-> void:
 
 	#add all uniforms bindings into the set
 	uniform_set_primary_RID = rd.uniform_set_create(
-			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform]
+			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform, bender_data_uniform]
 			, compute_pos_shader_RID, 0)
 	RID_arr.append(uniform_set_primary_RID)
 

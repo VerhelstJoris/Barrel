@@ -53,13 +53,18 @@ layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
    float Y_ROT;
    float Z_ROT;
 } PLAYERDATA;
-
+        
 // array detailing which chunk segments should actually be drawn, size is double the amount of workgroups for [x,z] section coordintate      
 layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 int data[];
 } SEGMENTSTODRAW;
         
-
+// array detailing points in space grass should be bending away from
+// this will be in the shape of [X,Y,Z, Radius]    
+layout(set = 0, binding = 8, std430) restrict readonly buffer FoliageBenderData{
+    float data[];
+} FOLIAGE_BENDERS;
+        
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
     float x = mix(a, b, t);
