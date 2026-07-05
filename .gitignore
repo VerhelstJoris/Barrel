@@ -21,5 +21,5 @@ mono_crash.*.json
 !/Origin/*.fbx
 *.import
 
-
+/addons/rider-plugin
 /addons/terrain_3d/demo
