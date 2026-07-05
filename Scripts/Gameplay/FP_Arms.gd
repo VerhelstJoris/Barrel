@@ -8,7 +8,7 @@ class_name FPArms extends Node3D
 var cached_scale : Vector3
 
 func _ready() -> void:
-	pistol_equipment = NodeUtils._retrieve_node_meta_from_self(PlayerEquipment.equipment_node_name, colt_scene)
+	pistol_equipment = NodeUtils._retrieve_node_meta_from_node(PlayerEquipment.equipment_node_name, colt_scene)
 	cached_scale = get_scale()
 
 func _align_to_world_camera(align_to : Camera3D ) -> void:

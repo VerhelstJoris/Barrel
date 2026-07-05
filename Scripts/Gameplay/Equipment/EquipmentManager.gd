@@ -57,7 +57,7 @@ func _setup_ui_data()-> void:
 			equipment_hud._intialize(player)
 
 func _setup_animation_data() -> void:
-	var arms_animation_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_self(FPArmsAnimationBus.arms_anim_bus_node_name,player.arms)
+	var arms_animation_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_node(FPArmsAnimationBus.arms_anim_bus_node_name,player.arms)
 	if(arms_animation_bus == null):
 		push_error("Failed to retrieve the FP Arms animation bus on the equipment manager")
 	

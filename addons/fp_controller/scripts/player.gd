@@ -25,7 +25,7 @@ func _ready() -> void:
 	_setup_animation_data()
 	
 func _setup_animation_data() -> void:
-	var anim_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_self(FPArmsAnimationBus.arms_anim_bus_node_name, arms) as FPArmsAnimationBus
+	var anim_bus : FPArmsAnimationBus = NodeUtils._retrieve_node_meta_from_node(FPArmsAnimationBus.arms_anim_bus_node_name, arms) as FPArmsAnimationBus
 	if(anim_bus == null):
 		push_error("No valid FP Arms animation bus found on player")
 		return

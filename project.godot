@@ -25,6 +25,7 @@ imgui/config="uid://cymx5hoexxule"
 config/name="Barrel"
 run/main_scene="uid://bus7tc0ndedol"
 config/features=PackedStringArray("4.5", "Forward Plus")
+run/max_fps=144
 config/icon="res://icon.svg"
 
 [autoload]
@@ -56,7 +57,7 @@ project/assembly_name="Barrel"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/LineRenderer/plugin.cfg", "res://addons/godot_ui_animations/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/input_prompts/plugin.cfg", "res://addons/renderdoc_launcher/plugin.cfg", "res://addons/sky_3d/plugin.cfg", "res://addons/terrain_3d/plugin.cfg", "res://addons/wc_bridge/plugin.cfg")
+enabled=PackedStringArray("res://addons/LineRenderer/plugin.cfg", "res://addons/godot_ui_animations/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/input_prompts/plugin.cfg", "res://addons/renderdoc_launcher/plugin.cfg", "res://addons/rider-plugin/plugin.cfg", "res://addons/sky_3d/plugin.cfg", "res://addons/terrain_3d/plugin.cfg", "res://addons/wc_bridge/plugin.cfg")
 
 [file_customization]
 

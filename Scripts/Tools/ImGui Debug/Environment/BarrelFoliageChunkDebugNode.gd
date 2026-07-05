@@ -1,6 +1,8 @@
-﻿class_name BarrelFoliageChunkDebugNode extends BarrelSceneDebugNode
+class_name BarrelFoliageChunkDebugNode extends BarrelSceneDebugNode
 
 @export var chunk : FoliageChunk
+
+var dummy_bender_tex : Texture2D
 
 var left_copy_arr : Array[Vector2i]
 var center_copy_arr : Array[Vector2i]
@@ -23,7 +25,14 @@ var table_draw_conflict_col : Array[float] = [0,1,1]
 var table_x_draw_range : Array[int] = [0,50]
 var table_y_draw_range : Array[int] = [0,50]
 
+var bender_img_scale : Array[float] = [1.0]
+var bender_img_min_uv : Array[float] = [0.0,0.0]
+var bender_img_max_uv : Array[float] = [1.0,1.0]
+
 func _ready() -> void:
+	if(!chunk):
+		queue_free()
+	
 	super()
 	BarrelDebugWindow.environment_node._register_environment_node(self, BarrelEnvironmentDebugNode.EDebugEnvNodeType.Foliage)
 	
@@ -40,12 +49,17 @@ func _get_name() -> String:
 func _draw_contents(_delta : float) -> void:
 	_cache_current_data()
 	
-	if(ImGui.CollapsingHeader("Current Data")):
-		_draw_current_data()
+	if(ImGui.CollapsingHeader("Current Segment Data")):
+		_draw_current_segment_data()
 
-	if(ImGui.CollapsingHeader("Display")):	
+	if(ImGui.CollapsingHeader("Segment Display")):	
 		ImGui.Indent()
 		_draw_chunk_table()
+		ImGui.Unindent()
+
+	if(ImGui.CollapsingHeader("Current Bender Display")):
+		ImGui.Indent()
+		_draw_bender_data()
 		ImGui.Unindent()
 
 func _cache_current_data() -> void:
@@ -164,7 +178,7 @@ func _cache_copy_of_array(amount : int, copy_from_arr : PackedInt32Array, copy_t
 	for id in range(amount):
 		copy_to_arr[id] = Vector2i(copy_from_arr[2* id], copy_from_arr[(2*id) +1])
 	
-func _draw_current_data() -> void:
+func _draw_current_segment_data() -> void:
 	_draw_found_arr(chunk.segments_found_left,left_copy_arr, "L" , Color(table_draw_left_color[0],table_draw_left_color[1],table_draw_left_color[2],1))
 	_draw_found_arr(chunk.segments_found_right,right_copy_arr, "R" , Color(table_draw_right_color[0],table_draw_right_color[1],table_draw_right_color[2],1))
 	_draw_found_arr(chunk.segments_found_center,center_copy_arr, "C",Color(table_draw_center_color[0],table_draw_center_color[1],table_draw_center_color[2],1) )
@@ -177,4 +191,20 @@ func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String
 	ImGui.PushStyleColor(ImGui.Col_Text, color)	
 	ImGui.TextWrapped("{} : {} == {}".format([prepend, found_amount, segments], "{}"))
 	ImGui.PopStyleColor()
+	
+func _draw_bender_data() -> void:
+	var tex : ImageTexture = ImageTexture.create_from_image(chunk.current_bender_image)
+	
+	dummy_bender_tex = tex	#needs to be assigned with a valid RID
+	
+	ImGui.Text("Image Size {}".format([tex.get_size()], "{}") )
+	ImGui.PushItemWidth(100)
+	ImGui.SliderFloat("Img Size", bender_img_scale, 0.0,1.0)
+	
+	ImGui.SameLine()
+	ImGui.InputFloat2("Min UV", bender_img_min_uv)
+	ImGui.SameLine()
+	ImGui.InputFloat2("Max UV", bender_img_max_uv)
+
+	ImGui.ImageEx(tex , tex.get_size() * bender_img_scale[0],Vector2(bender_img_min_uv[0], bender_img_min_uv[1]), Vector2(bender_img_max_uv[0], bender_img_max_uv[1]) )
 	

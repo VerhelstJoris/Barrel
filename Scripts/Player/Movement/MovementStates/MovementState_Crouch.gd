@@ -33,7 +33,7 @@ func _ready() -> void:
 
 func _init_player_data(in_player : Player) -> void:
 	super(in_player)
-	arms_anim_bus = NodeUtils._retrieve_node_meta_from_self(FPArmsAnimationBus.arms_anim_bus_node_name, player.arms)
+	arms_anim_bus = NodeUtils._retrieve_node_meta_from_node(FPArmsAnimationBus.arms_anim_bus_node_name, player.arms)
 
 	if(!arms_anim_bus):
 		push_error("No Arms Anim Bus set on crouch state")

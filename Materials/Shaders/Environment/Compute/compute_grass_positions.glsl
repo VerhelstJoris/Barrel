@@ -3,155 +3,151 @@
 #extension GL_NV_compute_shader_derivatives : enable
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-        
+		
 // the terrain heights at specific pixels of the terrain height texture, to be interpolated for individual positions
 layout(set = 0, binding = 0, std430) readonly buffer HeightPositions {
 float data[];
 }
 HEIGHT_DATA;        
-        
+		
 // multimesh data buffer allowing us to directly edit the amount of instances from the compute shader
 layout(set = 0, binding = 1, std430) writeonly buffer Transforms {
-    float data[];
+	float data[];
 }
 GRASS_TRANSFORMS;
 
 // array detailing how many grassblades are actually present in a specific         
 layout(set = 0, binding = 2, std430) writeonly buffer BladeAmounts {
-    int data[];
+	int data[];
 } BLADESPERGROUP;
-        
+		
 layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
-    float TERRAIN_VERTEX_SPACING;
+	float TERRAIN_VERTEX_SPACING;
 
-    float TARGET_DENSITY;
-    float MAX_BLADE_RANDOM_OFFSET;
-    float MAX_BLADE_TILT_RAD;
+	float TARGET_DENSITY;
+	float MAX_BLADE_RANDOM_OFFSET;
+	float MAX_BLADE_TILT_RAD;
 
-    float MIN_BLADE_SCALE;
-        
-    float DIST_THRESH_CLOSE;    
-    float DIST_THRESH_MED;    
-    float DIST_THRESH_FAR;    
+	float MIN_BLADE_SCALE;
+		
+	float DIST_THRESH_CLOSE;    
+	float DIST_THRESH_MED;    
+	float DIST_THRESH_FAR;    
 } FPARAMETERS;
-        
+		
 layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
 {
-    int MAX_BLADES_PER_GROUP;
-    int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
+	int MAX_BLADES_PER_GROUP;
+	int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
 } IPARAMETERS;
 
 layout(set = 0,binding = 5, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
-        
+		
 layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
 {
    float X_POS;     
    float Y_POS;     
    float Z_POS;
-        
+		
    float X_ROT;
    float Y_ROT;
    float Z_ROT;
 } PLAYERDATA;
-        
+		
 // array detailing which chunk segments should actually be drawn, size is double the amount of workgroups for [x,z] section coordintate      
 layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 int data[];
 } SEGMENTSTODRAW;
-        
-// array detailing points in space grass should be bending away from
-// this will be in the shape of [X,Y,Z, Radius]    
-layout(set = 0, binding = 8, std430) restrict readonly buffer FoliageBenderData{
-    float data[];
-} FOLIAGE_BENDERS;
-        
+		
+layout(set = 0,binding = 8, r8i) uniform restrict readonly image2D FOLIAGE_BENDER;
+
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
-    float x = mix(a, b, t);
-    float y = mix(c, d, t);
-    return mix(x, y, s);
+	float x = mix(a, b, t);
+	float y = mix(c, d, t);
+	return mix(x, y, s);
 }        
-        
+		
 float get_height_at_chunk_pos(vec2 chunk_pos, float A, float B, float C, float D)
 {
-    // Chunk pos is a value between [0 0] and [1 1]   
-    // A = [0 0]
-    // B = [0 1]
-    // C = [1 0]
-    // D = [1 1]
-            
-    float XLerp1 = mix(A,B,chunk_pos.x);
-    float XLerp2 = mix(C,D,chunk_pos.x);    
-    return mix(XLerp1,XLerp2,chunk_pos.y);
+	// Chunk pos is a value between [0 0] and [1 1]   
+	// A = [0 0]
+	// B = [0 1]
+	// C = [1 0]
+	// D = [1 1]
+			
+	float XLerp1 = mix(A,B,chunk_pos.x);
+	float XLerp2 = mix(C,D,chunk_pos.x);    
+	return mix(XLerp1,XLerp2,chunk_pos.y);
 }
-        
+		
 float get_scale(vec2 chunk_pos, ivec2 image_size, float max_size)
 {
-    vec2 normalized_final_pos = chunk_pos / max_size;
-    ivec2 image_pos = ivec2(normalized_final_pos * image_size);
-    return imageLoad(FOLIAGE_MASK, image_pos).r;    
+	vec2 normalized_final_pos = chunk_pos / max_size;
+	ivec2 image_pos = ivec2(normalized_final_pos * image_size);
+	return imageLoad(FOLIAGE_MASK, image_pos).r * imageLoad(FOLIAGE_BENDER, image_pos).r;    
 }
-        
+		
 float random2D(vec2 uv) {
-    return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123);
+	return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123);
 }
-        
+		
 mat3 rot_z(float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
+	float s = sin(angle);
+	float c = cos(angle);
 
-    return mat3(
-    c, s, 0.0,
-    -s, c, 0.0,
-    0.0, 0.0, 1.0);
+	return mat3(
+	c, s, 0.0,
+	-s, c, 0.0,
+	0.0, 0.0, 1.0);
 }
 
 mat3 rot_y(float angle) 
 {
-    float s = sin(angle);
-    float c = cos(angle);
+	float s = sin(angle);
+	float c = cos(angle);
 
-    return mat3(
-    c, 0.0, -s,
-    0.0, 1.0, 0.0,
-    s, 0.0, c);
+	return mat3(
+	c, 0.0, -s,
+	0.0, 1.0, 0.0,
+	s, 0.0, c);
 }        
-        
+		
 mat3 rot_x(float angle)
 {
-    float s = sin(angle);
-    float c = cos(angle);
-    
-    return mat3(
-    1.0, 0.0, 0.0,
-    0.0, c, s,
-    0.0, -s, c);
+	float s = sin(angle);
+	float c = cos(angle);
+	
+	return mat3(
+	1.0, 0.0, 0.0,
+	0.0, c, s,
+	0.0, -s, c);
 }
 
 float closest_if_between(float val, float low, float high)
 {
-    if (val > low && val < high)
-    {
-        return val < ((high - low) / 2.0 + low) ? low : high;
-    }
-        
-    return val;
+	if (val > low && val < high)
+	{
+		return val < ((high - low) / 2.0 + low) ? low : high;
+	}
+		
+	return val;
 }
-        
+		
 float get_rot_biased_towards_player(vec2 blade_pos)
 {
    float rand_angle = random2D(blade_pos) * 3.14159;    // RANGE [-PI, PI]
 
    vec2 target_dir = vec2(PLAYERDATA.X_POS - blade_pos.x, PLAYERDATA.Z_POS - blade_pos.y);
-        
+		
    float angle_towards_player = atan(target_dir.y, target_dir.x);   // range [-PI, PI]
    float angle_away_from_player = angle_towards_player + 3.14159;  // range [0, 2 * PI]   
-        
+		
    //if our random angle is similar to the angle towards the player, angle it away a bit     
    const float offset = 0.5;
    rand_angle = closest_if_between(rand_angle,angle_towards_player - offset, angle_towards_player + offset);
    rand_angle = closest_if_between(rand_angle,angle_away_from_player - offset, angle_away_from_player + offset);
-        
+		
    return rand_angle;
 }
 
