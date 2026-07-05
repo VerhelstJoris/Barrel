@@ -186,7 +186,7 @@ func _initialize_bender_data() -> void:
 	if(chunk_overlap_area):
 		NodeUtils._add_node_meta_to_node(foliage_node_meta ,chunk_overlap_area, self)
 
-	current_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_R8)
+	current_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RF)
 	current_bender_image.fill(Color.BLACK)
 	bender_image_target = current_bender_image
 
@@ -360,7 +360,7 @@ func _setup_compute_pipeline()	-> void:
 	var bender_tex_uniform = RDUniform.new()
 	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	bender_tex_uniform.binding = 8
-	current_bender_data_tex_RID = _init_existing_image_data(rd, current_bender_image, RenderingDevice.DATA_FORMAT_R8_UINT, true)
+	current_bender_data_tex_RID = _init_existing_image_data(rd, current_bender_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, true)
 	bender_tex_uniform.add_id(current_bender_data_tex_RID)
 	
 	#sparse tranform buffer pre-condensed

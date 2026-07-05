@@ -59,7 +59,7 @@ layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 int data[];
 } SEGMENTSTODRAW;
 		
-layout(set = 0,binding = 8, r8i) uniform restrict readonly image2D FOLIAGE_BENDER;
+layout(set = 0,binding = 8, r32f) uniform restrict readonly image2D FOLIAGE_BENDER;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
@@ -85,6 +85,7 @@ float get_scale(vec2 chunk_pos, ivec2 image_size, float max_size)
 {
 	vec2 normalized_final_pos = chunk_pos / max_size;
 	ivec2 image_pos = ivec2(normalized_final_pos * image_size);
+    //
 	return imageLoad(FOLIAGE_MASK, image_pos).r * imageLoad(FOLIAGE_BENDER, image_pos).r;    
 }
 		

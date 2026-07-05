@@ -22,7 +22,7 @@ func _switch_to(mesh: Mesh, material: Material) -> void:
 	multimesh.multimesh.mesh = mesh
 	multimesh.material_override = material
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var viewport : Viewport
 	if Engine.is_editor_hint():
 		viewport = EditorInterface.get_editor_viewport_3d()
