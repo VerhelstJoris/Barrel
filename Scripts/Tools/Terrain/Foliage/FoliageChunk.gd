@@ -517,15 +517,16 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 # REGION BENDERS 
 #=================================================================================================================================
 func _update_bender_data(_rd : RenderingDevice) -> void:
-	var chunk_offset : Vector2i = Vector2i(int(global_position.x - (chunk_dimenstion_size_m * 0.5)) ,int(global_position.z - (chunk_dimenstion_size_m * 0.5)))
+	var chunk_offset : Vector2 = Vector2(global_position.x - (chunk_dimenstion_size_m * 0.5) ,global_position.z - (chunk_dimenstion_size_m * 0.5))
 	var pixel_mult : float = bender_mask_res/ chunk_dimenstion_size_m 
 	
 	for bender in current_benders_arr:
 		#calculate the position on the texture that bender holds
-		var bender_diff : Vector2i = Vector2i( int(bender.global_position.x - chunk_offset.x), int(bender.global_position.z- chunk_offset.y))
-		var bender_pixel_pos : Vector2i = bender_diff * pixel_mult
+		var bender_diff : Vector2 = Vector2(bender.global_position.x - chunk_offset.x, bender.global_position.z- chunk_offset.y)
+		var bender_pixel_pos : Vector2i =Vector2i(bender_diff * pixel_mult)
 		if(bender_pixel_pos.x < bender_mask_res && bender_pixel_pos.y < bender_mask_res && bender_pixel_pos.x > 0 && bender_pixel_pos.y > 0):
 			current_bender_image.set_pixel(bender_pixel_pos.x, bender_pixel_pos.y, Color.RED)
+			print("write to pixel ", bender_pixel_pos)
 			
 	_rd.texture_update( current_bender_data_tex_RID,0,current_bender_image.get_data())
 
