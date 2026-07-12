@@ -59,7 +59,7 @@ layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 int data[];
 } SEGMENTSTODRAW;
 		
-layout(set = 0,binding = 8, r32f) uniform restrict readonly image2D FOLIAGE_BENDER;
+layout(set = 0,binding = 8, rgba8) uniform restrict readonly image2D FOLIAGE_BENDER;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
@@ -86,7 +86,7 @@ float get_scale(vec2 chunk_pos, ivec2 image_size, float max_size)
 	vec2 normalized_final_pos = chunk_pos / max_size;
 	ivec2 image_pos = ivec2(normalized_final_pos * image_size);
     //
-	return imageLoad(FOLIAGE_MASK, image_pos).r * imageLoad(FOLIAGE_BENDER, image_pos).r;    
+	return imageLoad(FOLIAGE_MASK, image_pos).r;    
 }
 		
 float random2D(vec2 uv) {
@@ -138,7 +138,7 @@ float closest_if_between(float val, float low, float high)
 float get_rot_biased_towards_player(vec2 blade_pos)
 {
    float rand_angle = random2D(blade_pos) * 3.14159;    // RANGE [-PI, PI]
-
+   return rand_angle;     
    vec2 target_dir = vec2(PLAYERDATA.X_POS - blade_pos.x, PLAYERDATA.Z_POS - blade_pos.y);
 		
    float angle_towards_player = atan(target_dir.y, target_dir.x);   // range [-PI, PI]
@@ -177,7 +177,7 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     const float z_group_offset = FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_local_coord.y - half_chunk_size_dim;
     const vec2 half_offset = vec2(half_chunk_size_dim, half_chunk_size_dim);
 
-    float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y;
+    float x,z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y, random_rot_z;
     vec2 final_pos;
     mat3 rot_scale_matrix;
     
@@ -232,16 +232,26 @@ int fill_chunk_segment(ivec2 segment_local_coord)
             final_z = group_z + z_group_offset;
             
             final_pos = vec2(final_x, final_z);
-            scale = get_scale(final_pos + half_offset - vec2(x_offset_rand, z_offset_rand), mask_size, chunk_size_dim);
+            vec2 uv_pos = final_pos + half_offset - vec2(x_offset_rand, z_offset_rand);
+            scale = get_scale(uv_pos, mask_size, chunk_size_dim);
                 
             if(scale < FPARAMETERS.MIN_BLADE_SCALE)
             {
                 continue;
             }
                 
-            random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
+            //random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
             random_rot_y = get_rot_biased_towards_player(final_pos);
-            rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y);
+
+            vec2 normalized_final_pos = uv_pos / chunk_size_dim;
+            normalized_final_pos.x = 1.0 - normalized_final_pos.x;    
+            ivec2 image_pos = ivec2(normalized_final_pos * mask_size);
+            random_rot_x = imageLoad(FOLIAGE_BENDER, image_pos).r * 1.45;    
+            //random_rot_y = 0;        
+
+            random_rot_z =  0;
+                
+            rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y) * rot_z(random_rot_z);
             
             id_offset = int( group_offset + (current_blade * 12) );
             

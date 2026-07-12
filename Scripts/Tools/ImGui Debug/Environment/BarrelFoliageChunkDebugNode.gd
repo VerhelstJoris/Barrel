@@ -25,7 +25,7 @@ var table_draw_conflict_col : Array[float] = [0,1,1]
 var table_x_draw_range : Array[int] = [0,50]
 var table_y_draw_range : Array[int] = [0,50]
 
-var bender_img_scale : Array[float] = [1.0]
+var bender_img_scale : Array[float] = [0.75]
 var bender_img_min_uv : Array[float] = [0.0,0.0]
 var bender_img_max_uv : Array[float] = [1.0,1.0]
 
@@ -193,10 +193,9 @@ func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String
 	ImGui.PopStyleColor()
 	
 func _draw_bender_data() -> void:
-	var tex : ImageTexture = ImageTexture.create_from_image(chunk.current_bender_image)
+	ImGui.TextColored(Color.CHOCOLATE, "Note that the X will be flipped as the render tex camera is underneath the world")
 	
-	dummy_bender_tex = tex	#needs to be assigned with a valid RID
-	
+	var tex : Texture = chunk.bender_mask_subviewport.get_texture()
 	ImGui.Text("Image Size {}".format([tex.get_size()], "{}") )
 	ImGui.PushItemWidth(100)
 	ImGui.SliderFloat("Img Size", bender_img_scale, 0.0,1.0)

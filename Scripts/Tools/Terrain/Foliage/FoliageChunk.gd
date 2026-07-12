@@ -10,23 +10,30 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 const foliage_node_meta : String = "Node_FoliageChunk"
 
 @export_group("Setup Data")
+@export var visibility_notifier : VisibleOnScreenNotifier3D
+@export var terrain_node : Terrain3D
+@export var inverse_terrain_node : Terrain3D
+@export var bender_mask_subviewport : SubViewport
+
 @export var chunk_transform_centered : bool = false
 @export var chunk_dimenstion_size_m : float = 200.0
+@export var chunk_mask : Texture2D
+
 @export var positions_compute_shader : RDShaderFile
 @export var transfer_compute_shader : RDShaderFile
+@export_subgroup("High LOD")
 @export var foliage_mesh_high_LOD : Mesh
-@export var foliage_mesh_low_LOD : Mesh
-
-@export var chunk_mask : Texture2D
 @export var grass_material_high_LOD :Material
+
+@export_subgroup("Low LOD")
+@export var foliage_mesh_low_LOD : Mesh
 @export var grass_material_low_LOD :Material
 
-@export var terrain_node : Terrain3D
+
 
 @export_subgroup("Grass Bending")
 @export var chunk_overlap_shape : CollisionShape3D
 @export var chunk_overlap_area : Area3D
-@export var visibility_notifier : VisibleOnScreenNotifier3D
 @export var bender_mask_res : int = 512
 
 @export_group("Customizable Parameters")
@@ -76,15 +83,8 @@ var player_transform_data_arr : PackedFloat32Array
 var player_transform_data_buffer_RID : RID
 var player_transform_to_pass : Transform3D
 
-#current foliage benders data
-var current_benders_arr : Array[FoliageBender]
+#current foliage bending data
 var current_bender_data_tex_RID : RID
-var current_bender_image : Image
-# graudally blend back towards this
-var bender_image_target : Image
-
-const max_foliage_benders_per_chunk : int = 10
-var current_bender_packed_arr : PackedByteArray
 
 # segment coord data
 var segments_per_dim : int = 0
@@ -165,6 +165,9 @@ func _ready() -> void:
 	_intialize_segments_data()
 	_initialize_bender_data()
 
+	if(inverse_terrain_node):
+		inverse_terrain_node.material.show_checkered = false
+
 	if(!Engine.is_editor_hint()):
 		RenderingServer.call_on_render_thread(_cleanup)
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
@@ -185,10 +188,6 @@ func _intialize_segments_data() -> void:
 func _initialize_bender_data() -> void:
 	if(chunk_overlap_area):
 		NodeUtils._add_node_meta_to_node(foliage_node_meta ,chunk_overlap_area, self)
-
-	current_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RF)
-	current_bender_image.fill(Color.BLACK)
-	bender_image_target = current_bender_image
 
 func _contruct_multimesh_bounding_box() ->AABB:
 	var extra_offset : float = 5
@@ -360,7 +359,7 @@ func _setup_compute_pipeline()	-> void:
 	var bender_tex_uniform = RDUniform.new()
 	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	bender_tex_uniform.binding = 8
-	current_bender_data_tex_RID = _init_existing_image_data(rd, current_bender_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, true)
+	current_bender_data_tex_RID = RenderingServer.texture_get_rd_texture(bender_mask_subviewport.get_texture().get_rid())
 	bender_tex_uniform.add_id(current_bender_data_tex_RID)
 	
 	#sparse tranform buffer pre-condensed
@@ -480,7 +479,8 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
 	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
-	_update_bender_data(rd)
+	#_update_bender_data(rd)
+
 	
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
@@ -517,22 +517,8 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 # REGION BENDERS 
 #=================================================================================================================================
 func _update_bender_data(_rd : RenderingDevice) -> void:
-	var chunk_offset : Vector2 = Vector2(global_position.x - (chunk_dimenstion_size_m * 0.5) ,global_position.z - (chunk_dimenstion_size_m * 0.5))
-	var pixel_mult : float = bender_mask_res/ chunk_dimenstion_size_m 
-	
-	for bender in current_benders_arr:
-		#calculate the position on the texture that bender holds
-		var bender_diff : Vector2 = Vector2(bender.global_position.x - chunk_offset.x, bender.global_position.z- chunk_offset.y)
-		var bender_pixel_pos : Vector2i =Vector2i(bender_diff * pixel_mult)
-		if(bender_pixel_pos.x < bender_mask_res && bender_pixel_pos.y < bender_mask_res && bender_pixel_pos.x > 0 && bender_pixel_pos.y > 0):
-			current_bender_image.set_pixel(bender_pixel_pos.x, bender_pixel_pos.y, Color.RED)
-			print("write to pixel ", bender_pixel_pos)
-			
-	_rd.texture_update( current_bender_data_tex_RID,0,current_bender_image.get_data())
+	pass
 
-func _calculate_bender_pixel_pos() -> Vector2i:
-	return Vector2i.ZERO
-	
 # REGION SEGMENT DETECTION 
 #=================================================================================================================================
 
