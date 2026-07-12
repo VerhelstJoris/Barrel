@@ -165,14 +165,11 @@ func _ready() -> void:
 	_intialize_segments_data()
 	_initialize_bender_data()
 
-	if(inverse_terrain_node):
-		inverse_terrain_node.material.show_checkered = false
-
 	if(!Engine.is_editor_hint()):
 		RenderingServer.call_on_render_thread(_cleanup)
 		RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 		
-	
+
 func _intialize_segments_data() -> void:
 	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
 	segment_work_data_arr.resize(segments_per_dim*segments_per_dim)
@@ -188,7 +185,13 @@ func _intialize_segments_data() -> void:
 func _initialize_bender_data() -> void:
 	if(chunk_overlap_area):
 		NodeUtils._add_node_meta_to_node(foliage_node_meta ,chunk_overlap_area, self)
-
+		
+	if(inverse_terrain_node):
+		inverse_terrain_node.material.show_checkered = false
+	
+	if(bender_mask_subviewport):
+		bender_mask_subviewport.size = Vector2(bender_mask_res,bender_mask_res)	
+		
 func _contruct_multimesh_bounding_box() ->AABB:
 	var extra_offset : float = 5
 	
@@ -330,8 +333,8 @@ func _setup_compute_pipeline()	-> void:
 	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	mask_tex_uniform.binding = 5
 	var chunk_image = chunk_mask.get_image()
-	chunk_image.convert(Image.FORMAT_RGBAF)
-	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT, false))
+	chunk_image.convert(Image.FORMAT_RF)
+	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, false))
 
 	#player data binding
 	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

@@ -41,7 +41,7 @@ layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
 	int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
 } IPARAMETERS;
 
-layout(set = 0,binding = 5, rgba32f) uniform restrict readonly image2D FOLIAGE_MASK;
+layout(set = 0,binding = 5, r32f) uniform restrict readonly image2D FOLIAGE_MASK;
 		
 layout(set = 0, binding = 6, std430) restrict readonly buffer PlayerData
 {
