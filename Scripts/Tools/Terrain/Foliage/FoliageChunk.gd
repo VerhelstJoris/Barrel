@@ -333,8 +333,8 @@ func _setup_compute_pipeline()	-> void:
 	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	mask_tex_uniform.binding = 5
 	var chunk_image = chunk_mask.get_image()
-	chunk_image.convert(Image.FORMAT_RF)
-	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, false))
+	chunk_image.convert(Image.FORMAT_R8)
+	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R8_UNORM, false))
 
 	#player data binding
 	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
