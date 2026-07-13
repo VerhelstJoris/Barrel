@@ -3,7 +3,7 @@ class_name FoliageChunk extends Node3D
 
 enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
-@export_tool_button("preview in Editor", "Callable") var preview_action : Callable = _preview_in_editor
+@export_tool_button("Preview in Editor", "Callable") var preview_action : Callable = _preview_in_editor
 @export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action : Callable = _generate_height_data
 @export_tool_button("Generate Bender Overlap Shape", "Callable") var generate_overlap_shape_action : Callable= _generate_overlap_shape
 
@@ -21,6 +21,8 @@ const foliage_node_meta : String = "Node_FoliageChunk"
 
 @export var positions_compute_shader : RDShaderFile
 @export var transfer_compute_shader : RDShaderFile
+@export var bender_compute_shader : RDShaderFile
+
 @export_subgroup("High LOD")
 @export var foliage_mesh_high_LOD : Mesh
 @export var grass_material_high_LOD :Material
@@ -28,8 +30,6 @@ const foliage_node_meta : String = "Node_FoliageChunk"
 @export_subgroup("Low LOD")
 @export var foliage_mesh_low_LOD : Mesh
 @export var grass_material_low_LOD :Material
-
-
 
 @export_subgroup("Grass Bending")
 @export var chunk_overlap_shape : CollisionShape3D
@@ -53,7 +53,8 @@ const foliage_node_meta : String = "Node_FoliageChunk"
 const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 const large_float_dist : float = 99999999999
 
-var current_lod : EFoliageLOD = EFoliageLOD.NONE
+var created_bender_image : Image
+var created_bender_image_RID : RID
 
 var rd : RenderingDevice
 
@@ -67,13 +68,21 @@ var created_multimesh_buffer_RID : RID
 var created_multimesh_command_buffer_RID : RID
 var created_multimesh_AABB : AABB
 
+
+#shader rid
 var compute_pos_shader_RID : RID
 var transfer_shader_RID : RID
+var bender_shader_RID : RID
 
-var uniform_set_primary_RID : RID
-var uniform_set_secondary_RID : RID
-var pipeline_primary_RID : RID
-var pipeline_secondary_RID : RID
+#uniform sets
+var uniform_set_position_calc_RID : RID
+var uniform_set_position_transfer_RID : RID
+var uniform_set_bender_RID : RID
+
+#pipelines
+var pipeline_position_calc_RID : RID
+var pipeline_position_transfer_RID : RID
+var pipeline_bender_RID : RID
 
 var secondary_transform_buffer_RID : RID
 var blade_count_buffer_RID : RID
@@ -192,6 +201,8 @@ func _initialize_bender_data() -> void:
 	if(bender_mask_subviewport):
 		bender_mask_subviewport.size = Vector2(bender_mask_res,bender_mask_res)	
 		
+	created_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RGBA8)	
+		
 func _contruct_multimesh_bounding_box() ->AABB:
 	var extra_offset : float = 5
 	
@@ -259,13 +270,19 @@ func _setup_compute_pipeline()	-> void:
 		return
 	RID_arr.append(compute_pos_shader_RID)
 
-
 	transfer_shader_RID = _load_shader_from_file(transfer_compute_shader)
 	if(!transfer_shader_RID.is_valid()):
 		push_error("FAILED TO LOAD SHADER: ", transfer_compute_shader.to_string())
 		return
 	RID_arr.append(transfer_shader_RID)
 	
+	#load shaders
+	bender_shader_RID = _load_shader_from_file(bender_compute_shader)
+	if(!bender_shader_RID.is_valid()):
+		push_error("FAILED TO LOAD SHADER: ", bender_compute_shader.to_string())
+		return
+	RID_arr.append(bender_shader_RID)
+
 	#height data binding
 	var height_data_uniform = RDUniform.new()
 	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
@@ -362,13 +379,6 @@ func _setup_compute_pipeline()	-> void:
 	var bender_sampler_state : RDSamplerState = RDSamplerState.new()
 	var bender_sampler_RID : RID = rd.sampler_create(bender_sampler_state)
 	RID_arr.append(bender_sampler_RID)	
-
-	var bender_tex_uniform = RDUniform.new()
-	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	bender_tex_uniform.binding = 8
-	current_bender_data_tex_RID = RenderingServer.texture_get_rd_texture(bender_mask_subviewport.get_texture().get_rid())
-	bender_tex_uniform.add_id(bender_sampler_RID)
-	bender_tex_uniform.add_id(current_bender_data_tex_RID)
 	
 	#sparse tranform buffer pre-condensed
 	var transform_array_uniform = RDUniform.new()
@@ -379,24 +389,49 @@ func _setup_compute_pipeline()	-> void:
 	RID_arr.append(secondary_transform_buffer_RID)
 	transform_array_uniform.add_id(secondary_transform_buffer_RID)	
 
+	#pass the subviewport through to process
+	var bender_img_uniform = RDUniform.new()
+	bender_img_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	bender_img_uniform.binding = 0
+	current_bender_data_tex_RID = RenderingServer.texture_get_rd_texture(bender_mask_subviewport.get_texture().get_rid())
+	bender_img_uniform.add_id(current_bender_data_tex_RID)
+	
+	var bender_modified_img_uniform = RDUniform.new()
+	bender_modified_img_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	bender_modified_img_uniform.binding = 1
+	created_bender_image_RID = _init_existing_image_data(rd, created_bender_image, RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM, true)
+	bender_modified_img_uniform.add_id(created_bender_image_RID)
+
+	var bender_tex_uniform = RDUniform.new()
+	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	bender_tex_uniform.binding = 8
+	bender_tex_uniform.add_id(bender_sampler_RID)
+	bender_tex_uniform.add_id(created_bender_image_RID)
+
 	#add all uniforms bindings into the set
-	uniform_set_primary_RID = rd.uniform_set_create(
+	uniform_set_position_calc_RID = rd.uniform_set_create(
 			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform, bender_tex_uniform]
 			, compute_pos_shader_RID, 0)
-	RID_arr.append(uniform_set_primary_RID)
+	RID_arr.append(uniform_set_position_calc_RID)
 
-	uniform_set_secondary_RID = rd.uniform_set_create(
+	uniform_set_position_transfer_RID = rd.uniform_set_create(
 		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform]
 		, transfer_shader_RID, 0)
-	RID_arr.append(uniform_set_secondary_RID)
-
+	RID_arr.append(uniform_set_position_transfer_RID)
 	
+	uniform_set_bender_RID = rd.uniform_set_create(
+		[bender_img_uniform, bender_modified_img_uniform],
+		bender_shader_RID ,0)
+	RID_arr.append(uniform_set_bender_RID)
+
 	# Create a compute pipeline
 	# don't actually run them or anything yet
-	pipeline_primary_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
-	RID_arr.append(pipeline_primary_RID)
-	pipeline_secondary_RID = rd.compute_pipeline_create(transfer_shader_RID)
-	RID_arr.append(pipeline_secondary_RID)
+	pipeline_position_calc_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
+	RID_arr.append(pipeline_position_calc_RID)
+	pipeline_position_transfer_RID = rd.compute_pipeline_create(transfer_shader_RID)
+	RID_arr.append(pipeline_position_transfer_RID)
+	pipeline_bender_RID =  rd.compute_pipeline_create(bender_shader_RID)
+	RID_arr.append(pipeline_bender_RID)
 
 	set_process(true)
 	initialized = true
@@ -476,7 +511,7 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
 func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D)->void:
-	if(!pipeline_primary_RID.is_valid() || !uniform_set_primary_RID.is_valid() || !uniform_set_secondary_RID.is_valid()):
+	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_position_calc_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
 		return
 		
 	compute_active = true
@@ -489,17 +524,22 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
 	#_update_bender_data(rd)
 
-	
 	var compute_list : int = rd.compute_list_begin()
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_primary_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_primary_RID, 0)
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
+	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	
+	rd.compute_list_add_barrier(compute_list)
+
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_position_calc_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_position_calc_RID, 0)
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
 
 	# wait until the first shader is done
 	rd.compute_list_add_barrier(compute_list)
 
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_secondary_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_secondary_RID, 0)
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_position_transfer_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_position_transfer_RID, 0)
 	rd.compute_list_dispatch(compute_list, high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
 
 	rd.compute_list_end()

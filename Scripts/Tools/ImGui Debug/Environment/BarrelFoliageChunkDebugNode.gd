@@ -192,6 +192,8 @@ func _draw_found_arr(found_amount : int, arr : Array[Vector2i], prepend : String
 	ImGui.TextWrapped("{} : {} == {}".format([prepend, found_amount, segments], "{}"))
 	ImGui.PopStyleColor()
 	
+var dummy_texture : Texture2D
+	
 func _draw_bender_data() -> void:
 	ImGui.TextColored(Color.CHOCOLATE, "Note that the X will be flipped as the render tex camera is underneath the world")
 	
@@ -206,4 +208,13 @@ func _draw_bender_data() -> void:
 	ImGui.InputFloat2("Max UV", bender_img_max_uv)
 
 	ImGui.ImageEx(tex , tex.get_size() * bender_img_scale[0],Vector2(bender_img_min_uv[0], bender_img_min_uv[1]), Vector2(bender_img_max_uv[0], bender_img_max_uv[1]) )
+	ImGui.SameLine()
 	
+	var rd := RenderingServer.get_rendering_device()
+	var created_tex_arr : PackedByteArray = rd.texture_get_data(chunk.created_bender_image_RID,0)
+	var created_image : Image = Image.create_from_data(chunk.bender_mask_res, chunk.bender_mask_res, false, Image.FORMAT_RGBA8, created_tex_arr)
+	var imagetex : ImageTexture = ImageTexture.create_from_image(created_image)
+
+	dummy_texture = imagetex
+
+	ImGui.ImageEx(dummy_texture , dummy_texture.get_size() * bender_img_scale[0],Vector2(bender_img_min_uv[0], bender_img_min_uv[1]), Vector2(bender_img_max_uv[0], bender_img_max_uv[1]) )
