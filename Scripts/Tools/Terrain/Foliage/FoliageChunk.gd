@@ -359,10 +359,15 @@ func _setup_compute_pipeline()	-> void:
 	segments_coord_uniform.add_id(segment_coord_data_buffer_RID)
 
 	##current blade tex binding
+	var bender_sampler_state : RDSamplerState = RDSamplerState.new()
+	var bender_sampler_RID : RID = rd.sampler_create(bender_sampler_state)
+	RID_arr.append(bender_sampler_RID)	
+
 	var bender_tex_uniform = RDUniform.new()
-	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
 	bender_tex_uniform.binding = 8
 	current_bender_data_tex_RID = RenderingServer.texture_get_rd_texture(bender_mask_subviewport.get_texture().get_rid())
+	bender_tex_uniform.add_id(bender_sampler_RID)
 	bender_tex_uniform.add_id(current_bender_data_tex_RID)
 	
 	#sparse tranform buffer pre-condensed

@@ -59,7 +59,7 @@ layout(set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 int data[];
 } SEGMENTSTODRAW;
 		
-layout(set = 0,binding = 8, rgba8) uniform restrict readonly image2D FOLIAGE_BENDER;
+layout(set = 0,binding = 8) uniform sampler2D FOLIAGE_BENDER;
 
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
@@ -245,8 +245,7 @@ int fill_chunk_segment(ivec2 segment_local_coord)
 
             vec2 normalized_final_pos = uv_pos / chunk_size_dim;
             normalized_final_pos.x = 1.0 - normalized_final_pos.x;    
-            ivec2 image_pos = ivec2(normalized_final_pos * mask_size);
-            random_rot_x = imageLoad(FOLIAGE_BENDER, image_pos).r * 1.45;    
+            random_rot_x = texture(FOLIAGE_BENDER, normalized_final_pos).r * 1.45;    
             //random_rot_y = 0;        
 
             random_rot_z =  0;
