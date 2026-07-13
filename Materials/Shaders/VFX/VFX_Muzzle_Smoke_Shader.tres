@@ -1,4 +1,4 @@
-[gd_resource type="VisualShader" load_steps=68 format=3 uid="uid://ptkpnelb3y0f"]
+[gd_resource type="VisualShader" load_steps=67 format=3 uid="uid://ptkpnelb3y0f"]
 
 [sub_resource type="VisualShaderNodeColorConstant" id="VisualShaderNodeColorConstant_ckggj"]
 constant = Color(0.91664, 0.91664, 0.91664, 1)
@@ -111,9 +111,6 @@ output_port_for_preview = 0
 output_port_for_preview = 0
 default_input_values = [0, 0.0, 1, 0.5]
 operator = 2
-
-[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_ifhbd"]
-input_name = "uv"
 
 [sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_scjmt"]
 input_name = "uv"
@@ -511,6 +508,4 @@ nodes/fragment/93/node = SubResource("VisualShaderNodeFloatOp_kqaoo")
 nodes/fragment/93/position = Vector2(-540, 2820)
 nodes/fragment/94/node = SubResource("VisualShaderNodeFloatOp_dmdi6")
 nodes/fragment/94/position = Vector2(180, 2660)
-nodes/fragment/96/node = SubResource("VisualShaderNodeInput_ifhbd")
-nodes/fragment/96/position = Vector2(1066.04, 426.364)
 nodes/fragment/connections = PackedInt32Array(7, 0, 39, 0, 14, 0, 27, 0, 50, 0, 7, 0, 7, 0, 27, 1, 28, 0, 41, 1, 4, 2, 57, 0, 57, 0, 63, 0, 41, 0, 63, 1, 4, 0, 64, 0, 65, 0, 64, 2, 63, 0, 68, 0, 63, 0, 69, 0, 68, 0, 69, 1, 28, 0, 70, 0, 64, 2, 41, 0, 66, 0, 65, 1, 70, 0, 66, 0, 70, 0, 57, 1, 82, 0, 81, 0, 36, 0, 82, 0, 69, 0, 89, 0, 89, 0, 39, 1, 36, 0, 92, 1, 92, 0, 91, 1, 91, 0, 88, 0, 81, 0, 93, 1, 93, 0, 91, 0, 74, 2, 93, 0, 88, 0, 94, 0, 94, 0, 89, 1, 27, 0, 0, 0, 39, 0, 0, 1)
