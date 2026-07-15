@@ -35,6 +35,10 @@ const foliage_node_meta : String = "Node_FoliageChunk"
 @export var chunk_overlap_shape : CollisionShape3D
 @export var chunk_overlap_area : Area3D
 @export var bender_mask_res : int = 512
+@export var unbend_rate_per_second : float = 0.05
+
+var bend_float_param_arr : PackedByteArray
+var fparameter_buffer_bend_RID :RID
 
 @export_group("Customizable Parameters")
 @export var high_lod_num_work_groups_xz : int = 4
@@ -201,7 +205,7 @@ func _initialize_bender_data() -> void:
 	if(bender_mask_subviewport):
 		bender_mask_subviewport.size = Vector2(bender_mask_res,bender_mask_res)	
 		
-	created_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RGBA8)	
+	created_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RF)	
 		
 func _contruct_multimesh_bounding_box() ->AABB:
 	var extra_offset : float = 5
@@ -244,7 +248,7 @@ func _process(_delta: float) -> void:
 
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
-		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam))
+		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam, _delta))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
@@ -399,8 +403,21 @@ func _setup_compute_pipeline()	-> void:
 	var bender_modified_img_uniform = RDUniform.new()
 	bender_modified_img_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	bender_modified_img_uniform.binding = 1
-	created_bender_image_RID = _init_existing_image_data(rd, created_bender_image, RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM, true)
+	created_bender_image_RID = _init_existing_image_data(rd, created_bender_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, true)
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
+	
+		# float parameter binding
+	const delta : float = 1.0/60.0
+	bend_float_param_arr  =  PackedFloat32Array(
+		[unbend_rate_per_second,delta]
+		 ).to_byte_array()
+	fparameter_buffer_bend_RID = rd.storage_buffer_create(bend_float_param_arr.size(), bend_float_param_arr)
+	RID_arr.append(fparameter_buffer_bend_RID)
+
+	var bender_float_parameter_uniform = RDUniform.new()
+	bender_float_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	bender_float_parameter_uniform.binding = 2
+	bender_float_parameter_uniform.add_id(fparameter_buffer_bend_RID)
 
 	var bender_tex_uniform = RDUniform.new()
 	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
@@ -420,7 +437,7 @@ func _setup_compute_pipeline()	-> void:
 	RID_arr.append(uniform_set_position_transfer_RID)
 	
 	uniform_set_bender_RID = rd.uniform_set_create(
-		[bender_img_uniform, bender_modified_img_uniform],
+		[bender_img_uniform, bender_modified_img_uniform, bender_float_parameter_uniform],
 		bender_shader_RID ,0)
 	RID_arr.append(uniform_set_bender_RID)
 
@@ -510,7 +527,7 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
-func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D)->void:
+func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float)->void:
 	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_position_calc_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
 		return
 		
@@ -522,14 +539,14 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
 	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
-	#_update_bender_data(rd)
+	_update_bender_data(rd, _delta)
 
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
 	
-	rd.compute_list_add_barrier(compute_list)
+	#rd.compute_list_add_barrier(compute_list)
 
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_position_calc_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_position_calc_RID, 0)
@@ -564,8 +581,10 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 
 # REGION BENDERS 
 #=================================================================================================================================
-func _update_bender_data(_rd : RenderingDevice) -> void:
-	pass
+func _update_bender_data(_rd : RenderingDevice, delta : float) -> void:
+	#update the delta passed through
+	bend_float_param_arr.encode_float(4,delta)
+	_rd.buffer_update(fparameter_buffer_bend_RID, 0, bend_float_param_arr.size() ,bend_float_param_arr)
 
 # REGION SEGMENT DETECTION 
 #=================================================================================================================================

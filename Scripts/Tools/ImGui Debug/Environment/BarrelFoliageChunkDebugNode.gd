@@ -212,7 +212,7 @@ func _draw_bender_data() -> void:
 	
 	var rd := RenderingServer.get_rendering_device()
 	var created_tex_arr : PackedByteArray = rd.texture_get_data(chunk.created_bender_image_RID,0)
-	var created_image : Image = Image.create_from_data(chunk.bender_mask_res, chunk.bender_mask_res, false, Image.FORMAT_RGBA8, created_tex_arr)
+	var created_image : Image = Image.create_from_data(chunk.bender_mask_res, chunk.bender_mask_res, false, Image.FORMAT_RF, created_tex_arr)
 	var imagetex : ImageTexture = ImageTexture.create_from_image(created_image)
 
 	dummy_texture = imagetex
