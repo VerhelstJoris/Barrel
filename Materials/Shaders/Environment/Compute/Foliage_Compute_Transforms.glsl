@@ -239,15 +239,13 @@ int fill_chunk_segment(ivec2 segment_local_coord)
             {
                 continue;
             }
-                
-            //random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
-            random_rot_y = get_rot_biased_towards_player(final_pos);
+
 
             vec2 normalized_final_pos = uv_pos / chunk_size_dim;
-            normalized_final_pos.x = 1.0 - normalized_final_pos.x;    
-            random_rot_x = texture(FOLIAGE_BENDER, normalized_final_pos).r * 1.45;    
-            //random_rot_y = 0;        
-
+            normalized_final_pos.x = 1.0 - normalized_final_pos.x;
+            //random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
+            random_rot_x = texture(FOLIAGE_BENDER, normalized_final_pos).r *1.45;
+            random_rot_y = get_rot_biased_towards_player(final_pos);
             random_rot_z =  0;
                 
             rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y) * rot_z(random_rot_z);

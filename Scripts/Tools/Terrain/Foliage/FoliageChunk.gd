@@ -231,6 +231,9 @@ func _contruct_multimesh_bounding_box() ->AABB:
 	return AABB(bb_pos, bb_size)
 	
 func _process(_delta: float) -> void:
+	if(!visibility_notifier.is_on_screen()):
+		return
+	
 	var viewport : Viewport
 	if Engine.is_editor_hint():
 		viewport = EditorInterface.get_editor_viewport_3d()
@@ -240,15 +243,13 @@ func _process(_delta: float) -> void:
 	var cam : Camera3D = viewport.get_camera_3d()
 	var cam_transform : Transform3D = cam.global_transform
 	
+	var update_all : bool= true	
 	if(player_transform_to_pass.is_equal_approx(cam_transform)):
-		return
-
-	if(!visibility_notifier.is_on_screen()):
-		return
+		update_all = false
 
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
-		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam, _delta))
+		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam, _delta, update_all))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
@@ -499,13 +500,13 @@ func _init_existing_image_data(_rd : RenderingDevice, img : Image, format : Rend
 	RID_arr.append(tex_RID)
 	return tex_RID
 	
-	
 func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _vertex_spacing : float) -> void:
 	created_multimesh_RID =RenderingServer.multimesh_create()
 	RID_arr.append(created_multimesh_RID)
 	#calculate an estimated instance count to pass through
 	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	foliage_mesh_high_LOD.surface_set_material(0, grass_material_high_LOD)
+	
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, foliage_mesh_high_LOD.get_rid())
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
 	created_multimesh_AABB = _contruct_multimesh_bounding_box()
@@ -527,7 +528,17 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
-func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float)->void:
+func _update_minimal_compute_data(_delta : float) -> void:
+	rd = RenderingServer.get_rendering_device()
+	_update_bender_data(rd, _delta)
+
+	var compute_list : int = rd.compute_list_begin()
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
+	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	rd.compute_list_end()
+
+func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float, update_all : bool)->void:
 	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_position_calc_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
 		return
 		
@@ -537,8 +548,9 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
-	_update_player_data_buffer(rd, _player_cam_transform_world)
-	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
+	if(!update_all):
+		_update_player_data_buffer(rd, _player_cam_transform_world)
+		_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
 	_update_bender_data(rd, _delta)
 
 	var compute_list : int = rd.compute_list_begin()
