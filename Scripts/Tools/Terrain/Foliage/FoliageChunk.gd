@@ -8,6 +8,7 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 @export_tool_button("Generate Bender Overlap Shape", "Callable") var generate_overlap_shape_action : Callable= _generate_overlap_shape
 
 const foliage_node_meta : String = "Node_FoliageChunk"
+const foliage_shader_bend_mask : String = "shader_parameter/bending_mask"
 
 @export_group("Setup Data")
 @export var visibility_notifier : VisibleOnScreenNotifier3D
@@ -54,11 +55,12 @@ var fparameter_buffer_bend_RID :RID
 @export_group("runtime data - DO NOT EDIT MANUALLY")
 @export var height_array : PackedFloat32Array
 
-const vertex_move_amount_shader_parameter : String = "vertex_move_amount"
 const large_float_dist : float = 99999999999
 
 var created_bender_image : Image
 var created_bender_image_RID : RID
+var created_bender_tex_RD : Texture2DRD
+
 
 var rd : RenderingDevice
 
@@ -71,7 +73,6 @@ var created_multimesh_RID : RID
 var created_multimesh_buffer_RID : RID
 var created_multimesh_command_buffer_RID : RID
 var created_multimesh_AABB : AABB
-
 
 #shader rid
 var compute_pos_shader_RID : RID
@@ -243,13 +244,13 @@ func _process(_delta: float) -> void:
 	var cam : Camera3D = viewport.get_camera_3d()
 	var cam_transform : Transform3D = cam.global_transform
 	
-	var update_all : bool= true	
 	if(player_transform_to_pass.is_equal_approx(cam_transform)):
-		update_all = false
+		RenderingServer.call_on_render_thread(_update_compute_bender_data.bind(_delta))		
+		return
 
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
-		RenderingServer.call_on_render_thread(_update_compute_data.bind(player_transform_to_pass, cam, _delta, update_all))
+		RenderingServer.call_on_render_thread(_update_all_compute_data.bind(player_transform_to_pass, cam, _delta))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
@@ -405,6 +406,12 @@ func _setup_compute_pipeline()	-> void:
 	bender_modified_img_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	bender_modified_img_uniform.binding = 1
 	created_bender_image_RID = _init_existing_image_data(rd, created_bender_image, RenderingDevice.DATA_FORMAT_R32_SFLOAT, true)
+	
+	created_bender_tex_RD = Texture2DRD.new()
+	created_bender_tex_RD.texture_rd_rid = created_bender_image_RID
+	grass_material_high_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	grass_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
 	
 		# float parameter binding
@@ -420,15 +427,9 @@ func _setup_compute_pipeline()	-> void:
 	bender_float_parameter_uniform.binding = 2
 	bender_float_parameter_uniform.add_id(fparameter_buffer_bend_RID)
 
-	var bender_tex_uniform = RDUniform.new()
-	bender_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	bender_tex_uniform.binding = 8
-	bender_tex_uniform.add_id(bender_sampler_RID)
-	bender_tex_uniform.add_id(created_bender_image_RID)
-
 	#add all uniforms bindings into the set
 	uniform_set_position_calc_RID = rd.uniform_set_create(
-			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform, bender_tex_uniform]
+			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform]
 			, compute_pos_shader_RID, 0)
 	RID_arr.append(uniform_set_position_calc_RID)
 
@@ -488,7 +489,6 @@ func _load_shader_from_file(file : RDShaderFile) -> RID:
 	return rd.shader_create_from_spirv(spirv)
 	
 func _init_existing_image_data(_rd : RenderingDevice, img : Image, format : RenderingDevice.DataFormat, updateable : bool) -> RID:
-
 	var tex_format := RDTextureFormat.new()
 	tex_format.width = img.get_width()
 	tex_format.height = img.get_height()
@@ -528,7 +528,10 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
 	RID_arr.append(created_multimesh_command_buffer_RID)
 
-func _update_minimal_compute_data(_delta : float) -> void:
+func _update_compute_bender_data(_delta : float) -> void:
+	if(!uniform_set_bender_RID.is_valid()):
+		return
+		
 	rd = RenderingServer.get_rendering_device()
 	_update_bender_data(rd, _delta)
 
@@ -536,10 +539,12 @@ func _update_minimal_compute_data(_delta : float) -> void:
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
 	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	
 	rd.compute_list_end()
 
-func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float, update_all : bool)->void:
-	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_position_calc_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
+
+func _update_all_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float)->void:
+	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_bender_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
 		return
 		
 	compute_active = true
@@ -548,9 +553,8 @@ func _update_compute_data(_player_cam_transform_world: Transform3D, _player_cam 
 	
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
-	if(!update_all):
-		_update_player_data_buffer(rd, _player_cam_transform_world)
-		_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
+	_update_player_data_buffer(rd, _player_cam_transform_world)
+	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
 	_update_bender_data(rd, _delta)
 
 	var compute_list : int = rd.compute_list_begin()

@@ -36,6 +36,9 @@ group_uniforms shaping;
 uniform bool enable_blade_shaping = true;
 uniform sampler2D grass_curve_shape;
 uniform float curve_width_shape_mult = 1.0;
+uniform sampler2D bending_mask;
+uniform float bending_mask_size_m = 200.0;
+varying float bend_factor;
 group_uniforms;
 
 void vertex()
@@ -83,6 +86,10 @@ void vertex()
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
 	VERTEX *= mix(size_small, size_large, patch_factor);
+	
+	vec2 world_coord = vec2(1.0-mod(abs(NODE_POSITION_WORLD.x),bending_mask_size_m) / bending_mask_size_m,
+	 1.0-mod(abs(NODE_POSITION_WORLD.z),bending_mask_size_m) / bending_mask_size_m);
+	bend_factor = texture(bending_mask, world_coord).x;
 
 	NORMAL = mix(NORMAL, vec3(0.0, 1.0, 0.0), uv_bottom_to_top);
 }
@@ -92,13 +99,14 @@ void fragment() {
 	{
 		NORMAL = -NORMAL;
 	}
+	
+	ALBEDO = vec3(bend_factor,0,0);
+	//AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
+	//AO_LIGHT_AFFECT = 1.0;
 
-	AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
-	AO_LIGHT_AFFECT = 1.0;
+	//ALBEDO = mix(color_small, color_large, patch_factor);
+	//BACKLIGHT = vec3(0.2);
 
-	ALBEDO = mix(color_small, color_large, patch_factor);
-	BACKLIGHT = vec3(0.2);
-
-	ROUGHNESS = 0.4;
-	SPECULAR = 0.2;
+	//ROUGHNESS = 0.4;
+	//SPECULAR = 0.2;
 }
