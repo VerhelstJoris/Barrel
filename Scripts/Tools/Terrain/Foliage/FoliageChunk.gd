@@ -5,16 +5,17 @@ enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
 @export_tool_button("Preview in Editor", "Callable") var preview_action : Callable = _preview_in_editor
 @export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action : Callable = _generate_height_data
-@export_tool_button("Generate Bender Overlap Shape", "Callable") var generate_overlap_shape_action : Callable= _generate_overlap_shape
 
 const foliage_node_meta : String = "Node_FoliageChunk"
 const foliage_shader_bend_mask : String = "shader_parameter/bending_mask"
+const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_size_m"
 
 @export_group("Setup Data")
 @export var visibility_notifier : VisibleOnScreenNotifier3D
 @export var terrain_node : Terrain3D
 @export var inverse_terrain_node : Terrain3D
 @export var bender_mask_subviewport : SubViewport
+@export var bender_mask_camera : Camera3D
 
 @export var chunk_transform_centered : bool = false
 @export var chunk_dimenstion_size_m : float = 200.0
@@ -33,8 +34,6 @@ const foliage_shader_bend_mask : String = "shader_parameter/bending_mask"
 @export var grass_material_low_LOD :Material
 
 @export_subgroup("Grass Bending")
-@export var chunk_overlap_shape : CollisionShape3D
-@export var chunk_overlap_area : Area3D
 @export var bender_mask_res : int = 512
 @export var unbend_rate_per_second : float = 0.05
 
@@ -131,13 +130,10 @@ func _get_vertex_spacing() -> float:
 		
 	return terrain_node.vertex_spacing
 
-func _generate_overlap_shape() -> void:
-	var length : float = chunk_dimenstion_size_m
-	chunk_overlap_area.shape.size.x = length
-	chunk_overlap_area.shape.size.z = length
-	chunk_overlap_area.shape.size.y = 100
-
 func _generate_height_data() -> void:
+	var min_height :float = large_float_dist
+	var max_height :float = -large_float_dist
+
 	height_array.clear()
 	var vertex_spacing :float = _get_vertex_spacing()
 	
@@ -161,6 +157,8 @@ func _generate_height_data() -> void:
 					push_error("NO height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, ", Defaulting to 0!")
 					height_array[current_index] = 0
 					continue
+				min_height = min(min_height, found_height)
+				max_height = max(max_height, found_height)	
 				height_array[current_index] = found_height
 				print("height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, " : " , found_height)
 	else:
@@ -168,7 +166,21 @@ func _generate_height_data() -> void:
 			for col in elem_per_dim:
 				var current_index : int = row * elem_per_dim + col
 				height_array[current_index]= current_index
+				min_height = min(min_height, current_index)
+				max_height = max(max_height, current_index)	
 				
+			
+	const offset : float = 1.0			
+	if(bender_mask_camera):
+		bender_mask_camera.size = chunk_dimenstion_size_m
+		bender_mask_camera.global_position.y = min_height -offset		
+		bender_mask_camera.far = abs(max_height - min_height) + (offset *2)
+		
+	if(visibility_notifier):
+		const size_padding : float = 5.0
+		visibility_notifier.global_position.y = min_height - offset	
+		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + offset, chunk_dimenstion_size_m + size_padding)
+
 func _preview_in_editor() -> void:
 	if(initialized):
 		RenderingServer.call_on_render_thread(_cleanup)
@@ -197,9 +209,6 @@ func _intialize_segments_data() -> void:
 				segments_filled_map[Vector2i(row,col)] = 0
 		
 func _initialize_bender_data() -> void:
-	if(chunk_overlap_area):
-		NodeUtils._add_node_meta_to_node(foliage_node_meta ,chunk_overlap_area, self)
-		
 	if(inverse_terrain_node):
 		inverse_terrain_node.material.show_checkered = false
 	
@@ -410,7 +419,9 @@ func _setup_compute_pipeline()	-> void:
 	created_bender_tex_RD = Texture2DRD.new()
 	created_bender_tex_RD.texture_rd_rid = created_bender_image_RID
 	grass_material_high_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	grass_material_high_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
 	grass_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	grass_material_low_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
 
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
 	
