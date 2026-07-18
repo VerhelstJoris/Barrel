@@ -38,7 +38,8 @@ layout(set = 0, binding = 4, std430) restrict readonly buffer IParameters
 void assign_blade_count()
 {
     int total_blades = 0;
-    for (int index; index < gl_NumWorkGroups.x * gl_NumWorkGroups.z; index++)
+    const int num = int(gl_NumWorkGroups.x * gl_NumWorkGroups.z);        
+    for (int index =0; index < num; index++)
     {
         total_blades = total_blades + BLADESPERGROUP.data[index];
     }
@@ -49,8 +50,7 @@ void assign_blade_count()
         
 void main() 
 {
-    const int group_id_arr =  int((gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
-    const int group = 3;
+    const int group_id_arr = int(gl_WorkGroupID.x + (gl_WorkGroupID.z * gl_NumWorkGroups.x));
         
     const int blades_in_group =  BLADESPERGROUP.data[group_id_arr];
     int write_offset = 0;
@@ -65,7 +65,7 @@ void main()
         OUT_TRANSFORMS.data[write_offset + copy_id] = IN_TRANSFORMS.data[read_offset + copy_id];
     }
 
-    if(group_id_arr == group)
+    if(group_id_arr == 0)
     {
         assign_blade_count();
     }

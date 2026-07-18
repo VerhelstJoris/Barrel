@@ -36,10 +36,15 @@ group_uniforms shaping;
 uniform bool enable_blade_shaping = true;
 uniform sampler2D grass_curve_shape;
 uniform float curve_width_shape_mult = 1.0;
+group_uniforms;
+
+group_uniforms bend_mask_related;
 uniform sampler2D bending_mask;
 uniform float bending_mask_size_m = 200.0;
-varying float bend_factor;
+uniform float bending_mask_strength_horizontal = 2.0f;
+uniform float bending_mask_strength_vertical = 2.0f;
 group_uniforms;
+
 
 void vertex()
 {
@@ -81,16 +86,22 @@ void vertex()
 	mat4 inv_model = inverse(MODEL_MATRIX);
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
 
+	float uv_strength = pow(uv_bottom_to_top, 2.0);
   	VERTEX.xz += current_wind_bend * local_direction;
-	VERTEX.xz += blade_bend_mult * pow(uv_bottom_to_top, 2.0);	// bend the blade in the direction this is positioned in
+	VERTEX.xz += blade_bend_mult * uv_strength;	// bend the blade in the direction this is positioned in
+	
+	// grass bender from tex
+	vec2 world_coord = vec2(1.0-mod(abs(NODE_POSITION_WORLD.x),bending_mask_size_m) / bending_mask_size_m,
+	 1.0-mod(abs(NODE_POSITION_WORLD.z),bending_mask_size_m) / bending_mask_size_m);
+	float bend_mask_val = texture(bending_mask, world_coord).x * uv_strength;
+	
+	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
+	VERTEX.xz += object_forward.xz * bend_mask_val * bending_mask_strength_horizontal;
+	VERTEX.y -= bend_mask_val * bending_mask_strength_vertical;
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
 	VERTEX *= mix(size_small, size_large, patch_factor);
 	
-	vec2 world_coord = vec2(1.0-mod(abs(NODE_POSITION_WORLD.x),bending_mask_size_m) / bending_mask_size_m,
-	 1.0-mod(abs(NODE_POSITION_WORLD.z),bending_mask_size_m) / bending_mask_size_m);
-	bend_factor = texture(bending_mask, world_coord).x;
-
 	NORMAL = mix(NORMAL, vec3(0.0, 1.0, 0.0), uv_bottom_to_top);
 }
 
@@ -100,13 +111,12 @@ void fragment() {
 		NORMAL = -NORMAL;
 	}
 	
-	ALBEDO = vec3(bend_factor,0,0);
-	//AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
-	//AO_LIGHT_AFFECT = 1.0;
+	AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
+	AO_LIGHT_AFFECT = 1.0;
 
-	//ALBEDO = mix(color_small, color_large, patch_factor);
-	//BACKLIGHT = vec3(0.2);
+	ALBEDO = mix(color_small, color_large, patch_factor);
+	BACKLIGHT = vec3(0.2);
 
-	//ROUGHNESS = 0.4;
-	//SPECULAR = 0.2;
+	ROUGHNESS = 0.4;
+	SPECULAR = 0.2;
 }
