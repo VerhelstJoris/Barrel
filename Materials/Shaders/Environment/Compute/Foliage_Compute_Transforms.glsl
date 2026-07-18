@@ -12,7 +12,7 @@ HEIGHT_DATA;
 		
 // multimesh data buffer allowing us to directly edit the amount of instances from the compute shader
 layout(set = 0, binding = 1, std430) writeonly buffer Transforms {
-	float data[];
+	vec4 data[];
 }
 GRASS_TRANSFORMS;
 
@@ -88,7 +88,9 @@ float get_scale(vec2 chunk_pos, ivec2 image_size, float max_size)
 }
 		
 float random2D(vec2 uv) {
-	return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123);
+    uv = fract(uv * 0.3183099 + vec2(0.71, 0.113));
+    uv *= 17.0;
+    return fract(uv.x * uv.y * (uv.x + uv.y));
 }
 		
 mat3 rot_z(float angle) {
@@ -136,7 +138,6 @@ float closest_if_between(float val, float low, float high)
 float get_rot_biased_towards_player(vec2 blade_pos)
 {
    float rand_angle = random2D(blade_pos) * 3.14159;    // RANGE [-PI, PI]
-   return rand_angle;     
    vec2 target_dir = vec2(PLAYERDATA.X_POS - blade_pos.x, PLAYERDATA.Z_POS - blade_pos.y);
 		
    float angle_towards_player = atan(target_dir.y, target_dir.x);   // range [-PI, PI]
@@ -158,7 +159,6 @@ bool should_skip_grass_id(int x_id ,int z_id, int dist_threshold_id)
    // then skip the ID if it's smaller than the dist_threshold_id       
    return ((x_id %2) * 2) + ( (z_id %2) * (((1 - (x_id %2)) *4) -1)) < dist_threshold_id;
 }
-        
 
 int fill_chunk_segment(ivec2 segment_local_coord)
 {
@@ -191,35 +191,26 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.z);
     const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
     
-    const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 12;
-        
-    //calculate the dist between the player and this segment    
-    const float distance_segment_player =  length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
-    int skip_id = 0;    
-    if(distance_segment_player > FPARAMETERS.DIST_THRESH_CLOSE)
-    {
-        skip_id = 1;
-        if(distance_segment_player > FPARAMETERS.DIST_THRESH_MED)
-        {
-            skip_id = 2;
-            if (distance_segment_player > FPARAMETERS.DIST_THRESH_FAR)
-            {
-                skip_id = 3;
-            }
-        }
-    }
+    const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 3;
 
+    const int blades_per_group = int(rows * rows); // worst case
+    const int group_offset_vec4 = int(
+    (gl_WorkGroupID.x * gl_NumWorkGroups.x * blades_per_group) +
+    (gl_WorkGroupID.z * blades_per_group)
+    ) * 3;    
+        
+    //calculate the dist between the player and this segment and see which should be skipped
+    const float d =  length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
+    int skip_id = (d > FPARAMETERS.DIST_THRESH_CLOSE? 1 : 0)+ (d > FPARAMETERS.DIST_THRESH_MED? 1 : 0) + (d > FPARAMETERS.DIST_THRESH_FAR? 1 : 0);
         
     for(int row_ID = 0; row_ID < rows; row_ID++)
     {
         x = row_ID * Offset;
         for(int col_ID = 0; col_ID < rows; col_ID++)
         {
-            if(should_skip_grass_id(row_ID, col_ID, skip_id))
-            {
-               continue;     
-            }
-
+            int mask = 1;
+            mask &= should_skip_grass_id(row_ID, col_ID, skip_id) ? 0 : 1;
+                
             z = col_ID * Offset;
             x_offset_rand = (fract(random2D(vec2(z,x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
             group_x = mod(x + x_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
@@ -232,59 +223,53 @@ int fill_chunk_segment(ivec2 segment_local_coord)
             final_pos = vec2(final_x, final_z);
             vec2 uv_pos = final_pos + half_offset - vec2(x_offset_rand, z_offset_rand);
             scale = get_scale(uv_pos, mask_size, chunk_size_dim);
+
+            mask &= scale >= FPARAMETERS.MIN_BLADE_SCALE ? 1 : 0;   
                 
-            if(scale < FPARAMETERS.MIN_BLADE_SCALE)
-            {
-                continue;
-            }
-
-
             vec2 normalized_final_pos = uv_pos / chunk_size_dim;
             normalized_final_pos.x = 1.0 - normalized_final_pos.x;
             random_rot_x = (random2D(final_pos + 1.1546461)  - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
             random_rot_y = get_rot_biased_towards_player(final_pos);
             random_rot_z =  0;
                 
-            rot_scale_matrix = mat3(scale) * rot_x(random_rot_x) * rot_y(random_rot_y) * rot_z(random_rot_z);
-            
-            id_offset = int( group_offset + (current_blade * 12) );
-            
-            // fill in the transforms    
-            GRASS_TRANSFORMS.data[0 + id_offset]= rot_scale_matrix[0][0];
-            GRASS_TRANSFORMS.data[1 + id_offset]= rot_scale_matrix[0][1];
-            GRASS_TRANSFORMS.data[2 + id_offset]= rot_scale_matrix[0][2];
-            
-            GRASS_TRANSFORMS.data[3 + id_offset]= final_x ;     // X-POS
-            
-            GRASS_TRANSFORMS.data[4 + id_offset]= rot_scale_matrix[1][0];
-            GRASS_TRANSFORMS.data[5 + id_offset]= rot_scale_matrix[1][1];
-            GRASS_TRANSFORMS.data[6 + id_offset]= rot_scale_matrix[1][2];
-            
-            GRASS_TRANSFORMS.data[7 + id_offset]= get_height_at_chunk_pos(vec2(group_x, group_z) / FPARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);   // Y-POS
-            
-            GRASS_TRANSFORMS.data[8 + id_offset]=  rot_scale_matrix[2][0];
-            GRASS_TRANSFORMS.data[9 + id_offset]=  rot_scale_matrix[2][1];
-            GRASS_TRANSFORMS.data[10 + id_offset]= rot_scale_matrix[2][2];
-            
-            GRASS_TRANSFORMS.data[11 + id_offset]= final_z;     // Z-POS
-            
-            current_blade++;
+            int base_index  = group_offset_vec4 + current_blade * 3;
+
+            float sx = sin(random_rot_x);
+            float cx = cos(random_rot_x);
+    
+            float sy = sin(random_rot_y);
+            float cy = cos(random_rot_y);
+                
+            vec3 basisX = vec3(cy, 0.0, -sy) * scale;
+            vec3 basisY = vec3(sx * sy, cx, sx * cy) * scale;
+            vec3 basisZ = vec3(cx * sy, -sx, cx * cy) * scale;
+    
+            float posX = final_x;
+            float posY = get_height_at_chunk_pos( vec2(group_x, group_z) / FPARAMETERS.TERRAIN_VERTEX_SPACING, height_A, height_B, height_C, height_D);
+            float posZ = final_z;
+                
+            // multiply by the mask    
+            GRASS_TRANSFORMS.data[base_index + 0] = vec4(basisX, posX) * mask;
+            GRASS_TRANSFORMS.data[base_index + 1] = vec4(basisY, posY) * mask;
+            GRASS_TRANSFORMS.data[base_index + 2] = vec4(basisZ, posZ) * mask;
+                
+            current_blade += mask;
         }
     }    
         
     return current_blade;
-}        
-        
+}
+
+
 // The code we want to execute in each invocation
-void main() 
+void main()
 {
     const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
-        
-    int workgroup_blades =0;
+
     ivec2 segment_coord =  ivec2(SEGMENTSTODRAW.data[group_id_arr*2], SEGMENTSTODRAW.data[(group_id_arr*2)+1]);
-        
-    workgroup_blades = workgroup_blades + fill_chunk_segment(segment_coord);
-        
+
+    int workgroup_blades = fill_chunk_segment(segment_coord);
+
     BLADESPERGROUP.data[group_id_arr] = workgroup_blades;
 }
-        
+                
