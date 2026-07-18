@@ -6,14 +6,14 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
         
 // densely packed        
 layout(set = 0, binding = 0, std430) writeonly buffer OutputTransforms {
-float data[];
+vec4 data[];
 }
 OUT_TRANSFORMS;
 
 // there's empty space here 
 // MAKE SURE THIS IS THE SAME BINDING AS IN THE COMPUTE GRASS BINDING
 layout(set = 0, binding = 1, std430) readonly buffer InputTransforms {
-float data[];
+vec4 data[];
 }
 IN_TRANSFORMS;
 
@@ -50,21 +50,17 @@ void assign_blade_count()
 void main() 
 {
     const int group_id_arr =  int((gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
-    const int group = 3;    
-    //if(group_id_arr != group)
-    //{
-    //  return;
-    //}
+    const int group = 3;
         
     const int blades_in_group =  BLADESPERGROUP.data[group_id_arr];
     int write_offset = 0;
-    const int read_offset = IPARAMETERS.MAX_BLADES_PER_GROUP * group_id_arr * 12;
+    const int read_offset = IPARAMETERS.MAX_BLADES_PER_GROUP * group_id_arr * 3;
     for (int index = 0; index < group_id_arr; index++)
     {
-        write_offset = write_offset + (BLADESPERGROUP.data[index] *12);
+        write_offset = write_offset + (BLADESPERGROUP.data[index] *3);
     }
         
-    for(int copy_id = 0; copy_id < blades_in_group * 12 ; copy_id++)
+    for(int copy_id = 0; copy_id < blades_in_group * 3 ; copy_id++)
     {
         OUT_TRANSFORMS.data[write_offset + copy_id] = IN_TRANSFORMS.data[read_offset + copy_id];
     }
@@ -73,5 +69,4 @@ void main()
     {
         assign_blade_count();
     }
-        
 }
