@@ -1,26 +1,26 @@
 shader_type spatial;
 render_mode cull_disabled;
 
-uniform float size_small = 0.2;
-uniform float size_large = 0.6;
+uniform float size_small = 0.2f;
+uniform float size_large = 0.6f;
 uniform vec3 color_small: source_color = vec3(0.3, 0.6, 0.1);
 uniform vec3 color_large: source_color = vec3(0.9, 0.9, 0.2);
 
 //patchiness
 group_uniforms patchiness;
 uniform sampler2D patch_noise;
-uniform float patch_scale = 5.0;
+uniform float patch_scale = 5.0f;
 varying float patch_factor;
 group_uniforms;
 
 //wind related
 group_uniforms wind_movement;
 uniform sampler2D wind_noise;
-uniform float blade_bend_mult = 0.5;
-uniform float wind_strength = 0.1;
+uniform float blade_bend_mult = 0.5f;
+uniform float wind_strength = 0.1f;
 uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
-uniform float wind_ao_affect = 0.1;
+uniform float wind_ao_affect = 0.1f;
 group_uniforms;
 
 // LOD related
@@ -35,14 +35,16 @@ group_uniforms;
 group_uniforms shaping;
 uniform bool enable_blade_shaping = true;
 uniform sampler2D grass_curve_shape;
-uniform float curve_width_shape_mult = 1.0;
+uniform float curve_width_shape_mult = 1.0f;
 group_uniforms;
 
 group_uniforms bend_mask_related;
 uniform sampler2D bending_mask;
-uniform float bending_mask_size_m = 200.0;
+uniform float bending_mask_size_m = 200.0f;
 uniform float bending_mask_strength_horizontal = 2.0f;
 uniform float bending_mask_strength_vertical = 2.0f;
+uniform float bend_AO_efect_mult = 1.0f;
+varying float bending_mask_strength;
 group_uniforms;
 
 
@@ -93,11 +95,11 @@ void vertex()
 	// grass bender from tex
 	vec2 world_coord = vec2(1.0-mod(abs(NODE_POSITION_WORLD.x),bending_mask_size_m) / bending_mask_size_m,
 	 1.0-mod(abs(NODE_POSITION_WORLD.z),bending_mask_size_m) / bending_mask_size_m);
-	float bend_mask_val = texture(bending_mask, world_coord).x * uv_strength;
+	bending_mask_strength = texture(bending_mask, world_coord).x * uv_strength;
 	
 	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
-	VERTEX.xz += object_forward.xz * bend_mask_val * bending_mask_strength_horizontal;
-	VERTEX.y -= bend_mask_val * bending_mask_strength_vertical;
+	VERTEX.xz += object_forward.xz * bending_mask_strength * bending_mask_strength_horizontal;
+	VERTEX.y -= bending_mask_strength * bending_mask_strength_vertical;
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
 	VERTEX *= mix(size_small, size_large, patch_factor);
@@ -111,12 +113,12 @@ void fragment() {
 		NORMAL = -NORMAL;
 	}
 	
-	AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
+	AO = uv_bottom_to_top - (current_wind_bend * wind_ao_affect) - (bending_mask_strength * bend_AO_efect_mult);
 	AO_LIGHT_AFFECT = 1.0;
 
 	ALBEDO = mix(color_small, color_large, patch_factor);
 	BACKLIGHT = vec3(0.2);
 
 	ROUGHNESS = 0.4;
-	SPECULAR = 0.2;
+	SPECULAR = 0.15;
 }
