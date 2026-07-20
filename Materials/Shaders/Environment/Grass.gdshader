@@ -89,17 +89,20 @@ void vertex()
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
 
 	float uv_strength = pow(uv_bottom_to_top, 2.0);
-  	VERTEX.xz += current_wind_bend * local_direction;
-	VERTEX.xz += blade_bend_mult * uv_strength;	// bend the blade in the direction this is positioned in
-	
+
 	// grass bender from tex
 	vec2 world_coord = vec2(1.0-mod(abs(NODE_POSITION_WORLD.x),bending_mask_size_m) / bending_mask_size_m,
 	 1.0-mod(abs(NODE_POSITION_WORLD.z),bending_mask_size_m) / bending_mask_size_m);
-	bending_mask_strength = texture(bending_mask, world_coord).x * uv_strength;
+	float raw_bend_mask =  texture(bending_mask, world_coord).x;
+	bending_mask_strength =raw_bend_mask * uv_strength;
 	
 	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
 	VERTEX.xz += object_forward.xz * bending_mask_strength * bending_mask_strength_horizontal;
 	VERTEX.y -= bending_mask_strength * bending_mask_strength_vertical;
+
+  	VERTEX.xz += (current_wind_bend * local_direction) * (1.0- raw_bend_mask);
+	VERTEX.xz += blade_bend_mult * uv_strength * (1.0- raw_bend_mask);	// bend the blade in the direction this is positioned in
+	
 
 	patch_factor = texture(patch_noise, NODE_POSITION_WORLD.xz / patch_scale).r;
 	VERTEX *= mix(size_small, size_large, patch_factor);

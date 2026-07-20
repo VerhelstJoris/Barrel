@@ -71,7 +71,6 @@ var scenario_RID
 var created_multimesh_RID : RID
 var created_multimesh_buffer_RID : RID
 var created_multimesh_command_buffer_RID : RID
-var created_multimesh_AABB : AABB
 
 #shader rid
 var compute_pos_shader_RID : RID
@@ -170,7 +169,7 @@ func _generate_height_data() -> void:
 				max_height = max(max_height, current_index)	
 				
 			
-	const offset : float = 1.0			
+	const offset : float = 5.0			
 	if(bender_mask_camera):
 		bender_mask_camera.size = chunk_dimenstion_size_m
 		bender_mask_camera.global_position.y = min_height -offset		
@@ -178,8 +177,11 @@ func _generate_height_data() -> void:
 		
 	if(visibility_notifier):
 		const size_padding : float = 5.0
-		visibility_notifier.global_position.y = min_height - offset	
-		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + offset, chunk_dimenstion_size_m + size_padding)
+		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + (offset * 2), chunk_dimenstion_size_m + size_padding)
+		var horizontal_offset := (chunk_dimenstion_size_m* 0.5) + (size_padding * 0.5)
+		visibility_notifier.aabb.position.x = -horizontal_offset
+		visibility_notifier.aabb.position.z = -horizontal_offset
+		visibility_notifier.aabb.position.y = min_height - offset
 
 func _preview_in_editor() -> void:
 	if(initialized):
@@ -216,29 +218,6 @@ func _initialize_bender_data() -> void:
 		bender_mask_subviewport.size = Vector2(bender_mask_res,bender_mask_res)	
 		
 	created_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RF)	
-		
-func _contruct_multimesh_bounding_box() ->AABB:
-	var extra_offset : float = 5
-	
-	var bb_size : Vector3 = Vector3(chunk_dimenstion_size_m + extra_offset,100,chunk_dimenstion_size_m + extra_offset)
-	
-	#the position of the AABB is not the center but rather the 'start' 
-	# the start is the 'most negative' point
-	var chunk_world_id : Vector2 = Vector2( (global_position.x + (sign(global_position.x) * chunk_dimenstion_size_m*0.5)) / chunk_dimenstion_size_m,
-	(global_position.z + + (sign(global_position.z) * chunk_dimenstion_size_m*0.5)) / chunk_dimenstion_size_m)
-	
-	var bb_pos : Vector3 = Vector3.ZERO
-	if(chunk_world_id.x > 0):
-		bb_pos.x = chunk_dimenstion_size_m * (chunk_world_id.x -1)
-	else:
-		bb_pos.x = chunk_dimenstion_size_m * chunk_world_id.x
-	
-	if(chunk_world_id.y > 0):
-		bb_pos.z = chunk_dimenstion_size_m * (chunk_world_id.y -1)
-	else:	
-		bb_pos.z = chunk_dimenstion_size_m * chunk_world_id.y
-	
-	return AABB(bb_pos, bb_size)
 	
 func _process(_delta: float) -> void:
 	if(!visibility_notifier.is_on_screen()):
@@ -520,13 +499,9 @@ func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _ve
 	
 	RenderingServer.multimesh_set_mesh(created_multimesh_RID, foliage_mesh_high_LOD.get_rid())
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
-	created_multimesh_AABB = _contruct_multimesh_bounding_box()
-	if(visibility_notifier):
-		visibility_notifier.aabb = created_multimesh_AABB
-	else:
-		push_error("No Visiblity notifier hooked up to foliage chunk ", name)
-	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,created_multimesh_AABB)
-	RenderingServer.instance_set_custom_aabb(instance_RID, created_multimesh_AABB)
+
+	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,visibility_notifier.aabb)
+	RenderingServer.instance_set_custom_aabb(instance_RID, 	visibility_notifier.aabb)
 	
 	RenderingServer.instance_set_scenario(instance_RID, scenario_RID)
 	RenderingServer.instance_set_base(instance_RID, created_multimesh_RID)
