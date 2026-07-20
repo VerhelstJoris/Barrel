@@ -101,7 +101,7 @@ var current_bender_data_tex_RID : RID
 # segment coord data
 var segments_per_dim : int = 0
 var segment_coord_data_arr : PackedInt32Array
-var segment_work_data_arr : Array[Vector2i]
+var segment_work_data_arr : PackedByteArray
 var segment_found_edges_left : PackedInt32Array
 var segment_found_edges_right : PackedInt32Array
 var segment_center_edges : PackedInt32Array
@@ -111,6 +111,7 @@ var segment_center_corner_edges_right : PackedInt32Array
 var segments_found_left : int
 var segments_found_right : int
 var segments_found_center : int
+var segment_work_filled_in : int
 var flood_fill_query_directions : Array[Vector2i] = [Vector2i.ZERO, Vector2i.ZERO,Vector2i.ZERO]
 
 var segments_filled_map : Dictionary[Vector2i, int]
@@ -200,7 +201,7 @@ func _ready() -> void:
 
 func _intialize_segments_data() -> void:
 	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
-	segment_work_data_arr.resize(segments_per_dim*segments_per_dim)
+	segment_work_data_arr.resize(segments_per_dim*segments_per_dim *2 *4)
 	segment_found_edges_left.resize(segments_per_dim *  4)
 	segment_found_edges_right.resize(segments_per_dim * 4)
 	segment_center_edges.resize(segments_per_dim *2 * 2)
@@ -605,7 +606,7 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	var player_current_segment : Vector2i   = Vector2i( int(floor(player_current_sub_id_pos.x))  ,int(floor(player_current_sub_id_pos.y)) )
 
 	#reset the working data from last frame
-	segment_work_data_arr.fill(Vector2i.MIN)
+	segment_work_data_arr.fill(Vector2i.MIN.x)
 	segment_found_edges_left.fill(Vector2i.MIN.x)
 	segment_found_edges_right.fill(Vector2i.MIN.x)
 	segment_center_edges.fill(Vector2i.MIN.x)
@@ -613,15 +614,10 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	segment_center_corner_edges_right.fill(Vector2i.MIN.x)
 	
 	#find the vector that describe the 'edges' of the camera
-	var segments_filled_in : int = _fill_work_array_with_current_segments_data(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
-	
-	#fill in 
-	for found_segment_id in range(min(segments_filled_in, high_lod_num_work_groups_xz * high_lod_num_work_groups_xz)):
-		segment_coord_data_arr[found_segment_id *2 ] = segment_work_data_arr[found_segment_id].x
-		segment_coord_data_arr[found_segment_id *2 +1 ] = segment_work_data_arr[found_segment_id].y
+	segment_work_filled_in = _fill_work_array_with_current_segments_data(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
 		
-	var diff_coord_byte_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
-	_rd.buffer_update(segment_coord_data_buffer_RID, 0, diff_coord_byte_arr.size() ,diff_coord_byte_arr)
+	var element_amount : int = 	min(segment_work_filled_in, high_lod_num_work_groups_xz * high_lod_num_work_groups_xz)
+	_rd.buffer_update(segment_coord_data_buffer_RID, 0, element_amount*8 ,segment_work_data_arr)
 	
 func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
@@ -665,7 +661,7 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 		else:
 			direction_amount_query = 1
 		
-		var start_segment : Vector2i = segment_work_data_arr[current_read_id]
+		var start_segment : Vector2i = Vector2i(segment_work_data_arr.decode_s32(current_read_id *8),segment_work_data_arr.decode_s32(current_read_id *8 +4))
 		current_read_id+=1
 		
 		for query_id in range(0,direction_amount_query):
@@ -680,8 +676,9 @@ func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, p
 				continue
 	
 			segments_filled_map[segment_to_check] = update_counter
-			segment_work_data_arr[current_write_id] = segment_to_check
-	
+			segment_work_data_arr.encode_s32(current_write_id *8,segment_to_check.x)
+			segment_work_data_arr.encode_s32(current_write_id *8 +4,segment_to_check.y)
+
 			#update the write id, make sure we don't accidentally 
 			current_write_id +=1
 			if(current_write_id == post_prioritize_write_offset && write_offsets.y > post_prioritize_write_offset):
@@ -718,15 +715,18 @@ func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, le
 			break
 	
 		if(smallest_distance == left_dist):
-			segment_work_data_arr[prio_write_id] = Vector2i(segment_found_edges_left[left_id], segment_found_edges_left[left_id +1])
+			segment_work_data_arr.encode_s32(prio_write_id *8,segment_found_edges_left[left_id])
+			segment_work_data_arr.encode_s32(prio_write_id *8 +4,segment_found_edges_left[left_id +1])
 			left_id +=2
 			left_dist = player_current_segment.distance_squared_to(Vector2i(segment_found_edges_left[left_id], segment_found_edges_left[left_id +1]))
 		elif(smallest_distance == center_dist):
-			segment_work_data_arr[prio_write_id] = Vector2i(segment_center_edges[center_id], segment_center_edges[center_id+1])
+			segment_work_data_arr.encode_s32(prio_write_id *8,segment_center_edges[center_id])
+			segment_work_data_arr.encode_s32(prio_write_id *8 +4,segment_center_edges[center_id+1])
 			center_id +=2
 			center_dist = player_current_segment.distance_squared_to(Vector2i(segment_center_edges[center_id], segment_center_edges[center_id+1]))
 		else:
-			segment_work_data_arr[prio_write_id] = Vector2i(segment_found_edges_right[ right_id], segment_found_edges_right[ right_id +1])
+			segment_work_data_arr.encode_s32(prio_write_id *8,segment_found_edges_right[right_id])
+			segment_work_data_arr.encode_s32(prio_write_id *8 +4,segment_found_edges_right[right_id+1])
 			right_id +=2
 			right_dist = player_current_segment.distance_squared_to(Vector2i(segment_found_edges_right[ right_id], segment_found_edges_right[ right_id +1]))
 
@@ -740,15 +740,18 @@ func _interleave_edge_data_into_work_array(player_current_segment : Vector2i, le
 
 		# write the rest of the data linearly
 		for l_id in range(left_id, left_edges_found *2,2):
-			segment_work_data_arr[post_prio_write_id] = Vector2i(segment_found_edges_left[l_id], segment_found_edges_left[l_id+1])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8,segment_found_edges_left[l_id])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8 +4,segment_found_edges_left[l_id+1])
 			post_prio_write_id += 1
 
 		for c_id in range(center_id, center_edges_found *2,2):
-			segment_work_data_arr[post_prio_write_id] = Vector2i(segment_center_edges[c_id], segment_center_edges[c_id+1])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8,segment_center_edges[c_id])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8 +4,segment_center_edges[c_id+1])
 			post_prio_write_id += 1
 		
 		for r_id in range(right_id, right_edges_found *2,2):
-			segment_work_data_arr[post_prio_write_id] = Vector2i(segment_found_edges_right[r_id], segment_found_edges_right[r_id+1])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8,segment_found_edges_right[r_id])
+			segment_work_data_arr.encode_s32(post_prio_write_id *8 +4,segment_found_edges_right[r_id+1])
 			post_prio_write_id += 1
 
 		return_index_write_offset.y = post_prio_write_id

@@ -7,6 +7,7 @@ var dummy_bender_tex : Texture2D
 var left_copy_arr : Array[Vector2i]
 var center_copy_arr : Array[Vector2i]
 var right_copy_arr : Array[Vector2i]
+var work_copy_arr : Array[Vector2i]
 
 var segments_per_dim : int =0
 
@@ -42,6 +43,7 @@ func _ready() -> void:
 	left_copy_arr.resize(segments_per_dim*2)
 	center_copy_arr.resize(segments_per_dim *4)
 	right_copy_arr.resize(segments_per_dim*2)
+	work_copy_arr.resize(segments_per_dim * segments_per_dim)
 	
 func _get_name() -> String:
 	return chunk.name
@@ -66,9 +68,11 @@ func _cache_current_data() -> void:
 	left_copy_arr.fill(Vector2i.MIN)
 	center_copy_arr.fill(Vector2i.MIN)
 	right_copy_arr.fill(Vector2i.MIN)
-	_cache_copy_of_array(chunk.segments_found_left,chunk.segment_found_edges_left, left_copy_arr)
-	_cache_copy_of_array(chunk.segments_found_right,chunk.segment_found_edges_right, right_copy_arr)
-	_cache_copy_of_array(chunk.segments_found_center,chunk.segment_center_edges, center_copy_arr)
+	work_copy_arr.fill(Vector2i.MIN)
+	_cache_copy_of_packed_int_array(chunk.segments_found_left,chunk.segment_found_edges_left, left_copy_arr)
+	_cache_copy_of_packed_int_array(chunk.segments_found_right,chunk.segment_found_edges_right, right_copy_arr)
+	_cache_copy_of_packed_int_array(chunk.segments_found_center,chunk.segment_center_edges, center_copy_arr)
+	_cache_copy_of_packed_byte_array(chunk.segment_work_filled_in, chunk.segment_work_data_arr, work_copy_arr)
 
 func _draw_chunk_table() -> void:
 	var draw_left_arr : Array[bool] = [table_draw_left]
@@ -154,7 +158,7 @@ func _draw_chunk_table() -> void:
 				ImGui.TextColored(right_col, "R")
 			elif(in_center):
 				ImGui.TextColored(center_col, "C")
-			elif(table_draw_flood_fill && chunk.segment_work_data_arr.has(current_cell)):
+			elif(table_draw_flood_fill && work_copy_arr.has(current_cell)):
 				ImGui.TextColored(fill_col, "F")
 			else:
 				ImGui.Text("-")	
@@ -174,10 +178,14 @@ func _draw_table_range() -> void:
 func _draw_table_flood_directions() -> void:
 	ImGui.Text("Query Dir: {}, {}, {}".format([ str(chunk.flood_fill_query_directions[0]), str(chunk.flood_fill_query_directions[1]), str(chunk.flood_fill_query_directions[2]) ], "{}" ))
 	
-func _cache_copy_of_array(amount : int, copy_from_arr : PackedInt32Array, copy_to_arr : Array[Vector2i]) -> void:
+func _cache_copy_of_packed_int_array(amount : int, copy_from_arr : PackedInt32Array, copy_to_arr : Array[Vector2i]) -> void:
 	for id in range(amount):
 		copy_to_arr[id] = Vector2i(copy_from_arr[2* id], copy_from_arr[(2*id) +1])
 	
+func _cache_copy_of_packed_byte_array(amount : int, copy_from_arr : PackedByteArray, copy_to_arr : Array[Vector2i]) -> void:
+	for id in range(amount):
+		copy_to_arr[id] = Vector2i(copy_from_arr.decode_s32(id *8), copy_from_arr.decode_s32(id *8 +4))
+
 func _draw_current_segment_data() -> void:
 	_draw_found_arr(chunk.segments_found_left,left_copy_arr, "L" , Color(table_draw_left_color[0],table_draw_left_color[1],table_draw_left_color[2],1))
 	_draw_found_arr(chunk.segments_found_right,right_copy_arr, "R" , Color(table_draw_right_color[0],table_draw_right_color[1],table_draw_right_color[2],1))
