@@ -39,6 +39,8 @@ layout(set = 0, binding =4, std430) restrict readonly buffer IParameters
 {
 	int MAX_BLADES_PER_GROUP;
 	int AMOUNT_OF_SEGMENTS_IN_CHUNK_PER_DIM;
+        
+    int SEGMENT_ID_OFFSET;
 } IPARAMETERS;
 
 layout(set = 0,binding = 5, r8) uniform restrict readonly image2D FOLIAGE_MASK;
@@ -91,38 +93,6 @@ float random2D(vec2 uv) {
     uv = fract(uv * 0.3183099 + vec2(0.71, 0.113));
     uv *= 17.0;
     return fract(uv.x * uv.y * (uv.x + uv.y));
-}
-		
-mat3 rot_z(float angle) {
-	float s = sin(angle);
-	float c = cos(angle);
-
-	return mat3(
-	c, s, 0.0,
-	-s, c, 0.0,
-	0.0, 0.0, 1.0);
-}
-
-mat3 rot_y(float angle) 
-{
-	float s = sin(angle);
-	float c = cos(angle);
-
-	return mat3(
-	c, 0.0, -s,
-	0.0, 1.0, 0.0,
-	s, 0.0, c);
-}        
-		
-mat3 rot_x(float angle)
-{
-	float s = sin(angle);
-	float c = cos(angle);
-	
-	return mat3(
-	1.0, 0.0, 0.0,
-	0.0, c, s,
-	0.0, -s, c);
 }
 
 float closest_if_between(float val, float low, float high)
@@ -189,16 +159,11 @@ int fill_chunk_segment(ivec2 segment_local_coord)
     float x_offset_rand, z_offset_rand;
     
     const int total_work_groups = int(gl_NumWorkGroups.x * gl_NumWorkGroups.z);
-    const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
     
     const int group_offset = int((gl_WorkGroupID.x * gl_NumWorkGroups.x * rows * rows) + (gl_WorkGroupID.z * rows * rows) ) * 3;
 
     const int blades_per_group = int(rows * rows); // worst case
-    const int group_offset_vec4 = int(
-    (gl_WorkGroupID.x * gl_NumWorkGroups.x * blades_per_group) +
-    (gl_WorkGroupID.z * blades_per_group)
-    ) * 3;    
-        
+    const int group_offset_vec4 = int((gl_WorkGroupID.x * gl_NumWorkGroups.z * blades_per_group) + (gl_WorkGroupID.z * blades_per_group)) * 3;
     //calculate the dist between the player and this segment and see which should be skipped
     const float d =  length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
     int skip_id = (d > FPARAMETERS.DIST_THRESH_CLOSE? 1 : 0)+ (d > FPARAMETERS.DIST_THRESH_MED? 1 : 0) + (d > FPARAMETERS.DIST_THRESH_FAR? 1 : 0);
@@ -264,9 +229,10 @@ int fill_chunk_segment(ivec2 segment_local_coord)
 // The code we want to execute in each invocation
 void main()
 {
-    const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.x) + gl_WorkGroupID.z);
-
-    ivec2 segment_coord =  ivec2(SEGMENTSTODRAW.data[group_id_arr*2], SEGMENTSTODRAW.data[(group_id_arr*2)+1]);
+    const int group_id_arr =  int(int(gl_WorkGroupID.x * gl_NumWorkGroups.z) + gl_WorkGroupID.z);
+        
+    const int offset_group_id = (group_id_arr + IPARAMETERS.SEGMENT_ID_OFFSET) *2;
+    const ivec2 segment_coord =  ivec2(SEGMENTSTODRAW.data[offset_group_id], SEGMENTSTODRAW.data[offset_group_id+1]);
 
     int workgroup_blades = fill_chunk_segment(segment_coord);
 

@@ -25,15 +25,20 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 @export var transfer_compute_shader : RDShaderFile
 @export var bender_compute_shader : RDShaderFile
 
-@export_subgroup("High LOD")
+@export_group("High LOD")
+@export var target_density_sq_m_high_LOD : float = 80
+@export var distance_thresholds_high_lod : Vector3 = Vector3(8,16,32)
 @export var foliage_mesh_high_LOD : Mesh
-@export var grass_material_high_LOD :Material
+@export var foliage_material_high_LOD :Material
+@export var high_lod_num_work_groups : Vector2i = Vector2i(8,8)
 
-@export_subgroup("Low LOD")
+@export_group("Low LOD")
+@export var target_density_sq_m_low_LOD : float = 10
+@export var distance_thresholds_low_lod : Vector3 = Vector3(32,32,32)
 @export var foliage_mesh_low_LOD : Mesh
-@export var grass_material_low_LOD :Material
+@export var foliage_material_low_LOD :Material
 
-@export_subgroup("Grass Bending")
+@export_group("Foliage Bending")
 @export var bender_mask_res : int = 512
 @export var unbend_rate_per_second : float = 0.05
 
@@ -41,13 +46,10 @@ var bend_float_param_arr : PackedByteArray
 var fparameter_buffer_bend_RID :RID
 
 @export_group("Customizable Parameters")
-@export var high_lod_num_work_groups_xz : int = 4
 	
-@export var foliage_target_density_sq_m : float = 80
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
 # In ascending order, at what distances from the player should a segment of grass blades draw 1/2/3 blades less per 4
-@export var distance_threshold_vec : Vector3 = Vector3(8,16,32)
 
 @export var min_grass_blade_scale : float = 0.2
 
@@ -65,12 +67,21 @@ var rd : RenderingDevice
 
 var RID_arr : Array[RID]
 
-var instance_RID
 var scenario_RID
 
-var created_multimesh_RID : RID
-var created_multimesh_buffer_RID : RID
-var created_multimesh_command_buffer_RID : RID
+var mm_high_RID : RID
+var mm_high_instance_RID : RID
+var mm_high_sparse_transform_buffer_rid : RID
+var mm_high_packed_transform_buffer_rid : RID
+var mm_high_command_buffer_rid : RID
+var mm_high_instance_count_buffer_rid : RID
+
+var mm_low_RID : RID
+var mm_low_instance_RID : RID
+var mm_low_sparse_transform_buffer_rid : RID
+var mm_low_packed_transform_buffer_rid : RID
+var mm_low_command_buffer_rid : RID
+var mm_low_instance_count_buffer_rid : RID
 
 #shader rid
 var compute_pos_shader_RID : RID
@@ -78,21 +89,20 @@ var transfer_shader_RID : RID
 var bender_shader_RID : RID
 
 #uniform sets
-var uniform_set_position_calc_RID : RID
-var uniform_set_position_transfer_RID : RID
+var mm_high_uniform_set_pos_calc_RID : RID
+var mm_low_uniform_set_pos_calc_RID : RID
+var mm_high_uniform_set_pos_transfer_RID : RID
+var mm_low_uniform_set_pos_transfer_RID : RID
 var uniform_set_bender_RID : RID
 
 #pipelines
-var pipeline_position_calc_RID : RID
-var pipeline_position_transfer_RID : RID
+var mm_pipeline_pos_calc_RID : RID
+var mm_pipeline_pos_transfer_RID : RID
 var pipeline_bender_RID : RID
-
-var secondary_transform_buffer_RID : RID
-var blade_count_buffer_RID : RID
 
 #player transform data
 var player_transform_data_arr : PackedFloat32Array
-var player_transform_data_buffer_RID : RID
+var player_transform_data_mm_high_buffer_rid : RID
 var player_transform_to_pass : Transform3D
 
 #current foliage bending data
@@ -117,7 +127,7 @@ var flood_fill_query_directions : Array[Vector2i] = [Vector2i.ZERO, Vector2i.ZER
 var segments_filled_map : Dictionary[Vector2i, int]
 var update_counter : int = 0
 
-var segment_coord_data_buffer_RID : RID
+var segment_coord_data_mm_buffer_rid : RID
 
 var compute_active : bool = false
 
@@ -147,11 +157,11 @@ func _generate_height_data() -> void:
 				var chunk_pixel_coord : Vector2i
 				if(chunk_transform_centered):
 					chunk_pixel_coord = Vector2i( 
-						int( (global_position.x - (chunk_dimenstion_size_m * 0.5) )/ terrain_node.vertex_spacing) ,
-						int( (global_position.z - (chunk_dimenstion_size_m * 0.5) )/ terrain_node.vertex_spacing) )
+						int( (global_position.x - (chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) ,
+						int( (global_position.z - (chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) )
 				else:
-					chunk_pixel_coord = Vector2i(int(global_position.x / terrain_node.vertex_spacing) ,int(global_position.z / terrain_node.vertex_spacing) )
-				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * terrain_node.vertex_spacing, 0, (chunk_pixel_coord.y + col) * terrain_node.vertex_spacing)
+					chunk_pixel_coord = Vector2i(int(global_position.x / vertex_spacing) ,int(global_position.z / vertex_spacing) )
+				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * vertex_spacing, 0, (chunk_pixel_coord.y + col) * vertex_spacing)
 				var found_height : float = terrain_node.data.get_height(corresponding_world_pos)
 				if(found_height == NAN):
 					push_error("NO height for chunk at (", row , ", ", col, ") and id: " , current_index , " and world pos ", corresponding_world_pos, ", Defaulting to 0!")
@@ -232,33 +242,250 @@ func _process(_delta: float) -> void:
 
 	var cam : Camera3D = viewport.get_camera_3d()
 	var cam_transform : Transform3D = cam.global_transform
-	
+
 	if(player_transform_to_pass.is_equal_approx(cam_transform)):
-		RenderingServer.call_on_render_thread(_update_compute_bender_data.bind(_delta))		
+		RenderingServer.call_on_render_thread(_update_compute_bender_only_data.bind(_delta))		
 		return
 
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
-		RenderingServer.call_on_render_thread(_update_all_compute_data.bind(player_transform_to_pass, cam, _delta))
+		RenderingServer.call_on_render_thread(_update_compute_segments_data.bind(player_transform_to_pass, cam, _delta))
 		
 func _setup_compute_pipeline()	-> void:
 	if(get_world_3d() == null):
 		return
 		
 	rd = RenderingServer.get_rendering_device()
-
 	scenario_RID = get_world_3d().scenario
 	
 	if(!scenario_RID.is_valid()):
 		return
 	RID_arr.append(scenario_RID)
-
-	instance_RID = RenderingServer.instance_create()
-	if(!instance_RID.is_valid()):
-		return
-	RID_arr.append(instance_RID)	
+				
+	_load_shaders()	
 		
-	#load shaders
+	var vertex_spacing : float = _get_vertex_spacing()
+	var high_estimated_per_chunk : int = int(target_density_sq_m_high_LOD * vertex_spacing * vertex_spacing)
+	var mm_high_estimated_count : int = int(high_lod_num_work_groups.x * high_lod_num_work_groups.y * high_estimated_per_chunk)
+		
+	var low_estimated_per_chunk : int = int(target_density_sq_m_low_LOD * vertex_spacing * vertex_spacing)
+	var chunks_per_dim : int = int(chunk_dimenstion_size_m / vertex_spacing)
+	var mm_low_estimated_count : int = int(low_estimated_per_chunk * chunks_per_dim * chunks_per_dim)
+	
+	_setup_multimesh_data(mm_high_estimated_count, mm_low_estimated_count)
+	
+	#height data binding
+	var height_data_uniform = RDUniform.new()
+	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	height_data_uniform.binding = 0
+	var input_bytes := height_array.to_byte_array()
+	var height_data_RID : RID = rd.storage_buffer_create(input_bytes.size(), input_bytes)
+	RID_arr.append(height_data_RID)
+	height_data_uniform.add_id(height_data_RID)
+	
+	#multimesh storage buffer binding
+	var mm_high_packed_transform_buffer_uniform := RDUniform.new()
+	mm_high_packed_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_packed_transform_buffer_uniform.binding = 0
+	mm_high_packed_transform_buffer_uniform.add_id(mm_high_packed_transform_buffer_rid)
+
+	var mm_low_packed_transform_buffer_uniform := RDUniform.new()
+	mm_low_packed_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_packed_transform_buffer_uniform.binding = 0
+	mm_low_packed_transform_buffer_uniform.add_id(mm_low_packed_transform_buffer_rid)
+
+	#Blade count per group binding
+	var mm_high_count_arr_uniform = RDUniform.new()
+	mm_high_count_arr_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_count_arr_uniform.binding = 2
+	
+	mm_high_instance_count_buffer_rid = rd.storage_buffer_create(high_lod_num_work_groups.x * high_lod_num_work_groups.y * 4) #*4 to account for int size
+	RID_arr.append(mm_high_instance_count_buffer_rid)
+	mm_high_count_arr_uniform.add_id(mm_high_instance_count_buffer_rid)
+	
+	var mm_low_count_arr_uniform = RDUniform.new()
+	mm_low_count_arr_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_count_arr_uniform.binding = 2
+	
+	mm_low_instance_count_buffer_rid = rd.storage_buffer_create(chunks_per_dim * chunks_per_dim * 4) #*4 to account for int size
+	RID_arr.append(mm_low_instance_count_buffer_rid)
+	mm_low_count_arr_uniform.add_id(mm_low_instance_count_buffer_rid)		
+	
+	#multimesh command buffer binding
+	var mm_high_command_buffer_uniform := RDUniform.new()
+	mm_high_command_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_command_buffer_uniform.binding = 3
+	mm_high_command_buffer_uniform.add_id(mm_high_command_buffer_rid)
+	
+	var mm_low_command_buffer_uniform := RDUniform.new()
+	mm_low_command_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_command_buffer_uniform.binding = 3
+	mm_low_command_buffer_uniform.add_id(mm_low_command_buffer_rid)
+	
+	# float parameters bindings
+	var mm_high_flt_params_arr : PackedByteArray =  PackedFloat32Array(
+		[vertex_spacing,
+		 sqrt(target_density_sq_m_high_LOD), 
+		max_foliage_individual_random_offset,
+		 deg_to_rad(max_foliage_tilt_degrees), 
+		min_grass_blade_scale,
+		distance_thresholds_high_lod.x,
+		distance_thresholds_high_lod.y, 
+		distance_thresholds_high_lod.z]
+		 ).to_byte_array()
+	var fparameter_mm_high_buffer_rid :RID = rd.storage_buffer_create(mm_high_flt_params_arr.size(), mm_high_flt_params_arr)
+	RID_arr.append(fparameter_mm_high_buffer_rid)
+
+	var mm_low_flt_params_arr : PackedByteArray = PackedFloat32Array(
+		[vertex_spacing, sqrt(target_density_sq_m_low_LOD), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale,
+		distance_thresholds_low_lod.x, distance_thresholds_low_lod.y, distance_thresholds_low_lod.z]
+		 ).to_byte_array()
+	var fparameter_mm_low_buffer_rid :RID = rd.storage_buffer_create(mm_low_flt_params_arr.size(), mm_low_flt_params_arr)
+	RID_arr.append(fparameter_mm_low_buffer_rid)
+
+	var mm_high_flt_param_uniform = RDUniform.new()
+	mm_high_flt_param_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_flt_param_uniform.binding = 3
+	mm_high_flt_param_uniform.add_id(fparameter_mm_high_buffer_rid)
+	
+	var mm_low_flt_param_uniform = RDUniform.new()
+	mm_low_flt_param_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_flt_param_uniform.binding = 3
+	mm_low_flt_param_uniform.add_id(fparameter_mm_low_buffer_rid)
+	
+	#int parameters bindings
+	var mm_high_int_params_arr : PackedByteArray =  PackedInt32Array(
+		[high_estimated_per_chunk ,chunks_per_dim, 0]
+		).to_byte_array()
+	var iparameter_mm_high_buffer_rid :RID = rd.storage_buffer_create(mm_high_int_params_arr.size(), mm_high_int_params_arr)
+	RID_arr.append(iparameter_mm_high_buffer_rid)
+	
+	var offset = high_lod_num_work_groups.x * high_lod_num_work_groups.y
+	var mm_low_int_params_arr : PackedByteArray =  PackedInt32Array(
+		[low_estimated_per_chunk ,chunks_per_dim, offset]
+		).to_byte_array()
+	var iparameter_mm_low_buffer_rid :RID = rd.storage_buffer_create(mm_low_int_params_arr.size(), mm_low_int_params_arr)
+	RID_arr.append(iparameter_mm_low_buffer_rid)
+
+	var mm_high_int_param_uniform = RDUniform.new()
+	mm_high_int_param_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_int_param_uniform.binding = 4
+	mm_high_int_param_uniform.add_id(iparameter_mm_high_buffer_rid)	
+	
+	var mm_low_int_param_uniform = RDUniform.new()
+	mm_low_int_param_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_int_param_uniform.binding = 4
+	mm_low_int_param_uniform.add_id(iparameter_mm_low_buffer_rid)
+	
+	#mask binding
+	var mask_tex_uniform = RDUniform.new()
+	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	mask_tex_uniform.binding = 5
+	var chunk_image = chunk_mask.get_image()
+	chunk_image.convert(Image.FORMAT_R8)
+	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R8_UNORM, false))
+
+	#player data binding
+	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
+	player_transform_data_mm_high_buffer_rid = rd.storage_buffer_create(player_data_arr.size(), player_data_arr)
+	RID_arr.append(player_transform_data_mm_high_buffer_rid)
+
+	var player_data_uniform = RDUniform.new()
+	player_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	player_data_uniform.binding = 6
+	player_data_uniform.add_id(player_transform_data_mm_high_buffer_rid)
+
+	# array with coordinates of segments to draw
+	segment_coord_data_arr.resize(chunks_per_dim * chunks_per_dim *2)
+	var segment_coord_packed_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
+	segment_coord_data_mm_buffer_rid = rd.storage_buffer_create(segment_coord_packed_arr.size(), segment_coord_packed_arr)
+	RID_arr.append(segment_coord_data_mm_buffer_rid)	
+	
+	var segments_coord_uniform : RDUniform = RDUniform.new()
+	segments_coord_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	segments_coord_uniform.binding = 7
+	segments_coord_uniform.add_id(segment_coord_data_mm_buffer_rid)
+	
+	#sparse tranform buffer pre-condensed
+	var mm_high_sparse_transform_uniform = RDUniform.new()
+	mm_high_sparse_transform_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_high_sparse_transform_uniform.binding = 1
+	# *48 for 12 elements of a transform with size 4 (float)
+	mm_high_sparse_transform_buffer_rid = rd.storage_buffer_create(mm_high_estimated_count * 48,PackedByteArray())
+	RID_arr.append(mm_high_sparse_transform_buffer_rid)
+	mm_high_sparse_transform_uniform.add_id(mm_high_sparse_transform_buffer_rid)
+	
+	var mm_low_sparse_transform_uniform = RDUniform.new()
+	mm_low_sparse_transform_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	mm_low_sparse_transform_uniform.binding = 1
+	# *48 for 12 elements of a transform with size 4 (float)
+	mm_low_sparse_transform_buffer_rid = rd.storage_buffer_create(mm_low_estimated_count * 48,PackedByteArray())
+	RID_arr.append(mm_low_sparse_transform_buffer_rid)
+	mm_low_sparse_transform_uniform.add_id(mm_low_sparse_transform_buffer_rid)	
+	
+	#add all uniforms bindings into the set
+	mm_high_uniform_set_pos_calc_RID = rd.uniform_set_create(
+			[height_data_uniform, mm_high_sparse_transform_uniform, mm_high_count_arr_uniform, mm_high_flt_param_uniform,mm_high_int_param_uniform, mask_tex_uniform, player_data_uniform, segments_coord_uniform]
+			, compute_pos_shader_RID, 0)
+	RID_arr.append(mm_high_uniform_set_pos_calc_RID)
+
+	mm_low_uniform_set_pos_calc_RID = rd.uniform_set_create(
+		[height_data_uniform, mm_low_sparse_transform_uniform, mm_low_count_arr_uniform, mm_low_flt_param_uniform,mm_low_int_param_uniform, mask_tex_uniform, player_data_uniform, segments_coord_uniform]
+		, compute_pos_shader_RID,0	)
+	RID_arr.append(mm_low_uniform_set_pos_calc_RID)
+
+	#transfer shader RID
+	mm_high_uniform_set_pos_transfer_RID = rd.uniform_set_create(
+		[mm_high_packed_transform_buffer_uniform, mm_high_sparse_transform_uniform , mm_high_count_arr_uniform, mm_high_command_buffer_uniform, mm_high_int_param_uniform]
+		, transfer_shader_RID, 0)
+	RID_arr.append(mm_high_uniform_set_pos_transfer_RID)
+	
+	mm_low_uniform_set_pos_transfer_RID = rd.uniform_set_create(
+		[mm_low_packed_transform_buffer_uniform, mm_low_sparse_transform_uniform , mm_low_count_arr_uniform, mm_low_command_buffer_uniform, mm_low_int_param_uniform]
+		, transfer_shader_RID, 0)
+	RID_arr.append(mm_low_uniform_set_pos_transfer_RID)
+
+	# Create the foliage compute pipelines
+	# don't actually run them or anything yet
+	mm_pipeline_pos_calc_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
+	RID_arr.append(mm_pipeline_pos_calc_RID)
+	mm_pipeline_pos_transfer_RID = rd.compute_pipeline_create(transfer_shader_RID)
+	RID_arr.append(mm_pipeline_pos_transfer_RID)
+	
+	_setup_foliage_bender_pipeline()
+
+	set_process(true)
+	initialized = true
+	
+func _setup_multimesh_data(mm_high_estimated_count : int, _mm_low_estimated_count) -> void:	
+	
+	mm_high_instance_RID = RenderingServer.instance_create()
+	RID_arr.append(mm_high_instance_RID)	
+
+	mm_high_RID = RenderingServer.multimesh_create()
+	RID_arr.append(mm_high_RID)
+	foliage_mesh_high_LOD.surface_set_material(0, foliage_material_high_LOD)
+	_init_new_multimesh(rd, mm_high_RID,mm_high_instance_RID, mm_high_estimated_count, foliage_mesh_high_LOD)
+	mm_high_packed_transform_buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(mm_high_RID)
+	RID_arr.append(mm_high_packed_transform_buffer_rid)
+	mm_high_command_buffer_rid = RenderingServer.multimesh_get_command_buffer_rd_rid(mm_high_RID);
+	RID_arr.append(mm_high_command_buffer_rid)
+	
+	## LOW LOD MULTIMESH
+	mm_low_instance_RID = RenderingServer.instance_create()
+	RID_arr.append(mm_low_instance_RID)	
+	
+	mm_low_RID = RenderingServer.multimesh_create()
+	RID_arr.append(mm_low_RID)
+	foliage_mesh_low_LOD.surface_set_material(0, foliage_material_low_LOD)
+	_init_new_multimesh(rd, mm_low_RID, mm_low_instance_RID, _mm_low_estimated_count , foliage_mesh_low_LOD)
+	mm_low_packed_transform_buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(mm_low_RID)
+	RID_arr.append(mm_low_packed_transform_buffer_rid)
+	mm_low_command_buffer_rid = RenderingServer.multimesh_get_command_buffer_rd_rid(mm_low_RID);
+	RID_arr.append(mm_low_command_buffer_rid)
+	
+func _load_shaders()-> void:
 	compute_pos_shader_RID = _load_shader_from_file(positions_compute_shader)
 	if(!compute_pos_shader_RID.is_valid()):
 		push_error("FAILED TO LOAD SHADER: ", positions_compute_shader.to_string())
@@ -278,112 +505,7 @@ func _setup_compute_pipeline()	-> void:
 		return
 	RID_arr.append(bender_shader_RID)
 
-	#height data binding
-	var height_data_uniform = RDUniform.new()
-	height_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	height_data_uniform.binding = 0
-	var input_bytes := height_array.to_byte_array()
-	var height_data_RID : RID = rd.storage_buffer_create(input_bytes.size(), input_bytes)
-	RID_arr.append(height_data_RID)
-	height_data_uniform.add_id(height_data_RID)
-	
-	#multimesh storage buffer binding
-	var multimesh_transform_buffer_uniform := RDUniform.new()
-	multimesh_transform_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	multimesh_transform_buffer_uniform.binding = 0
-
-	var vertex_spacing : float = _get_vertex_spacing()
-	var estimated_per_chunk : int = int(foliage_target_density_sq_m * vertex_spacing * vertex_spacing)
-	var estimated_count : int = int(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz * estimated_per_chunk)
-	_create_new_multimesh(rd,estimated_count, vertex_spacing)
-	var buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
-	RID_arr.append(buffer_rid)
-	multimesh_transform_buffer_uniform.add_id(buffer_rid)
-
-	#Blade count per group binding
-	var blade_count_array_uniform = RDUniform.new()
-	blade_count_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	blade_count_array_uniform.binding = 2
-	
-	blade_count_buffer_RID = rd.storage_buffer_create(high_lod_num_work_groups_xz*high_lod_num_work_groups_xz * 4) #*4 to account for int size
-	RID_arr.append(blade_count_buffer_RID)
-	blade_count_array_uniform.add_id(blade_count_buffer_RID)	
-	
-	#multimesh command buffer binding
-	var multimesh_command_buffer_uniform := RDUniform.new()
-	multimesh_command_buffer_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	multimesh_command_buffer_uniform.binding = 3
-	multimesh_command_buffer_uniform.add_id(created_multimesh_command_buffer_RID)
-	
-	# float parameter binding
-	var float_params_arr : PackedByteArray =  PackedFloat32Array(
-		[vertex_spacing, sqrt(foliage_target_density_sq_m), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale,
-		distance_threshold_vec.x, distance_threshold_vec.y, distance_threshold_vec.z]
-		 ).to_byte_array()
-	var fparameter_buffer_RID :RID = rd.storage_buffer_create(float_params_arr.size(), float_params_arr)
-	RID_arr.append(fparameter_buffer_RID)
-
-	var float_parameter_uniform = RDUniform.new()
-	float_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	float_parameter_uniform.binding = 3
-	float_parameter_uniform.add_id(fparameter_buffer_RID)
-	
-	#int parameter binding
-	var int_params_arr : PackedByteArray =  PackedInt32Array(
-		[estimated_per_chunk , int(chunk_dimenstion_size_m / vertex_spacing)]
-		).to_byte_array()
-	var iparameter_buffer_RID :RID = rd.storage_buffer_create(int_params_arr.size(), int_params_arr)
-	RID_arr.append(iparameter_buffer_RID)
-
-	var int_parameter_uniform = RDUniform.new()
-	int_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	int_parameter_uniform.binding = 4
-	int_parameter_uniform.add_id(iparameter_buffer_RID)	
-	
-	#mask binding
-	var mask_tex_uniform = RDUniform.new()
-	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	mask_tex_uniform.binding = 5
-	var chunk_image = chunk_mask.get_image()
-	chunk_image.convert(Image.FORMAT_R8)
-	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R8_UNORM, false))
-
-	#player data binding
-	player_transform_data_arr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
-	player_transform_data_buffer_RID = rd.storage_buffer_create(player_data_arr.size(), player_data_arr)
-	RID_arr.append(player_transform_data_buffer_RID)
-
-	var player_data_uniform = RDUniform.new()
-	player_data_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	player_data_uniform.binding = 6
-	player_data_uniform.add_id(player_transform_data_buffer_RID)
-
-	# array with coordinates of segments to draw
-	segment_coord_data_arr.resize(high_lod_num_work_groups_xz * high_lod_num_work_groups_xz *2)
-	var segment_coord_packed_arr : PackedByteArray = segment_coord_data_arr.to_byte_array()
-	segment_coord_data_buffer_RID = rd.storage_buffer_create(segment_coord_packed_arr.size(), segment_coord_packed_arr)
-	RID_arr.append(segment_coord_data_buffer_RID)	
-	
-	var segments_coord_uniform : RDUniform = RDUniform.new()
-	segments_coord_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	segments_coord_uniform.binding = 7
-	segments_coord_uniform.add_id(segment_coord_data_buffer_RID)
-
-	##current blade tex binding
-	var bender_sampler_state : RDSamplerState = RDSamplerState.new()
-	var bender_sampler_RID : RID = rd.sampler_create(bender_sampler_state)
-	RID_arr.append(bender_sampler_RID)	
-	
-	#sparse tranform buffer pre-condensed
-	var transform_array_uniform = RDUniform.new()
-	transform_array_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	transform_array_uniform.binding = 1
-	# *45 for 12 elements of a transform with size 4 (float)
-	secondary_transform_buffer_RID = rd.storage_buffer_create(estimated_count * 48,PackedByteArray())
-	RID_arr.append(secondary_transform_buffer_RID)
-	transform_array_uniform.add_id(secondary_transform_buffer_RID)	
-
+func _setup_foliage_bender_pipeline()-> void:
 	#pass the subviewport through to process
 	var bender_img_uniform = RDUniform.new()
 	bender_img_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
@@ -398,14 +520,14 @@ func _setup_compute_pipeline()	-> void:
 	
 	created_bender_tex_RD = Texture2DRD.new()
 	created_bender_tex_RD.texture_rd_rid = created_bender_image_RID
-	grass_material_high_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
-	grass_material_high_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
-	grass_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
-	grass_material_low_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
+	foliage_material_high_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	foliage_material_high_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
+	foliage_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	foliage_material_low_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
 
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
 	
-		# float parameter binding
+	# float parameter binding
 	const delta : float = 1.0/60.0
 	bend_float_param_arr  =  PackedFloat32Array(
 		[unbend_rate_per_second,delta]
@@ -413,45 +535,25 @@ func _setup_compute_pipeline()	-> void:
 	fparameter_buffer_bend_RID = rd.storage_buffer_create(bend_float_param_arr.size(), bend_float_param_arr)
 	RID_arr.append(fparameter_buffer_bend_RID)
 
-	var bender_float_parameter_uniform = RDUniform.new()
-	bender_float_parameter_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	bender_float_parameter_uniform.binding = 2
-	bender_float_parameter_uniform.add_id(fparameter_buffer_bend_RID)
-
-	#add all uniforms bindings into the set
-	uniform_set_position_calc_RID = rd.uniform_set_create(
-			[height_data_uniform, transform_array_uniform, blade_count_array_uniform, float_parameter_uniform, mask_tex_uniform, player_data_uniform, int_parameter_uniform, segments_coord_uniform]
-			, compute_pos_shader_RID, 0)
-	RID_arr.append(uniform_set_position_calc_RID)
-
-	uniform_set_position_transfer_RID = rd.uniform_set_create(
-		[multimesh_transform_buffer_uniform, transform_array_uniform , blade_count_array_uniform,multimesh_command_buffer_uniform, int_parameter_uniform]
-		, transfer_shader_RID, 0)
-	RID_arr.append(uniform_set_position_transfer_RID)
+	var bender_mm_high_flt_param_uniform = RDUniform.new()
+	bender_mm_high_flt_param_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	bender_mm_high_flt_param_uniform.binding = 2
+	bender_mm_high_flt_param_uniform.add_id(fparameter_buffer_bend_RID)
 	
 	uniform_set_bender_RID = rd.uniform_set_create(
-		[bender_img_uniform, bender_modified_img_uniform, bender_float_parameter_uniform],
+		[bender_img_uniform, bender_modified_img_uniform, bender_mm_high_flt_param_uniform],
 		bender_shader_RID ,0)
 	RID_arr.append(uniform_set_bender_RID)
-
-	# Create a compute pipeline
-	# don't actually run them or anything yet
-	pipeline_position_calc_RID = rd.compute_pipeline_create(compute_pos_shader_RID)
-	RID_arr.append(pipeline_position_calc_RID)
-	pipeline_position_transfer_RID = rd.compute_pipeline_create(transfer_shader_RID)
-	RID_arr.append(pipeline_position_transfer_RID)
+	
 	pipeline_bender_RID =  rd.compute_pipeline_create(bender_shader_RID)
 	RID_arr.append(pipeline_bender_RID)
-
-	set_process(true)
-	initialized = true
 	
 func _exit_tree() -> void:
 	_cleanup()
 	
 func _cleanup() -> void:
-	if(created_multimesh_RID.is_valid()):
-		RenderingServer.multimesh_allocate_data(created_multimesh_RID, 0 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
+	if(mm_high_RID.is_valid()):
+		RenderingServer.multimesh_allocate_data(mm_high_RID, 0 , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 
 	for rid_to_free in RID_arr:
 		_try_free_rid(rd, rid_to_free)
@@ -491,31 +593,22 @@ func _init_existing_image_data(_rd : RenderingDevice, img : Image, format : Rend
 	RID_arr.append(tex_RID)
 	return tex_RID
 	
-func _create_new_multimesh(_rd : RenderingDevice, estimated_transform_count, _vertex_spacing : float) -> void:
-	created_multimesh_RID =RenderingServer.multimesh_create()
-	RID_arr.append(created_multimesh_RID)
+func _init_new_multimesh(_rd : RenderingDevice, multimesh_rid : RID, instance_RID : RID, estimated_transform_count : int, mesh : Mesh) -> void:
 	#calculate an estimated instance count to pass through
-	RenderingServer.multimesh_allocate_data(created_multimesh_RID, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
-	foliage_mesh_high_LOD.surface_set_material(0, grass_material_high_LOD)
+	RenderingServer.multimesh_allocate_data(multimesh_rid, estimated_transform_count , RenderingServer.MULTIMESH_TRANSFORM_3D,false, false, true)
 	
-	RenderingServer.multimesh_set_mesh(created_multimesh_RID, foliage_mesh_high_LOD.get_rid())
+	RenderingServer.multimesh_set_mesh(multimesh_rid, mesh.get_rid())
 	RenderingServer.instance_set_transform(instance_RID, get_global_transform())
 
-	RenderingServer.multimesh_set_custom_aabb(created_multimesh_RID,visibility_notifier.aabb)
+	RenderingServer.multimesh_set_custom_aabb(multimesh_rid,visibility_notifier.aabb)
 	RenderingServer.instance_set_custom_aabb(instance_RID, 	visibility_notifier.aabb)
 	
 	RenderingServer.instance_set_scenario(instance_RID, scenario_RID)
-	RenderingServer.instance_set_base(instance_RID, created_multimesh_RID)
+	RenderingServer.instance_set_base(instance_RID, multimesh_rid)
 	RenderingServer.instance_geometry_set_flag(instance_RID, RenderingServer.InstanceFlags.INSTANCE_FLAG_USE_DYNAMIC_GI, true)
 	RenderingServer.instance_geometry_set_cast_shadows_setting(instance_RID, RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_OFF)
-	
-	created_multimesh_buffer_RID = RenderingServer.multimesh_get_buffer_rd_rid(created_multimesh_RID)
-	RID_arr.append(created_multimesh_buffer_RID)
-
-	created_multimesh_command_buffer_RID = RenderingServer.multimesh_get_command_buffer_rd_rid(created_multimesh_RID);
-	RID_arr.append(created_multimesh_command_buffer_RID)
-
-func _update_compute_bender_data(_delta : float) -> void:
+		
+func _update_compute_bender_only_data(_delta : float) -> void:
 	if(!uniform_set_bender_RID.is_valid()):
 		return
 		
@@ -525,49 +618,65 @@ func _update_compute_bender_data(_delta : float) -> void:
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
-	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups.x ,1, high_lod_num_work_groups.y)
 	
 	rd.compute_list_end()
 
-
-func _update_all_compute_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float)->void:
-	if(!pipeline_position_calc_RID.is_valid() || !uniform_set_bender_RID.is_valid() || !uniform_set_position_transfer_RID.is_valid()):
-		return
-		
+func _update_compute_segments_data(_player_cam_transform_world: Transform3D, _player_cam : Camera3D, _delta : float)->void:
 	compute_active = true
-	
 	update_counter += 1
 	
 	#this would be where we pass player transform through or updated textures
 	rd = RenderingServer.get_rendering_device()
 	_update_player_data_buffer(rd, _player_cam_transform_world)
-	_update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
-	_update_bender_data(rd, _delta)
-
-	var compute_list : int = rd.compute_list_begin()
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
-	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
+	var filled_in : int = _update_segments_to_draw_buffer(rd, _player_cam_transform_world, _player_cam)
 	
-	#rd.compute_list_add_barrier(compute_list)
+	if(uniform_set_bender_RID.is_valid()):
+		_update_bender_data(rd, _delta)
+		_dispatch_bender_compute_list(rd)
+	
+	if(mm_pipeline_pos_calc_RID.is_valid() && mm_high_uniform_set_pos_transfer_RID.is_valid()):
+		_dispatch_position_compute_list(rd, mm_high_uniform_set_pos_calc_RID, mm_high_uniform_set_pos_transfer_RID, high_lod_num_work_groups)
+		pass
 
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_position_calc_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_position_calc_RID, 0)
-	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
-
-	# wait until the first shader is done
-	rd.compute_list_add_barrier(compute_list)
-
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_position_transfer_RID)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set_position_transfer_RID, 0)
-	rd.compute_list_dispatch(compute_list, high_lod_num_work_groups_xz,1,high_lod_num_work_groups_xz)
-
-	rd.compute_list_end()
+	var total_high_lod_groups : int = high_lod_num_work_groups.x * high_lod_num_work_groups.y
+	if(filled_in >total_high_lod_groups):
+		var work_group_amount : Vector2i = _calculate_low_LOD_group_amount(filled_in, total_high_lod_groups)
+		_dispatch_position_compute_list(rd, mm_low_uniform_set_pos_calc_RID, mm_low_uniform_set_pos_transfer_RID,work_group_amount)
+	else:
+		#set the instance count to 0 on the low LOD
+		pass
+			
 
 	compute_active = false
 
+func _calculate_low_LOD_group_amount(segment_amount : int, high_lod_amount : int) -> Vector2:
+	return Vector2i(segment_amount - high_lod_amount, 1)
+
+func _dispatch_bender_compute_list(_rd : RenderingDevice) -> void:
+	var bender_compute_list : int = _rd.compute_list_begin()
+	_rd.compute_list_bind_compute_pipeline(bender_compute_list, pipeline_bender_RID)
+	_rd.compute_list_bind_uniform_set(bender_compute_list, uniform_set_bender_RID, 0)	
+	_rd.compute_list_dispatch(bender_compute_list,high_lod_num_work_groups.x,1,high_lod_num_work_groups.y)
+	_rd.compute_list_end()
+	
+func _dispatch_position_compute_list(_rd :RenderingDevice, pos_calc_uniform_set : RID,pos_transfer_uniform_set : RID,  workgroup_num : Vector2i)	-> void:
+	var compute_list : int = _rd.compute_list_begin()
+	_rd.compute_list_bind_compute_pipeline(compute_list, mm_pipeline_pos_calc_RID)
+	_rd.compute_list_bind_uniform_set(compute_list, pos_calc_uniform_set, 0)
+	_rd.compute_list_dispatch(compute_list,workgroup_num.x,1,workgroup_num.y)
+
+	# wait until the first shader is done
+	_rd.compute_list_add_barrier(compute_list)
+
+	_rd.compute_list_bind_compute_pipeline(compute_list, mm_pipeline_pos_transfer_RID)
+	_rd.compute_list_bind_uniform_set(compute_list, pos_transfer_uniform_set, 0)
+	_rd.compute_list_dispatch(compute_list, workgroup_num.x,1,workgroup_num.y)
+
+	_rd.compute_list_end()
+	
 func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_world: Transform3D) -> void:
-	if(!player_transform_data_buffer_RID.is_valid()):
+	if(!player_transform_data_mm_high_buffer_rid.is_valid()):
 		return
 
 	player_transform_data_arr[0] = _player_cam_transform_world.origin.x - self.get_global_position().x
@@ -580,7 +689,7 @@ func _update_player_data_buffer(_rd: RenderingDevice, _player_cam_transform_worl
 	player_transform_data_arr[5] = cam_rot.z
 	
 	var player_data_arr : PackedByteArray = player_transform_data_arr.to_byte_array()
-	_rd.buffer_update(player_transform_data_buffer_RID, 0, player_data_arr.size() ,player_data_arr)
+	_rd.buffer_update(player_transform_data_mm_high_buffer_rid, 0, player_data_arr.size() ,player_data_arr)
 
 # REGION BENDERS 
 #=================================================================================================================================
@@ -591,11 +700,10 @@ func _update_bender_data(_rd : RenderingDevice, delta : float) -> void:
 
 # REGION SEGMENT DETECTION 
 #=================================================================================================================================
-
-func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D, _player_cam : Camera3D) -> void:
-	if(!segment_coord_data_buffer_RID.is_valid()):
-		return
-		
+func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transform_world: Transform3D, _player_cam : Camera3D) -> int:
+	if(!segment_coord_data_mm_buffer_rid.is_valid()):
+		return 0
+				
 	var vertex_spacing : float = _get_vertex_spacing()		
 	#start by calculating the segment we are currently in
 	const backward_offset : float = 0.5
@@ -616,8 +724,9 @@ func _update_segments_to_draw_buffer(_rd : RenderingDevice, _player_cam_transfor
 	#find the vector that describe the 'edges' of the camera
 	segment_work_filled_in = _fill_work_array_with_current_segments_data(_player_cam , player_current_sub_id_pos, player_current_segment,segments_per_dim)
 		
-	var element_amount : int = 	min(segment_work_filled_in, high_lod_num_work_groups_xz * high_lod_num_work_groups_xz)
-	_rd.buffer_update(segment_coord_data_buffer_RID, 0, element_amount*8 ,segment_work_data_arr)
+	var element_amount : int = 	min(segment_work_filled_in, pow(int(chunk_dimenstion_size_m / vertex_spacing),2))
+	_rd.buffer_update(segment_coord_data_mm_buffer_rid, 0, element_amount*8 ,segment_work_data_arr)
+	return element_amount
 	
 func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_segment_sub_pos : Vector2, _player_current_segment : Vector2i, max_segments_per_side : int) -> int:
 	var cam_frustrum : Array[Plane] = _camera.get_frustum()
@@ -628,7 +737,7 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	segments_found_right = _find_ray_intersect_grid(_player_segment_sub_pos, right_dir,max_segments_per_side, segment_found_edges_right)
 	segments_found_center = _find_center_edge_segments(_player_current_segment, max_segments_per_side) 	# find all the segments in between those 2 ends
 
-	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups_xz
+	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups.x
 	var post_priotitize_offset : int = edge_amount_prioritize_per_side * edge_amount_prioritize_per_side
 
 	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(_player_current_segment, segments_found_left, segments_found_right, segments_found_center, edge_amount_prioritize_per_side, post_priotitize_offset)
@@ -638,7 +747,6 @@ func _fill_work_array_with_current_segments_data(_camera : Camera3D, _player_seg
 	
 	return end_write_id + 1 
 
-const compass_directions : Array[Vector2i] = [Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1), Vector2i(0,-1),Vector2i(1,-1)]	#clockwise directions starting with EAST
 
 func _flood_fill_work_data(camera_forward : Vector3, write_offsets : Vector2i, post_prioritize_write_offset : int,  max_segments_per_side : int) -> int:
 	#contruct an array of direction to check
@@ -922,6 +1030,8 @@ func _add_edge_segments_between_points(from : Vector2i, to : Vector2i, write_off
 		amount_added+=1
 
 	return amount_added
+
+const compass_directions : Array[Vector2i] = [Vector2i(1,0),Vector2i(1,1),Vector2i(0,1) ,Vector2i(-1,1),Vector2i(-1,0), Vector2i(-1,-1), Vector2i(0,-1),Vector2i(1,-1)]	#clockwise directions starting with EAST
 
 func _get_compass_direction_index(direction : Vector2) -> int:
 	return ((int(round( atan2(direction.y, direction.x)/ (2 * PI / 8))) + 8) % 8)	#divide the 360 look direction degrees into 8 sections for the cardinal directions
