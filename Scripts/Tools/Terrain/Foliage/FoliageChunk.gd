@@ -4,7 +4,8 @@ class_name FoliageChunk extends Node3D
 enum EFoliageLOD {NONE, TEX, LOW, HIGH}
 
 @export_tool_button("Preview in Editor", "Callable") var preview_action : Callable = _preview_in_editor
-@export_tool_button("Generate Height Data for Chunk", "Callable") var generate_height_data_action : Callable = _generate_height_data
+@export_tool_button("Generate Data for Chunk", "Callable") var generate_height_data_action : Callable = _generate_height_data
+@export_tool_button("Generate Terrain Mesh Copy", "Callable") var generate_terrain_copy_action : Callable = _create_terrain_mesh
 
 const foliage_node_meta : String = "Node_FoliageChunk"
 const foliage_shader_bend_mask : String = "shader_parameter/bending_mask"
@@ -39,6 +40,11 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 @export var distance_thresholds_low_lod : Vector3 = Vector3(32,32,32)
 @export var foliage_mesh_low_LOD : Mesh
 @export var foliage_material_low_LOD :Material
+
+@export_group("Lowest LOD")
+@export var foliage_lowest_LOD_mesh : MeshInstance3D
+@export var foliage_lowest_LOD_material : Material
+@export var foliage_lowest_LOD_mesh_offset : float = 1.0
 
 @export_group("Foliage Bending")
 @export var bender_mask_res : int = 512
@@ -182,21 +188,38 @@ func _generate_height_data() -> void:
 				max_height = max(max_height, current_index)	
 				
 			
-	const offset : float = 5.0			
+	const vert_offset : float = 5.0
 	if(bender_mask_camera):
 		bender_mask_camera.size = chunk_dimenstion_size_m
 		bender_mask_camera.global_position.x = get_global_position().x
-		bender_mask_camera.global_position.y = min_height -offset		
+		bender_mask_camera.global_position.y = min_height -vert_offset		
 		bender_mask_camera.global_position.z = get_global_position().z
-		bender_mask_camera.far = abs(max_height - min_height) + (offset *2)
+		bender_mask_camera.far = abs(max_height - min_height) + (vert_offset *2)
 		
 	if(visibility_notifier):
 		const size_padding : float = 5.0
-		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + (offset * 2), chunk_dimenstion_size_m + size_padding)
+		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + (vert_offset * 2), chunk_dimenstion_size_m + size_padding)
 		var horizontal_offset := (chunk_dimenstion_size_m* 0.5) + (size_padding * 0.5)
 		visibility_notifier.aabb.position.x = -horizontal_offset
 		visibility_notifier.aabb.position.z = -horizontal_offset
-		visibility_notifier.aabb.position.y = min_height - offset
+		visibility_notifier.aabb.position.y = min_height - vert_offset
+		
+	_create_terrain_mesh()	
+
+func _create_terrain_mesh() -> void:
+	var vertex_spacing : float = _get_vertex_spacing()
+	var segment_per_dim = chunk_dimenstion_size_m / vertex_spacing
+	var offset : Vector2 = Vector2.ZERO
+	if(chunk_transform_centered):
+		offset =  Vector2(chunk_dimenstion_size_m * -0.5, chunk_dimenstion_size_m * -0.5)
+		
+	var mesh := FoliageMeshBuilder.build_mesh(height_array,segment_per_dim+1,vertex_spacing,offset)
+	if mesh:
+		mesh.surface_set_material(0, foliage_lowest_LOD_material)
+		foliage_lowest_LOD_mesh.mesh =mesh
+		
+	foliage_lowest_LOD_mesh.global_position.y = foliage_lowest_LOD_mesh_offset	
+	
 
 func _preview_in_editor() -> void:
 	if(initialized):
@@ -372,9 +395,9 @@ func _setup_compute_pipeline()	-> void:
 	var iparameter_mm_high_buffer_rid :RID = rd.storage_buffer_create(mm_high_int_params_arr.size(), mm_high_int_params_arr)
 	RID_arr.append(iparameter_mm_high_buffer_rid)
 	
-	var offset = high_lod_num_work_groups.x * high_lod_num_work_groups.y
+	var vert_offset = high_lod_num_work_groups.x * high_lod_num_work_groups.y
 	var mm_low_int_params_arr : PackedByteArray =  PackedInt32Array(
-		[low_estimated_per_chunk ,chunks_per_dim, offset]
+		[low_estimated_per_chunk ,chunks_per_dim, vert_offset]
 		).to_byte_array()
 	var iparameter_mm_low_buffer_rid :RID = rd.storage_buffer_create(mm_low_int_params_arr.size(), mm_low_int_params_arr)
 	RID_arr.append(iparameter_mm_low_buffer_rid)
