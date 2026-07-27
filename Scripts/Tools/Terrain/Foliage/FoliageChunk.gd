@@ -27,6 +27,7 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 
 @export_group("High LOD")
 @export var target_density_sq_m_high_LOD : float = 80
+@export var foliage_cam_bias_degrees_high_LOD : float = 30
 @export var distance_thresholds_high_lod : Vector3 = Vector3(8,16,32)
 @export var foliage_mesh_high_LOD : Mesh
 @export var foliage_material_high_LOD :Material
@@ -34,6 +35,7 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 
 @export_group("Low LOD")
 @export var target_density_sq_m_low_LOD : float = 10
+@export var foliage_cam_bias_degrees_low_LOD : float = 70
 @export var distance_thresholds_low_lod : Vector3 = Vector3(32,32,32)
 @export var foliage_mesh_low_LOD : Mesh
 @export var foliage_material_low_LOD :Material
@@ -183,7 +185,9 @@ func _generate_height_data() -> void:
 	const offset : float = 5.0			
 	if(bender_mask_camera):
 		bender_mask_camera.size = chunk_dimenstion_size_m
+		bender_mask_camera.global_position.x = get_global_position().x
 		bender_mask_camera.global_position.y = min_height -offset		
+		bender_mask_camera.global_position.z = get_global_position().z
 		bender_mask_camera.far = abs(max_height - min_height) + (offset *2)
 		
 	if(visibility_notifier):
@@ -325,9 +329,10 @@ func _setup_compute_pipeline()	-> void:
 	# float parameters bindings
 	var mm_high_flt_params_arr : PackedByteArray =  PackedFloat32Array(
 		[vertex_spacing,
-		 sqrt(target_density_sq_m_high_LOD), 
+		sqrt(target_density_sq_m_high_LOD), 
 		max_foliage_individual_random_offset,
-		 deg_to_rad(max_foliage_tilt_degrees), 
+		deg_to_rad(max_foliage_tilt_degrees), 
+		deg_to_rad(foliage_cam_bias_degrees_high_LOD),
 		min_grass_blade_scale,
 		distance_thresholds_high_lod.x,
 		distance_thresholds_high_lod.y, 
@@ -337,8 +342,15 @@ func _setup_compute_pipeline()	-> void:
 	RID_arr.append(fparameter_mm_high_buffer_rid)
 
 	var mm_low_flt_params_arr : PackedByteArray = PackedFloat32Array(
-		[vertex_spacing, sqrt(target_density_sq_m_low_LOD), max_foliage_individual_random_offset, deg_to_rad(max_foliage_tilt_degrees), min_grass_blade_scale,
-		distance_thresholds_low_lod.x, distance_thresholds_low_lod.y, distance_thresholds_low_lod.z]
+		[vertex_spacing, 
+		sqrt(target_density_sq_m_low_LOD),
+		max_foliage_individual_random_offset, 
+		deg_to_rad(max_foliage_tilt_degrees), 
+		deg_to_rad(foliage_cam_bias_degrees_low_LOD),
+		min_grass_blade_scale,
+		distance_thresholds_low_lod.x, 
+		distance_thresholds_low_lod.y, 
+		distance_thresholds_low_lod.z]
 		 ).to_byte_array()
 	var fparameter_mm_low_buffer_rid :RID = rd.storage_buffer_create(mm_low_flt_params_arr.size(), mm_low_flt_params_arr)
 	RID_arr.append(fparameter_mm_low_buffer_rid)
