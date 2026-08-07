@@ -45,6 +45,8 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 @export var foliage_lowest_LOD_mesh : MeshInstance3D
 @export var foliage_lowest_LOD_material : Material
 @export var foliage_lowest_LOD_mesh_offset : float = 1.0
+@export var foliage_lowest_LOD_distance_activation : float = 250.0
+var foliage_lowest_LOD_distance_squared : float = 0.0
 
 @export_group("Foliage Bending")
 @export var bender_mask_res : int = 512
@@ -54,7 +56,6 @@ var bend_float_param_arr : PackedByteArray
 var fparameter_buffer_bend_RID :RID
 
 @export_group("Customizable Parameters")
-	
 @export var max_foliage_individual_random_offset : float = 0.2
 @export var max_foliage_tilt_degrees : float = 15.0
 # In ascending order, at what distances from the player should a segment of grass blades draw 1/2/3 blades less per 4
@@ -143,7 +144,7 @@ var initialized : bool = false
 
 func _get_vertex_spacing() -> float:
 	if(!terrain_node):
-		push_error("Terrain node is null, cannot retrieve vertex spacing, returning default value")
+		print("Terrain node is null, cannot retrieve vertex spacing, returning default value")
 		return 4.0
 		
 	return terrain_node.vertex_spacing
@@ -230,6 +231,7 @@ func _preview_in_editor() -> void:
 func _ready() -> void:
 	_intialize_segments_data()
 	_initialize_bender_data()
+	foliage_lowest_LOD_distance_squared = foliage_lowest_LOD_distance_activation * foliage_lowest_LOD_distance_activation
 
 	if(!Engine.is_editor_hint()):
 		RenderingServer.call_on_render_thread(_cleanup)
@@ -273,6 +275,16 @@ func _process(_delta: float) -> void:
 	if(player_transform_to_pass.is_equal_approx(cam_transform)):
 		RenderingServer.call_on_render_thread(_update_compute_bender_only_data.bind(_delta))		
 		return
+
+	#check distance from player
+	var squared_dist : float = cam_transform.origin.distance_squared_to(get_global_position())
+	if(squared_dist > foliage_lowest_LOD_distance_squared):
+		foliage_lowest_LOD_mesh.visible = true
+		#set active amount on high/low LOD to 0
+		return
+	else:
+		foliage_lowest_LOD_mesh.visible = false
+
 
 	if(!compute_active && initialized):
 		player_transform_to_pass = cam_transform
@@ -417,7 +429,10 @@ func _setup_compute_pipeline()	-> void:
 	mask_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	mask_tex_uniform.binding = 5
 	var chunk_image = chunk_mask.get_image()
+	chunk_image.decompress()
 	chunk_image.convert(Image.FORMAT_R8)
+	if chunk_image.has_mipmaps():
+		chunk_image.clear_mipmaps()
 	mask_tex_uniform.add_id(_init_existing_image_data(rd, chunk_image, RenderingDevice.DATA_FORMAT_R8_UNORM, false))
 
 	#player data binding
@@ -559,6 +574,8 @@ func _setup_foliage_bender_pipeline()-> void:
 	foliage_material_high_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
 	foliage_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
 	foliage_material_low_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
+	foliage_lowest_LOD_material.set(foliage_shader_bend_mask, created_bender_tex_RD)
+	foliage_lowest_LOD_material.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
 
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
 	
