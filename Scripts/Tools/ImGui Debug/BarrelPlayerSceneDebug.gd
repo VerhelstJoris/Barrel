@@ -11,6 +11,7 @@ func _ready() -> void:
 	player = owner as Player
 	equipment_manager = player.equipment_manager
 	BarrelDebugWindow.draw_player_debug.connect(_draw)
+	BarrelDebugWindow._register_player_node(self)
 	equipment_manager.on_equipped.connect(_on_new_equipped)
 	equipment_manager.on_unequipped.connect(_on_old_unequipped)
 	

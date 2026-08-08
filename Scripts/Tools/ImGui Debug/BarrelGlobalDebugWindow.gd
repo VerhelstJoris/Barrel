@@ -10,6 +10,7 @@ signal draw_favourited_debug(_delta)
 signal draw_environment_debug(_delta)
 
 var environment_node : BarrelEnvironmentDebugNode
+static var player_node : BarrelPlayerSceneDebug
 
 func _ready() -> void:
 	environment_node = BarrelEnvironmentDebugNode.new()
@@ -55,3 +56,9 @@ func _process(_delta: float) -> void:
 		
 func _get_environment_node() -> BarrelEnvironmentDebugNode:
 	return environment_node
+
+func _register_player_node(node : BarrelSceneDebugNode) -> void:
+	player_node = node
+	
+static func _get_player_node() -> BarrelSceneDebugNode:
+	return player_node	
