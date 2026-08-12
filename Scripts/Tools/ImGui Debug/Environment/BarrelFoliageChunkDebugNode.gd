@@ -22,6 +22,8 @@ var table_draw_flood_fill : bool = true
 var table_draw_fill_color : Array[float] = [1,1,0]
 var table_draw_conflicts : bool = true
 var table_draw_conflict_col : Array[float] = [0,1,1]
+var table_draw_player : bool = true
+var table_draw_player_col : Array[float] = [1,1,1]
 
 var table_x_draw_range : Array[int] = [0,50]
 var table_y_draw_range : Array[int] = [0,50]
@@ -72,7 +74,7 @@ func _cache_current_data() -> void:
 	_cache_copy_of_packed_int_array(chunk.segments_found_left,chunk.segment_found_edges_left, left_copy_arr)
 	_cache_copy_of_packed_int_array(chunk.segments_found_right,chunk.segment_found_edges_right, right_copy_arr)
 	_cache_copy_of_packed_int_array(chunk.segments_found_center,chunk.segment_center_edges, center_copy_arr)
-	_cache_copy_of_packed_byte_array(chunk.segment_work_filled_in, chunk.segment_work_data_arr, work_copy_arr)
+	_cache_copy_of_packed_int_array(chunk.segment_work_filled_in, chunk.segment_work_data_arr, work_copy_arr)
 
 func _draw_chunk_table() -> void:
 	var draw_left_arr : Array[bool] = [table_draw_left]
@@ -120,10 +122,17 @@ func _draw_chunk_table() -> void:
 	var table_draw_conflict_arr : Array[bool] = [table_draw_conflicts]
 	if(ImGui.Checkbox("Conflict   ", table_draw_conflict_arr)):
 		table_draw_conflicts = table_draw_conflict_arr[0]
+		
+	ImGui.SameLine()
+	ImGui.ColorEdit3("Player", table_draw_player_col, ImGui.ColorEditFlags_NoInputs | ImGui.ColorEditFlags_NoLabel)	
+	var player_col : Color = Color(table_draw_player_col[0],table_draw_player_col[1],table_draw_player_col[2],1)
+
+	ImGui.SameLine()
+	var table_draw_player_arr : Array[bool] = [table_draw_player]
+	if(ImGui.Checkbox("Player   ", table_draw_player_arr)):
+		table_draw_player = table_draw_player_arr[0]
 
 	_draw_table_range()
-	ImGui.SameLine()
-	_draw_table_flood_directions()
 	ImGui.Separator()
 	
 	ImGui.SetWindowFontScale(0.925)
@@ -152,6 +161,11 @@ func _draw_chunk_table() -> void:
 
 			if(table_draw_conflicts && in_amount > 1):
 				ImGui.TextColored(conflict_col ,"!")
+			elif(table_draw_player && (chunk.current_projected_player_segment == current_cell || chunk.current_player_segment == current_cell)):
+				if(chunk.current_projected_player_segment == current_cell):
+					ImGui.TextColored(player_col, "P")
+				elif( chunk.current_player_segment == current_cell):
+					ImGui.TextColored(player_col, "C")
 			elif(in_left):
 				ImGui.TextColored(left_col, "L")
 			elif(in_right):
@@ -174,9 +188,6 @@ func _draw_table_range() -> void:
 	ImGui.SameLine()
 	ImGui.InputInt2("Y: ",table_y_draw_range)
 	ImGui.PopItemWidth()
-	
-func _draw_table_flood_directions() -> void:
-	ImGui.Text("Query Dir: {}, {}, {}".format([ str(chunk.flood_fill_query_directions[0]), str(chunk.flood_fill_query_directions[1]), str(chunk.flood_fill_query_directions[2]) ], "{}" ))
 	
 func _cache_copy_of_packed_int_array(amount : int, copy_from_arr : PackedInt32Array, copy_to_arr : Array[Vector2i]) -> void:
 	for id in range(amount):
