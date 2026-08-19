@@ -17,49 +17,16 @@ const foliage_shader_bend_mask_size : String = "shader_parameter/bending_mask_si
 @export var inverse_terrain_node : Terrain3D
 @export var bender_mask_subviewport : SubViewport
 @export var bender_mask_camera : Camera3D
+@export var foliage_lowest_LOD_mesh : MeshInstance3D
 
-@export var chunk_transform_centered : bool = false
-@export var chunk_dimenstion_size_m : float = 200.0
+@export var settings_DA : FoliageChunkSettings
+
 @export var chunk_mask : Texture2D
 
-@export var positions_compute_shader : RDShaderFile
-@export var transfer_compute_shader : RDShaderFile
-@export var bender_compute_shader : RDShaderFile
-
-@export_group("High LOD")
-@export var target_density_sq_m_high_LOD : float = 80
-@export var distance_thresholds_high_lod : Vector3 = Vector3(8,16,32)
-@export var foliage_mesh_high_LOD : Mesh
-@export var foliage_material_high_LOD :Material
-@export var high_lod_num_work_groups : Vector2i = Vector2i(8,8)
-
-@export_group("Low LOD")
-@export var target_density_sq_m_low_LOD : float = 10
-@export var distance_thresholds_low_lod : Vector3 = Vector3(32,32,32)
-@export var foliage_mesh_low_LOD : Mesh
-@export var foliage_material_low_LOD :Material
-
-@export_group("Lowest LOD")
-@export var foliage_lowest_LOD_mesh : MeshInstance3D
-@export var foliage_lowest_LOD_material : Material
-@export var foliage_lowest_LOD_mesh_offset : float = 1.0
-@export var foliage_lowest_LOD_distance_activation : float = 250.0
 var foliage_lowest_LOD_distance_squared : float = 0.0
-
-@export_group("Foliage Bending")
-@export var bender_mask_res : int = 512
-@export var unbend_rate_per_second : float = 0.05
 
 var bend_float_param_arr : PackedByteArray
 var fparameter_buffer_bend_RID :RID
-
-@export_group("Customizable Parameters")
-@export var max_foliage_individual_random_offset : float = 0.2
-@export var foliage_cam_bias_degress_near_far : Vector2 = Vector2(30.0, 70.0)
-@export var max_foliage_tilt_degrees : float = 15.0
-
-# In ascending order, at what distances from the player should a segment of grass blades draw 1/2/3 blades less per 4
-@export var min_grass_blade_scale : float = 0.2
 
 @export_group("runtime data - DO NOT EDIT MANUALLY")
 @export var height_array : PackedFloat32Array
@@ -146,6 +113,10 @@ var compute_active : bool = false
 
 var initialized : bool = false
 
+var chunk_material_high_LOD_inst : Material
+var chunk_material_low_LOD_inst : Material
+var chunk_material_lowest_LOD_inst : Material
+
 # everything the render-thread segment update needs, all sampled on the main thread before being passed over
 class FoliageFrameSnapshot extends RefCounted:
 	var cam_transform : Transform3D
@@ -161,6 +132,14 @@ class FoliageFrameSnapshot extends RefCounted:
 	var player_sub_pos : Vector2
 	var backward_sub_offset : Vector2	# reverse-forward pad, in segment units
 
+func _try_assign_chunk_material_instances() -> void:
+	if(chunk_material_high_LOD_inst == null && settings_DA.foliage_material_high_LOD):
+		chunk_material_high_LOD_inst = settings_DA.foliage_material_high_LOD.duplicate()
+	if(chunk_material_low_LOD_inst == null && settings_DA.foliage_material_low_LOD):
+		chunk_material_low_LOD_inst = settings_DA.foliage_material_low_LOD.duplicate()
+	if(chunk_material_lowest_LOD_inst == null && settings_DA.foliage_lowest_LOD_material):
+		chunk_material_lowest_LOD_inst = settings_DA.foliage_lowest_LOD_material.duplicate()
+
 func _get_vertex_spacing() -> float:
 	if(!terrain_node):
 		print("Terrain node is null, cannot retrieve vertex spacing, returning default value")
@@ -175,7 +154,7 @@ func _generate_height_data() -> void:
 	height_array.clear()
 	var vertex_spacing :float = _get_vertex_spacing()
 	
-	var elem_per_dim : int = int(chunk_dimenstion_size_m / vertex_spacing) +1
+	var elem_per_dim : int = int(settings_DA.chunk_dimenstion_size_m / vertex_spacing) +1
 	height_array.resize( elem_per_dim * elem_per_dim)
 	
 	if(terrain_node):
@@ -183,12 +162,9 @@ func _generate_height_data() -> void:
 			for col in elem_per_dim:
 				var current_index : int = row * elem_per_dim + col
 				var chunk_pixel_coord : Vector2i
-				if(chunk_transform_centered):
-					chunk_pixel_coord = Vector2i( 
-						int( (global_position.x - (chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) ,
-						int( (global_position.z - (chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) )
-				else:
-					chunk_pixel_coord = Vector2i(int(global_position.x / vertex_spacing) ,int(global_position.z / vertex_spacing) )
+				chunk_pixel_coord = Vector2i( 
+						int( (global_position.x - (settings_DA.chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) ,
+						int( (global_position.z - (settings_DA.chunk_dimenstion_size_m * 0.5) )/ vertex_spacing) )
 				var corresponding_world_pos : Vector3 = Vector3( (chunk_pixel_coord.x + row) * vertex_spacing, 0, (chunk_pixel_coord.y + col) * vertex_spacing)
 				var found_height : float = terrain_node.data.get_height(corresponding_world_pos)
 				if(found_height == NAN):
@@ -210,7 +186,7 @@ func _generate_height_data() -> void:
 			
 	const vert_offset : float = 5.0
 	if(bender_mask_camera):
-		bender_mask_camera.size = chunk_dimenstion_size_m
+		bender_mask_camera.size = settings_DA.chunk_dimenstion_size_m
 		bender_mask_camera.global_position.x = get_global_position().x
 		bender_mask_camera.global_position.y = min_height -vert_offset		
 		bender_mask_camera.global_position.z = get_global_position().z
@@ -218,28 +194,30 @@ func _generate_height_data() -> void:
 		
 	if(visibility_notifier):
 		const size_padding : float = 5.0
-		visibility_notifier.aabb.size = Vector3(chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + (vert_offset * 2), chunk_dimenstion_size_m + size_padding)
-		var horizontal_offset := (chunk_dimenstion_size_m* 0.5) + (size_padding * 0.5)
+		visibility_notifier.aabb.size = Vector3(settings_DA.chunk_dimenstion_size_m + size_padding,  abs(max_height - min_height) + (vert_offset * 2), settings_DA.chunk_dimenstion_size_m + size_padding)
+		var horizontal_offset := (settings_DA.chunk_dimenstion_size_m* 0.5) + (size_padding * 0.5)
 		visibility_notifier.aabb.position.x = -horizontal_offset
 		visibility_notifier.aabb.position.z = -horizontal_offset
 		visibility_notifier.aabb.position.y = min_height - vert_offset
 		
+	_try_assign_chunk_material_instances()
+	
 	_create_terrain_mesh()	
 
 func _create_terrain_mesh() -> void:
 	var vertex_spacing : float = _get_vertex_spacing()
-	var segment_per_dim = chunk_dimenstion_size_m / vertex_spacing
+	var segment_per_dim = settings_DA.chunk_dimenstion_size_m / vertex_spacing
 	var offset : Vector2 = Vector2.ZERO
-	if(chunk_transform_centered):
-		offset =  Vector2(chunk_dimenstion_size_m * -0.5, chunk_dimenstion_size_m * -0.5)
+	offset =  Vector2(settings_DA.chunk_dimenstion_size_m * -0.5, settings_DA.chunk_dimenstion_size_m * -0.5)
 		
 	var mesh := FoliageMeshBuilder.build_mesh(height_array,segment_per_dim+1,vertex_spacing,offset)
 	if mesh:
-		mesh.surface_set_material(0, foliage_lowest_LOD_material)
+		mesh.surface_set_material(0, settings_DA.foliage_lowest_LOD_material)
 		foliage_lowest_LOD_mesh.mesh =mesh
 		
-	foliage_lowest_LOD_mesh.global_position.y = foliage_lowest_LOD_mesh_offset	
-	
+	foliage_lowest_LOD_mesh.global_position.y = settings_DA.foliage_lowest_LOD_mesh_offset	
+	foliage_lowest_LOD_mesh.set_surface_override_material(0, chunk_material_lowest_LOD_inst)
+
 
 func _preview_in_editor() -> void:
 	if(initialized):
@@ -250,9 +228,13 @@ func _preview_in_editor() -> void:
 func _ready() -> void:
 	if(!visible):
 		return
+		
+	if(!settings_DA):
+		return
+			
 	_intialize_segments_data()
 	_initialize_bender_data()
-	foliage_lowest_LOD_distance_squared = foliage_lowest_LOD_distance_activation * foliage_lowest_LOD_distance_activation
+	foliage_lowest_LOD_distance_squared = settings_DA.foliage_lowest_LOD_distance_activation * settings_DA.foliage_lowest_LOD_distance_activation
 
 	if(!Engine.is_editor_hint()):
 		RenderingServer.call_on_render_thread(_cleanup)
@@ -260,7 +242,7 @@ func _ready() -> void:
 		
 
 func _intialize_segments_data() -> void:
-	segments_per_dim = int(chunk_dimenstion_size_m / _get_vertex_spacing())
+	segments_per_dim = int(settings_DA.chunk_dimenstion_size_m / _get_vertex_spacing())
 	segment_work_data_arr.resize(segments_per_dim*segments_per_dim *2)
 	segment_found_edges_left.resize(segments_per_dim *  4)
 	segment_found_edges_right.resize(segments_per_dim * 4)
@@ -275,11 +257,14 @@ func _initialize_bender_data() -> void:
 		inverse_terrain_node.material.show_checkered = false
 	
 	if(bender_mask_subviewport):
-		bender_mask_subviewport.size = Vector2(bender_mask_res,bender_mask_res)	
+		bender_mask_subviewport.size = Vector2(settings_DA.bender_mask_res,settings_DA.bender_mask_res)	
 		
-	created_bender_image = Image.create_empty(bender_mask_res, bender_mask_res, false, Image.FORMAT_RF)	
+	created_bender_image = Image.create_empty(settings_DA.bender_mask_res, settings_DA.bender_mask_res, false, Image.FORMAT_RF)	
 	
 func _process(_delta: float) -> void:
+	if(!settings_DA):
+		return
+	
 	if(!visibility_notifier.is_on_screen()):
 		return
 	
@@ -321,9 +306,10 @@ func _gather_chunk_snapshot(cam : Camera3D, cam_transform : Transform3D) -> Foli
 	snapshot.cam_forward = -cam_transform.basis.z
 	snapshot.chunk_global_pos = global_position
 	snapshot.vertex_spacing = _get_vertex_spacing()
+	var half_size : float = settings_DA.chunk_dimenstion_size_m * 0.5
 	snapshot.chunk_min_corner = Vector2(
-		global_position.x - (chunk_dimenstion_size_m * 0.5),
-		global_position.z - (chunk_dimenstion_size_m * 0.5)
+		global_position.x - half_size,
+		global_position.z - half_size
 	)
 
 	var vp_size : Vector2 = cam.get_viewport().size
@@ -362,11 +348,11 @@ func _setup_compute_pipeline()	-> void:
 	_load_shaders()	
 		
 	var vertex_spacing : float = _get_vertex_spacing()
-	var high_estimated_per_chunk : int = int(target_density_sq_m_high_LOD * vertex_spacing * vertex_spacing)
-	var mm_high_estimated_count : int = int(high_lod_num_work_groups.x * high_lod_num_work_groups.y * high_estimated_per_chunk)
+	var high_estimated_per_chunk : int = int(settings_DA.target_density_sq_m_high_LOD * vertex_spacing * vertex_spacing)
+	var mm_high_estimated_count : int = int(settings_DA.high_lod_num_work_groups.x * settings_DA.high_lod_num_work_groups.y * high_estimated_per_chunk)
 		
-	var low_estimated_per_chunk : int = int(target_density_sq_m_low_LOD * vertex_spacing * vertex_spacing)
-	var chunks_per_dim : int = int(chunk_dimenstion_size_m / vertex_spacing)
+	var low_estimated_per_chunk : int = int(settings_DA.target_density_sq_m_low_LOD * vertex_spacing * vertex_spacing)
+	var chunks_per_dim : int = int(settings_DA.chunk_dimenstion_size_m / vertex_spacing)
 	var mm_low_estimated_count : int = int(low_estimated_per_chunk * chunks_per_dim * chunks_per_dim)
 	
 	_setup_multimesh_data(mm_high_estimated_count, mm_low_estimated_count)
@@ -396,7 +382,7 @@ func _setup_compute_pipeline()	-> void:
 	mm_high_count_arr_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	mm_high_count_arr_uniform.binding = 2
 	
-	mm_high_instance_count_buffer_rid = rd.storage_buffer_create(high_lod_num_work_groups.x * high_lod_num_work_groups.y * 4) #*4 to account for int size
+	mm_high_instance_count_buffer_rid = rd.storage_buffer_create(settings_DA.high_lod_num_work_groups.x * settings_DA.high_lod_num_work_groups.y * 4) #*4 to account for int size
 	RID_arr.append(mm_high_instance_count_buffer_rid)
 	mm_high_count_arr_uniform.add_id(mm_high_instance_count_buffer_rid)
 	
@@ -422,30 +408,30 @@ func _setup_compute_pipeline()	-> void:
 	# float parameters bindings
 	var mm_high_flt_params_arr : PackedByteArray =  PackedFloat32Array(
 		[vertex_spacing,
-		sqrt(target_density_sq_m_high_LOD), 
-		max_foliage_individual_random_offset,
-		deg_to_rad(max_foliage_tilt_degrees), 
-		deg_to_rad(foliage_cam_bias_degress_near_far.x),
-		deg_to_rad(foliage_cam_bias_degress_near_far.y),
-		min_grass_blade_scale,
-		distance_thresholds_high_lod.x,
-		distance_thresholds_high_lod.y, 
-		distance_thresholds_high_lod.z]
+		sqrt(settings_DA.target_density_sq_m_high_LOD), 
+		settings_DA.max_foliage_individual_random_offset,
+		deg_to_rad(settings_DA.max_foliage_tilt_degrees), 
+		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.x),
+		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.y),
+		settings_DA.min_grass_blade_scale,
+		settings_DA.distance_thresholds_high_lod.x,
+		settings_DA.distance_thresholds_high_lod.y, 
+		settings_DA.distance_thresholds_high_lod.z]
 		 ).to_byte_array()
 	var fparameter_mm_high_buffer_rid :RID = rd.storage_buffer_create(mm_high_flt_params_arr.size(), mm_high_flt_params_arr)
 	RID_arr.append(fparameter_mm_high_buffer_rid)
 
 	var mm_low_flt_params_arr : PackedByteArray = PackedFloat32Array(
 		[vertex_spacing, 
-		sqrt(target_density_sq_m_low_LOD),
-		max_foliage_individual_random_offset, 
-		deg_to_rad(max_foliage_tilt_degrees), 
-		deg_to_rad(foliage_cam_bias_degress_near_far.x),
-		deg_to_rad(foliage_cam_bias_degress_near_far.y),
-		min_grass_blade_scale,
-		distance_thresholds_low_lod.x, 
-		distance_thresholds_low_lod.y, 
-		distance_thresholds_low_lod.z]
+		sqrt(settings_DA.target_density_sq_m_low_LOD),
+		settings_DA.max_foliage_individual_random_offset, 
+		deg_to_rad(settings_DA.max_foliage_tilt_degrees), 
+		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.x),
+		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.y),
+		settings_DA.min_grass_blade_scale,
+		settings_DA.distance_thresholds_low_lod.x, 
+		settings_DA.distance_thresholds_low_lod.y, 
+		settings_DA.distance_thresholds_low_lod.z]
 		 ).to_byte_array()
 	var fparameter_mm_low_buffer_rid :RID = rd.storage_buffer_create(mm_low_flt_params_arr.size(), mm_low_flt_params_arr)
 	RID_arr.append(fparameter_mm_low_buffer_rid)
@@ -467,7 +453,7 @@ func _setup_compute_pipeline()	-> void:
 	var iparameter_mm_high_buffer_rid :RID = rd.storage_buffer_create(mm_high_int_params_arr.size(), mm_high_int_params_arr)
 	RID_arr.append(iparameter_mm_high_buffer_rid)
 	
-	var vert_offset = high_lod_num_work_groups.x * high_lod_num_work_groups.y
+	var vert_offset = settings_DA.high_lod_num_work_groups.x * settings_DA.high_lod_num_work_groups.y
 	var mm_low_int_params_arr : PackedByteArray =  PackedInt32Array(
 		[low_estimated_per_chunk ,chunks_per_dim, vert_offset]
 		).to_byte_array()
@@ -568,13 +554,15 @@ func _setup_compute_pipeline()	-> void:
 	initialized = true
 	
 func _setup_multimesh_data(mm_high_estimated_count : int, _mm_low_estimated_count) -> void:	
+	_try_assign_chunk_material_instances()
 	mm_high_instance_RID = RenderingServer.instance_create()
 	RID_arr.append(mm_high_instance_RID)	
 
 	mm_high_RID = RenderingServer.multimesh_create()
 	RID_arr.append(mm_high_RID)
-	foliage_mesh_high_LOD.surface_set_material(0, foliage_material_high_LOD)
-	_init_new_multimesh(rd, mm_high_RID,mm_high_instance_RID, mm_high_estimated_count, foliage_mesh_high_LOD)
+	_init_new_multimesh(rd, mm_high_RID,mm_high_instance_RID, mm_high_estimated_count, settings_DA.foliage_mesh_high_LOD)
+	if(chunk_material_high_LOD_inst):
+		RenderingServer.instance_geometry_set_material_override(mm_high_instance_RID, chunk_material_high_LOD_inst.get_rid())
 	mm_high_packed_transform_buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(mm_high_RID)
 	RID_arr.append(mm_high_packed_transform_buffer_rid)
 	mm_high_command_buffer_rid = RenderingServer.multimesh_get_command_buffer_rd_rid(mm_high_RID);
@@ -586,30 +574,31 @@ func _setup_multimesh_data(mm_high_estimated_count : int, _mm_low_estimated_coun
 	
 	mm_low_RID = RenderingServer.multimesh_create()
 	RID_arr.append(mm_low_RID)
-	foliage_mesh_low_LOD.surface_set_material(0, foliage_material_low_LOD)
-	_init_new_multimesh(rd, mm_low_RID, mm_low_instance_RID, _mm_low_estimated_count , foliage_mesh_low_LOD)
+	_init_new_multimesh(rd, mm_low_RID, mm_low_instance_RID, _mm_low_estimated_count , settings_DA.foliage_mesh_low_LOD)
+	if(chunk_material_low_LOD_inst):
+		RenderingServer.instance_geometry_set_material_override(mm_low_instance_RID, chunk_material_low_LOD_inst.get_rid())
 	mm_low_packed_transform_buffer_rid = RenderingServer.multimesh_get_buffer_rd_rid(mm_low_RID)
 	RID_arr.append(mm_low_packed_transform_buffer_rid)
 	mm_low_command_buffer_rid = RenderingServer.multimesh_get_command_buffer_rd_rid(mm_low_RID);
 	RID_arr.append(mm_low_command_buffer_rid)
 	
 func _load_shaders()-> void:
-	compute_pos_shader_RID = _load_shader_from_file(positions_compute_shader)
+	compute_pos_shader_RID = _load_shader_from_file(settings_DA.positions_compute_shader)
 	if(!compute_pos_shader_RID.is_valid()):
-		push_error("FAILED TO LOAD SHADER: ", positions_compute_shader.to_string())
+		push_error("FAILED TO LOAD SHADER: ", settings_DA.positions_compute_shader.to_string())
 		return
 	RID_arr.append(compute_pos_shader_RID)
 
-	transfer_shader_RID = _load_shader_from_file(transfer_compute_shader)
+	transfer_shader_RID = _load_shader_from_file(settings_DA.transfer_compute_shader)
 	if(!transfer_shader_RID.is_valid()):
-		push_error("FAILED TO LOAD SHADER: ", transfer_compute_shader.to_string())
+		push_error("FAILED TO LOAD SHADER: ", settings_DA.transfer_compute_shader.to_string())
 		return
 	RID_arr.append(transfer_shader_RID)
 	
 	#load shaders
-	bender_shader_RID = _load_shader_from_file(bender_compute_shader)
+	bender_shader_RID = _load_shader_from_file(settings_DA.bender_compute_shader)
 	if(!bender_shader_RID.is_valid()):
-		push_error("FAILED TO LOAD SHADER: ", bender_compute_shader.to_string())
+		push_error("FAILED TO LOAD SHADER: ", settings_DA.bender_compute_shader.to_string())
 		return
 	RID_arr.append(bender_shader_RID)
 
@@ -628,19 +617,17 @@ func _setup_foliage_bender_pipeline()-> void:
 	
 	created_bender_tex_RD = Texture2DRD.new()
 	created_bender_tex_RD.texture_rd_rid = created_bender_image_RID
-	foliage_material_high_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
-	foliage_material_high_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
-	foliage_material_low_LOD.set(foliage_shader_bend_mask, created_bender_tex_RD)
-	foliage_material_low_LOD.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
-	foliage_lowest_LOD_material.set(foliage_shader_bend_mask, created_bender_tex_RD)
-	foliage_lowest_LOD_material.set(foliage_shader_bend_mask_size, chunk_dimenstion_size_m)
-
+	_try_assign_chunk_material_instances()
+	for mat : Material in [chunk_material_high_LOD_inst, chunk_material_low_LOD_inst, chunk_material_lowest_LOD_inst]:
+		if(mat):
+			mat.set(foliage_shader_bend_mask, created_bender_tex_RD)
+			mat.set(foliage_shader_bend_mask_size, settings_DA.chunk_dimenstion_size_m)
 	bender_modified_img_uniform.add_id(created_bender_image_RID)
 	
 	# float parameter binding
 	const delta : float = 1.0/60.0
 	bend_float_param_arr  =  PackedFloat32Array(
-		[unbend_rate_per_second,delta]
+		[settings_DA.unbend_rate_per_second,delta]
 		 ).to_byte_array()
 	fparameter_buffer_bend_RID = rd.storage_buffer_create(bend_float_param_arr.size(), bend_float_param_arr)
 	RID_arr.append(fparameter_buffer_bend_RID)
@@ -728,7 +715,7 @@ func _update_compute_bender_only_data(_delta : float) -> void:
 	var compute_list : int = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_bender_RID)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set_bender_RID, 0)	
-	rd.compute_list_dispatch(compute_list,high_lod_num_work_groups.x ,1, high_lod_num_work_groups.y)
+	rd.compute_list_dispatch(compute_list,settings_DA.high_lod_num_work_groups.x ,1, settings_DA.high_lod_num_work_groups.y)
 	
 	rd.compute_list_end()
 
@@ -745,10 +732,10 @@ func _update_compute_segments_data(snapshot : FoliageFrameSnapshot, _delta : flo
 		_dispatch_bender_compute_list(rd)
 	
 	if(mm_pipeline_pos_calc_RID.is_valid() && mm_high_uniform_set_pos_transfer_RID.is_valid()):
-		_dispatch_position_compute_list(rd, mm_high_uniform_set_pos_calc_RID, mm_high_uniform_set_pos_transfer_RID, high_lod_num_work_groups)
+		_dispatch_position_compute_list(rd, mm_high_uniform_set_pos_calc_RID, mm_high_uniform_set_pos_transfer_RID, settings_DA.high_lod_num_work_groups)
 		pass
 
-	var total_high_lod_groups : int = high_lod_num_work_groups.x * high_lod_num_work_groups.y
+	var total_high_lod_groups : int = settings_DA.high_lod_num_work_groups.x * settings_DA.high_lod_num_work_groups.y
 	if(filled_in >total_high_lod_groups):
 		var work_group_amount : Vector2i = _calculate_low_LOD_group_amount(filled_in, total_high_lod_groups)
 		_dispatch_position_compute_list(rd, mm_low_uniform_set_pos_calc_RID, mm_low_uniform_set_pos_transfer_RID,work_group_amount)
@@ -767,7 +754,7 @@ func _dispatch_bender_compute_list(_rd : RenderingDevice) -> void:
 	var bender_compute_list : int = _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(bender_compute_list, pipeline_bender_RID)
 	_rd.compute_list_bind_uniform_set(bender_compute_list, uniform_set_bender_RID, 0)	
-	_rd.compute_list_dispatch(bender_compute_list,high_lod_num_work_groups.x,1,high_lod_num_work_groups.y)
+	_rd.compute_list_dispatch(bender_compute_list,settings_DA.high_lod_num_work_groups.x,1,settings_DA.high_lod_num_work_groups.y)
 	_rd.compute_list_end()
 	
 func _dispatch_position_compute_list(_rd :RenderingDevice, pos_calc_uniform_set : RID,pos_transfer_uniform_set : RID,  workgroup_num : Vector2i)	-> void:
@@ -851,7 +838,7 @@ func _fill_work_array_with_current_segments_data(snapshot : FoliageFrameSnapshot
 	segments_found_right = _find_ray_intersect_chunk(right_start_pos, snapshot.right_dir, max_segments_per_side, segment_found_edges_right, snapshot.vertex_spacing)
 	segments_found_center = _find_center_edge_segments(projected_player_pos, left_start_pos, right_start_pos, max_segments_per_side) 	# find all the segments in between those 2 ends
 
-	var edge_amount_prioritize_per_side : int = high_lod_num_work_groups.x
+	var edge_amount_prioritize_per_side : int = settings_DA.high_lod_num_work_groups.x
 	var post_priotitize_offset : int = edge_amount_prioritize_per_side * edge_amount_prioritize_per_side
 
 	var index_write_offsets : Vector2i = _interleave_edge_data_into_work_array(current_projected_player_segment, segments_found_left, segments_found_right, segments_found_center, edge_amount_prioritize_per_side, post_priotitize_offset)

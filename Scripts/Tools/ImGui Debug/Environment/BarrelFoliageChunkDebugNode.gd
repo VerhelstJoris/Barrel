@@ -39,7 +39,7 @@ func _ready() -> void:
 	super()
 	BarrelDebugWindow.environment_node._register_environment_node(self, BarrelEnvironmentDebugNode.EDebugEnvNodeType.Foliage)
 	
-	segments_per_dim = int(chunk.chunk_dimenstion_size_m / chunk._get_vertex_spacing())
+	segments_per_dim = int(chunk.settings_DA.chunk_dimenstion_size_m / chunk._get_vertex_spacing())
 	table_x_draw_range[1] = segments_per_dim
 	table_y_draw_range[1] = segments_per_dim
 	left_copy_arr.resize(segments_per_dim*2)
