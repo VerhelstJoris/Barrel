@@ -24,9 +24,6 @@ class_name FoliageWorldSettings extends Resource
 @export var foliage_mesh_low_LOD : Mesh
 @export var foliage_material_high_LOD : Material
 @export var foliage_material_low_LOD : Material
-## Kept for the lowest LOD mesh work that is deferred; unused by FoliageWorld.
-@export var foliage_lowest_LOD_material : Material
-@export var foliage_lowest_LOD_mesh_offset : float = 0.0
 
 @export_group("Budgets")
 ## High LOD dispatch shape. One work group handles one segment, so
@@ -72,6 +69,13 @@ class_name FoliageWorldSettings extends Resource
 @export var min_grass_blade_scale : float = 0.5
 @export var distance_thresholds_high_lod : Vector3 = Vector3(10.0, 25.0, 40.0)
 @export var distance_thresholds_low_lod : Vector3 = Vector3(40.0, 120.0, 250.0)
+
+@export_group("Terrain Material Link")
+## Push the bend and coverage uniforms onto the Terrain3D material, so the
+## ground card can be drawn by the terrain itself instead of by separate
+## lowest-LOD meshes. Requires foliage_ground_card.gdshaderinc in the terrain's
+## shader override.
+@export var link_terrain_material : bool = true
 
 @export_group("Mask")
 ## Single world-wide placement mask. No slicing needed any more -- paint it on

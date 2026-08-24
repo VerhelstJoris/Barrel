@@ -1,18 +1,39 @@
 @tool
 class_name FoliageWorld extends Node3D
 
+# Single owner of every foliage GPU resource in the scene.
+#
+# The old design allocated per chunk, so cost scaled with world AREA: 64 chunks
+# each sized to fill all 4096 of their own segments, each with their own
+# subviewport, their own copies of the same three shaders, and their own flood
+# fill every frame.
+#
+# Here allocation is tied to the DRAW BUDGET instead. One high LOD multimesh,
+# one low LOD multimesh, one work buffer, one bend window, one fill. A 2 km
+# world and a 20 km world allocate identically; draw distance is a function of
+# the budget you picked, not of how much terrain exists.
+#
+# Chunks still exist, but only as authoring units: they mark where foliage is
+# allowed and (later) carry the lowest LOD mesh. See FoliageChunk.
+
 const height_bake_vertical_slack : float = 1.0
 
 # grass material uniforms
-const foliage_shader_bend_mask : String = "shader_parameter/bending_mask"
-const foliage_shader_bend_origin_texel : String = "shader_parameter/bend_window_origin_texel"
-const foliage_shader_bend_res : String = "shader_parameter/bend_res"
-const foliage_shader_bend_texels_per_m : String = "shader_parameter/bend_texels_per_m"
+# Bare uniform names. ShaderMaterial.set() wants them prefixed; RenderingServer
+# and Terrain3DMaterial want them bare, hence both forms.
+const shader_param_prefix : String = "shader_parameter/"
+const foliage_shader_bend_mask : String = "bending_mask"
+const foliage_shader_bend_origin_texel : String = "bend_window_origin_texel"
+const foliage_shader_bend_res : String = "bend_res"
+const foliage_shader_bend_texels_per_m : String = "bend_texels_per_m"
+const foliage_shader_placement_mask : String = "foliage_placement_mask"
+const foliage_shader_world_origin_xz : String = "foliage_world_origin_xz"
+const foliage_shader_world_size_m : String = "foliage_world_size_m"
+const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
 
 @export_tool_button("Bake Global Height Map", "Callable") var bake_height_action : Callable = _generate_height_data
 @export_tool_button("Validate Setup", "Callable") var validate_action : Callable = _DEBUG_print_validation
 @export_tool_button("Diagnose Empty Fill", "Callable") var diagnose_action : Callable = _DEBUG_print_diagnosis
-@export_tool_button("Derive World Origin From Chunks", "Callable") var derive_origin_action : Callable = derive_world_origin_from_chunks
 
 @export_group("Setup")
 @export var settings_DA : FoliageWorldSettings
@@ -26,12 +47,6 @@ const foliage_shader_bend_texels_per_m : String = "shader_parameter/bend_texels_
 
 @export_group("Bake Output")
 @export_global_file("*.res") var height_map_save_path : String = "res://foliage_height_map.res"
-
-# --- chunk registry ------------------------------------------------------
-
-var chunk_arr : Array[FoliageChunk] = []
-var chunk_gate_arr : PackedByteArray			# one byte per chunk cell, 1 = foliage allowed
-var chunk_enabled_arr : PackedByteArray	# authored flag, before distance gating
 
 # --- fill ----------------------------------------------------------------
 
@@ -111,46 +126,7 @@ var frontier_radius_m : float = 0.0
 
 var DEBUG_reported_idle : bool = false
 
-
-#region chunk_management
-func register_chunk(chunk : FoliageChunk) -> void:
-	if not chunk_arr.has(chunk):
-		chunk_arr.append(chunk)
-	_rebuild_chunk_enabled_arr()
-
-
-func unregister_chunk(chunk : FoliageChunk) -> void:
-	chunk_arr.erase(chunk)
-	_rebuild_chunk_enabled_arr()
-
-
-func _rebuild_chunk_enabled_arr() -> void:
-	if not settings_DA:
-		return
-	var per_dim : int = settings_DA.chunks_per_dim()
-	chunk_enabled_arr.resize(per_dim * per_dim)
-	chunk_enabled_arr.fill(0)
-	chunk_gate_arr.resize(per_dim * per_dim)
-	chunk_gate_arr.fill(0)
-
-	for chunk in chunk_arr:
-		if not is_instance_valid(chunk) or not chunk.foliage_enabled:
-			continue
-		var index : int = _get_chunk_index_at(chunk.global_position)
-		if index >= 0:
-			chunk_enabled_arr[index] = 1
-
-
-func _get_chunk_index_at(world_pos : Vector3) -> int:
-	var per_dim : int = settings_DA.chunks_per_dim()
-	var local : Vector2 = Vector2(world_pos.x, world_pos.z) - settings_DA.world_origin_xz
-	var cx : int = floori(local.x / settings_DA.chunk_dimension_size_m)
-	var cz : int = floori(local.y / settings_DA.chunk_dimension_size_m)
-	if cx < 0 or cz < 0 or cx >= per_dim or cz >= per_dim:
-		return -1
-	return cx + cz * per_dim
-
-#endregion
+var terrain_material_linked : bool = false
 
 # ==========================================================================
 # LIFECYCLE
@@ -215,6 +191,66 @@ func _verify_assignments() -> bool:
 	return false
 
 
+# Pushes the foliage uniforms onto the Terrain3D material so the terrain itself
+# can draw the ground card, instead of every chunk carrying a baked copy of the
+# terrain underneath it.
+#
+# Terrain3DMaterial does not derive from Godot's Material, so it will not accept
+# a plain .set(). Which accessor it exposes varies by plugin version, so try the
+# resource method first and fall back to RenderingServer on the material RID.
+func _set_terrain_param(param_name : String, value : Variant) -> bool:
+	if not terrain_node:
+		return false
+	var mat = terrain_node.get_material()
+	if not mat:
+		return false
+
+	if mat.has_method("set_shader_param"):
+		mat.call("set_shader_param", param_name, value)
+		return true
+
+	if mat.has_method("get_material_rid"):
+		var mat_rid : RID = mat.call("get_material_rid")
+		if mat_rid.is_valid():
+			RenderingServer.material_set_param(mat_rid, param_name, value)
+			return true
+
+	return false
+
+
+# Everything that only changes when the world is rebuilt. Re-pushed whenever
+# Terrain3D regenerates its material, which drops any params we set.
+func _push_static_terrain_params() -> void:
+	if not settings_DA or not settings_DA.link_terrain_material:
+		return
+
+	var ok : bool = _set_terrain_param(foliage_shader_world_origin_xz, settings_DA.world_origin_xz)
+	ok = _set_terrain_param(foliage_shader_world_size_m, settings_DA.world_size_m) and ok
+	if settings_DA.global_mask:
+		ok = _set_terrain_param(foliage_shader_placement_mask, settings_DA.global_mask) and ok
+	if created_bender_tex_RD:
+		ok = _set_terrain_param(foliage_shader_bend_mask, created_bender_tex_RD) and ok
+		ok = _set_terrain_param(foliage_shader_bend_res, settings_DA.bend_mask_res) and ok
+		ok = _set_terrain_param(foliage_shader_bend_texels_per_m, settings_DA.bend_texels_per_m()) and ok
+
+
+	terrain_material_linked = ok
+	if not ok:
+		push_warning("FoliageWorld: could not push params to the Terrain3D material. "
+			+ "The ground card will not react to bending or the LOD frontier. "
+			+ "Check the terrain has a shader override including foliage_ground_card.gdshaderinc.")
+
+
+func _link_terrain_material() -> void:
+	if not settings_DA or not settings_DA.link_terrain_material or not terrain_node:
+		return
+	# a material rebuild wipes anything we set, so re-push on the signal
+	if terrain_node.has_signal("material_changed") \
+			and not terrain_node.is_connected("material_changed", _push_static_terrain_params):
+		terrain_node.connect("material_changed", _push_static_terrain_params)
+	_push_static_terrain_params()
+
+
 func _get_vertex_spacing() -> float:
 	if terrain_node:
 		return terrain_node.vertex_spacing
@@ -228,12 +264,8 @@ func _intialize_segments_data() -> void:
 	fill_grid = FoliageFillGrid.new()
 	fill_grid._initialize(settings_DA.fine_window_cells, vertex_spacing, settings_DA.total_segment_budget())
 	fill_grid.world_cells = settings_DA.world_cells_per_dim(vertex_spacing)
-	fill_grid.gate_stride = settings_DA.chunks_per_dim()
-	fill_grid.cells_per_gate = maxi(int(round(settings_DA.chunk_dimension_size_m / vertex_spacing)), 1)
 	fill_grid.edge_pad_cells = settings_DA.view_edge_pad_cells
 	fill_grid.terrain_vertical_slack = settings_DA.view_terrain_relief_m
-
-	_rebuild_chunk_enabled_arr()
 
 	player_transform_data_arr.resize(6 * 4)
 	bend_float_param_arr.resize(8 * 4)
@@ -275,7 +307,6 @@ func _process(delta : float) -> void:
 
 	var view : FoliageViewSnapshot = FoliageViewSnapshot.capture(cam, terrain_node)
 
-	_update_chunk_gate(view.cam_origin)
 	_update_bender_window(view)
 
 	# --- fine fill, on the main thread ---------------------------------
@@ -284,7 +315,6 @@ func _process(delta : float) -> void:
 	# thread carry it. Move it to a WorkerThreadPool task if it ever shows up
 	# in a profile -- the snapshot already decouples the sampling.
 	fill_grid.predict_yaw_rad = _update_camera_yaw_prediction(view, delta)
-	fill_grid.gate = chunk_gate_arr
 	fill_grid._centre_on(Vector2(view.cam_origin.x, view.cam_origin.z), settings_DA.world_origin_xz)
 
 	var budget : int = settings_DA.total_segment_budget()
@@ -356,32 +386,6 @@ func _get_current_camera() -> Camera3D:
 	return viewport.get_camera_3d()
 
 
-func _update_chunk_gate(cam_origin : Vector3) -> void:
-	# The fine fill already resolves visibility exactly, so the coarse pass is
-	# not doing frustum work any more. What is left is worth keeping: the
-	# authored per-chunk enable flag, and a distance cut so the fill never
-	# bothers testing chunks the window cannot reach.
-	var per_dim : int = settings_DA.chunks_per_dim()
-	if chunk_gate_arr.size() != per_dim * per_dim:
-		_rebuild_chunk_enabled_arr()
-
-	var reach : float = (float(fill_grid.cells_per_dim) * 0.5 * vertex_spacing) + (settings_DA.chunk_dimension_size_m * 0.7072)
-	var reach_sq : float = reach * reach
-	var half : float = settings_DA.chunk_dimension_size_m * 0.5
-	var cam_xz : Vector2 = Vector2(cam_origin.x, cam_origin.z)
-
-	for cz in per_dim:
-		for cx in per_dim:
-			var index : int = cx + cz * per_dim
-			if chunk_enabled_arr[index] == 0:
-				chunk_gate_arr[index] = 0
-				continue
-			var centre : Vector2 = settings_DA.world_origin_xz + Vector2(
-				(float(cx) + 0.5) * settings_DA.chunk_dimension_size_m,
-				(float(cz) + 0.5) * settings_DA.chunk_dimension_size_m)
-			chunk_gate_arr[index] = 1 if cam_xz.distance_squared_to(centre) <= reach_sq + half * half else 0
-
-
 func _update_bender_window(view : FoliageViewSnapshot) -> void:
 	if not bender_mask_camera or not bender_mask_subviewport:
 		return
@@ -416,9 +420,13 @@ func _update_bender_window(view : FoliageViewSnapshot) -> void:
 	bender_mask_camera.far = (high - low) + pad * 2.0
 
 	if chunk_material_high_LOD_inst:
-		chunk_material_high_LOD_inst.set(foliage_shader_bend_origin_texel, current_bender_origin_texel)
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_bend_origin_texel, current_bender_origin_texel)
 	if chunk_material_low_LOD_inst:
-		chunk_material_low_LOD_inst.set(foliage_shader_bend_origin_texel, current_bender_origin_texel)
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_bend_origin_texel, current_bender_origin_texel)
+	if terrain_material_linked:
+		# the window moves every frame, and the frontier moves with the fill
+		_set_terrain_param(foliage_shader_bend_origin_texel, current_bender_origin_texel)
+		_set_terrain_param(foliage_shader_frontier_radius, frontier_radius_m)
 
 
 func _encode_player_data(view : FoliageViewSnapshot) -> void:
@@ -700,10 +708,12 @@ func _setup_foliage_bender_pipeline() -> void:
 
 	for mat in [chunk_material_high_LOD_inst, chunk_material_low_LOD_inst]:
 		if mat:
-			mat.set(foliage_shader_bend_mask, created_bender_tex_RD)
-			mat.set(foliage_shader_bend_res, res)
-			mat.set(foliage_shader_bend_texels_per_m, settings_DA.bend_texels_per_m())
-			mat.set(foliage_shader_bend_origin_texel, current_bender_origin_texel)
+			mat.set(shader_param_prefix + foliage_shader_bend_mask, created_bender_tex_RD)
+			mat.set(shader_param_prefix + foliage_shader_bend_res, res)
+			mat.set(shader_param_prefix + foliage_shader_bend_texels_per_m, settings_DA.bend_texels_per_m())
+			mat.set(shader_param_prefix + foliage_shader_bend_origin_texel, current_bender_origin_texel)
+
+	_link_terrain_material()
 
 	var params := PackedByteArray()
 	params.resize(8 * 4)
@@ -906,21 +916,6 @@ func _DEBUG_bender_origin_texel() -> Vector2i:
 func _DEBUG_bender_image_RID() -> RID:
 	return created_bender_image_RID
 
-
-# Per chunk: 1 if the fill may emit there this frame (authored on AND within
-# reach of the window).
-func _DEBUG_chunk_gate_arr() -> PackedByteArray:
-	return chunk_gate_arr
-
-
-# Per chunk: the authored flag alone, before the distance cut.
-func _DEBUG_chunk_enabled_arr() -> PackedByteArray:
-	return chunk_enabled_arr
-
-
-func _DEBUG_chunk_count() -> int:
-	return chunk_arr.size()
-
 #endregion
 
 # ==========================================================================
@@ -962,60 +957,6 @@ func _DEBUG_read_instance_positions(high_tier : bool, count : int) -> PackedVect
 			bytes.decode_float(base + 28),
 			bytes.decode_float(base + 44)))
 	return out
-
-
-# ==========================================================================
-# TOOL: DERIVE WORLD ORIGIN
-# ==========================================================================
-
-# world_origin_xz is the MIN corner of the world, and getting it wrong shifts
-# the global cell grid under everything. This reads it back off the chunks you
-# have actually placed rather than making you work it out by hand.
-func derive_world_origin_from_chunks() -> void:
-	if not settings_DA:
-		push_error("FoliageWorld: no settings_DA assigned.")
-		return
-	if chunk_arr.is_empty():
-		_rebuild_chunk_enabled_arr()
-	if chunk_arr.is_empty():
-		push_error("FoliageWorld: no chunks registered to derive an origin from.")
-		return
-
-	var half : float = settings_DA.chunk_dimension_size_m * 0.5
-	var min_corner := Vector2(INF, INF)
-	var max_corner := Vector2(-INF, -INF)
-
-	for chunk in chunk_arr:
-		if not is_instance_valid(chunk):
-			continue
-		var centre := Vector2(chunk.global_position.x, chunk.global_position.z)
-		min_corner.x = minf(min_corner.x, centre.x - half)
-		min_corner.y = minf(min_corner.y, centre.y - half)
-		max_corner.x = maxf(max_corner.x, centre.x + half)
-		max_corner.y = maxf(max_corner.y, centre.y + half)
-
-	var span : Vector2 = max_corner - min_corner
-	var needed : float = maxf(span.x, span.y)
-	var chunk_size : float = settings_DA.chunk_dimension_size_m
-	var rounded : float = ceilf(needed / chunk_size) * chunk_size
-
-	print("--- derived from %d chunks ---" % chunk_arr.size())
-	print("chunks occupy X %.0f..%.0f  Z %.0f..%.0f  (span %.0f x %.0f)"
-		% [min_corner.x, max_corner.x, min_corner.y, max_corner.y, span.x, span.y])
-	print("current  world_origin_xz %s   world_size_m %.0f"
-		% [str(settings_DA.world_origin_xz), settings_DA.world_size_m])
-	print("derived  world_origin_xz (%.0f, %.0f)   world_size_m %.0f"
-		% [min_corner.x, min_corner.y, rounded])
-
-	if settings_DA.world_origin_xz.is_equal_approx(min_corner) and absf(settings_DA.world_size_m - rounded) < 0.5:
-		print("already correct.")
-		return
-
-	settings_DA.world_origin_xz = min_corner
-	settings_DA.world_size_m = rounded
-	print("applied. Save the settings_DA resource, then re-bake the height map --")
-	print("the bake walks the world grid, so it depends on both of these.")
-
 
 # ==========================================================================
 # DIAGNOSTIC
@@ -1070,44 +1011,6 @@ func _DEBUG_diagnose() -> PackedStringArray:
 	out.append("camera at %.0f, %.0f -> global cell %s of 0..%d  %s"
 		% [cam_xz.x, cam_xz.y, str(cam_cell), world_cells - 1,
 			"OK" if cam_in_world else "OUTSIDE THE WORLD BOUNDS"])
-
-	# --- chunk registration --------------------------------------------
-	var mapped : int = 0
-	var unmapped : Array[String] = []
-	for chunk in chunk_arr:
-		if not is_instance_valid(chunk):
-			continue
-		var index : int = _get_chunk_index_at(chunk.global_position)
-		if index >= 0:
-			mapped += 1
-		elif unmapped.size() < 4:
-			unmapped.append("%s at %.0f, %.0f" % [chunk.name, chunk.global_position.x, chunk.global_position.z])
-
-	out.append("chunks: %d registered, %d map into the world grid" % [chunk_arr.size(), mapped])
-	if chunk_arr.is_empty():
-		out.append("FAIL  no chunks registered. FoliageChunk searches its PARENT chain for a")
-		out.append("      FoliageWorld -- the chunks must be descendants of this node, or have")
-		out.append("      foliage_world assigned explicitly.")
-	elif mapped == 0:
-		var half : float = settings_DA.world_size_m * 0.5
-		out.append("FAIL  every chunk falls outside the world grid. This is almost always a")
-		out.append("      coordinate-frame mismatch: world_origin_xz is the MIN corner, but a")
-		out.append("      Terrain3D world is usually centred on the origin, so a %.0f m world"
-			% settings_DA.world_size_m)
-		out.append("      wants world_origin_xz = (%.0f, %.0f), not (0, 0)." % [-half, -half])
-		for entry in unmapped:
-			out.append("      unmapped: " + entry)
-
-	var enabled_count : int = 0
-	for enabled_byte in chunk_enabled_arr:
-		if enabled_byte != 0:
-			enabled_count += 1
-	var gated_count : int = 0
-	for gate_byte in chunk_gate_arr:
-		if gate_byte != 0:
-			gated_count += 1
-	out.append("gate: %d chunks authored on, %d passing this frame's distance cut"
-		% [enabled_count, gated_count])
 
 	# --- bisect the fill -----------------------------------------------
 	var view : FoliageViewSnapshot = FoliageViewSnapshot.capture(cam, terrain_node)
@@ -1181,7 +1084,6 @@ func _DEBUG_print_validation() -> void:
 	print("fine window radius   : %.1f m" % window_radius)
 	print("bend window          : %.1f m at %d px (%.1f texels/m)"
 		% [settings_DA.bend_window_size_m, settings_DA.bend_mask_res, settings_DA.bend_texels_per_m()])
-	print("registered chunks    : %d" % chunk_arr.size())
 	if problems.is_empty():
 		print("no problems found.")
 	else:

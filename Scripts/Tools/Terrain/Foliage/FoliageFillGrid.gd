@@ -12,10 +12,6 @@ var origin_world : Vector2			# world XZ of local (0,0)'s min corner
 # Global grid extent in cells. Cells outside are skipped. 0 disables.
 var world_cells : int = 0
 
-#byte per chunk saying whether foliage is allowed there, with gate_stride and cells_per_gate describing its layout.
-var gate : PackedByteArray
-var gate_stride : int = 0
-var cells_per_gate : int = 1
 
 #outer padding so cells partly visible still count
 var edge_pad_cells : float = 1.0
@@ -124,8 +120,6 @@ func _build(view : FoliageViewSnapshot, budget : int) -> int:
 	var ocx : int = origin_cell.x
 	var ocy : int = origin_cell.y
 	var wc : int = world_cells
-	var gs : int = gate_stride
-	var cpg : int = maxi(cells_per_gate, 1)
 	var capture : bool = DEBUG_capture_data
 
 	# world bounds expressed as local column/row limits, so the inner loop never has to test them per cell
@@ -170,7 +164,6 @@ func _build(view : FoliageViewSnapshot, budget : int) -> int:
 			if h_c0 > h_c1:
 				continue
 
-			var h_gate_row : int = ((ocy + h_row) / cpg) * gs
 			var h_row_base : int = h_row * cells_per_dim
 			var h_gy : int = ocy + h_row
 
@@ -178,10 +171,6 @@ func _build(view : FoliageViewSnapshot, budget : int) -> int:
 				if written >= budget:
 					break
 				var h_gx : int = ocx + h_col
-				if gs > 0 and gate[h_gate_row + (h_gx / cpg)] == 0:
-					if capture:
-						status_arr[h_row_base + h_col] = 2
-					continue
 				out_arr[written * 2] = h_gx
 				out_arr[written * 2 + 1] = h_gy
 				if capture:
@@ -207,15 +196,10 @@ func _build(view : FoliageViewSnapshot, budget : int) -> int:
 					continue
 
 				var v_gx : int = ocx + v_col
-				var v_gate_col : int = v_gx / cpg
 
 				for v_row in range(v_r0, v_r1 + 1):
 					if written >= budget:
 						break
-					if gs > 0 and gate[((ocy + v_row) / cpg) * gs + v_gate_col] == 0:
-						if capture:
-							status_arr[v_row * cells_per_dim + v_col] = 2
-						continue
 					out_arr[written * 2] = v_gx
 					out_arr[written * 2 + 1] = ocy + v_row
 					if capture:

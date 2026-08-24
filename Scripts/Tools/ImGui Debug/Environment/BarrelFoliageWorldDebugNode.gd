@@ -1,12 +1,31 @@
 class_name BarrelFoliageWorldDebugNode extends BarrelSceneDebugNode
 
+# Global replacement for BarrelFoliageChunkDebugNode.
+#
+# There is one of these now, not one per chunk, and the grid it draws is the
+# fine fill window rather than a chunk. Three things changed enough to be worth
+# calling out:
+#
+#  * The left/right/centre arrays are gone. Edge cells go straight into the ring
+#    buckets, so provenance is read back per cell from FoliageFillGrid's
+#    debug_capture instead of by searching three copies of the data. That also
+#    kills the old per-cell Array.has() scans, which were O(cells) each.
+#
+#  * The window can be much larger than a chunk was (160 cells vs 64) and ImGui
+#    tables cap at 64 columns, so the grid view is a movable slice that follows
+#    the camera rather than the whole thing.
+#
+#  * The bend accumulator is toroidal now, so a straight blit shows it torn
+#    across the wrap seam. "Unwrap" reassembles it into window order using four
+#    UV sub-rects, which costs nothing.
+
 const MAX_TABLE_COLUMNS : int = 64
 
 @export var foliage_world : FoliageWorld
 
+enum ColourMode { STATUS, TIER, RING }
 
 # --- grid view state -----------------------------------------------------
-enum ColourMode { STATUS, TIER, RING }
 
 var colour_mode : int = ColourMode.TIER
 var follow_player : bool = true
@@ -55,11 +74,11 @@ func _ready() -> void:
 func _get_name() -> String:
 	return "Foliage World"
 
-
 func _exit_tree() -> void:
 	# leave the grid paying nothing once the panel is gone
 	if foliage_world and foliage_world.fill_grid:
 		foliage_world.fill_grid.DEBUG_capture_data = false
+
 
 func _draw_contents(_delta : float) -> void:
 	if not foliage_world or not foliage_world.settings_DA:
@@ -105,11 +124,6 @@ func _draw_contents(_delta : float) -> void:
 	if ImGui.CollapsingHeader("Window Grid"):
 		ImGui.Indent()
 		_draw_window_grid(grid)
-		ImGui.Unindent()
-
-	if ImGui.CollapsingHeader("Chunk Gate"):
-		ImGui.Indent()
-		_draw_chunk_gate(grid)
 		ImGui.Unindent()
 
 	if ImGui.CollapsingHeader("Placement Check"):
@@ -337,48 +351,6 @@ func _draw_grid_controls(grid : FoliageFillGrid) -> void:
 
 	var origin_world : Vector2 = grid.origin_world + Vector2(table_origin[0], table_origin[1]) * grid.cell_spacing
 	ImGui.TextColored(Color.DARK_GRAY, "view top-left world XZ  %.1f, %.1f" % [origin_world.x, origin_world.y])
-
-
-# ==========================================================================
-# CHUNK GATE
-# ==========================================================================
-
-func _draw_chunk_gate(grid : FoliageFillGrid) -> void:
-	var settings : FoliageWorldSettings = foliage_world.settings_DA
-	var per_dim : int = settings.chunks_per_dim()
-	var gate : PackedByteArray = foliage_world._DEBUG_chunk_gate_arr()
-	var enabled : PackedByteArray = foliage_world._DEBUG_chunk_enabled_arr()
-
-	if gate.size() != per_dim * per_dim or enabled.size() != per_dim * per_dim:
-		ImGui.TextColored(Color.ORANGE_RED, "gate arrays not sized yet")
-		return
-
-	ImGui.Text("%d registered chunks over a %dx%d grid" % [foliage_world._DEBUG_chunk_count(), per_dim, per_dim])
-	ImGui.TextColored(Color.DARK_GRAY, "#  emitting     o  authored but out of reach     .  no foliage")
-
-	var player_global : Vector2i = grid.origin_cell + grid.player_cell
-	var cells_per_chunk : int = maxi(grid.cells_per_gate, 1)
-	var player_chunk := Vector2i(player_global.x / cells_per_chunk, player_global.y / cells_per_chunk)
-
-	var columns : int = mini(per_dim, MAX_TABLE_COLUMNS)
-	ImGui.SetWindowFontScale(0.925)
-	if ImGui.BeginTable("FoliageGate", columns,
-			ImGui.TableFlags_SizingFixedFit | ImGui.TableFlags_ScrollX):
-		for row in per_dim:
-			for col in columns:
-				var index : int = col + row * per_dim
-				if Vector2i(col, row) == player_chunk:
-					ImGui.TextColored(_col(col_player), "@")
-				elif gate[index] != 0:
-					ImGui.TextColored(_col(col_emitted), "#")
-				elif enabled[index] != 0:
-					ImGui.TextColored(_col(col_dropped), "o")
-				else:
-					ImGui.Text(".")
-				ImGui.TableNextColumn()
-			ImGui.TableNextRowEx(0, 0)
-		ImGui.EndTable()
-	ImGui.SetWindowFontScale(1.0)
 
 
 # ==========================================================================
