@@ -22,8 +22,7 @@ class_name FoliageWorldSettings extends Resource
 @export_group("Meshes and Materials")
 @export var foliage_mesh_high_LOD : Mesh
 @export var foliage_mesh_low_LOD : Mesh
-@export var foliage_material_high_LOD : Material
-@export var foliage_material_low_LOD : Material
+@export var foliage_material : Material
 
 @export_group("Budgets")
 ## High LOD dispatch shape. One work group handles one segment, so
@@ -143,4 +142,6 @@ func validate() -> PackedStringArray:
 		problems.append("global_mask is unassigned.")
 	if absf(world_size_m / chunk_dimension_size_m - float(chunks_per_dim())) > 0.001:
 		problems.append("world_size_m is not a whole multiple of chunk_dimension_size_m.")
+	if(foliage_material == null):
+		problems.append("foliage material is unassigned.")
 	return problems

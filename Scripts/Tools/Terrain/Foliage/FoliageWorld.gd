@@ -22,6 +22,8 @@ const height_bake_vertical_slack : float = 1.0
 # Bare uniform names. ShaderMaterial.set() wants them prefixed; RenderingServer
 # and Terrain3DMaterial want them bare, hence both forms.
 const shader_param_prefix : String = "shader_parameter/"
+const foliage_shader_blade_shaping : String = "enable_blade_shaping"
+const foliage_shader_lod_divide : String = "enable_LOD_divide"
 const foliage_shader_bend_mask : String = "bending_mask"
 const foliage_shader_bend_origin_texel : String = "bend_window_origin_texel"
 const foliage_shader_bend_res : String = "bend_res"
@@ -522,10 +524,12 @@ func _load_shader_from_file(file : RDShaderFile) -> RID:
 	return rid
 
 func _try_assign_chunk_material_instances() -> void:
-	if settings_DA.foliage_material_high_LOD:
-		chunk_material_high_LOD_inst = settings_DA.foliage_material_high_LOD.duplicate()
-	if settings_DA.foliage_material_low_LOD:
-		chunk_material_low_LOD_inst = settings_DA.foliage_material_low_LOD.duplicate()
+	if settings_DA.foliage_material:
+		chunk_material_high_LOD_inst = settings_DA.foliage_material.duplicate()
+		chunk_material_low_LOD_inst = settings_DA.foliage_material.duplicate()
+		
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_blade_shaping, false)	
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_lod_divide, false)	
 
 func _get_world_AABB() -> AABB:
 	var low : float = height_map.min_height - 50.0
