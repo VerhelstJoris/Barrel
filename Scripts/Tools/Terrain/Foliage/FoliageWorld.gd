@@ -456,7 +456,6 @@ func _update_bender_data(delta : float) -> void:
 	bend_float_param_arr.encode_s32(28, settings_DA.bend_flip_bits())
 
 
-
 #region render_setup
 
 func _setup_compute_pipeline() -> void:
@@ -622,8 +621,8 @@ func _setup_setting_buffers(high_per_segment : int, low_per_segment : int, high_
 	var high_counts_u := _create_storage_uniform(2, mm_high_instance_count_buffer_rid)
 	var low_counts_u := _create_storage_uniform(2, mm_low_instance_count_buffer_rid)
 
-	var high_floats := _create_float_params_array(settings_DA.target_density_sq_m_high_LOD, settings_DA.distance_thresholds_high_lod)
-	var low_floats := _create_float_params_array(settings_DA.target_density_sq_m_low_LOD, settings_DA.distance_thresholds_low_lod)
+	var high_floats := _create_float_params_array(settings_DA.target_density_sq_m_high_LOD, settings_DA.culling_distance_thresholds)
+	var low_floats := _create_float_params_array(settings_DA.target_density_sq_m_low_LOD, settings_DA.culling_distance_thresholds)
 	var buf_high_floats : RID = rd.storage_buffer_create(high_floats.size(), high_floats)
 	RID_arr.append(buf_high_floats)
 	var buf_low_floats : RID = rd.storage_buffer_create(low_floats.size(), low_floats)
@@ -689,6 +688,7 @@ func _create_float_params_array(density : float, thresholds : Vector3) -> Packed
 		deg_to_rad(settings_DA.max_foliage_tilt_degrees),
 		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.x),
 		deg_to_rad(settings_DA.foliage_cam_bias_degress_near_far.y),
+		settings_DA.foliage_cam_bias_min_distance,
 		settings_DA.min_grass_blade_scale,
 		thresholds.x, thresholds.y, thresholds.z,
 		settings_DA.world_origin_xz.x,

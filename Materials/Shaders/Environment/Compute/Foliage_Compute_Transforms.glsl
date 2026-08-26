@@ -29,6 +29,7 @@ layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
 	float MAX_BLADE_TILT_RAD;
     float BLADE_ROT_TO_CAMERA_BIAS_NEAR;
     float BLADE_ROT_TO_CAMERA_BIAS_FAR;
+    float BLADE_ROT_TO_CAMERA_MIN_DIST;
 	float MIN_BLADE_SCALE;
 
 	float DIST_THRESH_CLOSE;
@@ -128,7 +129,8 @@ float get_rot_biased_towards_player(vec2 blade_pos, float distance)
    float angle_away_from_player = angle_towards_player + 3.14159;  // range [0, 2 * PI]
 
    //if our random angle is similar to the angle towards the player, angle it away a bit
-   const float offset = mix( FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_NEAR, FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_FAR, (distance / FPARAMETERS.DIST_THRESH_FAR));
+   const float offset_alpha = smoothstep(FPARAMETERS.BLADE_ROT_TO_CAMERA_MIN_DIST, FPARAMETERS.BLADE_ROT_TO_CAMERA_MIN_DIST + 1.0, distance);
+   const float offset = mix( FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_NEAR, FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_FAR, (distance / FPARAMETERS.DIST_THRESH_FAR)) * offset_alpha;
    rand_angle = closest_if_between(rand_angle,angle_towards_player - offset, angle_towards_player + offset);
    rand_angle = closest_if_between(rand_angle,angle_away_from_player - offset, angle_away_from_player + offset);
 		

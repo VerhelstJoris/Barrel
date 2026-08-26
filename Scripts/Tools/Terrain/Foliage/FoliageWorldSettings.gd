@@ -1,11 +1,6 @@
 @tool
 class_name FoliageWorldSettings extends Resource
 
-# Replaces FoliageChunkSettings. The placement parameters are unchanged; what is
-# new is that the budgets are expressed in absolute counts rather than being
-# implied by chunk area, which is what makes allocation independent of world
-# size.
-
 @export_group("World")
 ## Side length of the whole world in metres. Must be a multiple of chunk size.
 @export var world_size_m : float = 2048.0
@@ -25,25 +20,19 @@ class_name FoliageWorldSettings extends Resource
 @export var foliage_material : Material
 
 @export_group("Budgets")
-## High LOD dispatch shape. One work group handles one segment, so
-## x * y is the high LOD segment budget. Kept as a Vector2i to preserve the
-## existing (x, 1, y) dispatch and the shader's work group indexing.
+# High LOD dispatch shape. One work group handles one segment, so
+# x * y is the high LOD segment budget.
 @export var high_lod_num_work_groups : Vector2i = Vector2i(16, 16)
-## Total segments the low LOD tier may cover. Used to be segments-per-chunk
-## squared; now it is simply the number you are willing to pay for.
+# Total segments the low LOD tier may cover.
 @export var low_lod_segment_budget : int = 4096
 
 @export_group("Fine Fill Window")
-## Side length of the segment fill window in cells. Rounded up to even.
-## Must comfortably exceed the radius the budget can actually cover, or the
-## window clips the fill before the budget does.
+# Side length of the segment fill window in cells. Rounded up to even.
+# Must comfortably exceed the radius the budget can actually cover, or the window clips the fill before the budget does.
 @export var fine_window_cells : int = 160
-## Constraints are dilated outward by this many cells, so a cell counts as
-## visible if any part of it is in view rather than only its centre.
+# Constraints are dilated outward by this many cells, so a cell counts as visible if any part of it is in view rather than only its centre.
 @export var view_edge_pad_cells : float = 1.0
-## The frustum is clipped to a horizontal plane at the camera's ground height.
-## This band lets a rise poke into view without being clipped away. Larger is
-## safer; smaller spends less budget on cells that turn out not to be visible.
+# The frustum is clipped to a horizontal plane at the camera's ground height. This band lets a rise poke into view without being clipped away. 
 @export var view_terrain_relief_m : float = 20.0
 
 @export_group("Rotation Latency")
@@ -65,15 +54,12 @@ class_name FoliageWorldSettings extends Resource
 @export var max_foliage_individual_random_offset : float = 0.5
 @export var max_foliage_tilt_degrees : float = 20.0
 @export var foliage_cam_bias_degress_near_far : Vector2 = Vector2(0.0, 45.0)
+@export var foliage_cam_bias_min_distance : float = 12.0
 @export var min_grass_blade_scale : float = 0.5
-@export var distance_thresholds_high_lod : Vector3 = Vector3(10.0, 25.0, 40.0)
-@export var distance_thresholds_low_lod : Vector3 = Vector3(40.0, 120.0, 250.0)
+@export var culling_distance_thresholds : Vector3 = Vector3(10.0, 25.0, 40.0)
 
 @export_group("Terrain Material Link")
-## Push the bend and coverage uniforms onto the Terrain3D material, so the
-## ground card can be drawn by the terrain itself instead of by separate
-## lowest-LOD meshes. Requires foliage_ground_card.gdshaderinc in the terrain's
-## shader override.
+# link the material on the terrain to the foliage so the same shader settings will be pushed out to it
 @export var link_terrain_material : bool = true
 
 @export_group("Mask")
