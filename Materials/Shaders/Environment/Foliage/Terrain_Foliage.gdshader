@@ -1,6 +1,9 @@
 shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,skip_vertex_transform;
 
+#include "res://Materials/Shaders/Environment/Foliage/FoliageBend.gdshaderinc"
+#include "res://Materials/Shaders/Environment/Foliage/FoliageAppearance.gdshaderinc"
+#include "res://Materials/Shaders/Environment/Foliage/FoliageGust.gdshaderinc"
 #include "res://Materials/Shaders/Environment/Foliage/FoliageLayer.gdshaderinc"
 
 
@@ -562,8 +565,7 @@ void fragment() {
 		float f_ao = AO;
 		vec3 f_backlight = vec3(0.0);
 
-		apply_foliage_layer(v_vertex, v_vertex_xz_dist, foliage_cover,
-				f_albedo, f_normal, f_rough, f_spec, f_ao, f_backlight);
+		apply_foliage_layer(v_vertex, v_vertex_xz_dist, foliage_cover, f_albedo, f_normal, f_rough, f_spec, f_ao, f_backlight);
 
 		ALBEDO = f_albedo;
 		ROUGHNESS = f_rough;

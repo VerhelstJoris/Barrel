@@ -56,6 +56,7 @@ class_name FoliageWorldSettings extends Resource
 @export var foliage_cam_bias_degress_near_far : Vector2 = Vector2(0.0, 45.0)
 @export var foliage_cam_bias_min_distance : float = 12.0
 @export var min_grass_blade_scale : float = 0.5
+@export var blade_width_far_mult : float = 2.0
 @export var culling_distance_thresholds : Vector3 = Vector3(10.0, 25.0, 40.0)
 
 @export_group("Terrain Material Link")
@@ -63,8 +64,7 @@ class_name FoliageWorldSettings extends Resource
 @export var link_terrain_material : bool = true
 
 @export_group("Mask")
-## Single world-wide placement mask. No slicing needed any more -- paint it on
-## the terrain, bake one texture, done.
+# Single world-wide placement mask. No slicing needed any more 
 @export var global_mask : Texture2D
 ## Mask texels per metre. 1.0 over a 2 km world is a 2048x2048 R8, about 4 MB.
 @export var mask_texels_per_m : float = 1.0

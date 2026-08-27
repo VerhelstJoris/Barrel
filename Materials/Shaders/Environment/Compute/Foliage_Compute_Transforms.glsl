@@ -36,6 +36,8 @@ layout(set = 0, binding = 3, std430) restrict readonly buffer FParameters {
 	float DIST_THRESH_MED;
 	float DIST_THRESH_FAR;
 
+    float BLADE_WIDTH_FAR_MULT;
+
 	float WORLD_ORIGIN_X;
 	float WORLD_ORIGIN_Z;
 	float MASK_TEXELS_PER_M;
@@ -189,6 +191,8 @@ int fill_world_segment(ivec2 segment_coord)
     //calculate the dist between the player and this segment and see which should be skipped
     const float d =  length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
     int skip_id = (d > FPARAMETERS.DIST_THRESH_CLOSE? 1 : 0)+ (d > FPARAMETERS.DIST_THRESH_MED? 1 : 0) + (d > FPARAMETERS.DIST_THRESH_FAR? 1 : 0);
+
+    const float width_mult = mix(1.0, FPARAMETERS.BLADE_WIDTH_FAR_MULT, clamp(d / FPARAMETERS.DIST_THRESH_FAR, 0.0, 1.0));
         
     for(int row_ID = 0; row_ID < rows; row_ID++)
     {
@@ -227,8 +231,8 @@ int fill_world_segment(ivec2 segment_coord)
     
             float sy = sin(random_rot_y);
             float cy = cos(random_rot_y);
-                
-            vec3 basisX = vec3(cy, 0.0, -sy) * scale;
+
+            vec3 basisX = vec3(cy, 0.0, -sy) * scale * width_mult;
             vec3 basisY = vec3(sx * sy, cx, sx * cy) * scale;
             vec3 basisZ = vec3(cx * sy, -sx, cx * cy) * scale;
     

@@ -1,42 +1,12 @@
 // The foliage ground layer that takes over where the geometry blades stop.
-// Mirrors Grass.gdshader's distant_uniformity model with the same parameters
-// and defaults, so the two converge on the same look at the frontier rather
-// than meeting as a visible ring. Driven entirely by world XZ.
+// Shares its whole appearance block with Grass.gdshader via
+// FoliageAppearance.gdshaderinc, so the two cannot drift apart. Driven entirely
+// by world XZ.
 // The editor will flag errors opening this alone -- it is a fragment, not a shader.
 
 #include "res://Materials/Shaders/Environment/Foliage/FoliageBend.gdshaderinc"
-
-group_uniforms foliage_base;
-// Match the blade shader's color_small.
-uniform vec3 foliage_color_small : source_color = vec3(0.3, 0.6, 0.1);
-// Match the blade shader's color_large.
-uniform vec3 foliage_color_large : source_color = vec3(0.9, 0.9, 0.2);
-// Matches the blade's base_ao before ao_far_flatten lifts it.
-uniform float foliage_base_AO = 0.5f;
-uniform float foliage_roughness = 0.4f;
-uniform float foliage_specular = 0.15f;
-uniform vec3 foliage_backlight : source_color = vec3(0.2);
-group_uniforms;
-
-group_uniforms foliage_patchiness;
-// Match the blade shader's patch_noise or the two disagree on colour.
-uniform sampler2D foliage_patch_noise : hint_default_white;
-// Match the blade shader's patch_scale.
-uniform float foliage_patch_scale = 5.0f;
-group_uniforms;
-
-group_uniforms foliage_distant_uniformity;
-// Mirrors the blade shader's clump_min_distance; keep the two identical.
-uniform float foliage_clump_min_distance = 8.0f;
-// Mirrors the blade shader's clump_max_distance; keep the two identical.
-uniform float foliage_clump_max_distance = 25.0f;
-// Mirrors patch_scale_far_mult; without it the layer's patches are 4x too fine.
-uniform float foliage_patch_scale_far_mult = 4.0f;
-// Mirrors ao_far_flatten, lifting AO toward 1.0 as the blades' AO does.
-uniform float foliage_ao_far_flatten = 1.0f;
-// Mirrors clump_normal_flatten, fading normal variance out with distance.
-uniform float foliage_normal_flatten_far = 1.0f;
-group_uniforms;
+#include "res://Materials/Shaders/Environment/Foliage/FoliageAppearance.gdshaderinc"
+#include "res://Materials/Shaders/Environment/Foliage/FoliageGust.gdshaderinc"
 
 group_uniforms foliage_wind;
 uniform sampler2D foliage_wind_noise : hint_default_white;
@@ -45,6 +15,18 @@ uniform float foliage_wind_strength = 0.1f;
 uniform vec2 foliage_wind_direction = vec2(1.0, 0.0);
 // Defaults off: the blades carry wind as motion, never as albedo brightness.
 uniform float foliage_wind_highlight_strength = 0.0f;
+// Metres the sample position drifts with the wind; scaled up with distance.
+uniform float foliage_wind_warp_m = 0.15f;
+// Gust size multiplier at distance; without it gusts go sub-pixel and vanish.
+uniform float foliage_wind_scale_far_mult = 4.0f;
+// Distance at which the extended wind ramp reaches full strength.
+uniform float foliage_wind_far_distance = 200.0f;
+// Extra warp multiplier there, on top of what clump already gave.
+uniform float foliage_wind_far_mult = 2.5f;
+// Extra metres of drift at the gust crest, on top of the continuous wind.
+uniform float foliage_gust_warp_m = 1.0f;
+// How far the surface tilts into the wind at the crest; the layer's stand-in for blades leaning.
+uniform float foliage_gust_normal_tilt = 0.35f;
 group_uniforms;
 
 group_uniforms foliage_bend;
@@ -80,13 +62,6 @@ uniform float foliage_under_blades = 0.0f;
 group_uniforms;
 
 
-// The blade shader's clump_factor, recomputed here so both converge together.
-float foliage_clump_factor(float cam_dist_xz)
-{
-	return smoothstep(foliage_clump_min_distance, foliage_clump_max_distance, cam_dist_xz);
-}
-
-
 // 0 where blades cover the ground, ramping to full past the frontier, always 0
 // outside the placement mask. cam_dist_xz must be XZ, matching the fill's ring radius.
 float foliage_coverage(vec3 world_pos, float cam_dist_xz)
@@ -119,16 +94,40 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 
 	float clump = foliage_clump_factor(cam_dist_xz);
 
-	// Patches coarsen with distance exactly as the blades' do.
-	float patch_scale = foliage_patch_scale * mix(1.0, foliage_patch_scale_far_mult, clump);
-	float patch_factor = texture(foliage_patch_noise, world_pos.xz / patch_scale).r;
+	// How much everything coarsens with distance; shared by patches and gusts so
+	// a displacement stays the same fraction of a feature at any range.
+	float coarsen = foliage_coarsen(clump);
+
+	// clump saturates at clump_max_distance, but the layer only STARTS at the
+	// frontier, so without this the whole visible range sits at one setting.
+	float wind_far = mix(1.0, foliage_wind_far_mult,
+			smoothstep(foliage_clump_max_distance, foliage_wind_far_distance, cam_dist_xz));
+
+	// Gusts coarsen too. A 10 m cell is a fraction of a pixel at 250 m and
+	// averages away, so no amount of amplitude would make it visible.
+	float wind_scale = foliage_wind_noise_scale * mix(1.0, foliage_wind_scale_far_mult, clump);
+	vec2 wind_uv = world_pos.xz / wind_scale - TIME * foliage_wind_direction * foliage_wind_strength;
+	float wind_val = texture(foliage_wind_noise, wind_uv).r;
+
+	// The travelling wave, in phase with the blade shader's copy.
+	float gust = foliage_gust(world_pos.xz,foliage_wind_direction );
+
+	// Drift where we sample rather than how bright it is: the patches undulate
+	// instead of pulsing in place, which is what reads as movement. The gust
+	// adds a coherent push on top, so the whole field surges together. coarsen
+	// applies to both; wind_far boosts only the continuous term, since the gust
+	// carries its own amplitude and its normal tilt already reads at range.
+	vec2 sample_xz = world_pos.xz + clump * coarsen * foliage_wind_direction
+			* ((wind_val - 0.5) * 2.0 * foliage_wind_warp_m * wind_far
+				+ gust * foliage_gust_warp_m);
+
+	// Shared with the blades, so both coarsen identically.
+	float patch_factor = foliage_patch_factor(sample_xz, clump);
 	vec3 layer_albedo = mix(foliage_color_small, foliage_color_large, patch_factor);
 
 	// Off by default; the blades express wind as motion, not brightness.
 	if (foliage_wind_highlight_strength > 0.0)
 	{
-		vec2 wind_uv = world_pos.xz / foliage_wind_noise_scale - TIME * foliage_wind_direction * foliage_wind_strength;
-		float wind_val = texture(foliage_wind_noise, wind_uv).r;
 		layer_albedo *= mix(1.0 - foliage_wind_highlight_strength,
 				1.0 + foliage_wind_highlight_strength, wind_val);
 	}
@@ -139,15 +138,22 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 
 	// Variance fades out with distance, as the blades flatten toward straight up.
 	float variance = foliage_normal_variance_strength * (1.0 - clump * foliage_normal_flatten_far);
-	vec2 n_uv = world_pos.xz / foliage_normal_noise_scale;
+	vec2 n_uv = sample_xz / foliage_normal_noise_scale;
 	float nx = texture(foliage_normal_noise, n_uv).r * 2.0 - 1.0;
 	float nz = texture(foliage_normal_noise, n_uv + vec2(0.37, 0.61)).r * 2.0 - 1.0;
 	// World space, unlike the plane shader which perturbed the view-space NORMAL and swam as the camera turned.
-	vec3 layer_normal = normalize(world_normal + vec3(nx, 0.0, nz) * variance);
+	// The gust tilts the surface into the wind, standing in for blades leaning over.
+	vec3 gust_tilt = vec3(foliage_wind_direction.x, 0.0, foliage_wind_direction.y)
+			* gust * foliage_gust_normal_tilt;
+	vec3 layer_normal = normalize(world_normal + vec3(nx, 0.0, nz) * variance + gust_tilt);
 
 	// AO lifts toward 1.0 with distance, matching the blades' ao_far_flatten.
-	float flattened_base_ao = mix(foliage_base_AO, 1.0, clump * foliage_ao_far_flatten);
-	float layer_ao = clamp(flattened_base_ao - bend_mask * foliage_bend_AO_effect_mult, 0.0, 1.0);
+	// The bend term fades with it, or a trail stays fully dark against ground
+	// that has flattened out all around it.
+	float ao_flatten = clump * foliage_ao_far_flatten;
+	float flattened_base_ao = mix(foliage_base_AO, 1.0, ao_flatten);
+	float layer_ao = clamp(flattened_base_ao
+			- bend_mask * foliage_bend_AO_effect_mult * (1.0 - ao_flatten), 0.0, 1.0);
 	float layer_rough = clamp(foliage_roughness + nx * foliage_roughness_variance_strength, 0.0, 1.0);
 
 	albedo = mix(albedo, layer_albedo, coverage);

@@ -691,6 +691,7 @@ func _create_float_params_array(density : float, thresholds : Vector3) -> Packed
 		settings_DA.foliage_cam_bias_min_distance,
 		settings_DA.min_grass_blade_scale,
 		thresholds.x, thresholds.y, thresholds.z,
+		settings_DA.blade_width_far_mult,
 		settings_DA.world_origin_xz.x,
 		settings_DA.world_origin_xz.y,
 		settings_DA.mask_texels_per_m]).to_byte_array()
