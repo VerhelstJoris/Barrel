@@ -110,7 +110,7 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	float wind_val = texture(foliage_wind_noise, wind_uv).r;
 
 	// The travelling wave, in phase with the blade shader's copy.
-	float gust = foliage_gust(world_pos.xz,foliage_wind_direction );
+	float gust = foliage_gust(world_pos.xz );
 
 	// Drift where we sample rather than how bright it is: the patches undulate
 	// instead of pulsing in place, which is what reads as movement. The gust

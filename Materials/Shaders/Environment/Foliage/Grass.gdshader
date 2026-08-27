@@ -113,7 +113,8 @@ void vertex()
 	current_wind_bend *= wind_strength;
 	// Added before the height scaling, so the gust leans the blade exactly as the
 	// base wind does and feeds the wind AO term further down for free.
-	current_wind_bend += foliage_gust(wind_sample_pos, wind_direction) * gust_bend_strength;
+	//current_wind_bend += foliage_gust(wind_sample_pos) * gust_bend_strength;
+	current_wind_bend += foliage_gust(NODE_POSITION_WORLD.xz) * gust_bend_strength;
 	current_wind_bend *= uv_bottom_to_top * 2.0;
 
 	mat4 inv_model = inverse(MODEL_MATRIX);
