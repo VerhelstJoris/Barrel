@@ -2,19 +2,6 @@
 class_name FoliageWorld extends Node3D
 
 # Single owner of every foliage GPU resource in the scene.
-#
-# The old design allocated per chunk, so cost scaled with world AREA: 64 chunks
-# each sized to fill all 4096 of their own segments, each with their own
-# subviewport, their own copies of the same three shaders, and their own flood
-# fill every frame.
-#
-# Here allocation is tied to the DRAW BUDGET instead. One high LOD multimesh,
-# one low LOD multimesh, one work buffer, one bend window, one fill. A 2 km
-# world and a 20 km world allocate identically; draw distance is a function of
-# the budget you picked, not of how much terrain exists.
-#
-# Chunks still exist, but only as authoring units: they mark where foliage is
-# allowed and (later) carry the lowest LOD mesh. See FoliageChunk.
 
 const height_bake_vertical_slack : float = 1.0
 
@@ -35,6 +22,20 @@ const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
 
 @export_tool_button("Bake Global Height Map", "Callable") var bake_height_action : Callable = _generate_height_data
 @export_tool_button("Validate Setup", "Callable") var validate_action : Callable = _DEBUG_print_validation
+
+# used to copy parameters over from the foliage material onto the terrain
+@export_tool_button("Copy Shader Properties Onto Terrain", "Callable") var grass_shader_props_action : Callable = _assign_terrain_shader_properties
+@export_group("Shader Property Manager")
+@export var foliage_param_name : String = "foliage_"
+@export var exempt_param_names : PackedStringArray = [
+	"foliage_frontier_radius_m",
+	"foliage_placement_mask",
+	"foliage_world_origin_xz",
+	"foliage_world_size_m",
+	]
+
+
+
 @export_tool_button("Diagnose Empty Fill", "Callable") var diagnose_action : Callable = _DEBUG_print_diagnosis
 
 @export_group("Setup")
@@ -856,6 +857,33 @@ func _cleanup() -> void:
 
 
 #region tooling
+func _assign_terrain_shader_properties() -> void:
+	
+	if(!settings_DA || !terrain_node):
+		return
+	
+	var mat : ShaderMaterial = settings_DA.foliage_material
+	if(!mat):
+		return
+	
+	var shader_rid : RID = mat.shader.get_rid()	
+	var uniform_list = mat.shader.get_shader_uniform_list()	
+		
+	for	uniform in uniform_list:
+		var param_name : String = str(uniform.get("name", ""))
+		if(!param_name.begins_with(foliage_param_name)):
+			continue
+			
+		if(exempt_param_names.has(param_name)):
+			continue	
+			
+		#get the value to copy over	
+		var value : Variant = mat.get_shader_parameter(param_name)
+		if value == null:
+			value = RenderingServer.shader_get_parameter_default(shader_rid, param_name)
+	
+		_set_terrain_param(param_name, value)	
+		
 func _generate_height_data() -> void:
 	if not settings_DA or not terrain_node:
 		push_error("FoliageWorld: assign settings_DA and terrain_node before baking.")
@@ -921,7 +949,6 @@ func _DEBUG_bender_origin_texel() -> Vector2i:
 func _DEBUG_bender_image_RID() -> RID:
 	return created_bender_image_RID
 
-#endregion
 
 # ==========================================================================
 # PLACEMENT CHECK
@@ -1094,3 +1121,5 @@ func _DEBUG_print_validation() -> void:
 	else:
 		for p in problems:
 			print("PROBLEM: " + p)
+
+#endregion
