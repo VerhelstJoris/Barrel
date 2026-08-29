@@ -74,7 +74,7 @@ layout (set = 0, binding = 6, std430) restrict readonly buffer PlayerData
 } PLAYERDATA;
 
 
-// array detailing which chunk segments should actually be drawn, size is double the amount of workgroups for [x,z] section coordintate
+// Priority-ordered list of the segments to draw, one int per segment: the global cell x in the low 16 bits and z in the high 16. 
 layout (set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 	int data[];
 } SEGMENTSTODRAW;
@@ -282,8 +282,9 @@ void main()
 		return;
 	}
 	
-	const int offset_group_id = (group_id_arr + IPARAMETERS.SEGMENT_ID_OFFSET) * 2;
-	const ivec2 segment_coord = ivec2(SEGMENTSTODRAW.data[offset_group_id], SEGMENTSTODRAW.data[offset_group_id + 1]);
+	// One packed int per segment. Mask the high half as well: >> on a signed int is
+	const int packed_coord = SEGMENTSTODRAW.data[group_id_arr + IPARAMETERS.SEGMENT_ID_OFFSET];
+	const ivec2 segment_coord = ivec2(packed_coord & 0xFFFF, (packed_coord >> 16) & 0xFFFF);
 	
 	int workgroup_blades = fill_world_segment(segment_coord);
 	

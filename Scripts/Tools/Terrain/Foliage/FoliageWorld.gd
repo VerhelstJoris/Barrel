@@ -328,10 +328,14 @@ func _process(delta : float) -> void:
 
 	# keep the head of the list so the debug panel can compare where a segment
 	# was asked for against where its instances actually landed
-	DEBUG_head_segment_coords.resize(0)
-	for i in mini(segments_filled, 4):
-		DEBUG_head_segment_coords.append(bytes.decode_s32(i * 8))
-		DEBUG_head_segment_coords.append(bytes.decode_s32(i * 8 + 4))
+	# opt: read straight from the fill buffer -- no decode_s32 per value. The fill packs
+	# x into the low 16 bits and z into the high 16, so unpack them back into pairs here.
+	var head_cells : int = mini(segments_filled, 4)
+	DEBUG_head_segment_coords.resize(head_cells * 2)		# opt: fixed size, so no reallocation after frame one
+	for i in head_cells:
+		var packed : int = fill_grid.out_arr[i]
+		DEBUG_head_segment_coords[i * 2] = packed & 0xFFFF
+		DEBUG_head_segment_coords[i * 2 + 1] = packed >> 16
 
 	var high_budget : int = settings_DA.high_segment_budget()
 	high_segments_drawn = mini(segments_filled, high_budget)
@@ -590,7 +594,7 @@ func _setup_shared_buffers(high_segments : int, low_segments : int) -> void:
 	# global priority-ordered segment list: high LOD reads the front of it,
 	# low LOD reads the rest
 	var segment_bytes := PackedByteArray()
-	segment_bytes.resize(settings_DA.total_segment_budget() * 8)
+	segment_bytes.resize(settings_DA.total_segment_budget() * 4)	# opt: one packed int per segment
 	segment_coord_data_mm_buffer_rid = rd.storage_buffer_create(segment_bytes.size(), segment_bytes)
 	RID_arr.append(segment_coord_data_mm_buffer_rid)
 
@@ -779,7 +783,7 @@ func _update_compute_segments_data(segment_bytes : PackedByteArray, segment_coun
 
 	rd.buffer_update(player_transform_data_mm_high_buffer_rid, 0, player_bytes.size(), player_bytes)
 	if segment_count > 0:
-		rd.buffer_update(segment_coord_data_mm_buffer_rid, 0, segment_count * 8, segment_bytes)
+		rd.buffer_update(segment_coord_data_mm_buffer_rid, 0, segment_count * 4, segment_bytes)	# opt: 4 bytes per packed segment
 
 	# bend first, so this frame's grass reads this frame's bend state
 	if uniform_set_bender_RID.is_valid():
