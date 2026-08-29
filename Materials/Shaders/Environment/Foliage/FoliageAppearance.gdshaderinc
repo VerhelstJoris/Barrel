@@ -29,6 +29,8 @@ uniform float foliage_patch_scale_far_mult = 4.0f;
 uniform float foliage_ao_far_flatten = 1.0f;
 // Fades normal detail out at full distance.
 uniform float foliage_normal_flatten_far = 1.0f;
+uniform float foliage_specular_far_flatten = 1.0f;
+uniform float foliage_roughness_far_flatten = 0.5f;
 group_uniforms;
 
 

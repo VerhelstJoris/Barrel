@@ -47,6 +47,13 @@ uniform float bending_mask_strength_horizontal = 2.0f;
 uniform float bending_mask_strength_vertical = 2.0f;
 uniform float bend_AO_efect_mult = 1.0f;
 varying float bending_mask_strength;
+// The blade's own Y scale, read straight off the model matrix. The compute
+// shader fades this toward 0 at the fill frontier, and a flattened blade is
+// where the backlight term turns into a dark fringe.
+varying float blade_height_scale;
+// Height scale below which backlight is faded out. Only affects blades already
+// collapsing into the ground layer.
+uniform float backlight_min_height_scale = 0.35f;
 group_uniforms;
 
 // distant clump uniformity — at range, blades share more with their
@@ -113,7 +120,10 @@ void vertex()
 	current_wind_bend *= wind_strength;
 	// Added before the height scaling, so the gust leans the blade exactly as the
 	// base wind does and feeds the wind AO term further down for free.
-	//current_wind_bend += foliage_gust(wind_sample_pos) * gust_bend_strength;
+	// Sampled at the true blade position, NOT wind_sample_pos. That one is
+	// snapped to the clump grid so neighbouring blades sway together in the
+	// continuous wind -- but the gust is already coherent over hundreds of
+	// metres, so quantising it only turns a smooth crest into clump-sized steps.
 	current_wind_bend += foliage_gust(NODE_POSITION_WORLD.xz) * gust_bend_strength;
 	current_wind_bend *= uv_bottom_to_top * 2.0;
 
@@ -139,6 +149,10 @@ void vertex()
 
 	// push the whole blade toward the up-facing tip normal as distance grows,
 	NORMAL = mix(NORMAL, vec3(0.0, 1.0, 0.0), max(uv_bottom_to_top, clump_factor * foliage_normal_flatten_far));
+
+	// Column 1 of the model matrix is the blade's up axis, so its length is the
+	// height scale the compute shader assigned.
+	blade_height_scale = length(MODEL_MATRIX[1].xyz);
 }
 
 void fragment() {
@@ -154,8 +168,9 @@ void fragment() {
 	AO_LIGHT_AFFECT = 1.0;
 
 	ALBEDO = mix(foliage_color_small, foliage_color_large, patch_factor);
-	BACKLIGHT = foliage_backlight;
-
+	
+	BACKLIGHT = foliage_backlight * smoothstep(0.0, backlight_min_height_scale, blade_height_scale);
 	ROUGHNESS = foliage_roughness;
 	SPECULAR = foliage_specular;
+	
 }

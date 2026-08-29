@@ -154,12 +154,14 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	float flattened_base_ao = mix(foliage_base_AO, 1.0, ao_flatten);
 	float layer_ao = clamp(flattened_base_ao
 			- bend_mask * foliage_bend_AO_effect_mult * (1.0 - ao_flatten), 0.0, 1.0);
-	float layer_rough = clamp(foliage_roughness + nx * foliage_roughness_variance_strength, 0.0, 1.0);
-
+	float layer_rough = clamp(mix(foliage_roughness + nx * foliage_roughness_variance_strength,
+			1.0, clump * foliage_roughness_far_flatten), 0.0, 1.0);
+	float layer_spec = mix(foliage_specular, 0.0, clump * foliage_specular_far_flatten);
+	
 	albedo = mix(albedo, layer_albedo, coverage);
 	world_normal = normalize(mix(world_normal, layer_normal, coverage));
 	roughness = mix(roughness, layer_rough, coverage);
-	specular = mix(specular, foliage_specular, coverage);
+	specular = mix(specular, layer_spec, coverage);
 	ao = mix(ao, layer_ao, coverage);
 	backlight = mix(backlight, foliage_backlight, coverage);
 }
