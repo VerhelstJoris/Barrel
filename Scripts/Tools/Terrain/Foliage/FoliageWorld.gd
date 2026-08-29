@@ -270,7 +270,7 @@ func _intialize_segments_data() -> void:
 	fill_grid.edge_pad_cells = settings_DA.view_edge_pad_cells
 	fill_grid.terrain_vertical_slack = settings_DA.view_terrain_relief_m
 
-	player_transform_data_arr.resize(6 * 4)
+	player_transform_data_arr.resize(7 * 4)
 	bend_float_param_arr.resize(8 * 4)
 	active_segment_count_arr.resize(4)
 
@@ -444,6 +444,8 @@ func _encode_player_data(view : FoliageViewSnapshot) -> void:
 	player_transform_data_arr.encode_float(12, rot.x)
 	player_transform_data_arr.encode_float(16, rot.y)
 	player_transform_data_arr.encode_float(20, rot.z)
+	player_transform_data_arr.encode_float(24, frontier_radius_m)
+
 
 
 func _update_bender_data(delta : float) -> void:
@@ -593,7 +595,7 @@ func _setup_shared_buffers(high_segments : int, low_segments : int) -> void:
 	RID_arr.append(segment_coord_data_mm_buffer_rid)
 
 	var player_bytes := PackedByteArray()
-	player_bytes.resize(6 * 4)
+	player_bytes.resize(7 * 4)
 	player_transform_data_mm_high_buffer_rid = rd.storage_buffer_create(player_bytes.size(), player_bytes)
 	RID_arr.append(player_transform_data_mm_high_buffer_rid)
 
@@ -692,10 +694,11 @@ func _create_float_params_array(density : float, thresholds : Vector3) -> Packed
 		settings_DA.foliage_cam_bias_min_distance,
 		settings_DA.min_grass_blade_scale,
 		thresholds.x, thresholds.y, thresholds.z,
-		settings_DA.blade_width_far_mult,
 		settings_DA.world_origin_xz.x,
 		settings_DA.world_origin_xz.y,
-		settings_DA.mask_texels_per_m]).to_byte_array()
+		settings_DA.mask_texels_per_m,
+		settings_DA.lod_skip_fade_m,
+		settings_DA.frontier_fade_m]).to_byte_array()
 
 func _setup_foliage_bender_pipeline() -> void:
 	if not bender_mask_subviewport:

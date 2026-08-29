@@ -56,8 +56,11 @@ class_name FoliageWorldSettings extends Resource
 @export var foliage_cam_bias_degress_near_far : Vector2 = Vector2(0.0, 45.0)
 @export var foliage_cam_bias_min_distance : float = 12.0
 @export var min_grass_blade_scale : float = 0.5
-@export var blade_width_far_mult : float = 2.0
 @export var culling_distance_thresholds : Vector3 = Vector3(10.0, 25.0, 40.0)
+## Metres the density LOD threshold is dithered per blade.
+@export var lod_skip_fade_m : float = 4.0
+## Metres over which blades shrink into the fill frontier. Match this to the
+@export var frontier_fade_m : float = 30.0
 
 @export_group("Terrain Material Link")
 # link the material on the terrain to the foliage so the same shader settings will be pushed out to it
