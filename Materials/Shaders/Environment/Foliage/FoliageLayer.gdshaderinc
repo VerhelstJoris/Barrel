@@ -15,16 +15,14 @@ uniform float foliage_wind_strength = 0.1f;
 uniform vec2 foliage_wind_direction = vec2(1.0, 0.0);
 // Defaults off: the blades carry wind as motion, never as albedo brightness.
 uniform float foliage_wind_highlight_strength = 0.0f;
-// Metres the sample position drifts with the wind; scaled up with distance.
-uniform float foliage_wind_warp_m = 0.15f;
+// Metres the sample position drifts with the wind. World space and view
+// independent -- scaling this by camera distance shears the pattern into arcs
+// centred on the camera, which is what a "swirl" around the player is.
+uniform float foliage_wind_warp_m = 0.5f;
 // Gust size multiplier at distance; without it gusts go sub-pixel and vanish.
 uniform float foliage_wind_scale_far_mult = 4.0f;
-// Distance at which the extended wind ramp reaches full strength.
-uniform float foliage_wind_far_distance = 200.0f;
-// Extra warp multiplier there, on top of what clump already gave.
-uniform float foliage_wind_far_mult = 2.5f;
 // Extra metres of drift at the gust crest, on top of the continuous wind.
-uniform float foliage_gust_warp_m = 1.0f;
+uniform float foliage_gust_warp_m = 1.5f;
 // How far the surface tilts into the wind at the crest; the layer's stand-in for blades leaning.
 uniform float foliage_gust_normal_tilt = 0.35f;
 group_uniforms;
@@ -45,6 +43,21 @@ uniform float foliage_normal_noise_scale = 0.15f;
 uniform float foliage_normal_variance_strength = 0.5f;
 // Defaults to 0 because the plane shader overwrote its varied roughness, making this dead.
 uniform float foliage_roughness_variance_strength = 0.0f;
+group_uniforms;
+
+group_uniforms foliage_blade_detail;
+// High-frequency noise standing in for individual blades. Assign a fine noise
+// with mipmaps ON -- mip filtering is what fades this out with distance, and it
+// does so exactly where individual blades stop being resolvable.
+uniform sampler2D foliage_blade_noise : hint_default_white;
+// Metres per tile. Around a blade width, so 0.2-0.4.
+uniform float foliage_blade_noise_scale = 0.3f;
+// Albedo modulation. 0 disables the colour half.
+uniform float foliage_blade_contrast = 0.12f;
+// Normal perturbation, which is what actually reads as separate blades.
+uniform float foliage_blade_normal_strength = 0.3f;
+// Stretch along the wind direction, so it combs into streaks rather than static.
+uniform float foliage_blade_anisotropy = 3.0f;
 group_uniforms;
 
 group_uniforms foliage_coverage_settings;
@@ -98,11 +111,6 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	// a displacement stays the same fraction of a feature at any range.
 	float coarsen = foliage_coarsen(clump);
 
-	// clump saturates at clump_max_distance, but the layer only STARTS at the
-	// frontier, so without this the whole visible range sits at one setting.
-	float wind_far = mix(1.0, foliage_wind_far_mult,
-			smoothstep(foliage_clump_max_distance, foliage_wind_far_distance, cam_dist_xz));
-
 	// Gusts coarsen too. A 10 m cell is a fraction of a pixel at 250 m and
 	// averages away, so no amount of amplitude would make it visible.
 	float wind_scale = foliage_wind_noise_scale * mix(1.0, foliage_wind_scale_far_mult, clump);
@@ -113,12 +121,17 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	float gust = foliage_gust(world_pos.xz );
 
 	// Drift where we sample rather than how bright it is: the patches undulate
-	// instead of pulsing in place, which is what reads as movement. The gust
-	// adds a coherent push on top, so the whole field surges together. coarsen
-	// applies to both; wind_far boosts only the continuous term, since the gust
-	// carries its own amplitude and its normal tilt already reads at range.
-	vec2 sample_xz = world_pos.xz + clump * coarsen * foliage_wind_direction
-			* ((wind_val - 0.5) * 2.0 * foliage_wind_warp_m * wind_far
+	// instead of pulsing in place, which is what reads as movement.
+	//
+	// PURELY WORLD SPACE. Nothing here may depend on camera distance: the
+	// displacement direction is constant, so a magnitude that varies with
+	// distance shears the texture along arcs of constant radius and draws
+	// rings around the player that swim as the camera moves. Far-field
+	// visibility has to come from lighting instead -- see the gust normal tilt
+	// below and foliage_wind_highlight_strength, both of which are view
+	// independent.
+	vec2 sample_xz = world_pos.xz + foliage_wind_direction
+			* ((wind_val - 0.5) * 2.0 * foliage_wind_warp_m
 				+ gust * foliage_gust_warp_m);
 
 	// Shared with the blades, so both coarsen identically.
@@ -145,7 +158,27 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	// The gust tilts the surface into the wind, standing in for blades leaning over.
 	vec3 gust_tilt = vec3(foliage_wind_direction.x, 0.0, foliage_wind_direction.y)
 			* gust * foliage_gust_normal_tilt;
-	vec3 layer_normal = normalize(world_normal + vec3(nx, 0.0, nz) * variance + gust_tilt);
+	// Blade-scale detail. Stretched along the wind so it reads as blades combed
+	// over rather than isotropic static, and sampled from sample_xz so it sways
+	// with the warp instead of sitting still under it.
+	//
+	// No distance term anywhere: texture() mipmaps this away on its own as the
+	// footprint grows, which is both free and safe. A distance-driven strength
+	// would be another radial function of camera position, and that is exactly
+	// what drew the rings around the player last time.
+	vec2 blade_dir = normalize(foliage_wind_direction);
+	vec2 blade_perp = vec2(-blade_dir.y, blade_dir.x);
+	vec2 blade_uv = vec2(dot(sample_xz, blade_dir) / max(foliage_blade_anisotropy, 0.001),
+			dot(sample_xz, blade_perp)) / max(foliage_blade_noise_scale, 0.001);
+	float blade_n = texture(foliage_blade_noise, blade_uv).r * 2.0 - 1.0;
+
+	layer_albedo *= 1.0 + blade_n * foliage_blade_contrast;
+
+	// Tilt across the comb direction, so neighbouring streaks catch the light
+	// differently the way real blades leaning apart would.
+	vec3 blade_tilt = vec3(blade_perp.x, 0.0, blade_perp.y) * blade_n * foliage_blade_normal_strength;
+
+	vec3 layer_normal = normalize(world_normal + vec3(nx, 0.0, nz) * variance + gust_tilt + blade_tilt);
 
 	// AO lifts toward 1.0 with distance, matching the blades' ao_far_flatten.
 	// The bend term fades with it, or a trail stays fully dark against ground
@@ -157,7 +190,7 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	float layer_rough = clamp(mix(foliage_roughness + nx * foliage_roughness_variance_strength,
 			1.0, clump * foliage_roughness_far_flatten), 0.0, 1.0);
 	float layer_spec = mix(foliage_specular, 0.0, clump * foliage_specular_far_flatten);
-	
+
 	albedo = mix(albedo, layer_albedo, coverage);
 	world_normal = normalize(mix(world_normal, layer_normal, coverage));
 	roughness = mix(roughness, layer_rough, coverage);

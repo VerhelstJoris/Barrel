@@ -29,7 +29,10 @@ uniform float foliage_patch_scale_far_mult = 4.0f;
 uniform float foliage_ao_far_flatten = 1.0f;
 // Fades normal detail out at full distance.
 uniform float foliage_normal_flatten_far = 1.0f;
+// Fades specular out at full distance; per-blade normals turn any highlight
+// into sparkle once blades go sub-pixel.
 uniform float foliage_specular_far_flatten = 1.0f;
+// Pushes roughness toward 1 at full distance, broadening what highlight is left.
 uniform float foliage_roughness_far_flatten = 0.5f;
 group_uniforms;
 

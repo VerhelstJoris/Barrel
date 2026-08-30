@@ -170,7 +170,10 @@ void fragment() {
 	ALBEDO = mix(foliage_color_small, foliage_color_large, patch_factor);
 	
 	BACKLIGHT = foliage_backlight * smoothstep(0.0, backlight_min_height_scale, blade_height_scale);
-	ROUGHNESS = foliage_roughness;
-	SPECULAR = foliage_specular;
-	
+
+	// Per-blade normals make specular sparkle once blades are sub-pixel, and
+	// flattening normals toward vertical means the whole field peaks at once when
+	// viewed from above. Fade the highlight out and broaden what is left.
+	ROUGHNESS = mix(foliage_roughness, 1.0, clump_factor_v * foliage_roughness_far_flatten);
+	SPECULAR = mix(foliage_specular, 0.0, clump_factor_v * foliage_specular_far_flatten);
 }

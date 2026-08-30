@@ -1,4 +1,8 @@
-[gd_resource type="Terrain3DMaterial" format=3 uid="uid://dtuu2hhal12lt"]
+[gd_resource type="Terrain3DMaterial" load_steps=2 format=3 uid="uid://dtuu2hhal12lt"]
+
+[ext_resource type="Shader" uid="uid://bk1p1ovaljm1h" path="res://Materials/Shaders/Environment/Foliage/Terrain_Foliage.gdshader" id="2_t6xj2"]
 
 [resource]
 world_background = 0
+shader_override_enabled = true
+shader_override = ExtResource("2_t6xj2")
