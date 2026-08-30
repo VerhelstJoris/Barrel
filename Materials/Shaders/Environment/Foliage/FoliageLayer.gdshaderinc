@@ -58,6 +58,8 @@ uniform float foliage_blade_contrast = 0.12f;
 uniform float foliage_blade_normal_strength = 0.3f;
 // Stretch along the wind direction, so it combs into streaks rather than static.
 uniform float foliage_blade_anisotropy = 3.0f;
+// How far the detail lags behind the coverage ramp. 1 matches coverage exactly,
+uniform float foliage_blade_detail_falloff = 2.0f;
 group_uniforms;
 
 group_uniforms foliage_coverage_settings;
@@ -171,6 +173,8 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 	vec2 blade_uv = vec2(dot(sample_xz, blade_dir) / max(foliage_blade_anisotropy, 0.001),
 			dot(sample_xz, blade_perp)) / max(foliage_blade_noise_scale, 0.001);
 	float blade_n = texture(foliage_blade_noise, blade_uv).r * 2.0 - 1.0;
+
+	blade_n *= pow(coverage, max(foliage_blade_detail_falloff, 0.001));
 
 	layer_albedo *= 1.0 + blade_n * foliage_blade_contrast;
 
