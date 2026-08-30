@@ -9,13 +9,11 @@ void main()
 
 #[fragment]
 #version 450 core
-layout (location = 0) out vec4 frag_color;
+layout (location = 0) out float frag_color;
 layout (set = 0, binding = 0) uniform FrameData {
     vec2 resolution;
 };
 
 void main() {
-    // adjust position so it matches GlobalInvocationID in compute shaders
-    vec2 pos = gl_FragCoord.xy - 0.5;
-    frag_color = vec4(pos, 1, 1);
+    frag_color = 1.0;
 }

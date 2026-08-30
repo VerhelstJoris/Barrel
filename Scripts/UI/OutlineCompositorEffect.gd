@@ -70,7 +70,23 @@ var resolution := Vector2i(1, 1)
 
 ## Textures used by both the stencil copy pipeline, and the jump flood pipeline
 ## And one random debug texture we can do whatever we want to
+## The ping-pong textures used by the jump flood passes
 var _textures := [RID(), RID(), RID()]
+
+## Coverage mask written by the stencil copy pass and read by the first jump
+## flood pass.  Single channel, single sample.
+var mask_texture: RID
+
+## Multisampled counterpart of mask_texture, used as the stencil copy pass's
+## colour attachment when the scene is multisampled.  The render pass resolves
+## it into mask_texture for us, so nothing reads this directly.  RID() when
+## MSAA is off.
+var mask_msaa_texture: RID
+
+## Sample count of the scene's render buffers, RenderingDevice.TEXTURE_SAMPLES_1
+## when MSAA is off.  Every attachment in a render pass has to agree on this,
+## so the stencil copy framebuffer and pipeline are built against it.
+var samples := RenderingDevice.TEXTURE_SAMPLES_1
 
 ## Exposed Texture2Ds to allow debugging of the various textures used in this
 ## CompositorEffect.
@@ -108,7 +124,7 @@ func _init():
 	sc_shader_file = jump_flood_shader_directory + "stencil_copy.glsl"
 	do_shader_file = jump_flood_shader_directory + "draw_outline.glsl"
 	
-	effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_OPAQUE
+	effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 
 	# Grab the rendering device
 	rd = RenderingServer.get_rendering_device()
@@ -159,6 +175,10 @@ func _notification(what):
 		for rid in _textures:
 			if rid.is_valid():
 				rd.free_rid(rid)
+		if mask_texture.is_valid():
+			rd.free_rid(mask_texture)
+		if mask_msaa_texture.is_valid():
+			rd.free_rid(mask_msaa_texture)
 		if scdo_vertex_buffer.is_valid():
 			rd.free_rid(scdo_vertex_buffer)
 		if scdo_uniform_buffer.is_valid():
@@ -256,31 +276,43 @@ func _build_sc_pipeline() -> void:
 	uniform.add_id(scdo_uniform_buffer)
 	sc_uniform_set = rd.uniform_set_create([uniform], sc_shader, 0)
 
-	# Make the framebuffer
-	assert(_textures[0].is_valid())
+	# Make the framebuffer.
+	#
+	# Attachment 0 is the mask we render into, at the scene's sample count.
+	# Attachment 1 is the scene's depth/stencil buffer.  Under MSAA that has to
+	# be the multisampled one, because the resolved copy Godot hands out is
+	# R32_SFLOAT with no stencil aspect and no attachment usage bit.
+	# Attachment 2, only present under MSAA, is the single sampled mask, which
+	# the render pass resolves into for free at the end of the pass.
+	assert(mask_texture.is_valid())
 	assert(depth_texture.is_valid())
 
-	var attachments: Array[Variant] = []
-	var attachment_format           = RDAttachmentFormat.new()
+	var attachments: Array[RDAttachmentFormat] = []
+	attachments.push_back(_attachment_format_for(_sc_color_target(), samples))
+	attachments.push_back(_attachment_format_for(depth_texture, samples))
 
-	# Add the draw texture format to the sc_framebuffer attachments
-	var texture_format: RDTextureFormat = rd.texture_get_format(_textures[0])
-	attachment_format.format = texture_format.format
-	attachment_format.usage_flags = texture_format.usage_bits
-	attachment_format.samples = RenderingDevice.TEXTURE_SAMPLES_1
-	attachments.push_back(attachment_format)
+	var fb_pass := RDFramebufferPass.new()
+	fb_pass.color_attachments = PackedInt32Array([0])
+	fb_pass.depth_attachment = 1
 
-	# Add the depth texture format to the sc_framebuffer attachments
-	var depth_format: RDTextureFormat = rd.texture_get_format(depth_texture)
-	attachment_format = RDAttachmentFormat.new()
-	attachment_format.format = depth_format.format
-	attachment_format.usage_flags = depth_format.usage_bits
-	attachment_format.samples = RenderingDevice.TEXTURE_SAMPLES_1
-	attachments.push_back(attachment_format)
+	var fb_textures: Array[RID] = [_sc_color_target(), depth_texture]
 
-	var format: int = rd.framebuffer_format_create(attachments)
-	sc_framebuffer = rd.framebuffer_create([_textures[0], depth_texture], format)
-	assert(sc_framebuffer.is_valid())
+	if _using_msaa():
+		attachments.push_back(_attachment_format_for(
+				mask_texture, RenderingDevice.TEXTURE_SAMPLES_1))
+		fb_pass.resolve_attachments = PackedInt32Array([2])
+		fb_textures.push_back(mask_texture)
+
+	# Note: framebuffer_format_create() has no concept of resolve attachments and
+	# would sort the resolve target into color_attachments, producing a format
+	# that disagrees with the one framebuffer_create() derives.  The multipass
+	# variants take the pass description explicitly, so use them for both.
+	var format: int = rd.framebuffer_format_create_multipass(attachments, [fb_pass])
+	sc_framebuffer = rd.framebuffer_create_multipass(fb_textures, [fb_pass], format)
+	if not sc_framebuffer.is_valid():
+		# asserts are stripped in release builds, so fail loudly here instead
+		push_error("failed to create sc_framebuffer")
+		return
 
 	# Create the pipeline
 	var blend := RDPipelineColorBlendState.new()
@@ -296,17 +328,42 @@ func _build_sc_pipeline() -> void:
 	stencil_state.front_op_reference = stencil_value
 	stencil_state.front_op_fail = RenderingDevice.STENCIL_OP_KEEP
 	stencil_state.front_op_pass = RenderingDevice.STENCIL_OP_KEEP
+
+	# The pipeline's sample count has to match the framebuffer's, or pipeline
+	# creation fails.
+	var multisample_state := RDPipelineMultisampleState.new()
+	multisample_state.sample_count = samples
+
 	sc_pipeline = rd.render_pipeline_create(
 		sc_shader,
 		format,
 		scdo_vertex_format,
 		RenderingDevice.RENDER_PRIMITIVE_TRIANGLES,
 		RDPipelineRasterizationState.new(),
-		RDPipelineMultisampleState.new(),
+		multisample_state,
 		stencil_state,
 		blend,
 	)
 	assert(sc_pipeline.is_valid())
+
+## True when the scene's render buffers are multisampled.
+func _using_msaa() -> bool:
+	return samples != RenderingDevice.TEXTURE_SAMPLES_1
+
+## The colour attachment the stencil copy pass renders into.
+func _sc_color_target() -> RID:
+	return mask_msaa_texture if mask_msaa_texture.is_valid() else mask_texture
+
+## Describe an existing texture as a framebuffer attachment at a given sample
+## count.
+func _attachment_format_for(texture: RID,
+		attachment_samples: RenderingDevice.TextureSamples) -> RDAttachmentFormat:
+	var texture_format: RDTextureFormat = rd.texture_get_format(texture)
+	var attachment_format := RDAttachmentFormat.new()
+	attachment_format.format = texture_format.format
+	attachment_format.usage_flags = texture_format.usage_bits
+	attachment_format.samples = attachment_samples
+	return attachment_format
 
 ## Build the draw-outline render pipeline
 ## This pipeline will use the stencil buffer to draw the generated outlines
@@ -350,6 +407,13 @@ func _build_jf_pipeline() -> void:
 	# now build the uniform sets we'll use through the _passes
 	assert(_textures[0].is_valid())
 	assert(_textures[1].is_valid())
+	assert(mask_texture.is_valid())
+
+	var mask_uniform := RDUniform.new()
+	mask_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	mask_uniform.binding = 2
+	mask_uniform.add_id(mask_texture)
+
 	for group in [[0, _textures[0], _textures[1]],
 		[1, _textures[1], _textures[0]]]:
 		var pass_number = group[0]
@@ -371,7 +435,7 @@ func _build_jf_pipeline() -> void:
 		dest_uniform.add_id(dest_texture)
 
 		jf_uniform_sets[pass_number] = rd.uniform_set_create(
-				[src_uniform, dest_uniform], jf_shader, 0)
+				[src_uniform, dest_uniform, mask_uniform], jf_shader, 0)
 
 ## Create a new color texture to use as the output for our render sc_pipeline.
 ## Note: this texture must be the same size as the depth texture, so we create
@@ -412,6 +476,48 @@ func _build_textures():
 
 		if old_rid.is_valid():
 			rd.free_rid(old_rid)
+
+	# Build the coverage mask.  This is what the stencil copy pass renders into
+	# and what the first jump flood pass seeds from.  One channel is enough: a
+	# seed's position is its own pixel position, so the only thing the stencil
+	# copy pass has to record is whether the pixel is covered.
+	if mask_texture.is_valid():
+		rd.free_rid(mask_texture)
+		mask_texture = RID()
+	if mask_msaa_texture.is_valid():
+		rd.free_rid(mask_msaa_texture)
+		mask_msaa_texture = RID()
+
+	var mask_format := RDTextureFormat.new()
+	mask_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	mask_format.width = resolution.x
+	mask_format.height = resolution.y
+	mask_format.format = RenderingDevice.DATA_FORMAT_R8_UNORM
+	mask_format.usage_bits = (
+		RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT |
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
+		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
+	)
+	# Hint to the driver that this is a resolve target under MSAA.
+	mask_format.is_resolve_buffer = _using_msaa()
+	mask_texture = rd.texture_create(mask_format, RDTextureView.new())
+	assert(mask_texture.is_valid())
+
+	if _using_msaa():
+		# The stencil copy pass has to render at the scene's sample count,
+		# because the stencil it tests against only exists in the multisampled
+		# depth buffer.  Nothing reads this texture: the render pass resolves it
+		# into mask_texture, so it can be discarded as soon as the pass ends.
+		var mask_msaa_format := RDTextureFormat.new()
+		mask_msaa_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+		mask_msaa_format.width = resolution.x
+		mask_msaa_format.height = resolution.y
+		mask_msaa_format.format = RenderingDevice.DATA_FORMAT_R8_UNORM
+		mask_msaa_format.samples = samples
+		mask_msaa_format.usage_bits = RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT
+		mask_msaa_texture = rd.texture_create(mask_msaa_format, RDTextureView.new())
+		assert(mask_msaa_texture.is_valid())
+		rd.texture_set_discardable(mask_msaa_texture, true)
 
 ## Update uniform buffer shared between the stencil-copy and draw-outline
 ## pipelines
@@ -458,14 +564,25 @@ func _render_callback(_p_effect_callback_type, p_render_data) -> void:
 		resolution = size
 		rebuild = true
 
-	# if the depth texture has changed, we'll need to rebuild the pipelines
+	# MSAA changes the sample count every attachment in the stencil copy pass
+	# has to be built at, so pick it up before anything gets rebuilt.
+	var new_samples: RenderingDevice.TextureSamples = render_scene_buffers.get_texture_samples()
+	if new_samples != samples:
+		samples = new_samples
+		rebuild = true
+
+	# if the color texture has changed, we'll need to rebuild the pipelines
 	var color_tex: RID = render_scene_buffers.get_color_layer(0)
 	if color_tex != color_texture:
 		color_texture = color_tex
 		rebuild = true
 
-	# if the depth texture has changed, we'll need to rebuild the pipelines
-	var depth_tex: RID = render_scene_buffers.get_depth_layer(0)
+	# If the depth texture has changed, we'll need to rebuild the pipelines.
+	# The msaa argument matters: with MSAA on, the non-multisampled depth layer
+	# is a resolve target created as R32_SFLOAT with no depth/stencil attachment
+	# bit and no stencil aspect, so it can't be attached to a framebuffer and
+	# wouldn't carry our stencil values anyway.
+	var depth_tex: RID = render_scene_buffers.get_depth_layer(0, _using_msaa())
 	if depth_tex != depth_texture:
 		depth_texture = depth_tex
 		rebuild = true
@@ -478,12 +595,15 @@ func _render_callback(_p_effect_callback_type, p_render_data) -> void:
 		_build_jf_pipeline()
 		_build_do_pipeline()
 
+	if not sc_framebuffer.is_valid() or not sc_pipeline.is_valid():
+		return
+
 	# Perform the draw using the rendering sc_pipeline, and the stencil buffer
 	# from the real render pipeline.
 	var draw_list := rd.draw_list_begin(
 						 sc_framebuffer,
 						 RenderingDevice.DRAW_CLEAR_COLOR_0,
-							 [Color(-1, -1, 2**15, -1)],
+							 [Color(0, 0, 0, 0)],
 						 1.0,
 						 0,
 						 Rect2(),
@@ -505,12 +625,21 @@ func _render_callback(_p_effect_callback_type, p_render_data) -> void:
 
 	# Run the jump-flood pipeline the required number of passes, swapping the
 	# textures between each pass.
+	#
+	# At least one pass always runs.  The seed buffer is now produced by the
+	# first jump flood pass rather than written directly by the stencil copy
+	# pass, so skipping every pass (thickness 0) would leave the draw outline
+	# pass reading a stale buffer.
+	var jf_passes: int = maxi(_passes, 1)
 	var compute_list := rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, jf_pipeline)
 
-	for i in range(_passes):
-		var stride: int = (1<<(_passes-i-1))
+	for i in range(jf_passes):
+		var stride: int = (1<<(jf_passes-i-1))
 		push_constant.encode_u32(0, stride)
+		# The first pass has no seed buffer to read yet, so it seeds from the
+		# coverage mask instead.
+		push_constant.encode_u32(4, 1 if i == 0 else 0)
 		rd.compute_list_set_push_constant(compute_list, push_constant, push_constant.size())
 
 		# pick the uniform set based on the pass number so we ping-pong between
@@ -533,7 +662,7 @@ func _render_callback(_p_effect_callback_type, p_render_data) -> void:
 	var src_uniform := RDUniform.new()
 	src_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	src_uniform.binding = 0
-	src_uniform.add_id(_textures[_passes & 0x1])
+	src_uniform.add_id(_textures[jf_passes & 0x1])
 	var dest_uniform = RDUniform.new()
 	dest_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	dest_uniform.binding = 1
