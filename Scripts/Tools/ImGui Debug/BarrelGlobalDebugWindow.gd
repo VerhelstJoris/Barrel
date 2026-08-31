@@ -14,6 +14,7 @@ static var player_node : BarrelPlayerSceneDebug
 
 func _ready() -> void:
 	environment_node = BarrelEnvironmentDebugNode.new()
+	add_child(environment_node)
 	draw_environment_debug.connect(environment_node._draw)
 
 func _input(event: InputEvent) -> void:

@@ -4,17 +4,26 @@ enum EDebugEnvNodeType { Foliage }
 
 # Maps each environment debug node type to the list of all nodes registered for that type.
 var _registered_nodes : Dictionary[EDebugEnvNodeType, Array] = {}
+var manager_node : BarrelEnvironmentManagerDebugNode
 
 # Per-type "currently selected index" storage. wrapped in array so it can be passed to ImGui easier
 var _selected_index_by_type : Dictionary[EDebugEnvNodeType, Array] = {}
 
 func _ready() -> void:
 	super()
+	manager_node = BarrelEnvironmentManagerDebugNode.new()
+	add_child(manager_node)
 
 func _get_name() -> String:
 	return "Global Environment Debug"
 
 func _draw(_delta: float) -> void:
+	if(manager_node):
+		manager_node._draw(_delta)
+	else:
+		ImGui.TextColored(Color.FIREBRICK, "No Environment Manger Debug Node!")	
+	
+	ImGui.Separator()
 	for type : EDebugEnvNodeType in _registered_nodes.keys():
 		_draw_type_section(type, _delta)
 		ImGui.Separator()
@@ -48,12 +57,10 @@ func _draw_type_section(type: EDebugEnvNodeType, _delta: float) -> void:
 		if closest_index != -1:
 			selected_ref[0] = closest_index
 
-
 	ImGui.Indent()
 	var selected_node : BarrelSceneDebugNode = nodes[selected_ref[0]]
 	selected_node._draw(_delta)
 	ImGui.Unindent()
-
 
 func _get_closest_node_index(nodes: Array) -> int:
 	var player_node := BarrelGlobalDebugWindow.player_node
@@ -77,7 +84,6 @@ func _get_closest_node_index(nodes: Array) -> int:
 			closest_index = i
  
 	return closest_index
-
 
 func _register_environment_node(new_node: BarrelSceneDebugNode, type: EDebugEnvNodeType) -> void:
 	if not _registered_nodes.has(type):
