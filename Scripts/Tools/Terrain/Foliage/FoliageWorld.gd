@@ -20,7 +20,7 @@ const foliage_shader_world_origin_xz : String = "foliage_world_origin_xz"
 const foliage_shader_world_size_m : String = "foliage_world_size_m"
 const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
 const foliage_shader_wind_dir : String = "wind_direction"
-const foliage_shader_wind_speed : String = "wind_speed"
+const foliage_shader_wind_speed : String = "wind_strength"
 
 const foliage_shader_gust_dir : String =  "foliage_gust_direction"
 const foliage_shader_gust_speed : String =  "foliage_gust_speed"

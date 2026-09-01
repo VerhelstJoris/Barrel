@@ -19,7 +19,11 @@ group_uniforms;
 group_uniforms wind_movement;
 uniform sampler2D wind_noise;
 uniform float blade_bend_mult = 0.5f;
-uniform float wind_strength = 0.1f;
+uniform float wind_strength = 0.3f;
+// Scroll speed, split out of wind_strength which was doing both jobs.
+uniform float wind_speed = 0.6f;
+// Metres per noise tile; was hardcoded at 10.0.
+uniform float wind_noise_scale = 10.0f;
 uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
 uniform float wind_ao_affect = 0.1f;
@@ -112,10 +116,10 @@ void vertex()
 	}
 
 	vec2 wind_sample_pos = mix(NODE_POSITION_WORLD.xz, clump_pos_xz, clump_factor);
-	vec2 wind_position = wind_sample_pos / 10.0;
-  	wind_position -= TIME * wind_direction * wind_strength;
+	vec2 wind_position = wind_sample_pos / max(wind_noise_scale, 0.001);
+  	wind_position -= TIME * wind_direction * wind_speed;
 
-  	current_wind_bend = texture(wind_noise, wind_position).x;
+  	current_wind_bend = texture(wind_noise, wind_position).x * 2.0 - 1.0;
 
 	current_wind_bend *= wind_strength;
 	// Added before the height scaling, so the gust leans the blade exactly as the
