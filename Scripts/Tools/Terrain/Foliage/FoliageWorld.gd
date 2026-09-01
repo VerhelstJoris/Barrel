@@ -471,9 +471,9 @@ func _update_bender_data(delta : float) -> void:
 
 
 func _on_wind_direction_changed(new_dir : Vector2, new_speed : float):
-	print("on changed ", new_dir, " spd ", new_speed)
-	var normalized_speed : float = min(new_speed / max_wind_speed,1)
-	var remapped : float = wind_speed_remap_curve_normalized.sample(normalized_speed)
+	var remapped : float = min(new_speed / max_wind_speed,1)
+	if(wind_speed_remap_curve_normalized):
+		remapped = wind_speed_remap_curve_normalized.sample(remapped)
 	
 	if(chunk_material_high_LOD_inst):
 		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_wind_dir, new_dir)
@@ -490,8 +490,7 @@ func _on_wind_direction_changed(new_dir : Vector2, new_speed : float):
 		_set_terrain_param(foliage_shader_gust_dir, new_dir)
 	
 func _on_gust_changed(new_speed : float):
-	var remapped = min(new_speed, max_gust_speed)
-	print("remapped gust speed ", remapped)
+	var remapped: float = min(new_speed, max_gust_speed)
 	
 	if(chunk_material_high_LOD_inst):
 		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_gust_speed, remapped)

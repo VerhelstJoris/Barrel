@@ -1,8 +1,130 @@
-[gd_resource type="Terrain3DMaterial" load_steps=2 format=3 uid="uid://dtuu2hhal12lt"]
+[gd_resource type="Terrain3DMaterial" load_steps=9 format=3 uid="uid://dtuu2hhal12lt"]
 
+[ext_resource type="Texture2D" uid="uid://blpuh0l33i5k5" path="res://Data/Foliage/Foliage_Patch_noise.res" id="1_os7dx"]
+[ext_resource type="Texture2D" uid="uid://d24en2f8ruqie" path="res://Data/Foliage/Foliage_Blade_Distance_noise.res" id="2_gjusm"]
 [ext_resource type="Shader" uid="uid://bk1p1ovaljm1h" path="res://Materials/Shaders/Environment/Foliage/Terrain_Foliage.gdshader" id="2_t6xj2"]
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_lmwga"]
+frequency = 0.0032
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_thgkd"]
+width = 2048
+height = 2048
+generate_mipmaps = false
+noise = SubResource("FastNoiseLite_lmwga")
+seamless = true
+normalize = false
+
+[sub_resource type="Gradient" id="Gradient_yxhjm"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_os7dx"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_t6xj2"]
+noise = SubResource("FastNoiseLite_os7dx")
+color_ramp = SubResource("Gradient_yxhjm")
+seamless = true
+
 [resource]
+_shader_parameters = {
+&"": null,
+&"bend_res": 1024,
+&"bend_texels_per_m": 16.0,
+&"bend_window_origin_texel": Vector2i(0, 0),
+&"bending_mask": null,
+&"bias_distance": 512.0,
+&"blend_sharpness": 0.5,
+&"depth_blur": 0.0,
+&"enable_macro_variation": true,
+&"enable_projection": true,
+&"flat_terrain_normals": false,
+&"foliage_ao_far_flatten": 0.6,
+&"foliage_appearance": null,
+&"foliage_backlight": Color(0, 0, 0, 1),
+&"foliage_base_AO": 0.5,
+&"foliage_bend": null,
+&"foliage_bend_AO_effect_mult": 1.0,
+&"foliage_bend_darken_strength": 0.0,
+&"foliage_blade_anisotropy": 3.0,
+&"foliage_blade_contrast": 0.28,
+&"foliage_blade_detail": null,
+&"foliage_blade_detail_falloff": 2.0,
+&"foliage_blade_noise": ExtResource("2_gjusm"),
+&"foliage_blade_noise_scale": 0.45,
+&"foliage_blade_normal_strength": 0.4,
+&"foliage_clump_max_distance": 25.0,
+&"foliage_clump_min_distance": 20.0,
+&"foliage_color_large": Color(0.9019608, 0.6666667, 0.19607843, 1),
+&"foliage_color_small": Color(0.7764706, 0.39607844, 0.12941177, 1),
+&"foliage_coverage_settings": null,
+&"foliage_distant_uniformity": null,
+&"foliage_frontier_fade_m": 30.0,
+&"foliage_frontier_radius_m": 250.0,
+&"foliage_gust": null,
+&"foliage_gust_asymmetry": 0.5,
+&"foliage_gust_direction": Vector2(0.365, 0.41),
+&"foliage_gust_normal_tilt": 0.35,
+&"foliage_gust_patchiness": 0.35,
+&"foliage_gust_rebound": 0.15,
+&"foliage_gust_sharpness": 1.5,
+&"foliage_gust_speed": 40.0,
+&"foliage_gust_strength": 1.75,
+&"foliage_gust_warp_m": 1.5,
+&"foliage_gust_wavelength_m": 400.0,
+&"foliage_gust_width": 0.2,
+&"foliage_gust_wobble_detail": 0.1,
+&"foliage_gust_wobble_m": 15.0,
+&"foliage_gust_wobble_noise": SubResource("NoiseTexture2D_thgkd"),
+&"foliage_gust_wobble_scale_m": 400.0,
+&"foliage_gust_wobble_speed": 0.02,
+&"foliage_normal_flatten_far": 1.0,
+&"foliage_normal_noise": null,
+&"foliage_normal_noise_scale": 0.15,
+&"foliage_normal_variance": null,
+&"foliage_normal_variance_strength": 0.5,
+&"foliage_patch_noise": ExtResource("1_os7dx"),
+&"foliage_patch_scale": 15.0,
+&"foliage_patch_scale_far_mult": 15.0,
+&"foliage_patchiness": null,
+&"foliage_placement_mask": null,
+&"foliage_roughness": 0.4,
+&"foliage_roughness_far_flatten": 0.5,
+&"foliage_roughness_variance_strength": 0.5,
+&"foliage_specular": 0.15,
+&"foliage_specular_far_flatten": 1.0,
+&"foliage_under_blades": 0.0,
+&"foliage_wind": null,
+&"foliage_wind_direction": Vector2(1, 0),
+&"foliage_wind_highlight_strength": 0.0,
+&"foliage_wind_noise": null,
+&"foliage_wind_noise_scale": 10.0,
+&"foliage_wind_scale_far_mult": 4.0,
+&"foliage_wind_strength": 0.1,
+&"foliage_wind_warp_m": 0.5,
+&"foliage_world_origin_xz": Vector2(-1024, -1024),
+&"foliage_world_size_m": 2048.0,
+&"macro_variation1": Color(1, 1, 1, 1),
+&"macro_variation2": Color(1, 1, 1, 1),
+&"macro_variation_slope": 0.333,
+&"mipmap_bias": 1.0,
+&"noise1_angle": 0.0,
+&"noise1_offset": Vector2(0.5, 0.5),
+&"noise1_scale": 0.04,
+&"noise2_scale": 0.076,
+&"noise_texture": SubResource("NoiseTexture2D_t6xj2"),
+&"projection_threshold": 0.8
+}
 world_background = 0
 shader_override_enabled = true
 shader_override = ExtResource("2_t6xj2")
