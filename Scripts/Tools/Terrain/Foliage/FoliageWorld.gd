@@ -19,6 +19,11 @@ const foliage_shader_placement_mask : String = "foliage_placement_mask"
 const foliage_shader_world_origin_xz : String = "foliage_world_origin_xz"
 const foliage_shader_world_size_m : String = "foliage_world_size_m"
 const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
+const foliage_shader_wind_dir : String = "wind_direction"
+const foliage_shader_wind_speed : String = "wind_speed"
+
+const foliage_shader_gust_dir : String =  "foliage_gust_direction"
+const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 
 @export_tool_button("Bake Global Height Map", "Callable") var bake_height_action : Callable = _generate_height_data
 @export_tool_button("Validate Setup", "Callable") var validate_action : Callable = _DEBUG_print_validation
@@ -34,8 +39,6 @@ const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
 	"foliage_world_size_m",
 	]
 
-
-
 @export_tool_button("Diagnose Empty Fill", "Callable") var diagnose_action : Callable = _DEBUG_print_diagnosis
 
 @export_group("Setup")
@@ -47,6 +50,11 @@ const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
 @export_group("Bend Window")
 @export var bender_mask_subviewport : SubViewport
 @export var bender_mask_camera : Camera3D
+
+@export_group("Customizable Parameters")
+@export var wind_speed_remap_curve_normalized : Curve
+@export var max_wind_speed : float = 10
+@export var max_gust_speed : float = 40
 
 @export_group("Bake Output")
 @export_global_file("*.res") var height_map_save_path : String = "res://foliage_height_map.res"
@@ -160,10 +168,10 @@ func _ready() -> void:
 	RenderingServer.call_on_render_thread(_cleanup)
 	RenderingServer.call_on_render_thread(_setup_compute_pipeline)
 
-
+	_initialize_wind_data()
+	
 func _exit_tree() -> void:
 	_cleanup()
-
 
 # Renaming an @export breaks its saved value: Godot keys exported data in the
 # .tscn by property name, so a renamed property finds nothing to load and comes
@@ -220,7 +228,6 @@ func _set_terrain_param(param_name : String, value : Variant) -> bool:
 
 	return false
 
-
 # Everything that only changes when the world is rebuilt. Re-pushed whenever
 # Terrain3D regenerates its material, which drops any params we set.
 func _push_static_terrain_params() -> void:
@@ -253,7 +260,6 @@ func _link_terrain_material() -> void:
 		terrain_node.connect("material_changed", _push_static_terrain_params)
 	_push_static_terrain_params()
 
-
 func _get_vertex_spacing() -> float:
 	if terrain_node:
 		return terrain_node.vertex_spacing
@@ -261,7 +267,6 @@ func _get_vertex_spacing() -> float:
 		return height_map.cell_size
 	push_warning("FoliageWorld: no terrain node, defaulting cell size to 4.0")
 	return 4.0
-
 
 func _intialize_segments_data() -> void:
 	fill_grid = FoliageFillGrid.new()
@@ -273,7 +278,6 @@ func _intialize_segments_data() -> void:
 	player_transform_data_arr.resize(7 * 4)
 	bend_float_param_arr.resize(8 * 4)
 	active_segment_count_arr.resize(4)
-
 
 func _initialize_bender_data() -> void:
 	if inverse_terrain_node and inverse_terrain_node.material:
@@ -289,6 +293,11 @@ func _initialize_bender_data() -> void:
 		# tree access happens off the main thread
 		bender_subviewport_tex_RID = bender_mask_subviewport.get_texture().get_rid()
 
+func _initialize_wind_data() -> void:
+	EnvironmentManager.on_wind_changed.connect(_on_wind_direction_changed)
+	EnvironmentManager.on_gust_changed.connect(_on_gust_changed)
+	_on_wind_direction_changed(EnvironmentManager.current_wind_direction, EnvironmentManager.current_wind_speed_m_s)
+	_on_gust_changed(EnvironmentManager.current_gust_speed_m_s)
 
 # ==========================================================================
 # MAIN THREAD FRAME
@@ -450,8 +459,6 @@ func _encode_player_data(view : FoliageViewSnapshot) -> void:
 	player_transform_data_arr.encode_float(20, rot.z)
 	player_transform_data_arr.encode_float(24, frontier_radius_m)
 
-
-
 func _update_bender_data(delta : float) -> void:
 	bend_float_param_arr.encode_float(0, settings_DA.unbend_rate_per_second)
 	bend_float_param_arr.encode_float(4, delta)
@@ -462,6 +469,38 @@ func _update_bender_data(delta : float) -> void:
 	bend_float_param_arr.encode_s32(24, previous_bender_origin_texel.y)
 	bend_float_param_arr.encode_s32(28, settings_DA.bend_flip_bits())
 
+
+func _on_wind_direction_changed(new_dir : Vector2, new_speed : float):
+	print("on changed ", new_dir, " spd ", new_speed)
+	var normalized_speed : float = min(new_speed / max_wind_speed,1)
+	var remapped : float = wind_speed_remap_curve_normalized.sample(normalized_speed)
+	
+	if(chunk_material_high_LOD_inst):
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_wind_dir, new_dir)
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_wind_speed, remapped)
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_gust_dir, new_dir)
+
+	if(chunk_material_low_LOD_inst):
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_wind_dir, new_dir)
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_wind_speed, remapped)
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_gust_dir, new_dir)
+
+	if(terrain_material_linked && terrain_node != null):
+		_set_terrain_param(foliage_shader_wind_dir, new_dir)
+		_set_terrain_param(foliage_shader_gust_dir, new_dir)
+	
+func _on_gust_changed(new_speed : float):
+	var remapped = min(new_speed, max_gust_speed)
+	print("remapped gust speed ", remapped)
+	
+	if(chunk_material_high_LOD_inst):
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_gust_speed, remapped)
+
+	if(chunk_material_low_LOD_inst):
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_gust_speed, remapped)
+
+	if(terrain_material_linked && terrain_node != null):
+		_set_terrain_param(foliage_shader_gust_speed, remapped)
 
 #region render_setup
 
