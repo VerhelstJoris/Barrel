@@ -1,4 +1,4 @@
-[gd_resource type="NoiseTexture2D" load_steps=3 format=3 uid="uid://cfqk60lpl5ljv"]
+[gd_resource type="NoiseTexture2D" format=3 uid="uid://cfqk60lpl5ljv"]
 
 [sub_resource type="Gradient" id="Gradient_knl3j"]
 colors = PackedColorArray(0.0400802, 0.0400802, 0.0400802, 1, 1, 1, 1, 1)

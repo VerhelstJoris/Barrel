@@ -20,20 +20,25 @@ input_prompts/icons/joypad_motion/sony="uid://bcfyuk0xhldj1"
 input_prompts/icons/joypad_motion/xbox="uid://dkjlrandqglyj"
 imgui/config="uid://cymx5hoexxule"
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Barrel"
 run/main_scene="uid://bus7tc0ndedol"
-config/features=PackedStringArray("4.5", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 run/max_fps=144
 config/icon="res://icon.svg"
 
 [autoload]
 
-PromptManager="*res://addons/input_prompts/input_prompt_manager.gd"
-UIAnimation="*res://addons/godot_ui_animations/UIAnimationHandler.tscn"
-ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
+PromptManager="*uid://bbjuckg3061vx"
+UIAnimation="*uid://cawfyydj325or"
+ImGuiRoot="*uid://dugmpnsxaagba"
 BarrelDebugWindow="*res://Scripts/Tools/ImGui Debug/BarrelGlobalDebugWindow.gd"
+EnvironmentManager="*res://Scripts/Environment/EnvironmentSystemManager.gd"
 
 [debug]
 

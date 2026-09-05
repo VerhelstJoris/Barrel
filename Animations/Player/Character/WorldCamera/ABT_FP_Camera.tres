@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=8 format=3 uid="uid://duun6khj30hj5"]
+[gd_resource type="AnimationNodeBlendTree" format=3 uid="uid://duun6khj30hj5"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_aj01c"]
 animation = &"RESET"

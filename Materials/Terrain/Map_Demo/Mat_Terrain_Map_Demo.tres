@@ -1,4 +1,4 @@
-[gd_resource type="Terrain3DMaterial" load_steps=9 format=3 uid="uid://dtuu2hhal12lt"]
+[gd_resource type="Terrain3DMaterial" format=3 uid="uid://dtuu2hhal12lt"]
 
 [ext_resource type="Texture2D" uid="uid://blpuh0l33i5k5" path="res://Data/Foliage/Foliage_Patch_noise.res" id="1_os7dx"]
 [ext_resource type="Texture2D" uid="uid://d24en2f8ruqie" path="res://Data/Foliage/Foliage_Blade_Distance_noise.res" id="2_gjusm"]
@@ -57,7 +57,7 @@ _shader_parameters = {
 &"foliage_bend_AO_effect_mult": 1.0,
 &"foliage_bend_darken_strength": 0.0,
 &"foliage_blade_anisotropy": 3.0,
-&"foliage_blade_contrast": 0.3,
+&"foliage_blade_contrast": 0.4,
 &"foliage_blade_detail": null,
 &"foliage_blade_detail_falloff": 2.0,
 &"foliage_blade_noise": ExtResource("2_gjusm"),

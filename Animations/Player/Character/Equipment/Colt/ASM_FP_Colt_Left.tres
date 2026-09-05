@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeStateMachine" load_steps=74 format=3 uid="uid://byhj6ox58mvk6"]
+[gd_resource type="AnimationNodeStateMachine" format=3 uid="uid://byhj6ox58mvk6"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nwbtk"]
 animation = &"AL_FP_Character/A_FP_Enter_Reload_Uncock"

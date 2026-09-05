@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=28 format=3 uid="uid://blsb7g0t5c8mx"]
+[gd_resource type="AnimationNodeBlendTree" format=3 uid="uid://blsb7g0t5c8mx"]
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_1detw"]
 mix_mode = 1

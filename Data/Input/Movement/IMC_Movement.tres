@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="InputActionMappingContext" load_steps=25 format=3 uid="uid://crg7w5jka1q2l"]
+[gd_resource type="Resource" script_class="InputActionMappingContext" format=3 uid="uid://crg7w5jka1q2l"]
 
 [ext_resource type="Script" uid="uid://bl8c6d7f6faru" path="res://Scripts/Gameplay/Input/InputActionInfo.gd" id="1_38a4m"]
 [ext_resource type="Script" uid="uid://qxw8e8yoa5xb" path="res://Scripts/UI/HUD/Equipment/HUD_Input_Info.gd" id="2_38a4m"]

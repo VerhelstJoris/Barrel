@@ -1,4 +1,4 @@
-[gd_resource type="Terrain3DAssets" load_steps=7 format=3 uid="uid://bai2mlqlkfb30"]
+[gd_resource type="Terrain3DAssets" format=3 uid="uid://bai2mlqlkfb30"]
 
 [ext_resource type="Texture2D" uid="uid://i7fdaq4yxyas" path="res://Data/Terrain/Map_Demo/Tex_Terrain_Map_Demo_Albedo.tex" id="1_ww0oo"]
 [ext_resource type="Texture2D" uid="uid://b3uyn0l3woym2" path="res://Data/Terrain/Map_Demo/Tex_Terrain_Map_Demo_Normal.tex" id="2_nrfih"]

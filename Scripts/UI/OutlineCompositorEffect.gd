@@ -678,7 +678,7 @@ func _render_callback(_p_effect_callback_type, p_render_data) -> void:
 	do_push_constant.encode_float(4, outline_color.g)
 	do_push_constant.encode_float(8, outline_color.b)
 	do_push_constant.encode_float(12, outline_color.a)
-	do_push_constant.encode_u32(16, thickness**2)
+	do_push_constant.encode_u32(16, thickness*2)
 
 	compute_list = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, do_pipeline)

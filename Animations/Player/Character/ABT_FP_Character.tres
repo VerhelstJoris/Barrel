@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=93 format=3 uid="uid://blgtcmlreana8"]
+[gd_resource type="AnimationNodeBlendTree" format=3 uid="uid://blgtcmlreana8"]
 
 [ext_resource type="AnimationNodeStateMachine" uid="uid://1yjnhyqg3bh" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt.tres" id="1_x8ke2"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://byhj6ox58mvk6" path="res://Animations/Player/Character/Equipment/Colt/ASM_FP_Colt_Left.tres" id="2_g0oko"]
@@ -269,17 +269,22 @@ start_offset = 0.0
 loop_mode = 1
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_x8ke2"]
+snap = Vector2(0.5, 0.5)
 blend_point_0/node = SubResource("AnimationNodeAnimation_em04p")
 blend_point_0/pos = Vector2(0, 0)
+blend_point_0/name = &"0"
 blend_point_1/node = SubResource("AnimationNodeAnimation_tmq1e")
 blend_point_1/pos = Vector2(0, 1)
+blend_point_1/name = &"1"
 blend_point_2/node = SubResource("AnimationNodeAnimation_hxvos")
 blend_point_2/pos = Vector2(0, -1)
+blend_point_2/name = &"2"
 blend_point_3/node = SubResource("AnimationNodeAnimation_es4ed")
 blend_point_3/pos = Vector2(1, -0.02)
+blend_point_3/name = &"3"
 blend_point_4/node = SubResource("AnimationNodeAnimation_forti")
 blend_point_4/pos = Vector2(-1, 0)
-snap = Vector2(0.5, 0.5)
+blend_point_4/name = &"4"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_aax62"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Idle"
@@ -324,14 +329,19 @@ loop_mode = 1
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_g0oko"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_aax62")
 blend_point_0/pos = Vector2(0, 0)
+blend_point_0/name = &"0"
 blend_point_1/node = SubResource("AnimationNodeAnimation_ioi4e")
 blend_point_1/pos = Vector2(0, 1)
+blend_point_1/name = &"1"
 blend_point_2/node = SubResource("AnimationNodeAnimation_vcppr")
 blend_point_2/pos = Vector2(-1, 0)
+blend_point_2/name = &"2"
 blend_point_3/node = SubResource("AnimationNodeAnimation_vepdb")
 blend_point_3/pos = Vector2(0, -1)
+blend_point_3/name = &"3"
 blend_point_4/node = SubResource("AnimationNodeAnimation_8c1vo")
 blend_point_4/pos = Vector2(1, 0)
+blend_point_4/name = &"4"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_rhv7s"]
 animation = &"AL_FP_Character_Movement/A_FP_Move_Sprint"
@@ -415,10 +425,13 @@ animation = &"AL_FP_Character_Movement/A_FP_Move_Vert_Down"
 [sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_3wpmr"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_28pq6")
 blend_point_0/pos = 0.0
+blend_point_0/name = &"0"
 blend_point_1/node = SubResource("AnimationNodeAnimation_jqlb3")
 blend_point_1/pos = 1.0
+blend_point_1/name = &"1"
 blend_point_2/node = SubResource("AnimationNodeAnimation_yud83")
 blend_point_2/pos = -1.0
+blend_point_2/name = &"2"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sq2n5"]
 graph_offset = Vector2(-253.678, 256.065)

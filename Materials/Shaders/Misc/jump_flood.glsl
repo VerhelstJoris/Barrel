@@ -18,6 +18,8 @@ layout(r8, set = 0, binding = 2) uniform readonly image2D u_mask_image;
 layout(push_constant, std430) uniform Params {
     uint stride;
     uint init;
+	uint pad1;
+	uint pad2;
 } params;
 
 // Read a seed for a pixel.
