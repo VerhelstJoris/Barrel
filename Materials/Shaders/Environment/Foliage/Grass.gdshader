@@ -60,15 +60,15 @@ varying float blade_height_scale;
 uniform float backlight_min_height_scale = 0.35f;
 group_uniforms;
 
-// distant clump uniformity — at range, blades share more with their
-// neighbors than they do up close: patches of color grow larger (patch
-// noise sampled at a coarser scale), wind sways in sync (sampled from a
-// shared grid cell), and normals flatten out. Reduces per-blade noise to
-// better match distant plane-based grass, without changing anything close
-// to the camera.
 group_uniforms distant_uniformity;
 uniform bool enable_clump_uniformity = true;
+// Base cell size in metres, near the camera. Cells grow from here in powers of
+// two so a clump holds a roughly constant size on screen.
 uniform float clump_size_m = 1.0f;
+// Ceiling on that growth.
+uniform float clump_size_max_m = 8.0f;
+// Metres of camera distance per doubling of the cell size.
+uniform float clump_size_ref_dist = 12.0f;
 uniform float dist_jitter_amount = 4.0f;
 varying float clump_factor_v;
 group_uniforms;
@@ -81,26 +81,55 @@ uniform float billboard_min_distance = 8.0f;
 uniform float billboard_max_distance = 20.0f;
 group_uniforms;
 
-float hash21(vec2 p)
+
+// Integer hash. A sin/fract hash quantises badly once world coordinates reach
+// the thousands, banding rather than scattering. This works on the bit pattern
+// instead, and is fed cell indices, which are small integers, so it is exact.
+uint hash_uint(uint x)
 {
-	return fract(sin(dot(p, vec2(127.12, 311.7))) * 43758.545663);
+	x ^= x >> 16u;
+	x *= 0x7feb352du;
+	x ^= x >> 15u;
+	x *= 0x846ca68bu;
+	x ^= x >> 16u;
+	return x;
 }
+
+float hash_cell(vec2 cell)
+{
+	ivec2 c = ivec2(floor(cell));
+	return float(hash_uint(uint(c.x) ^ hash_uint(uint(c.y)))) * (1.0 / 4294967296.0);
+}
+
 
 void vertex()
 {
-	// calculate the distance of this blade to the camera — needed by both
-	// the LOD divide below and clump uniformity further down
+	// ---- per-instance basics -------------------------------------------------
+	// Distance is measured to the BLADE, not to the transformed vertex.
 	vec3 world_camera = (INV_VIEW_MATRIX * vec4(vec3(0.0), 1.0)).xyz;
-	vec3 world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	float dist = distance(world_position.xyz, world_camera);
+	vec3 blade_origin = MODEL_MATRIX[3].xyz;
+	float dist = distance(blade_origin, world_camera);
 
-	// jitter distance per-blade so the transition band isn't a perfect
-	// circle around the camera — very obvious as concentric rings when
-	// viewed from above otherwise
-	float dist_jitter = (hash21(NODE_POSITION_WORLD.xz) - 0.5) * 2.0 * dist_jitter_amount;
-	float clump_factor = enable_clump_uniformity ? foliage_clump_factor(dist + dist_jitter) : 0.0;
+	// ---- clump ---------------------------------------------------------------
+	// Cell size grows with distance so a clump holds a roughly constant size on screen
+	float clump_steps = clamp(dist / max(clump_size_ref_dist, 0.001),
+			1.0, max(clump_size_max_m / max(clump_size_m, 0.001), 1.0));
+	float clump_size = clump_size_m * exp2(floor(log2(clump_steps)));
+
+	vec2 clump_cell = floor(blade_origin.xz / clump_size);
+	vec2 clump_pos_xz = (clump_cell + 0.5) * clump_size;
+
+	// Jitter the transition distance per CELL, not per blade.
+	float dist_jitter = (hash_cell(clump_cell) - 0.5) * 2.0 * dist_jitter_amount;
+	float clump_dist = distance(vec3(clump_pos_xz.x, blade_origin.y, clump_pos_xz.y), world_camera);
+	float clump_factor = enable_clump_uniformity ? foliage_clump_factor(clump_dist + dist_jitter) : 0.0;
 	clump_factor_v = clump_factor;
-	vec2 clump_pos_xz = floor(NODE_POSITION_WORLD.xz / clump_size_m) * clump_size_m + clump_size_m * 0.5;
+
+	// ---- patch ---------------------------------------------------------------
+	vec2 patch_pos = mix(blade_origin.xz, clump_pos_xz, clump_factor);
+	patch_factor = foliage_patch_factor(patch_pos, clump_factor);
+	float blade_size = mix(size_small, size_large, patch_factor);
+
 	if(enable_LOD_divide)
 	{
 		uv_bottom_to_top = 1.0 - UV.y;
@@ -124,9 +153,7 @@ void vertex()
 	}
 
 	//turn blade towards camera based on overall world position of the entire blade
-	vec3 blade_origin = MODEL_MATRIX[3].xyz;
-	float blade_dist = distance(blade_origin, world_camera);
-	float bb_alpha = smoothstep(billboard_min_distance, billboard_max_distance, blade_dist);
+	float bb_alpha = smoothstep(billboard_min_distance, billboard_max_distance, dist);
 
 	vec2 fwd = MODEL_MATRIX[2].xz;
 	vec2 tgt = (world_camera - blade_origin).xz;
@@ -145,7 +172,7 @@ void vertex()
 		VERTEX.xz = vec2(bb_c * VERTEX.x + bb_s * VERTEX.z, -bb_s * VERTEX.x + bb_c * VERTEX.z);
 	}
 
-	vec2 wind_sample_pos = mix(NODE_POSITION_WORLD.xz, clump_pos_xz, clump_factor);
+	vec2 wind_sample_pos = mix(blade_origin.xz, clump_pos_xz, clump_factor);
 	vec2 wind_position = wind_sample_pos / max(wind_noise_scale, 0.001);
   	wind_position -= TIME * wind_direction * wind_speed;
 
@@ -158,7 +185,7 @@ void vertex()
 	// snapped to the clump grid so neighbouring blades sway together in the
 	// continuous wind -- but the gust is already coherent over hundreds of
 	// metres, so quantising it only turns a smooth crest into clump-sized steps.
-	current_wind_bend += foliage_gust(NODE_POSITION_WORLD.xz) * gust_bend_strength;
+	current_wind_bend += foliage_gust(blade_origin.xz) * gust_bend_strength;
 	current_wind_bend *= uv_bottom_to_top * 2.0;
 
 	mat4 inv_model = inverse(MODEL_MATRIX);
@@ -167,7 +194,7 @@ void vertex()
 	float uv_strength = pow(uv_bottom_to_top, 2.0);
 
 	// grass bender from the world-anchored accumulator. Sampled at the blade ROOT rather than per vertex, so the whole blade leans as one -- same as
-	float raw_bend_mask = sample_bend(NODE_POSITION_WORLD.xz);
+	float raw_bend_mask = sample_bend(blade_origin.xz);
 	bending_mask_strength = raw_bend_mask * uv_strength;
 	
 	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
@@ -177,15 +204,12 @@ void vertex()
   	VERTEX.xz += (current_wind_bend * local_direction) * (1.0- raw_bend_mask);
 	VERTEX.xz += blade_bend_mult * uv_strength * (1.0- raw_bend_mask);	// bend the blade in the direction this is positioned in
 	
-	// patchiness grows coarser with distance — bigger, more pronounced patches of color instead of finer per-blade variation
-	patch_factor = foliage_patch_factor(NODE_POSITION_WORLD.xz, clump_factor);
-	VERTEX *= mix(size_small, size_large, patch_factor);
+	VERTEX *= blade_size;
 
 	// push the whole blade toward the up-facing tip normal as distance grows,
 	NORMAL = mix(NORMAL, vec3(0.0, 1.0, 0.0), max(uv_bottom_to_top, clump_factor * foliage_normal_flatten_far));
 
-	// Column 1 of the model matrix is the blade's up axis, so its length is the
-	// height scale the compute shader assigned.
+	// Column 1 of the model matrix is the blade's up axis, so its length is the height scale the compute shader assigned.
 	blade_height_scale = length(MODEL_MATRIX[1].xyz);
 }
 
@@ -205,9 +229,6 @@ void fragment() {
 	
 	BACKLIGHT = foliage_backlight * smoothstep(0.0, backlight_min_height_scale, blade_height_scale);
 
-	// Per-blade normals make specular sparkle once blades are sub-pixel, and
-	// flattening normals toward vertical means the whole field peaks at once when
-	// viewed from above. Fade the highlight out and broaden what is left.
 	ROUGHNESS = mix(foliage_roughness, 1.0, clump_factor_v * foliage_roughness_far_flatten);
 	SPECULAR = mix(foliage_specular, 0.0, clump_factor_v * foliage_specular_far_flatten);
 }

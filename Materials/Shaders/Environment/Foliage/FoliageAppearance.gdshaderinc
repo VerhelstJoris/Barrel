@@ -55,5 +55,7 @@ float foliage_coarsen(float clump)
 // The shared colour lookup: patches coarsen with distance on both sides.
 float foliage_patch_factor(vec2 world_xz, float clump)
 {
-	return texture(foliage_patch_noise, world_xz / (foliage_patch_scale * foliage_coarsen(clump))).r;
+	float fine = texture(foliage_patch_noise,world_xz / max(foliage_patch_scale, 0.001)).r;
+	float coarse = texture(foliage_patch_noise,(world_xz + vec2(37.0, 11.0))/ max(foliage_patch_scale * foliage_patch_scale_far_mult, 0.001)).r;
+	return mix(fine, coarse, clump);
 }
