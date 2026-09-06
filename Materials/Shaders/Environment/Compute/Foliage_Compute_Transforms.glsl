@@ -136,9 +136,25 @@ float height_at(int vx, int vz)
 
 int fill_world_segment(ivec2 segment_coord)
 {
-	float rows = FPARAMETERS.TARGET_DENSITY * FPARAMETERS.TERRAIN_VERTEX_SPACING;
+	const int blade_limit = max(IPARAMETERS.MAX_BLADES_PER_GROUP, 1);
 	
-	const float Offset = (1.0 / FPARAMETERS.TARGET_DENSITY);
+	int density_rows = int(ceil(FPARAMETERS.TARGET_DENSITY * FPARAMETERS.TERRAIN_VERTEX_SPACING));
+	
+	int capacity_rows = int(floor(sqrt(float(blade_limit))));
+	if (capacity_rows * capacity_rows > blade_limit)
+	{
+		capacity_rows -= 1;
+	}
+	
+	// rows <= capacity_rows, so rows*rows <= slot_limit. The shader cannot ask for
+	// more slots than exist no matter what the CPU sends.
+	const int rows = clamp(density_rows, 1, max(capacity_rows, 1));
+	const int blades_this_segment = rows * rows;
+	
+	const float cell_size = FPARAMETERS.TERRAIN_VERTEX_SPACING / float(rows);
+	
+	// Jitter stays in METRES as before, but capped at one cell so a blade can never leave its own cell. T
+	const float max_offset = min(FPARAMETERS.MAX_BLADE_RANDOM_OFFSET, cell_size);
 	
 	int current_blade = 0;
 	
@@ -146,7 +162,7 @@ int fill_world_segment(ivec2 segment_coord)
 	const float x_group_offset = FPARAMETERS.WORLD_ORIGIN_X + FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_coord.x;
 	const float z_group_offset = FPARAMETERS.WORLD_ORIGIN_Z + FPARAMETERS.TERRAIN_VERTEX_SPACING * segment_coord.y;
 	
-	float x, z, group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y, random_rot_z;
+	float group_x, group_z, final_x, final_z, scale, random_rot_x, random_rot_y, random_rot_z;
 	vec2 final_pos;
 	
 	// corners of this segment in the global height buffer
@@ -155,55 +171,62 @@ int fill_world_segment(ivec2 segment_coord)
 	const float height_C = height_at(segment_coord.x, segment_coord.y + 1);
 	const float height_D = height_at(segment_coord.x + 1, segment_coord.y + 1);
 	
-	float x_offset_rand, z_offset_rand;
-	
-	const int blades_per_group = int(rows * rows); // worst case
 	const int group_id = int(gl_WorkGroupID.x * gl_NumWorkGroups.z) + int(gl_WorkGroupID.z);
-	const int group_offset_vec4 = group_id * blades_per_group * 3;
+	const int group_offset_vec4 = group_id * blade_limit * 3;
 	
-	//calculate the dist between the player and this segment and see which should be skipped
-	const float d = length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
+	const vec2 player_xz = vec2(PLAYERDATA.X_POS, PLAYERDATA.Z_POS);
 	
-	const vec2 to_cam = vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset);
-	const float d_ring = max(abs(to_cam.x), abs(to_cam.y));
-	const float frontier_fade = clamp(
-		(PLAYERDATA.FRONTIER_RADIUS - d_ring) / max(FPARAMETERS.FRONTIER_FADE_M, 0.001), 0.0, 1.0);
-	
-	const int frontier_visible = frontier_fade > 0.02 ? 1 : 0;
+	// Cheap reject for the whole segment. 
+	const vec2 to_cam = player_xz - vec2(x_group_offset, z_group_offset);
+	const float d_ring_corner = max(abs(to_cam.x), abs(to_cam.y));
+	const int frontier_visible = (d_ring_corner - FPARAMETERS.TERRAIN_VERTEX_SPACING) < PLAYERDATA.FRONTIER_RADIUS ? 1 : 0;
 	
 	for (int row_ID = 0; row_ID < rows; row_ID++)
 	{
-		x = row_ID * Offset;
 		for (int col_ID = 0; col_ID < rows; col_ID++)
 		{
 			int mask = frontier_visible;
 			
-			z = col_ID * Offset;
-			x_offset_rand = (fract(random2D(vec2(z, x)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
-			group_x = mod(x + x_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
-			final_x = group_x + x_group_offset;
+			const vec2 cell_world = vec2(
+			x_group_offset + (float(row_ID) + 0.5) * cell_size,
+			z_group_offset + (float(col_ID) + 0.5) * cell_size);
 			
-			z_offset_rand = (fract(random2D(vec2(final_x, z)) * FPARAMETERS.MAX_BLADE_RANDOM_OFFSET));
-			group_z = mod(z + z_offset_rand, FPARAMETERS.TERRAIN_VERTEX_SPACING);
+			group_x = (float(row_ID) + 0.5) * cell_size
+			+ (random2D(cell_world) - 0.5) * max_offset;
+			group_z = (float(col_ID) + 0.5) * cell_size
+			+ (random2D(cell_world + vec2(17.31, 5.77)) - 0.5) * max_offset;
+			
+			final_x = group_x + x_group_offset;
 			final_z = group_z + z_group_offset;
 			
 			final_pos = vec2(final_x, final_z);
 			
-			// Dither the LOD distance per blade so a segment thins out across a band instead of dropping a quarter of itself the frame its centre crosses a threshold
-			const int blade_id = grass_id_2x2(row_ID, col_ID);
-			const float d_blade = d + (random2D(final_pos * 3.71) - 0.5) * FPARAMETERS.LOD_SKIP_FADE_M;
-			const int skip_id = (d_blade > FPARAMETERS.DIST_THRESH_CLOSE ? 1 : 0)
-			+ (d_blade > FPARAMETERS.DIST_THRESH_MED ? 1 : 0)
-			+ (d_blade > FPARAMETERS.DIST_THRESH_FAR ? 1 : 0);
+			// Distance to THIS BLADE, not to the segment
+			const float blade_dist = length(final_pos - player_xz);
+			
+			// Per-blade frontier fade, for the same reason. d_ring is Chebyshev
+			// because the fill walks square rings, so a segment on the diagonal
+			// sits up to sqrt(2) further out than the frontier radius.
+			const float d_ring = max(abs(final_x - PLAYERDATA.X_POS), abs(final_z - PLAYERDATA.Z_POS));
+			const float frontier_fade = clamp(
+				(PLAYERDATA.FRONTIER_RADIUS - d_ring) / max(FPARAMETERS.FRONTIER_FADE_M, 0.001), 0.0, 1.0);
+			mask &= frontier_fade > 0.02 ? 1 : 0;
+			
+
+			const int blade_id = grass_id_2x2(segment_coord.x * rows + row_ID,
+			                                  segment_coord.y * rows + col_ID);
+			const float blade_dist_dithered = blade_dist + (random2D(final_pos * 3.71) - 0.5) * FPARAMETERS.LOD_SKIP_FADE_M;
+			const int skip_id = (blade_dist_dithered > FPARAMETERS.DIST_THRESH_CLOSE ? 1 : 0)
+			+ (blade_dist_dithered > FPARAMETERS.DIST_THRESH_MED ? 1 : 0)
+			+ (blade_dist_dithered > FPARAMETERS.DIST_THRESH_FAR ? 1 : 0);
 			mask &= blade_id < skip_id ? 0 : 1;
 			
 			// The threshold that will remove THIS blade, so it can shrink into its own removal rather than vanishing at full size.
 			const float death_dist = blade_id == 0 ? FPARAMETERS.DIST_THRESH_CLOSE : blade_id == 1 ? FPARAMETERS.DIST_THRESH_MED : blade_id == 2 ? FPARAMETERS.DIST_THRESH_FAR : FPARAMETERS.DIST_THRESH_FAR * 1000.0;
-			const float lod_fade = clamp((death_dist - d_blade) / max(FPARAMETERS.LOD_SKIP_FADE_M, 0.001), 0.0, 1.0);
+			const float lod_fade = clamp((death_dist - blade_dist_dithered) / max(FPARAMETERS.LOD_SKIP_FADE_M, 0.001), 0.0, 1.0);
 			
-			// sample the mask on the unjittered grid position, as before, so the jitter cannot alias the mask edges
-			vec2 mask_pos = final_pos - vec2(x_offset_rand, z_offset_rand);
-			scale = get_scale(mask_pos);
+			// sample the mask on the unjittered cell centre, so the jitter cannot alias the mask edges
+			scale = get_scale(cell_world);
 			
 			mask &= scale >= FPARAMETERS.MIN_BLADE_SCALE ? 1 : 0;
 			
