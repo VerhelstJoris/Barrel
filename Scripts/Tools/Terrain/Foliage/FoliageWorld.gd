@@ -144,13 +144,6 @@ var terrain_material_linked : bool = false
 # ==========================================================================
 
 func _ready() -> void:
-	if not _verify_assignments():
-		return
-
-	var problems : PackedStringArray = settings_DA.validate()
-	for p in problems:
-		push_warning("FoliageWorld: " + p)
-
 	# Run after gameplay and camera scripts, so the snapshot is this frame's
 	# camera rather than last frame's. Higher priority means later in Godot.
 	process_priority = settings_DA.process_priority
@@ -173,10 +166,6 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	_cleanup()
 
-# Renaming an @export breaks its saved value: Godot keys exported data in the
-# .tscn by property name, so a renamed property finds nothing to load and comes
-# back null. That used to fail silently -- _process returns on its first line
-# and you get no cells and no grass, with nothing in the log to say why.
 func _verify_assignments() -> bool:
 	var missing := PackedStringArray()
 	if not settings_DA:
@@ -202,13 +191,6 @@ func _verify_assignments() -> bool:
 	return false
 
 
-# Pushes the foliage uniforms onto the Terrain3D material so the terrain itself
-# can draw the ground card, instead of every chunk carrying a baked copy of the
-# terrain underneath it.
-#
-# Terrain3DMaterial does not derive from Godot's Material, so it will not accept
-# a plain .set(). Which accessor it exposes varies by plugin version, so try the
-# resource method first and fall back to RenderingServer on the material RID.
 func _set_terrain_param(param_name : String, value : Variant) -> bool:
 	if not terrain_node:
 		return false
@@ -823,6 +805,7 @@ func _update_compute_segments_data(segment_bytes : PackedByteArray, segment_coun
 	# bend first, so this frame's grass reads this frame's bend state
 	if uniform_set_bender_RID.is_valid():
 		rd.buffer_update(fparameter_buffer_bend_RID, 0, bend_bytes.size(), bend_bytes)
+		@warning_ignore("integer_division")
 		var groups : int = settings_DA.bend_mask_res / 8
 		var bend_list : int = rd.compute_list_begin()
 		rd.compute_list_bind_compute_pipeline(bend_list, pipeline_bender_RID)
@@ -1155,6 +1138,10 @@ func _DEBUG_print_validation() -> void:
 		% [settings_DA.high_segment_budget(), settings_DA.high_segment_budget() * settings_DA.instances_per_segment_high(cell_size)])
 	print("low segments         : %d (%d instances)"
 		% [settings_DA.low_lod_segment_budget, settings_DA.low_lod_segment_budget * settings_DA.instances_per_segment_low(cell_size)])
+	print("high grid            : " + _segment_grid_report(
+		settings_DA.target_density_sq_m_high_LOD, settings_DA.instances_per_segment_high(cell_size), cell_size))
+	print("low grid             : " + _segment_grid_report(
+		settings_DA.target_density_sq_m_low_LOD, settings_DA.instances_per_segment_low(cell_size), cell_size))
 	print("fine window radius   : %.1f m" % window_radius)
 	print("bend window          : %.1f m at %d px (%.1f texels/m)"
 		% [settings_DA.bend_window_size_m, settings_DA.bend_mask_res, settings_DA.bend_texels_per_m()])
@@ -1163,5 +1150,63 @@ func _DEBUG_print_validation() -> void:
 	else:
 		for p in problems:
 			print("PROBLEM: " + p)
+
+
+# Rows of blades across one segment edge, exactly as the shader derives density_rows. The shader receives sqrt(density) as TARGET_DENSITY
+# blades per metre -- and multiplies it by TERRAIN_VERTEX_SPACING.
+static func _rows_per_segment(density_sq_m : float, cell_size : float) -> int:
+	var target_density : float = sqrt(maxf(density_sq_m, 0.0))
+	return maxi(ceili(target_density * cell_size), 1)
+
+# The largest square grid that fits in the slots actually reserved, matching the  shader's capacity_rows including its decrement guard.
+static func _capacity_rows(per_segment : int) -> int:
+	var slot_limit : int = maxi(per_segment, 1)
+	var rows : int = int(floor(sqrt(float(slot_limit))))
+	if rows * rows > slot_limit:
+		rows -= 1
+	return maxi(rows, 1)
+
+
+# Warns when the reservation is not the exact square of the row count the
+# density asks for. The shader clamps itself to what fits, so the failure mode
+# is silently thinner grass rather than corruption -- which is exactly why it
+# needs saying out loud.
+func _verify_segment_grid(density_sq_m : float, per_segment : int, label : String) -> void:
+	var rows : int = _rows_per_segment(density_sq_m, vertex_spacing)
+	if rows * rows == per_segment:
+		return
+	push_warning(("FoliageWorld: %s tier reserves %d slots per segment, but the density "
+		+ "asks for a %dx%d grid (%d blades). instances_per_segment_%s() must return the "
+		+ "exact square of the row count -- the shader plants a square grid and clamps "
+		+ "itself to floor(sqrt(slots)) rows, so anything else drops a row per axis.")
+		% [label, per_segment, rows, rows, rows * rows, label])
+
+
+# What the shader will actually plant, for the validation printout. CAPPED means
+# the reservation is the limiting factor and the grass is thinner than the
+# density setting says.
+func _segment_grid_report(density_sq_m : float, per_segment : int, cell_size : float) -> String:
+	var density_rows : int = _rows_per_segment(density_sq_m, cell_size)
+	var capacity_rows : int = _capacity_rows(per_segment)
+	var rows : int = clampi(density_rows, 1, capacity_rows)
+	var used : int = rows * rows
+	var cell : float = cell_size / float(rows)
+
+	var note : String = "OK"
+	if rows < density_rows:
+		note = "CAPPED -- wanted %d rows, reserve allows %d (%.0f%% of the intended blades)" \
+			% [density_rows, rows, 100.0 * float(used) / float(density_rows * density_rows)]
+	elif used < maxi(per_segment, 1):
+		note = "%d of %d slots unused" % [per_segment - used, per_segment]
+
+	var effective : float = float(used) / maxf(cell_size * cell_size, 0.0001)
+
+	var jitter : String = ""
+	if settings_DA and settings_DA.max_foliage_individual_random_offset > cell:
+		jitter = "  [jitter %.2f m clamped to the %.2f m cell]" \
+			% [settings_DA.max_foliage_individual_random_offset, cell]
+
+	return "%dx%d, %d blades/segment, %.2f m cells, %.2f blades/m^2 effective -- %s%s" \
+		% [rows, rows, used, cell, effective, note, jitter]
 
 #endregion
