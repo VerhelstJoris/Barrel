@@ -20,16 +20,14 @@ GRASS_TRANSFORMS;
 layout (set = 0, binding = 2, std430) writeonly buffer BladeAmounts {
 	int data[];
 } BLADESPERGROUP;
-
+		
 layout (set = 0, binding = 3, std430) restrict readonly buffer FParameters {
 	float TERRAIN_VERTEX_SPACING;
 	
 	float TARGET_DENSITY;
 	float MAX_BLADE_RANDOM_OFFSET;
 	float MAX_BLADE_TILT_RAD;
-	float BLADE_ROT_TO_CAMERA_BIAS_NEAR;
-	float BLADE_ROT_TO_CAMERA_BIAS_FAR;
-	float BLADE_ROT_TO_CAMERA_MIN_DIST;
+
 	float MIN_BLADE_SCALE;
 	
 	float DIST_THRESH_CLOSE;
@@ -79,6 +77,8 @@ layout (set = 0, binding = 7, std430) restrict readonly buffer SegmentsToDraw {
 	int data[];
 } SEGMENTSTODRAW;
 
+const float TAU = 6.28318530718;
+
 float biLerp(float a, float b, float c, float d, float s, float t)
 {
 	float x = mix(a, b, t);
@@ -114,34 +114,7 @@ float random2D(vec2 uv) {
 	uv *= 17.0;
 	return fract(uv.x * uv.y * (uv.x + uv.y));
 }
-
-float closest_if_between(float val, float low, float high)
-{
-	if (val > low && val < high)
-	{
-		return val < ((high - low) / 2.0 + low) ? low : high;
-	}
-	
-	return val;
-}
-
-float get_rot_biased_towards_player(vec2 blade_pos, float distance)
-{
-	float rand_angle = random2D(blade_pos) * 3.14159;    // RANGE [-PI, PI]
-	vec2 target_dir = vec2(PLAYERDATA.X_POS - blade_pos.x, PLAYERDATA.Z_POS - blade_pos.y);
-	
-	float angle_towards_player = atan(target_dir.y, target_dir.x); // range [-PI, PI]
-	float angle_away_from_player = angle_towards_player + 3.14159; // range [0, 2 * PI]
-	
-	//if our random angle is similar to the angle towards the player, angle it away a bit
-	const float offset_alpha = smoothstep(FPARAMETERS.BLADE_ROT_TO_CAMERA_MIN_DIST, FPARAMETERS.BLADE_ROT_TO_CAMERA_MIN_DIST + 1.0, distance);
-	const float offset = mix(FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_NEAR, FPARAMETERS.BLADE_ROT_TO_CAMERA_BIAS_FAR, (distance / FPARAMETERS.DIST_THRESH_FAR)) * offset_alpha;
-	rand_angle = closest_if_between(rand_angle, angle_towards_player - offset, angle_towards_player + offset);
-	rand_angle = closest_if_between(rand_angle, angle_away_from_player - offset, angle_away_from_player + offset);
-	
-	return rand_angle;
-}
-
+		
 // layout id over small squares of 2X2 with following ID order
 //   3   1
 //   0   2
@@ -191,8 +164,6 @@ int fill_world_segment(ivec2 segment_coord)
 	//calculate the dist between the player and this segment and see which should be skipped
 	const float d = length(vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset));
 	
-	// Shrink into the fill frontier. Measured with CHEBYSHEV distance, notEuclidean: the fill walks square rings, so a segment on the diagonal sits
-	// up to sqrt(2) further away than the frontier radius and would fade out
 	const vec2 to_cam = vec2(PLAYERDATA.X_POS - x_group_offset, PLAYERDATA.Z_POS - z_group_offset);
 	const float d_ring = max(abs(to_cam.x), abs(to_cam.y));
 	const float frontier_fade = clamp(
@@ -239,7 +210,7 @@ int fill_world_segment(ivec2 segment_coord)
 			scale *= lod_fade * frontier_fade;
 			
 			random_rot_x = (random2D(final_pos + 1.1546461) - 0.5) * 2.0 * FPARAMETERS.MAX_BLADE_TILT_RAD;
-			random_rot_y = get_rot_biased_towards_player(final_pos, d);
+			random_rot_y = random2D(final_pos) * TAU;
 			random_rot_z = 0;
 			
 			int base_index = group_offset_vec4 + current_blade * 3;

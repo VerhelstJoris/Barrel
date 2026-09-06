@@ -53,8 +53,6 @@ class_name FoliageWorldSettings extends Resource
 @export var target_density_sq_m_low_LOD : float = 1.0
 @export var max_foliage_individual_random_offset : float = 0.5
 @export var max_foliage_tilt_degrees : float = 20.0
-@export var foliage_cam_bias_degress_near_far : Vector2 = Vector2(0.0, 45.0)
-@export var foliage_cam_bias_min_distance : float = 12.0
 @export var min_grass_blade_scale : float = 0.5
 @export var culling_distance_thresholds : Vector3 = Vector3(10.0, 25.0, 40.0)
 ## Metres the density LOD threshold is dithered per blade.

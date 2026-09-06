@@ -73,6 +73,14 @@ uniform float dist_jitter_amount = 4.0f;
 varying float clump_factor_v;
 group_uniforms;
 
+group_uniforms billboarding;
+uniform float billboard_amount : hint_range(0.0, 1.0) = 0.8f;
+// anything before this distance will not be affected
+uniform float billboard_min_distance = 8.0f;
+// full billboard amount past this distnance
+uniform float billboard_max_distance = 20.0f;
+group_uniforms;
+
 float hash21(vec2 p)
 {
 	return fract(sin(dot(p, vec2(127.12, 311.7))) * 43758.545663);
@@ -113,6 +121,28 @@ void vertex()
 		// min value is to fix a small wrap-around issue with the curve where the bottom verts can seemingly be affected by the very end
 		float curve_val = texture(grass_curve_shape,  vec2(max(uv_bottom_to_top,0.01),0) ).x;
 		VERTEX.x = curve_val * sign(VERTEX.x) * curve_width_shape_mult;
+	}
+
+	//turn blade towards camera based on overall world position of the entire blade
+	vec3 blade_origin = MODEL_MATRIX[3].xyz;
+	float blade_dist = distance(blade_origin, world_camera);
+	float bb_alpha = smoothstep(billboard_min_distance, billboard_max_distance, blade_dist);
+
+	vec2 fwd = MODEL_MATRIX[2].xz;
+	vec2 tgt = (world_camera - blade_origin).xz;
+	float fl = length(fwd);
+	float tl = length(tgt);
+	if (fl > 0.0001 && tl > 0.0001)
+	{
+		fwd /= fl;
+		tgt /= tl;
+		float sd = fwd.x * tgt.y - fwd.y * tgt.x;
+		float cd = dot(fwd, tgt);
+
+		float bb = -billboard_amount * bb_alpha * sd * cd;
+		float bb_c = cos(bb);
+		float bb_s = sin(bb);
+		VERTEX.xz = vec2(bb_c * VERTEX.x + bb_s * VERTEX.z, -bb_s * VERTEX.x + bb_c * VERTEX.z);
 	}
 
 	vec2 wind_sample_pos = mix(NODE_POSITION_WORLD.xz, clump_pos_xz, clump_factor);
