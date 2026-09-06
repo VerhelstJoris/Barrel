@@ -62,7 +62,7 @@ _shader_parameters = {
 &"foliage_blade_detail_falloff": 2.0,
 &"foliage_blade_noise": ExtResource("2_gjusm"),
 &"foliage_blade_noise_scale": 0.4,
-&"foliage_blade_normal_strength": 0.3,
+&"foliage_blade_normal_strength": 0.35,
 &"foliage_clump_max_distance": 25.0,
 &"foliage_clump_min_distance": 20.0,
 &"foliage_color_large": Color(0.9019608, 0.6666667, 0.19607843, 1),
