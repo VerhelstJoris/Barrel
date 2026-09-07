@@ -16,9 +16,9 @@ func _draw_contents(_delta : float) -> void:
 	
 	
 func _draw_wind_contents(_delta : float ) -> void:
-	var editable_wind_dir : Array[float] = [EnvironmentManager.current_wind_direction.x, EnvironmentManager.current_wind_direction.y]
-	if(ImGui.DragFloat2Ex("Wind Direction", editable_wind_dir , 0.01)):
-		EnvironmentManager._set_wind_direction(Vector2(editable_wind_dir[0],editable_wind_dir[1]))
+	var editable_wind_dir : Array[float] = [EnvironmentManager._get_wind_direction_deg()]
+	if(ImGui.DragFloatEx("Wind Direction Deg", editable_wind_dir,2.0,0.0,360.0)):
+		EnvironmentManager._set_wind_direction_deg(editable_wind_dir[0])
 		
 	ed_wind_speed[0] = EnvironmentManager.current_wind_speed_m_s
 	if(ImGui.DragFloatEx("Wind Speed", ed_wind_speed,0.01,0,20)):

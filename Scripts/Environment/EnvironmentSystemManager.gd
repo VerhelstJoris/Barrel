@@ -16,6 +16,10 @@ func _set_wind_direction(new_dir : Vector2) -> Vector2:
 	current_wind_direction = temp
 	on_wind_changed.emit(current_wind_direction, current_wind_speed_m_s)
 	return current_wind_direction
+	
+func _set_wind_direction_deg(degrees: float) -> Vector2:
+	var r := deg_to_rad(degrees)
+	return _set_wind_direction(Vector2(-sin(r), cos(r)))	
 
 func _set_wind_speed(new_speed_m_s : float) -> float:
 	if(current_wind_speed_m_s == new_speed_m_s):
@@ -24,6 +28,12 @@ func _set_wind_speed(new_speed_m_s : float) -> float:
 	current_wind_speed_m_s = new_speed_m_s	
 	on_wind_changed.emit(current_wind_direction, current_wind_speed_m_s)
 	return current_wind_speed_m_s
+	
+func _get_wind_direction_deg() -> float:
+	if current_wind_direction.is_zero_approx():
+		return 0.0
+	return fposmod(rad_to_deg(atan2(-current_wind_direction.x, current_wind_direction.y)), 360.0)
+
 
 func _set_gust_speed(new_gust_speed_m_s : float) -> float:
 	if(current_gust_speed_m_s == new_gust_speed_m_s):
