@@ -10,6 +10,14 @@ class_name LineRenderer extends MeshInstance3D
 @export var connect_polys : bool = true
 @export var flip_y_uv : bool = true
 
+@export_group("Smoothing")
+@export var smooth_line : bool = false
+@export var smooth_permanent : bool = false
+@export_range(0.0, 1.0, 0.01) var smooth_strength : float = 0.5
+@export var smooth_iterations : int = 2
+@export var smooth_permanent_speed : float = 6.0
+@export_range(0.0, 1.0, 0.01) var smooth_vertical_scale : float = 1.0
+
 @export_group("Line Thickness")
 @export var use_precomputed_thickness_arr : bool = true
 @export var pre_computed_thickness_arr : Array[float]
@@ -34,6 +42,9 @@ var max_thickness : float = 0
 var current_alpha : float = 0
 var next_alpha : float =0
 
+var _draw_points : Array[Vector3] = []
+var _working_points : Array[Vector3] = []
+
 func _enter_tree() -> void:
 	mesh = ImmediateMesh.new()
 	
@@ -56,12 +67,7 @@ func _process(_delta: float) -> void:
 		push_error("Line Renderer points Array (",points.size() , ") and Point Thickness Array (", pre_computed_thickness_arr.size(), ")are not the same size")
 		return
 
-	cameraOrigin = to_local(camera.get_global_transform().origin) 
-	
-	_reset_vars_for_drawing(_delta)
-	
-	mesh.surface_begin(Mesh.PrimitiveType.PRIMITIVE_TRIANGLES)
-	
+	# the start point is pinned before smoothing so the rest of the line relaxes toward where it actually is
 	if(replace_start_point != null):
 		var additional_pos : Vector3
 		if(use_global_coords):
@@ -69,12 +75,49 @@ func _process(_delta: float) -> void:
 		else:
 			additional_pos = replace_start_point.get_position()
 		points[0] = additional_pos
+
+	_build_draw_points(_delta)
+
+	cameraOrigin = to_local(camera.get_global_transform().origin) 
+	
+	_reset_vars_for_drawing(_delta)
+	
+	mesh.surface_begin(Mesh.PrimitiveType.PRIMITIVE_TRIANGLES)
 		
-	for i in range(points.size() - 1):
-		_draw_next_poly(points[i],points[i+1], i)
+	for i in range(_draw_points.size() - 1):
+		_draw_next_poly(_draw_points[i],_draw_points[i+1], i)
 		
 	mesh.surface_end()
-	
+
+# permanent smoothing writes back into points and keeps building on itself, transient rebuilds from the untouched source every frame
+func _build_draw_points(_delta : float) -> void:
+	if(!smooth_line || points.size() < 3):
+		_draw_points = points
+		return
+
+	if(smooth_permanent):
+		_smooth_positions(points, 1, 1.0 - exp(-smooth_permanent_speed * _delta))
+		_draw_points = points
+		return
+
+	_working_points.assign(points)
+	_smooth_positions(_working_points, smooth_iterations, smooth_strength)
+	_draw_points = _working_points
+
+# laplacian relaxation, every interior point eases toward the midpoint of its neighbours while both ends stay pinned
+func _smooth_positions(target : Array[Vector3], iterations : int, weight : float) -> void:
+	if(iterations <= 0 || weight <= 0.0):
+		return
+
+	for _pass_id in iterations:
+		# working off a snapshot keeps the pass unbiased by the direction it walks the array
+		var source := target.duplicate()
+		for i in range(1, source.size() - 1):
+			var midpoint : Vector3 = (source[i - 1] + source[i + 1]) * 0.5
+			var relaxed : Vector3 = source[i].lerp(midpoint, weight)
+			relaxed.y = lerpf(source[i].y, midpoint.y, weight * smooth_vertical_scale)
+			target[i] = relaxed
+		
 func _reset_vars_for_drawing(_delta : float)->void:
 	current_alpha = 0
 	if(flip_y_uv):
@@ -84,8 +127,8 @@ func _reset_vars_for_drawing(_delta : float)->void:
 		
 	var prev_total_dist: float = total_dist
 	total_dist = 0
-	for i in range(points.size() - 1):
-		total_dist += points[i].distance_to(points[i + 1])
+	for i in range(_draw_points.size() - 1):
+		total_dist += _draw_points[i].distance_to(_draw_points[i + 1])
 		
 	total_dist = lerp(prev_total_dist, total_dist, 1 * _delta)	
 
@@ -171,4 +214,3 @@ func _add_vertex(pos : Vector3,   uv : Vector2, normal : Vector3) -> void:
 	mesh.surface_set_normal(normal)
 	mesh.surface_set_uv(uv)
 	mesh.surface_add_vertex(pos)
-	
