@@ -29,7 +29,8 @@ var smoke_renderer : LineRenderer
 @export var _point_amount : int = 75
 @export var _smoke_point_tracking_time : float = 4.0
 @export var _muzzle_smoke_start_width:float = 0.1
-@export var _point_thickness_growth_per_second : float = 0.5
+@export var _muzzle_smoke_max_width : float = 2.1
+@export var _muzzle_smoke_width_curve : Curve
 
 @export var min_muzzle_smoke_move_speed : Vector3 = Vector3(-0.1, 0.2, -0.1)
 @export var max_muzzle_smoke_move_speed : Vector3 = Vector3(0.1, 0.5, 0.1)
@@ -53,6 +54,7 @@ var max_sharp_angle_rad : float
 var _smoke_add_point_timer : float = 0.0
 var muzzle_positions : Array[Vector3]
 var muzzle_smoke_width_arr : Array[float]
+var muzzle_ages : Array[float]
 
 var muzzle_smoke_growth_tween : Tween
 var muzzle_smoke_decay_tween : Tween
@@ -119,20 +121,42 @@ func _process_muzzle_smoke(delta : float) -> void:
 func _reset_vars() -> void:
 	muzzle_positions.clear()
 	muzzle_smoke_width_arr.clear()
+	muzzle_ages.clear()
 	muzzle_smoke_active = false
 	muzzle_smoke_decaying = false
 	if(smoke_renderer):
 		smoke_renderer.points.clear()
 		smoke_renderer.pre_computed_thickness_arr.clear()
 		_reset_muzzle_smoke_vfx_shader_params()
+
+# a point's whole life is one tracking time, so that is what normalises age into the curve's 0 to 1 domain
+func _age_fraction(age : float) -> float:
+	return clampf(age / maxf(_smoke_point_tracking_time, 0.0001), 0.0, 1.0)
+
+# width follows from how long the point has been alive, so it no longer depends on where the point sits in the array
+func _width_for_age(age : float) -> float:
+	var alpha : float = _age_fraction(age)
+	if(_muzzle_smoke_width_curve != null):
+		alpha = _muzzle_smoke_width_curve.sample_baked(alpha)
+		
+	return lerpf(_muzzle_smoke_start_width, _muzzle_smoke_max_width, alpha)
+
+# subdivision keeps the arrays aligned, this is only a floor so a desync cannot crash the indexing below
+func _match_age_array_size() -> void:
+	while(muzzle_ages.size() < muzzle_positions.size()):
+		muzzle_ages.push_back(_smoke_point_tracking_time)
+	while(muzzle_ages.size() > muzzle_positions.size()):
+		muzzle_ages.pop_back()
 	
 func _add_muzzle_smoke_point() -> void:
 	if(muzzle_positions.size() >= _point_amount):
 		muzzle_positions.pop_back()
 		muzzle_smoke_width_arr.pop_back()
+		muzzle_ages.pop_back()
 
 	muzzle_positions.push_front(smoke_renderer_start_point.get_global_position())
-	muzzle_smoke_width_arr.push_front(_muzzle_smoke_start_width)
+	muzzle_smoke_width_arr.push_front(_width_for_age(0.0))
+	muzzle_ages.push_front(0.0)
 	
 func _process_muzzle_smoke_points(_delta : float) -> void:
 	if muzzle_smoke_active:
@@ -148,14 +172,16 @@ func _process_muzzle_smoke_points(_delta : float) -> void:
 			smoke_renderer.pre_computed_thickness_arr = muzzle_smoke_width_arr
 	
 func _update_existing_muzzle_points(_delta : float) -> void:
+	_match_age_array_size()
+
 	var added : Vector3= Vector3(randf_range(min_muzzle_smoke_move_speed.x, max_muzzle_smoke_move_speed.x) ,
 		randf_range(min_muzzle_smoke_move_speed.y, max_muzzle_smoke_move_speed.y),
 		randf_range(min_muzzle_smoke_move_speed.z, max_muzzle_smoke_move_speed.z)) * _delta
 
-	var thickness_delta_add : float = _delta * _point_thickness_growth_per_second
 	for id in muzzle_positions.size():
 		muzzle_positions[id] +=  added
-		muzzle_smoke_width_arr[id] += thickness_delta_add
+		muzzle_ages[id] += _delta
+		muzzle_smoke_width_arr[id] = _width_for_age(muzzle_ages[id])
 		
 	for id in range(1, muzzle_positions.size() -1):
 		#average x/z of position out to between previous and next point
@@ -178,6 +204,8 @@ func _update_existing_muzzle_points(_delta : float) -> void:
 func _check_subdivide_long_poly(current_id : int) -> int:
 	var A:Vector3 = muzzle_positions[current_id]
 	var B: Vector3 = muzzle_positions[current_id + 1]
+	var age_a : float = muzzle_ages[current_id]
+	var age_b : float = muzzle_ages[current_id + 1]
 	var dist : float = A.distance_to(B)
 	if(subdivide_long_polys && dist > long_poly_max_length):
 		var sub_amount : int =  int(dist / long_poly_max_length)
@@ -190,9 +218,12 @@ func _check_subdivide_long_poly(current_id : int) -> int:
 		for j in sub_amount:
 			var alpha : float = float(j +1)/ (sub_amount + 1)
 			var new_pos : Vector3 = lerp(A, B,alpha)
+			# the inserted point takes an age between the two segment ends, and its width falls out of that age
+			var new_age : float = lerpf(age_a, age_b, alpha)
 			current_id = current_id +1
 			muzzle_positions.insert(current_id, new_pos)
-			muzzle_smoke_width_arr.insert(current_id, lerp(muzzle_smoke_width_arr[current_id], muzzle_smoke_width_arr[current_id +1], alpha))
+			muzzle_ages.insert(current_id, new_age)
+			muzzle_smoke_width_arr.insert(current_id, _width_for_age(new_age))
 			debug_points.push_back(new_pos)
 			
 
