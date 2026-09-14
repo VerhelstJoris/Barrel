@@ -40,7 +40,7 @@ func _toggle_mouse_capture() -> void:
 
 func _process(_delta: float) -> void:
 	if(tool_open):
-		if(ImGui.Begin("Demo")):
+		if(ImGui.Begin("BarrelDebug")):
 			ImGui.BeginTabBar("Categories")
 			if(ImGui.BeginTabItem("Player")):
 				draw_player_debug.emit(_delta)

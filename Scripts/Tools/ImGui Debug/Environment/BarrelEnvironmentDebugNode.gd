@@ -1,6 +1,6 @@
 class_name BarrelEnvironmentDebugNode extends BarrelSceneDebugNode
 
-enum EDebugEnvNodeType { Foliage }
+enum EDebugEnvNodeType { Manager, Foliage, Wind }
 
 # Maps each environment debug node type to the list of all nodes registered for that type.
 var _registered_nodes : Dictionary[EDebugEnvNodeType, Array] = {}
@@ -13,20 +13,19 @@ func _ready() -> void:
 	super()
 	manager_node = BarrelEnvironmentManagerDebugNode.new()
 	add_child(manager_node)
+	_register_environment_node(manager_node, EDebugEnvNodeType.Manager)
 
 func _get_name() -> String:
 	return "Global Environment Debug"
 
 func _draw(_delta: float) -> void:
-	if(manager_node):
-		manager_node._draw(_delta)
-	else:
-		ImGui.TextColored(Color.FIREBRICK, "No Environment Manger Debug Node!")	
-	
-	ImGui.Separator()
+	ImGui.BeginTabBar("Env Categories")
 	for type : EDebugEnvNodeType in _registered_nodes.keys():
-		_draw_type_section(type, _delta)
-		ImGui.Separator()
+		var type_name : String = EDebugEnvNodeType.keys()[type]
+		if(ImGui.BeginTabItem(type_name)):
+			_draw_type_section(type, _delta)
+			ImGui.EndTabItem()
+	ImGui.EndTabBar()
 
 func _draw_type_section(type: EDebugEnvNodeType, _delta: float) -> void:
 	var nodes : Array = _registered_nodes.get(type, [])
