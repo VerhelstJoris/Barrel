@@ -4,16 +4,12 @@ enum EDebugEnvNodeType { Manager, Foliage, Wind }
 
 # Maps each environment debug node type to the list of all nodes registered for that type.
 var _registered_nodes : Dictionary[EDebugEnvNodeType, Array] = {}
-var manager_node : BarrelEnvironmentManagerDebugNode
 
 # Per-type "currently selected index" storage. wrapped in array so it can be passed to ImGui easier
 var _selected_index_by_type : Dictionary[EDebugEnvNodeType, Array] = {}
 
 func _ready() -> void:
 	super()
-	manager_node = BarrelEnvironmentManagerDebugNode.new()
-	add_child(manager_node)
-	_register_environment_node(manager_node, EDebugEnvNodeType.Manager)
 
 func _get_name() -> String:
 	return "Global Environment Debug"

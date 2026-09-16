@@ -1,8 +1,8 @@
-class_name EnvironmentSystemManager extends Node
+class_name EnvironmentManager extends Node
 
-var current_wind_speed_m_s : float = 3.3
-var current_gust_speed_m_s : float = 40.0
-var current_wind_direction : Vector2 = Vector2(0.664929, 0.746907)
+@export var current_wind_speed_m_s : float = 3.3
+@export var current_gust_speed_m_s : float = 40.0
+@export var current_wind_direction : Vector2 = Vector2(0.664929, 0.746907)
 
 signal on_wind_changed(direction ,speed)
 signal on_gust_changed(speed)
