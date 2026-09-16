@@ -18,6 +18,10 @@ class_name LineRenderer extends MeshInstance3D
 @export var smooth_permanent_speed : float = 6.0
 @export_range(0.0, 1.0, 0.01) var smooth_vertical_scale : float = 1.0
 
+@export_group("Joints")
+@export var miter_joints : bool = true
+@export var miter_limit : float = 3.0
+
 @export_group("Line Thickness")
 @export var use_precomputed_thickness_arr : bool = true
 @export var pre_computed_thickness_arr : Array[float]
@@ -162,28 +166,21 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 		current_thickness = lerp(start_thickness, max_thickness, current_alpha) / global_scale
 		next_thickness = lerp(start_thickness, max_thickness, next_alpha) / global_scale
 	
-	var AB:Vector3 = B - A;
-	var dir : Vector3
-	var normal
 	var cam_transform :Transform3D = camera.get_global_transform()
+	var normal
 	
-	if(billboard_polys):
-		var forward : Vector3 = Vector3.FORWARD
-		dir = Vector3.RIGHT #right
-		
-		#project B onto the plane made by the  forward and A
-		var proj_B : Vector3 = B
-		proj_B.y = 0
-		#calculate angle between A and projected B
-		var dot :float = (A - forward).dot(A-proj_B)
-		
-		#rotate dir around forward
-		dir.rotated(forward, acos(dot))
-	else:
-		dir = (cameraOrigin - ((A + B) / 2)).cross(AB).normalized()
+	var dir : Vector3 = _poly_direction(A, B)
+	var end_dir : Vector3 = dir
+	
+	# the edge at B is shared with the next segment, so it belongs on the bisector of the two rather than square to this one
+	if(miter_joints && index + 2 < _draw_points.size()):
+		var C : Vector3 = _draw_points[index + 2]
+		if(use_global_coords):
+			C = to_local(C)
+		end_dir = _miter_dir(dir, _poly_direction(B, C))
 	
 	var orthogonalABStart:Vector3 = dir * current_thickness
-	var orthogonalABEnd:Vector3 = dir * next_thickness
+	var orthogonalABEnd:Vector3 = end_dir * next_thickness
 	
 	var AtoABStart:Vector3
 	var AfromABStart:Vector3
@@ -209,6 +206,36 @@ func _draw_next_poly(A: Vector3, B : Vector3, index : int )	-> void:
 	
 	PrevBToAB = BtoABEnd
 	PrevBFromAB = BfromABEnd
+
+func _poly_direction(A : Vector3, B : Vector3) -> Vector3:
+	if(billboard_polys):
+		var forward : Vector3 = Vector3.FORWARD
+		var dir : Vector3 = Vector3.RIGHT #right
+		
+		#project B onto the plane made by the  forward and A
+		var proj_B : Vector3 = B
+		proj_B.y = 0
+		#calculate angle between A and projected B
+		var dot :float = (A - forward).dot(A-proj_B)
+		
+		#rotate dir around forward
+		dir.rotated(forward, acos(dot))
+		return dir
+	
+	return (cameraOrigin - ((A + B) / 2)).cross(B - A).normalized()
+
+# the bisector is extended by 1/cos so both quads keep their full width through the bend, with the limit stopping a hairpin spiking off
+func _miter_dir(prev_dir : Vector3, next_dir : Vector3) -> Vector3:
+	var miter : Vector3 = prev_dir + next_dir
+	if(miter.length_squared() < 0.000001):
+		return next_dir
+
+	miter = miter.normalized()
+	var cosine : float = miter.dot(next_dir)
+	if(cosine < 0.0001):
+		return next_dir
+
+	return miter * minf(1.0 / cosine, maxf(miter_limit, 1.0))
 
 func _add_vertex(pos : Vector3,   uv : Vector2, normal : Vector3) -> void:
 	mesh.surface_set_normal(normal)
