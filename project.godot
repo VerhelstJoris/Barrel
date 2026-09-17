@@ -38,6 +38,7 @@ PromptManager="*uid://bbjuckg3061vx"
 UIAnimation="*uid://cawfyydj325or"
 ImGuiRoot="*uid://dugmpnsxaagba"
 BarrelDebugWindow="*res://Scripts/Tools/ImGui Debug/BarrelGlobalDebugWindow.gd"
+EnvironmentManager="*uid://w04ac8ial5pk"
 
 [debug]
 

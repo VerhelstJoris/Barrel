@@ -1,4 +1,4 @@
-class_name EnvironmentManager extends Node
+class_name GlobalEnvironmentManagerSingleton extends Node
 
 @export var current_wind_speed_m_s : float = 3.3
 @export var current_gust_speed_m_s : float = 40.0
@@ -6,6 +6,11 @@ class_name EnvironmentManager extends Node
 
 signal on_wind_changed(direction ,speed)
 signal on_gust_changed(speed)
+
+func _initalize(settings : EnvironmentSettings) -> void:
+	_set_wind_direction(settings.current_wind_direction)
+	_set_wind_speed(settings.current_wind_speed_m_s)
+	_set_gust_speed(settings.current_gust_speed_m_s)
 
 func _set_wind_direction(new_dir : Vector2) -> Vector2:
 	var temp := new_dir.normalized()
