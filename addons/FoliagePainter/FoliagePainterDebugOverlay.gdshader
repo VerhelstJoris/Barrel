@@ -6,6 +6,11 @@ uniform sampler2D fmask_tex : filter_linear, repeat_disable, hint_default_black;
 uniform vec4 fmask_rect = vec4(0.0);   // xy = world min XZ, zw = world size XZ
 uniform vec4 fmask_color : source_color = vec4(0.15, 1.0, 0.35, 1.0);
 uniform float fmask_opacity : hint_range(0.0, 1.0) = 0.0;
+uniform vec2 fbrush_pos = vec2(0.0);
+uniform float fbrush_radius = 0.0;
+uniform float fbrush_hardness : hint_range(0.0, 1.0) = 0.5;
+uniform float fbrush_strength : hint_range(0.0, 1.0) = 1.0;
+uniform float fbrush_erase = 0.0;
 
 /* The terrain depends on this shader to function. Don't change most things in vertex() or 
  * terrain normal calculations in fragment(). You probably only want to customize the 
@@ -554,6 +559,17 @@ void fragment() {
 		float m = texture(fmask_tex, clamp(muv, vec2(0.0), vec2(1.0))).r;
 		ALBEDO = mix(ALBEDO, fmask_color.rgb, m * fmask_opacity);
 	}
-
+	
+	if (fbrush_radius > 0.0) {
+	vec2 bpos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xz;
+	float bd = distance(bpos, fbrush_pos) / fbrush_radius;
+	if (bd < 1.0) {
+		float ba = clamp((1.0 - bd) / max(1.0 - fbrush_hardness, 0.001), 0.0, 1.0);
+		ba = ba * ba * (3.0 - 2.0 * ba);
+		vec3 bcol = mix(vec3(1.0), vec3(1.0, 0.15, 0.1), fbrush_erase);
+		ALBEDO = mix(ALBEDO, bcol, ba * fbrush_strength * 0.35);
+		ALBEDO = mix(ALBEDO, bcol, smoothstep(0.93, 1.0, bd) * 0.8);
+	}
 }
 
+}

@@ -23,7 +23,13 @@ var _painting := false
 var _erasing := false
 var _dirty := false
 var _last_stamp := Vector2.INF
-
+ 
+var _hover_camera: Camera3D = null
+var _hover_mouse := Vector2.ZERO
+var _hover_dirty := false
+var _brush_pos := Vector2.ZERO
+var _brush_active := false
+ 
 func _enter_tree() -> void:
 	_toolbar = HBoxContainer.new()
 	_paint_toggle = CheckButton.new()
@@ -84,15 +90,21 @@ func _make_visible(vis: bool) -> void:
 	_ensure_connections()
 	if _toolbar != null:
 		_toolbar.visible = vis
-	if not vis and _paint_toggle != null:
-		_paint_toggle.button_pressed = false
-
+	if not vis:
+		_brush_active = false
+		if _paint_toggle != null:
+			_paint_toggle.button_pressed = false
+ 
 func _process(_delta: float) -> void:
 	if _mask_node == null or not is_instance_valid(_mask_node):
 		return
 	if _dirty:
 		_mask_node.flush()
 		_dirty = false
+	# Hover raycasts are throttled to one per frame; painting raycasts per event for stroke fidelity.
+	if _hover_dirty and not _painting:
+		_hover_dirty = false
+		_update_brush()
 	if _overlay_target != null:
 		_push_mask_params()
 
@@ -115,20 +127,38 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent) -> int:
 			else:
 				_painting = false
 			return EditorPlugin.AFTER_GUI_INPUT_STOP
-	elif event is InputEventMouseMotion and _painting:
+	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		_erasing = mm.shift_pressed
-		_paint_at(viewport_camera, mm.position)
-		return EditorPlugin.AFTER_GUI_INPUT_STOP
+		_hover_camera = viewport_camera
+		_hover_mouse = mm.position
+		_hover_dirty = true
+		if _painting:
+			_paint_at(viewport_camera, mm.position)
+			return EditorPlugin.AFTER_GUI_INPUT_STOP
 	return EditorPlugin.AFTER_GUI_INPUT_PASS
-
+ 
+func _update_brush() -> void:
+	_brush_active = false
+	if _hover_camera == null or not is_instance_valid(_hover_camera):
+		return
+	var from := _hover_camera.project_ray_origin(_hover_mouse)
+	var hit := _raycast(from, _hover_camera.project_ray_normal(_hover_mouse))
+	if is_nan(hit.x):
+		return
+	_brush_pos = Vector2(hit.x, hit.z)
+	_brush_active = true
+ 
 func _paint_at(cam: Camera3D, mouse: Vector2) -> void:
 	if cam == null:
 		return
 	var hit := _raycast(cam.project_ray_origin(mouse), cam.project_ray_normal(mouse))
 	if is_nan(hit.x):
+		_brush_active = false
 		return
 	var xz := Vector2(hit.x, hit.z)
+	_brush_pos = xz
+	_brush_active = true
 	var radius := float(_radius.value)
 	# Brush spacing keeps a slow drag from stacking stamps on one spot.
 	if _last_stamp.is_finite() and _last_stamp.distance_to(xz) < radius * 0.25:
@@ -152,8 +182,9 @@ func _on_paint_toggled(pressed: bool) -> void:
 		_install_overlay()
 	else:
 		_painting = false
+		_brush_active = false
 		_remove_overlay()
-
+ 
 func _on_fit_pressed() -> void:
 	if _mask_node == null:
 		return
@@ -228,7 +259,12 @@ func _push_mask_params() -> void:
 	mat.set_shader_param(&"fmask_rect", Vector4(rect.position.x, rect.position.y, rect.size.x, rect.size.y))
 	mat.set_shader_param(&"fmask_color", _mask_node.overlay_color)
 	mat.set_shader_param(&"fmask_opacity", _mask_node.overlay_opacity)
-
+	mat.set_shader_param(&"fbrush_pos", _brush_pos)
+	mat.set_shader_param(&"fbrush_radius", float(_radius.value) if _brush_active else 0.0)
+	mat.set_shader_param(&"fbrush_hardness", float(_hardness.value))
+	mat.set_shader_param(&"fbrush_strength", float(_strength.value))
+	mat.set_shader_param(&"fbrush_erase", 1.0 if _erasing else 0.0)
+ 
 func _find_terrain(node: Node) -> Node:
 	if node == null:
 		return null
