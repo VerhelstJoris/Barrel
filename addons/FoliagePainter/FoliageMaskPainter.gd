@@ -1,7 +1,7 @@
 @tool
 class_name FoliageMaskPainter extends Node3D
 
-const MASK_FORMAT := Image.FORMAT_L8
+const MASK_FORMAT := Image.FORMAT_R8
 const SAVE_EXTENSIONS := ["res", "tres", "png"]
 
 # Saved mask asset; assigning one loads it into the paint buffer.
@@ -45,6 +45,7 @@ func _ready() -> void:
 		queue_free()
 
 # Mask is centred on this node, so moving it moves the painted area.
+# TODO: improve this to calculate this dynamically
 func get_world_rect() -> Rect2:
 	var centre := Vector2(global_position.x, global_position.z)
 	return Rect2(centre - _world_size * 0.5, _world_size)
@@ -159,6 +160,23 @@ func _target_size() -> Vector2i:
 	var aspect := 1.0 if _world_size.x <= 0.0 else _world_size.y / _world_size.x
 	return Vector2i(_resolution, maxi(1, roundi(float(_resolution) * aspect)))
 
+# Image.convert() between single-channel formats averages RGB, so reinterpret the bytes instead.
+func _to_mask_format(src: Image) -> Image:
+	var fmt := src.get_format()
+	if fmt == MASK_FORMAT:
+		return src
+	if fmt == Image.FORMAT_L8:
+		return Image.create_from_data(src.get_width(), src.get_height(), false, MASK_FORMAT, src.get_data())
+	if fmt != Image.FORMAT_RGBA8:
+		src.convert(Image.FORMAT_RGBA8)
+	var rgba := src.get_data()
+	var count := src.get_width() * src.get_height()
+	var red := PackedByteArray()
+	red.resize(count)
+	for i in count:
+		red[i] = rgba[i * 4]
+	return Image.create_from_data(src.get_width(), src.get_height(), false, MASK_FORMAT, red)
+
 func _ensure_buffer() -> void:
 	if _loaded:
 		return
@@ -167,9 +185,7 @@ func _ensure_buffer() -> void:
 	if _mask != null:
 		src = _mask.get_image()
 	if src != null and not src.is_empty():
-		src = src.duplicate() as Image
-		if src.get_format() != MASK_FORMAT:
-			src.convert(MASK_FORMAT)
+		src = _to_mask_format(src.duplicate() as Image)
 		if src.get_width() != _size.x or src.get_height() != _size.y:
 			src.resize(_size.x, _size.y, Image.INTERPOLATE_BILINEAR)
 		_image = src
