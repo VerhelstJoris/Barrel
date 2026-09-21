@@ -34,6 +34,8 @@ uniform float foliage_normal_flatten_far = 1.0f;
 uniform float foliage_specular_far_flatten = 1.0f;
 // Pushes roughness toward 1 at full distance, broadening what highlight is left.
 uniform float foliage_roughness_far_flatten = 0.5f;
+// Pulls the patch value toward the middle at full distance; 0 keeps full contrast, 1 makes the far field one colour.
+uniform float foliage_patch_contrast_far : hint_range(0.0, 1.0) = 0.0f;
 group_uniforms;
 
 
@@ -55,7 +57,12 @@ float foliage_coarsen(float clump)
 // The shared colour lookup: patches coarsen with distance on both sides.
 float foliage_patch_factor(vec2 world_xz, float clump)
 {
-	float fine = texture(foliage_patch_noise,world_xz / max(foliage_patch_scale, 0.001)).r;
-	float coarse = texture(foliage_patch_noise,(world_xz + vec2(37.0, 11.0))/ max(foliage_patch_scale * foliage_patch_scale_far_mult, 0.001)).r;
-	return mix(fine, coarse, clump);
+	float fine = texture(foliage_patch_noise,
+			world_xz / max(foliage_patch_scale, 0.001)).r;
+	float coarse = texture(foliage_patch_noise,
+			(world_xz + vec2(37.0, 11.0))
+			/ max(foliage_patch_scale * foliage_patch_scale_far_mult, 0.001)).r;
+	float value = mix(fine, coarse, clump);
+	// Contrast falls with the same factor as everything else, so near blades keep their full range.
+	return mix(value, 0.5, clump * foliage_patch_contrast_far);
 }
