@@ -148,34 +148,19 @@ func save_mask() -> Error:
 		var tex := PortableCompressedTexture2D.new()
 		tex.create_from_image(img, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS)
 		err = ResourceSaver.save(tex, path)
+		if err == OK:
+			tex.take_over_path(path)
+			_mask = tex
 	if err != OK:
 		return err
 	EditorInterface.get_resource_filesystem().update_file(path)
 	# Assign the backing var directly so the live buffer survives the save.
-	_mask = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE)
 	notify_property_list_changed()
 	return OK
 
 func _target_size() -> Vector2i:
 	var aspect := 1.0 if _world_size.x <= 0.0 else _world_size.y / _world_size.x
 	return Vector2i(_resolution, maxi(1, roundi(float(_resolution) * aspect)))
-
-# Image.convert() between single-channel formats averages RGB, so reinterpret the bytes instead.
-func _to_mask_format(src: Image) -> Image:
-	var fmt := src.get_format()
-	if fmt == MASK_FORMAT:
-		return src
-	if fmt == Image.FORMAT_L8:
-		return Image.create_from_data(src.get_width(), src.get_height(), false, MASK_FORMAT, src.get_data())
-	if fmt != Image.FORMAT_RGBA8:
-		src.convert(Image.FORMAT_RGBA8)
-	var rgba := src.get_data()
-	var count := src.get_width() * src.get_height()
-	var red := PackedByteArray()
-	red.resize(count)
-	for i in count:
-		red[i] = rgba[i * 4]
-	return Image.create_from_data(src.get_width(), src.get_height(), false, MASK_FORMAT, red)
 
 func _ensure_buffer() -> void:
 	if _loaded:
@@ -185,7 +170,10 @@ func _ensure_buffer() -> void:
 	if _mask != null:
 		src = _mask.get_image()
 	if src != null and not src.is_empty():
-		src = _to_mask_format(src.duplicate() as Image)
+		src = src.duplicate() as Image
+		# Converting to R8 copies the red channel; only gray destinations average the channels.
+		if src.get_format() != MASK_FORMAT:
+			src.convert(MASK_FORMAT)
 		if src.get_width() != _size.x or src.get_height() != _size.y:
 			src.resize(_size.x, _size.y, Image.INTERPOLATE_BILINEAR)
 		_image = src
