@@ -14,6 +14,8 @@ class_name WorldSDFBaker extends Node3D
 @export_group("Output")
 @export_dir var output_directory : String = "res://wind"
 @export var output_name : String = "WorldSDF"
+@export var half_precision_output : bool = true
+@export var compress_output : bool = false
 
 @export_group("Terrain")
 @export var terrain_node : Terrain3D
@@ -429,7 +431,10 @@ func _save_field(field : PackedFloat32Array) -> void:
 	if(error != OK):
 		push_error("WindSDFBaker: failed to write %s.exr (error %d)" % [base_path, error])
 		return
- 
+
+	if(!_save_runtime_image(image, base_path)):
+		return
+
 	var meta : Dictionary = {
 		"resolution": resolution,
 		"origin_x": _origin.x,
@@ -447,4 +452,33 @@ func _save_field(field : PackedFloat32Array) -> void:
  
 	if(Engine.is_editor_hint()):
 		EditorInterface.get_resource_filesystem().scan()
- 
+
+# an Image inside a .res never touches the import pipeline, which is both what keeps the float data and its sign and what avoids an exr decode costing seconds at this size
+# half float is the format to ship, since its steps stay far finer than a texel at every distance the steering actually reads
+func _save_runtime_image(image : Image, base_path : String) -> bool:
+	var runtime_image : Image = image
+	if(half_precision_output):
+		runtime_image = image.duplicate() as Image
+		runtime_image.convert(Image.FORMAT_RH)
+
+	var flags : int = ResourceSaver.FLAG_COMPRESS if compress_output else ResourceSaver.FLAG_NONE
+	var error : int = ResourceSaver.save(runtime_image, base_path + ".res", flags)
+	if(error != OK):
+		push_error("WindSDFBaker: failed to write %s.res (error %d)" % [base_path, error])
+		return false
+
+	print("WindSDFBaker: wrote %s.res as %s, %s on disk | point field_image at this rather than the exr" % [
+		base_path,
+		"RH" if half_precision_output else "RF",
+		String.humanize_size(_file_size(base_path + ".res"))])
+
+	return true
+
+func _file_size(path : String) -> int:
+	var file : FileAccess = FileAccess.open(path, FileAccess.READ)
+	if(file == null):
+		return 0
+
+	var length : int = file.get_length()
+	file.close()
+	return length
