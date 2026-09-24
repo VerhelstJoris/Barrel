@@ -39,16 +39,7 @@ const AABB_HEIGHT : float = 1000.0
 @export var load_in_background : bool = true
 @export var report_timing : bool = false
 
-@export_group("Wind")
-@export var wind_direction : Vector2 = Vector2(1.0, 0.0):
-	set(value):
-		wind_direction = value
-		_push_wind_base_params()
-@export var wind_speed : float = 45.0:
-	set(value):
-		wind_speed = value
-		_push_wind_base_params()
-		_push_wind_tuning_params()
+@export var wind_speed_mult : float = 5.0
 
 # authored in metres so the look holds at any speed, since every one of these is a time or a rate in the shader
 @export_group("Tuning Distances")
@@ -86,6 +77,13 @@ func _ready() -> void:
 		apply_field_async()
 	else:
 		apply_field()
+		
+	EnvironmentManager.on_wind_changed.connect(_on_wind_direction_changed)
+	_on_wind_direction_changed(EnvironmentManager.current_wind_direction, EnvironmentManager.current_wind_speed_m_s)
+
+func _on_wind_direction_changed(new_dir : Vector2, new_speed : float):
+	_push_wind_base_params(new_speed * wind_speed_mult, new_dir)
+	_push_wind_tuning_params()
 
 ## Blocking apply, used by the editor button. Also refreshes the cached metadata from the json.
 func apply_field() -> void:
@@ -145,7 +143,7 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 	# a fizzled particle has to outlive its own trail history, and that history is exactly trail_lifetime long
 	material.set_shader_parameter(PARAM_TAIL_HOLD, trail_lifetime)
 
-	_push_wind_base_params()
+	_push_wind_base_params(EnvironmentManager.current_gust_speed_m_s, EnvironmentManager.current_wind_direction)
 	_push_wind_tuning_params()
 	_apply_world_settings()
 	_warn_about_trails(material)
@@ -155,30 +153,13 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 			image.get_width(), image.get_height(), _format_name(source_format),
 			json_usec / 1000.0, load_usec / 1000.0, upload_usec / 1000.0])
 
-## Sets both at once so the derived tuning is only recomputed once.
-func set_wind(direction : Vector2, speed : float) -> void:
-	wind_direction = direction
-	wind_speed = speed
-
-## Direction on the XZ plane; a zero vector is ignored since the shader normalises it.
-func set_wind_direction(direction : Vector2) -> void:
-	if(direction.length_squared() < 0.000001):
-		push_warning("WindStreak: ignoring a zero wind direction")
-		return
-
-	wind_direction = direction
-
-## Metres per second; everything under Tuning Distances is rederived from this.
-func set_wind_speed(speed : float) -> void:
-	wind_speed = maxf(speed, 0.0)
-
-func _push_wind_base_params() -> void:
+func _push_wind_base_params(new_speed : float, new_dir : Vector2) -> void:
 	var material : ShaderMaterial = _shader_material()
 	if(material == null):
 		return
 
-	material.set_shader_parameter(PARAM_WIND_DIRECTION, wind_direction)
-	material.set_shader_parameter(PARAM_WIND_SPEED, wind_speed)
+	material.set_shader_parameter(PARAM_WIND_DIRECTION, new_dir)
+	material.set_shader_parameter(PARAM_WIND_SPEED, new_speed)
 
 # a time in the shader is a distance divided by speed and a rate is a speed divided by a distance, so holding the distances fixed keeps the behaviour identical as speed changes
 func _push_wind_tuning_params() -> void:
@@ -189,7 +170,7 @@ func _push_wind_tuning_params() -> void:
 	if(material == null):
 		return
 
-	var speed : float = maxf(wind_speed, 0.001)
+	var speed : float = maxf(EnvironmentManager.current_wind_speed_m_s * wind_speed_mult, 0.001)
 	material.set_shader_parameter(PARAM_TURN_RATE, speed / maxf(turn_distance, 0.001))
 	material.set_shader_parameter(PARAM_SWAY_FREQUENCY, speed / maxf(sway_wavelength, 0.001))
 	material.set_shader_parameter(PARAM_STALL_WINDOW, stall_distance / speed)
