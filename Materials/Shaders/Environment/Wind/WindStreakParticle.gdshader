@@ -33,8 +33,15 @@ uniform float turn_rate = 4.0;
 uniform float skin = 0.25;
 
 group_uniforms Spawning;
-// half extents of the spawn box around the emitter, so a corner of the map outside this gets nothing
-uniform vec2 spawn_extent = vec2(40.0);
+// an annulus around the emitter, so streaks appear no nearer than the inner radius and no further than the outer
+uniform float spawn_radius = 120.0;
+uniform float spawn_inner_radius = 0.0;
+// shifts the whole ring upwind so streaks sweep toward the emitter rather than materialising all round it, in multiples of the radius
+uniform float spawn_upwind_bias = 0.0;
+// biases the ring toward its upwind side without moving it, 0 spreads evenly and 1 uses only the upwind half
+uniform float spawn_upwind_weight = 0.0;
+// half extents of the old spawn box, used instead of the ring when either axis is above zero
+uniform vec2 spawn_extent = vec2(0.0);
 // how far above the ground a streak rides
 uniform float height_offset = 0.75;
 // read terrain height from the field's green channel instead of sitting flat at the emitter's height
@@ -215,6 +222,28 @@ float ground_height(vec2 xz, float emitter_height) {
 }
 
 // trail meshes are built along local Y, so Y has to follow the travel direction or the ribbon collapses edge on
+// a ring rather than a box, because the emitter is usually the camera and view distance is a radius, not a square
+// the upwind weight skews where on the ring a streak lands, the bias slides the whole ring, and the two compose
+vec2 spawn_offset(uint seed, vec2 wind_dir) {
+	if (spawn_extent.x > 0.0 || spawn_extent.y > 0.0) {
+		return (vec2(rand01(seed), rand01(seed + uint(1))) * 2.0 - 1.0) * spawn_extent;
+	}
+
+	float angle = rand01(seed) * TAU;
+	if (spawn_upwind_weight > 0.0) {
+		// pulling the angle toward the upwind heading crowds the ring on that side while still covering all of it
+		float upwind = atan(-wind_dir.y, -wind_dir.x);
+		float offset = (rand01(seed) * 2.0 - 1.0) * PI;
+		angle = upwind + offset * mix(1.0, 0.5, clamp(spawn_upwind_weight, 0.0, 1.0));
+	}
+
+	// the square root keeps the area per unit radius even, otherwise everything piles into the middle
+	float span = max(spawn_radius - spawn_inner_radius, 0.0);
+	float radius = spawn_inner_radius + span * sqrt(rand01(seed + uint(2)));
+
+	return vec2(cos(angle), sin(angle)) * radius - wind_dir * spawn_radius * spawn_upwind_bias;
+}
+
 mat3 trail_basis(vec2 velocity) {
 	vec2 flat_dir = length(velocity) > 0.0001 ? velocity : wind_direction;
 	vec3 forward = normalize(vec3(flat_dir.x, 0.0, flat_dir.y));
@@ -227,8 +256,7 @@ void start() {
 	vec2 wind = normalize(wind_direction) * wind_speed * unroll_speed_scale;
 
 	if (RESTART_POSITION) {
-		vec2 r = vec2(rand01(seed), rand01(seed + uint(1))) * 2.0 - 1.0;
-		vec2 xz = push_out(EMISSION_TRANSFORM[3].xz + r * spawn_extent);
+		vec2 xz = push_out(EMISSION_TRANSFORM[3].xz + spawn_offset(seed, normalize(wind_direction)));
 		mat3 basis = trail_basis(wind);
 		// born at zero width so the life envelope grows it in rather than it popping into view
 		TRANSFORM = mat4(vec4(0.0), vec4(basis[1], 0.0), vec4(0.0),
