@@ -1,10 +1,10 @@
 {
 	"has_height_channel": true,
-	"metres_per_texel_x": 4.0,
-	"metres_per_texel_z": 4.0,
-	"origin_x": 0.0,
-	"origin_z": -2048.0,
+	"metres_per_texel_x": 3.984375,
+	"metres_per_texel_z": 3.984375,
+	"origin_x": 4.0,
+	"origin_z": -2044.0,
 	"resolution": 512,
-	"size_x": 2048,
-	"size_z": 2048
+	"size_x": 2040,
+	"size_z": 2040
 }

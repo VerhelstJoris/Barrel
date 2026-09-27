@@ -9,6 +9,8 @@ uniform sampler2D sdf_map : filter_linear, repeat_disable;
 uniform vec2 sdf_origin = vec2(0.0);
 // world size of the baked region in metres, which together with the origin maps world XZ onto uv
 uniform vec2 sdf_size = vec2(512.0);
+// how much faster a streak past the edge of the bake fades, as a multiple of the normal rate, 0 lets it carry on unaffected
+uniform float outside_fade_rate = 3.0;
 
 group_uniforms Wind;
 // global wind heading on the XZ plane, needs to be non zero since everything normalises it
@@ -145,13 +147,18 @@ vec2 world_to_uv(vec2 xz) {
 	return (xz - sdf_origin) / sdf_size;
 }
 
+bool inside_region(vec2 xz) {
+	vec2 uv = world_to_uv(xz);
+	return uv.x >= 0.0 && uv.y >= 0.0 && uv.x <= 1.0 && uv.y <= 1.0;
+}
+
 // outside the baked region there is no data, so it reads as open air rather than letting clamped edge texels steer anything
 float sdf_at(vec2 xz) {
-	vec2 uv = world_to_uv(xz);
-	if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
+	if (!inside_region(xz)) {
 		return 1000000.0;
 	}
-	return textureLod(sdf_map, uv, 0.0).r;
+
+	return textureLod(sdf_map, world_to_uv(xz), 0.0).r;
 }
 
 // the gradient of a distance field points away from the nearest surface, which is the normal without ever storing one
@@ -240,9 +247,14 @@ float smoothed_height(vec2 xz) {
 }
 
 // leading the sample along the heading makes a streak start climbing before it reaches a rise, which is what stops it hugging every slope face
-float ground_height(vec2 xz, vec2 heading, float emitter_height) {
+float ground_height(vec2 xz, vec2 heading, float emitter_height, float current_y) {
 	if (!use_height_channel) {
 		return emitter_height + height_offset;
+	}
+
+	// past the edge of the bake there is no ground to read, so a streak holds the height it left with instead of snapping onto a clamped edge texel
+	if (!inside_region(xz)) {
+		return current_y;
 	}
 
 	return smoothed_height(xz + heading * height_lead_distance) + height_offset;
@@ -296,7 +308,7 @@ void start() {
 		mat3 basis = trail_basis(wind);
 		// born at zero width so the life envelope grows it in rather than it popping into view
 		TRANSFORM = mat4(vec4(0.0), vec4(basis[1], 0.0), vec4(0.0),
-			vec4(xz.x, ground_height(xz, normalize(wind_direction), EMISSION_TRANSFORM[3].y), xz.y, 1.0));
+			vec4(xz.x, ground_height(xz, normalize(wind_direction), EMISSION_TRANSFORM[3].y, EMISSION_TRANSFORM[3].y + height_offset), xz.y, 1.0));
 	}
 
 	if (RESTART_VELOCITY) {
@@ -346,6 +358,10 @@ void process() {
 	float fade_step = DELTA / max(fizzle_time, 0.001);
 	if (CUSTOM.w > 0.0) {
 		float direction = stalled ? -1.0 : 1.0 - 2.0 * pressure;
+		// nothing out there steers, deflects or grounds a streak, so it clears out rather than drifting on blind
+		if (outside_fade_rate > 0.0 && !inside_region(xz)) {
+			direction = -outside_fade_rate;
+		}
 		CUSTOM.w = min(CUSTOM.w + direction * fade_step, 1.0);
 	} else {
 		// once fully faded there is no recovery, it only waits long enough for its trail history to roll off rather than popping
@@ -372,7 +388,7 @@ void process() {
 	TRANSFORM[0].xyz = basis[0] * width;
 	TRANSFORM[1].xyz = basis[1];
 	TRANSFORM[2].xyz = basis[2] * width;
-	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y);
+	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, TRANSFORM[3].y);
 	TRANSFORM[3].xyz = vec3(xz.x, settled_height(TRANSFORM[3].y, target_y, speed, DELTA), xz.y);
 	VELOCITY = vec3(velocity.x, 0.0, velocity.y);
 
