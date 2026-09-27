@@ -80,6 +80,23 @@ group_uniforms Sway;
 uniform float sway_degrees = 12.0;
 // oscillations per second, which at constant speed fixes the wavelength at wind_speed over this
 uniform float sway_frequency = 0.4;
+// spread of frequency between streaks, so neighbours do not snake in step
+uniform float sway_frequency_variation = 0.4;
+// spread of peak angle between streaks, so some wander far more than others
+uniform float sway_amplitude_variation = 0.35;
+// blends the tidy sine toward layered noise, which is what stops a long lived streak visibly repeating
+uniform float sway_noise_amount = 0.4;
+// layers of detail in that noise, one is a slow wander and three adds fine chatter on top
+uniform int sway_noise_octaves = 2;
+
+group_uniforms VerticalSway;
+// peak rise and fall in metres, added on top of the ground the streak is riding
+uniform float sway_vertical_amplitude = 0.0;
+uniform float sway_vertical_frequency = 0.5;
+uniform float sway_vertical_frequency_variation = 0.4;
+uniform float sway_vertical_amplitude_variation = 0.35;
+uniform float sway_vertical_noise_amount = 0.4;
+uniform int sway_vertical_noise_octaves = 2;
 
 group_uniforms Width;
 // width multiplier over the particle's life, unassigned reads as a flat 1.0
@@ -123,12 +140,64 @@ vec2 rotate2(vec2 v, float angle) {
 	return vec2(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-// two sines at a non integer ratio stop the wobble reading as a metronome, and running off age gives every streak a wavelength of speed over frequency
+float noise_at_cell(uint seed_base, int cell) {
+	return rand01(hash_uint(seed_base + uint(cell) * uint(747796405))) * 2.0 - 1.0;
+}
+
+// smoothstepped value noise, which unlike a sine never repeats over a streak's life
+float value_noise(float x, uint seed_base) {
+	float cell = floor(x);
+	float t = fract(x);
+	t = t * t * (3.0 - 2.0 * t);
+	return mix(noise_at_cell(seed_base, int(cell)), noise_at_cell(seed_base, int(cell) + 1), t);
+}
+
+// each octave halves in strength and doubles in rate, so one is a slow wander and more adds chatter without changing the overall swing
+float layered_noise(float x, uint seed_base, int octaves) {
+	float total = 0.0;
+	float amplitude = 1.0;
+	float weight = 0.0;
+
+	for (int i = 0; i < 4; i++) {
+		if (i >= octaves) {
+			break;
+		}
+		total += value_noise(x, seed_base + uint(i) * uint(101)) * amplitude;
+		weight += amplitude;
+		x *= 2.0;
+		amplitude *= 0.5;
+	}
+
+	return total / max(weight, 0.001);
+}
+
+// one waveform for both axes: the sines keep a predictable wavelength, the noise breaks up the repetition, and the mix picks between them
+float sway_wave(float age, uint seed_base, uint salt, float frequency, float frequency_variation, float noise_amount, int octaves) {
+	float tuned = frequency * mix(1.0 - frequency_variation, 1.0 + frequency_variation, particle_random(seed_base, salt));
+	float phase = particle_random(seed_base, salt + uint(7)) * TAU;
+	float t = age * tuned;
+
+	float sine = sin(t * TAU + phase) * 0.7 + sin(t * 2.37 * TAU + phase * 1.3) * 0.3;
+	if (noise_amount <= 0.0) {
+		return sine;
+	}
+
+	return mix(sine, layered_noise(t + phase, seed_base + salt, octaves), clamp(noise_amount, 0.0, 1.0));
+}
+
 float sway_angle(float age, uint seed_base) {
-	float frequency = sway_frequency * mix(0.6, 1.4, particle_random(seed_base, uint(17)));
-	float phase = particle_random(seed_base, uint(53)) * TAU;
-	float wave = sin(age * frequency * TAU + phase) * 0.7 + sin(age * frequency * 2.37 * TAU + phase * 1.3) * 0.3;
-	return radians(sway_degrees) * wave;
+	float amplitude = radians(sway_degrees) * mix(1.0 - sway_amplitude_variation, 1.0 + sway_amplitude_variation, particle_random(seed_base, uint(31)));
+	return amplitude * sway_wave(age, seed_base, uint(17), sway_frequency, sway_frequency_variation, sway_noise_amount, sway_noise_octaves);
+}
+
+// vertical is an offset in metres rather than an angle, since the particle only ever moves on XZ and its height comes from the ground
+float sway_height(float age, uint seed_base) {
+	if (sway_vertical_amplitude <= 0.0) {
+		return 0.0;
+	}
+
+	float amplitude = sway_vertical_amplitude * mix(1.0 - sway_vertical_amplitude_variation, 1.0 + sway_vertical_amplitude_variation, particle_random(seed_base, uint(59)));
+	return amplitude * sway_wave(age, seed_base, uint(71), sway_vertical_frequency, sway_vertical_frequency_variation, sway_vertical_noise_amount, sway_vertical_noise_octaves);
 }
 
 // growing in from nothing and shrinking back out stops either end of a life popping, and the fade out has to span the trail so the tail is gone before it dies
@@ -388,8 +457,12 @@ void process() {
 	TRANSFORM[0].xyz = basis[0] * width;
 	TRANSFORM[1].xyz = basis[1];
 	TRANSFORM[2].xyz = basis[2] * width;
-	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, TRANSFORM[3].y);
-	TRANSFORM[3].xyz = vec3(xz.x, settled_height(TRANSFORM[3].y, target_y, speed, DELTA), xz.y);
+	// the stored y already carries last frame's sway, so it is removed before easing and reapplied after, or the two would fight each other
+	float previous_sway = sway_height(max(age - DELTA, 0.0), seed_base);
+	float grounded_y = TRANSFORM[3].y - previous_sway;
+	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, grounded_y);
+	float settled_y = settled_height(grounded_y, target_y, speed, DELTA);
+	TRANSFORM[3].xyz = vec3(xz.x, settled_y + sway_height(age, seed_base), xz.y);
 	VELOCITY = vec3(velocity.x, 0.0, velocity.y);
 
 	if (debug_color) {

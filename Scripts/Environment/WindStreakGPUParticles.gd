@@ -13,6 +13,7 @@ const PARAM_FIZZLE_TIME : StringName = &"fizzle_time"
 const PARAM_TAIL_HOLD : StringName = &"tail_hold"
 const PARAM_LOOKAHEAD_TIME : StringName = &"lookahead_time"
 const PARAM_SWAY_FREQUENCY : StringName = &"sway_frequency"
+const PARAM_SWAY_VERTICAL_FREQUENCY : StringName = &"sway_vertical_frequency"
 const PARAM_LIFE_FADE_OUT : StringName = &"life_fade_out"
 const PARAM_UNROLL_TIME : StringName = &"unroll_time"
 const PARAM_USE_HEIGHT_CHANNEL : StringName = &"use_height_channel"
@@ -68,6 +69,10 @@ const AABB_HEIGHT : float = 1000.0
 @export var sway_wavelength : float = 112.5:
 	set(value):
 		sway_wavelength = value
+		_push_wind_tuning_params()
+@export var sway_vertical_wavelength : float = 90.0:
+	set(value):
+		sway_vertical_wavelength = value
 		_push_wind_tuning_params()
 
 # only applied automatically in game, since doing it in the editor embeds the whole field into the saved scene
@@ -178,6 +183,7 @@ func _push_wind_tuning_params() -> void:
 	var speed : float = maxf(EnvironmentManager.current_wind_speed_m_s * wind_speed_mult, 0.001)
 	material.set_shader_parameter(PARAM_TURN_RATE, speed / maxf(turn_distance, 0.001))
 	material.set_shader_parameter(PARAM_SWAY_FREQUENCY, speed / maxf(sway_wavelength, 0.001))
+	material.set_shader_parameter(PARAM_SWAY_VERTICAL_FREQUENCY, speed / maxf(sway_vertical_wavelength, 0.001))
 	material.set_shader_parameter(PARAM_STALL_WINDOW, stall_distance / speed)
 	material.set_shader_parameter(PARAM_FIZZLE_TIME, fizzle_distance / speed)
 	material.set_shader_parameter(PARAM_LOOKAHEAD_TIME, lookahead_distance / speed)
