@@ -41,6 +41,7 @@ const AABB_HEIGHT : float = 1000.0
 @export var report_timing : bool = false
 
 @export var wind_speed_mult : float = 5.0
+@export var fade_out_floor : float = 1.0
 
 # authored in metres so the look holds at any speed, since every one of these is a time or a rate in the shader
 @export_group("Tuning Distances")
@@ -144,6 +145,7 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 	# a fizzled particle has to outlive its own trail history, and that history is exactly trail_lifetime long
 	material.set_shader_parameter(PARAM_TAIL_HOLD, trail_lifetime)
 
+	material.set_shader_parameter(PARAM_LIFE_FADE_OUT, maxf(fade_out_floor, trail_lifetime / maxf(lifetime, 0.001)))
 	material.set_shader_parameter(PARAM_UNROLL_TIME, trail_lifetime)
 
 	_push_wind_base_params(EnvironmentManager.current_gust_speed_m_s, EnvironmentManager.current_wind_direction)
