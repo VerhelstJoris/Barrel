@@ -1,4 +1,5 @@
 {
+	"has_height_channel": true,
 	"metres_per_texel_x": 4.0,
 	"metres_per_texel_z": 4.0,
 	"origin_x": 0.0,

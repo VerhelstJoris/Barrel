@@ -17,6 +17,17 @@ class_name WorldSDFBaker extends Node3D
 @export var half_precision_output : bool = true
 @export var compress_output : bool = false
 
+@export_group("Height Channel")
+@export var bake_height_channel : bool = true
+# geometry this far above the terrain becomes the ground a streak rides over, so a bridge deck or a rooftop carries wind rather than being tunnelled under
+@export var height_from_static_geometry : bool = true
+@export var static_height_threshold : float = 2.0
+
+@export_group("Terrain Slope")
+@export var slope_blocks_wind : bool = false
+# gradient in metres of rise per metre across, so 1.0 is forty five degrees
+@export var max_traversable_slope : float = 1.0
+
 @export_group("Terrain")
 @export var terrain_node : Terrain3D
 @export var terrain_fallback_height : float = 0.0
@@ -38,6 +49,7 @@ const FAR_OFFSET : int = 20000
 var _terrain_data : Object = null
 var _height_grid : PackedFloat32Array = PackedFloat32Array()
 var _hole_grid : PackedByteArray = PackedByteArray()
+var _surface_grid : PackedFloat32Array = PackedFloat32Array()
 var _origin : Vector2 = Vector2.ZERO
 var _texel_size : Vector2 = Vector2.ONE
  
@@ -47,6 +59,8 @@ var _stat_below_threshold : int = 0
 var _stat_filtered : int = 0
 var _stat_triangles : int = 0
 var _stat_no_data : int = 0
+var _stat_raised_by_geometry : int = 0
+var _stat_steep : int = 0
  
 func _bake_sdf() -> void:
 	if(!Engine.is_editor_hint()):
@@ -67,13 +81,15 @@ func _bake_sdf() -> void:
 	var mask : PackedByteArray = PackedByteArray()
 	mask.resize(resolution * resolution)
 	_rasterise_occluders(mask)
- 
+	_mark_steep_slopes(mask)
+
 	var field : PackedFloat32Array = _build_signed_field(mask)
 	_save_field(field)
- 
-	print("WindSDFBaker: baked %dx%d in %d ms | considered %d, included %d, filtered %d, under height threshold %d, triangles %d, texels with no terrain data %d" % [
+
+	print("WindSDFBaker: baked %dx%d in %d ms | considered %d, included %d, filtered %d, under height threshold %d, triangles %d, texels with no terrain data %d, raised by geometry %d, too steep %d" % [
 		resolution, resolution, Time.get_ticks_msec() - started,
-		_stat_considered, _stat_included, _stat_filtered, _stat_below_threshold, _stat_triangles, _stat_no_data])
+		_stat_considered, _stat_included, _stat_filtered, _stat_below_threshold, _stat_triangles,
+		_stat_no_data, _stat_raised_by_geometry, _stat_steep])
  
 # Terrain3D moved its height data from storage to data in 1.0, so resolve whichever this project has rather than assuming
 func _resolve_terrain_data() -> bool:
@@ -174,6 +190,7 @@ func _rasterise_occluders(mask : PackedByteArray) -> void:
 	_stat_below_threshold = 0
 	_stat_filtered = 0
 	_stat_triangles = 0
+	_reset_surface_grid()
  
 	if(treat_holes_as_solid):
 		for i in mask.size():
@@ -253,6 +270,41 @@ func _clears_terrain(visual : VisualInstance3D) -> bool:
 	var centre : Vector3 = box.get_center()
 	return box.end.y - _height_at_world(centre.x, centre.z) >= min_height_above_terrain
  
+# what a streak rides on: the terrain, except where something solid sits high enough above it to be a surface in its own right
+func _reset_surface_grid() -> void:
+	_surface_grid = _height_grid.duplicate()
+	_stat_raised_by_geometry = 0
+
+func _raise_surface(index : int, height : float) -> void:
+	if(!height_from_static_geometry || index < 0 || index >= _surface_grid.size()):
+		return
+
+	if(height < _height_grid[index] + static_height_threshold || height <= _surface_grid[index]):
+		return
+
+	if(_surface_grid[index] <= _height_grid[index]):
+		_stat_raised_by_geometry += 1
+
+	_surface_grid[index] = height
+
+# a slope too steep to flow up is an obstacle, which is the only way terrain deflects anything since the terrain node itself is never rasterised
+func _mark_steep_slopes(mask : PackedByteArray) -> void:
+	_stat_steep = 0
+	if(!slope_blocks_wind):
+		return
+
+	for y in resolution:
+		for x in resolution:
+			var rise_x : float = _height_at_texel(x + 1, y) - _height_at_texel(x - 1, y)
+			var rise_y : float = _height_at_texel(x, y + 1) - _height_at_texel(x, y - 1)
+			var gradient : float = Vector2(rise_x / (2.0 * _texel_size.x), rise_y / (2.0 * _texel_size.y)).length()
+
+			if(gradient > max_traversable_slope):
+				var index : int = y * resolution + x
+				if(mask[index] == 0):
+					_stat_steep += 1
+				mask[index] = 1
+
 func _rasterise_visual(visual : VisualInstance3D, mask : PackedByteArray) -> void:
 	var mesh_instance := visual as MeshInstance3D
 	if(use_mesh_triangles && mesh_instance != null && mesh_instance.mesh != null):
@@ -281,12 +333,32 @@ func _rasterise_faces(faces : PackedVector3Array, transform : Transform3D, mask 
 			continue
  
 		_stat_triangles += 1
+		_raise_surface_under_triangle(v0, v1, v2)
 		_rasterise_triangle(
 			_world_to_texel(v0.x, v0.z),
 			_world_to_texel(v1.x, v1.z),
 			_world_to_texel(v2.x, v2.z),
 			mask)
  
+# the top of a triangle is a walkable surface when it clears the terrain, so the texels beneath it take its height rather than the ground's
+func _raise_surface_under_triangle(v0 : Vector3, v1 : Vector3, v2 : Vector3) -> void:
+	if(!height_from_static_geometry):
+		return
+
+	var a : Vector2 = _world_to_texel(v0.x, v0.z)
+	var b : Vector2 = _world_to_texel(v1.x, v1.z)
+	var c : Vector2 = _world_to_texel(v2.x, v2.z)
+	var top : float = max(v0.y, v1.y, v2.y)
+
+	var min_x : int = clampi(int(floor(min(a.x, b.x, c.x))), 0, resolution - 1)
+	var max_x : int = clampi(int(ceil(max(a.x, b.x, c.x))), 0, resolution - 1)
+	var min_y : int = clampi(int(floor(min(a.y, b.y, c.y))), 0, resolution - 1)
+	var max_y : int = clampi(int(ceil(max(a.y, b.y, c.y))), 0, resolution - 1)
+
+	for y in range(min_y, max_y + 1):
+		for x in range(min_x, max_x + 1):
+			_raise_surface(y * resolution + x, top)
+
 func _rasterise_triangle(a : Vector2, b : Vector2, c : Vector2, mask : PackedByteArray) -> void:
 	var min_x : int = clampi(int(floor(min(a.x, b.x, c.x))), 0, resolution - 1)
 	var max_x : int = clampi(int(ceil(max(a.x, b.x, c.x))), 0, resolution - 1)
@@ -422,17 +494,39 @@ func _distance_from(mask : PackedByteArray, seed_value : int) -> PackedFloat32Ar
  
 	return out
  
+# distance in red and the surface a streak rides on in green, so the shader answers both from one sample in one uv space
+func _build_field_image(field : PackedFloat32Array, pack_height : bool) -> Image:
+	if(!pack_height):
+		return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, field.to_byte_array())
+
+	var packed : PackedFloat32Array = PackedFloat32Array()
+	packed.resize(field.size() * 2)
+	for i in field.size():
+		packed[i * 2] = field[i]
+		packed[i * 2 + 1] = _surface_grid[i]
+
+	return Image.create_from_data(resolution, resolution, false, Image.FORMAT_RGF, packed.to_byte_array())
+
+func _saved_format_name(pack_height : bool) -> String:
+	if(half_precision_output):
+		return "RGH" if pack_height else "RH"
+
+	return "RGF" if pack_height else "RF"
+
 # distances are stored raw in metres, which needs a float format, so the companion json carries the world mapping a sampler needs
 func _save_field(field : PackedFloat32Array) -> void:
-	var image : Image = Image.create_from_data(resolution, resolution, false, Image.FORMAT_RF, field.to_byte_array())
+	var pack_height : bool = bake_height_channel && _surface_grid.size() == field.size()
+	var image : Image = _build_field_image(field, pack_height)
 	var base_path : String = output_directory.path_join(output_name)
- 
-	var error : int = image.save_exr(base_path + ".exr", true)
+
+	# the exr is only for eyeballing the bake in an image viewer, so it keeps full precision
+	# grayscale only holds for a single channel, so packing height has to turn it off
+	var error : int = image.save_exr(base_path + ".exr", !pack_height)
 	if(error != OK):
 		push_error("WindSDFBaker: failed to write %s.exr (error %d)" % [base_path, error])
 		return
 
-	if(!_save_runtime_image(image, base_path)):
+	if(!_save_runtime_image(image, pack_height, base_path)):
 		return
 
 	var meta : Dictionary = {
@@ -443,23 +537,24 @@ func _save_field(field : PackedFloat32Array) -> void:
 		"size_z": region_size.y,
 		"metres_per_texel_x": _texel_size.x,
 		"metres_per_texel_z": _texel_size.y,
+		"has_height_channel": pack_height,
 	}
- 
+
 	var file : FileAccess = FileAccess.open(base_path + ".json", FileAccess.WRITE)
 	if(file != null):
 		file.store_string(JSON.stringify(meta, "\t"))
 		file.close()
- 
+
 	if(Engine.is_editor_hint()):
 		EditorInterface.get_resource_filesystem().scan()
 
 # an Image inside a .res never touches the import pipeline, which is both what keeps the float data and its sign and what avoids an exr decode costing seconds at this size
 # half float is the format to ship, since its steps stay far finer than a texel at every distance the steering actually reads
-func _save_runtime_image(image : Image, base_path : String) -> bool:
+func _save_runtime_image(image : Image, pack_height : bool, base_path : String) -> bool:
 	var runtime_image : Image = image
 	if(half_precision_output):
 		runtime_image = image.duplicate() as Image
-		runtime_image.convert(Image.FORMAT_RH)
+		runtime_image.convert(Image.FORMAT_RGH if pack_height else Image.FORMAT_RH)
 
 	var flags : int = ResourceSaver.FLAG_COMPRESS if compress_output else ResourceSaver.FLAG_NONE
 	var error : int = ResourceSaver.save(runtime_image, base_path + ".res", flags)
@@ -467,10 +562,11 @@ func _save_runtime_image(image : Image, base_path : String) -> bool:
 		push_error("WindSDFBaker: failed to write %s.res (error %d)" % [base_path, error])
 		return false
 
-	print("WindSDFBaker: wrote %s.res as %s, %s on disk | point field_image at this rather than the exr" % [
+	print("WindSDFBaker: wrote %s.res as %s, %s on disk | point field_image at this rather than the exr%s" % [
 		base_path,
-		"RH" if half_precision_output else "RF",
-		String.humanize_size(_file_size(base_path + ".res"))])
+		_saved_format_name(pack_height),
+		String.humanize_size(_file_size(base_path + ".res")),
+		", and turn on use_height_channel in the shader" if pack_height else ""])
 
 	return true
 
