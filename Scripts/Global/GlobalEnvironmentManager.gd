@@ -4,10 +4,32 @@ class_name GlobalEnvironmentManagerSingleton extends Node
 @export var current_gust_speed_m_s : float = 40.0
 @export var current_wind_direction : Vector2 = Vector2(0.664929, 0.746907)
 
+var current_settings : EnvironmentSettings
+var current_player_following_effects : Array[Node]
+
 signal on_wind_changed(direction ,speed)
 signal on_gust_changed(speed)
 
 func _initalize(settings : EnvironmentSettings) -> void:
+	current_settings = settings
+	
+	var player : Player = Player.current_player
+	if(!player):
+		push_error("Cannot Initialize the environment, could not find active player")
+		return
+	
+	for	effect in current_player_following_effects:
+		effect.queue_free()
+	current_player_following_effects.clear()	
+	
+	for	effect in settings.player_following_effects:
+		if(!effect.can_instantiate()):
+			continue
+				
+		var new_effect = effect.instantiate()
+		player.add_child(new_effect)
+		new_effect.set_position(Vector3.ZERO)
+			
 	_set_wind_direction(settings.current_wind_direction)
 	_set_wind_speed(settings.current_wind_speed_m_s)
 	_set_gust_speed(settings.current_gust_speed_m_s)

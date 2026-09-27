@@ -20,6 +20,16 @@ class_name Player extends CharacterBody3D
 
 @onready var arms: FPArms = %FP_Arms
 
+static var current_player : Player
+
+func _enter_tree() -> void:
+	if(current_player != self && current_player != null):
+		push_error("2 Players present!?")
+	current_player = self
+
+func _exit_tree() -> void:
+	if current_player == self:
+		current_player = null
 
 func _ready() -> void:
 	_setup_animation_data()

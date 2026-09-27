@@ -15,6 +15,10 @@ group_uniforms Wind;
 uniform vec2 wind_direction = vec2(1.0, 0.0);
 // metres per second, held constant so steering bends the path rather than slowing it
 uniform float wind_speed = 4.0;
+// speed multiplier at birth, which lays down trail history faster so a fresh streak reaches full length sooner
+uniform float unroll_speed_scale = 1.0;
+// seconds the boost eases away over, pushed from trail_lifetime so it is spent exactly when the trail is full
+uniform float unroll_time = 1.5;
 // distance from a surface at which deflection starts, and the band the lookahead treats as crowded
 uniform float deflect_radius = 12.0;
 // how much being deflected ages a streak early, wearing it thinner the more geometry it has fought past
@@ -33,6 +37,8 @@ group_uniforms Spawning;
 uniform vec2 spawn_extent = vec2(40.0);
 // how far above the ground a streak rides
 uniform float height_offset = 0.75;
+// read terrain height from the field's green channel instead of sitting flat at the emitter's height
+uniform bool use_height_channel = false;
 
 group_uniforms Stalling;
 // time constant of the lagging anchor, which sets the distance the progress check measures against
@@ -89,6 +95,11 @@ float particle_random(uint seed_base, uint salt) {
 	return rand01(hash_uint(seed_base + salt));
 }
 
+// a fresh streak has no history behind it, so it starts quick to lay some down and eases back to wind speed once it has
+float unroll_scale(float age) {
+	return mix(unroll_speed_scale, 1.0, smoothstep(0.0, max(unroll_time, 0.001), age));
+}
+
 vec2 rotate2(vec2 v, float angle) {
 	float c = cos(angle);
 	float s = sin(angle);
@@ -123,7 +134,7 @@ vec2 world_to_uv(vec2 xz) {
 float sdf_at(vec2 xz) {
 	vec2 uv = world_to_uv(xz);
 	if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
-		return 1e6;
+		return 1000000.0;
 	}
 	return textureLod(sdf_map, uv, 0.0).r;
 }
@@ -135,7 +146,7 @@ vec2 sdf_normal(vec2 xz) {
 		sdf_at(xz + vec2(texel.x, 0.0)) - sdf_at(xz - vec2(texel.x, 0.0)),
 		sdf_at(xz + vec2(0.0, texel.y)) - sdf_at(xz - vec2(0.0, texel.y)));
 	float len = length(gradient);
-	return len > 1e-5 ? gradient / len : vec2(0.0);
+	return len > 0.00001 ? gradient / len : vec2(0.0);
 }
 
 // strips the part of the wind heading into a surface, scaled by proximity, so flow slides along an obstacle instead of stopping at it
@@ -153,7 +164,7 @@ vec2 steer_direction(vec2 xz, vec2 base, float side) {
 	vec2 v = base - n * min(0.0, dot(base, n)) * (1.0 - smoothstep(0.0, deflect_radius, d));
 
 	// a dead head on approach cancels to zero, so each particle's side decides which way round it goes
-	if (length(v) < 1e-3) {
+	if (length(v) < 0.001) {
 		v = vec2(-n.y, n.x) * side;
 	}
 	return normalize(v);
@@ -161,7 +172,7 @@ vec2 steer_direction(vec2 xz, vec2 base, float side) {
 
 // stepping the probe forward and re-steering at each one follows roughly the path the particle will take, so a streak that would curve clear is not mistaken for one about to hit
 // side is passed in so a probe reaching a head on stall resolves the same way the particle itself would
-float closing_ahead(vec2 xz, vec2 velocity, vec2 base, float side) {
+float closing_ahead(vec2 xz, vec2 velocity, vec2 base, float side, float speed) {
 	if (lookahead_time <= 0.0 || lookahead_steps <= 0) {
 		return 0.0;
 	}
@@ -175,10 +186,10 @@ float closing_ahead(vec2 xz, vec2 velocity, vec2 base, float side) {
 
 	for (int i = 0; i < lookahead_steps; i++) {
 		probe += heading * step_time;
-		heading = steer_direction(probe, base, side) * wind_speed;
+		heading = steer_direction(probe, base, side) * speed;
 
 		// the closest approach anywhere along the path matters, not just wherever the last step happened to land
-		float travelled = float(i + 1) * step_time * wind_speed;
+		float travelled = float(i + 1) * step_time * speed;
 		float closing = clamp((here - sdf_at(probe)) / max(travelled, 0.001), 0.0, 1.0);
 		float crowding = 1.0 - smoothstep(0.0, max(deflect_radius, 0.001), sdf_at(probe));
 		worst = max(worst, closing * crowding);
@@ -197,12 +208,15 @@ vec2 push_out(vec2 xz) {
 }
 
 float ground_height(vec2 xz, float emitter_height) {
+	if (use_height_channel) {
+		return textureLod(sdf_map, clamp(world_to_uv(xz), 0.0, 1.0), 0.0).g + height_offset;
+	}
 	return emitter_height + height_offset;
 }
 
 // trail meshes are built along local Y, so Y has to follow the travel direction or the ribbon collapses edge on
 mat3 trail_basis(vec2 velocity) {
-	vec2 flat_dir = length(velocity) > 1e-4 ? velocity : wind_direction;
+	vec2 flat_dir = length(velocity) > 0.0001 ? velocity : wind_direction;
 	vec3 forward = normalize(vec3(flat_dir.x, 0.0, flat_dir.y));
 	vec3 side = normalize(cross(forward, vec3(0.0, 1.0, 0.0)));
 	return mat3(side, forward, cross(side, forward));
@@ -210,10 +224,10 @@ mat3 trail_basis(vec2 velocity) {
 
 void start() {
 	uint seed = hash_uint(NUMBER + RANDOM_SEED);
-	vec2 wind = normalize(wind_direction) * wind_speed;
+	vec2 wind = normalize(wind_direction) * wind_speed * unroll_speed_scale;
 
 	if (RESTART_POSITION) {
-		vec2 r = vec2(rand01(seed), rand01(seed + 1u)) * 2.0 - 1.0;
+		vec2 r = vec2(rand01(seed), rand01(seed + uint(1))) * 2.0 - 1.0;
 		vec2 xz = push_out(EMISSION_TRANSFORM[3].xz + r * spawn_extent);
 		mat3 basis = trail_basis(wind);
 		// born at zero width so the life envelope grows it in rather than it popping into view
@@ -228,7 +242,7 @@ void start() {
 	if (RESTART_CUSTOM) {
 		CUSTOM.x = 0.0;
 		// one window of travel upwind is exactly where the anchor settles for straight motion, so a fresh particle does not read as stalled
-		CUSTOM.yz = TRANSFORM[3].xz - normalize(wind_direction) * wind_speed * stall_window;
+		CUSTOM.yz = TRANSFORM[3].xz - normalize(wind_direction) * wind_speed * unroll_speed_scale * stall_window;
 		CUSTOM.w = 1.0;
 	}
 }
@@ -238,12 +252,13 @@ void process() {
 	CUSTOM.x += DELTA;
 	float age = CUSTOM.x;
 	float side = particle_random(seed_base, uint(131)) > 0.5 ? 1.0 : -1.0;
+	float speed = wind_speed * unroll_scale(age);
 
 	// sway rotates the wind before steering, so the deflection rule still strips any part of it that would swing into a wall
 	vec2 xz = TRANSFORM[3].xz;
 	vec2 base = rotate2(normalize(wind_direction), sway_angle(age, seed_base));
 	vec2 steered = steer_direction(xz, base, side);
-	vec2 target = steered * wind_speed;
+	vec2 target = steered * speed;
 
 	// how far the geometry turned the streak off its intended heading, zero running straight and one fully reversed
 	float deflection = clamp((1.0 - dot(base, steered)) * 0.5, 0.0, 1.0);
@@ -251,17 +266,17 @@ void process() {
 
 	// easing toward the steered direction gives the flow some mass, so it overshoots an obstacle slightly instead of snapping back
 	vec2 velocity = mix(VELOCITY.xz, target, 1.0 - exp(-turn_rate * DELTA));
-	velocity = length(velocity) > 1e-4 ? normalize(velocity) * wind_speed : target;
+	velocity = length(velocity) > 0.0001 ? normalize(velocity) * speed : target;
 
 	xz = push_out(xz + velocity * DELTA);
 
 	// the anchor lags one window behind, so straight travel keeps it a full window away while vibrating in a pocket lets it catch up
-	CUSTOM.yz = mix(CUSTOM.yz, xz, 1.0 - exp(-DELTA / max(stall_window, 1e-3)));
-	float efficiency = distance(xz, CUSTOM.yz) / max(wind_speed * stall_window, 1e-3);
+	CUSTOM.yz = mix(CUSTOM.yz, xz, 1.0 - exp(-DELTA / max(stall_window, 0.001)));
+	float efficiency = distance(xz, CUSTOM.yz) / max(speed * stall_window, 0.001);
 	bool stalled = efficiency < stall_threshold;
 
 	// the probe only pulls the fade down while it is closing, and lets it climb again the moment it is not, so a streak that slips past widens back out
-	float closing = closing_ahead(xz, velocity, base, side) * lookahead_closing;
+	float closing = closing_ahead(xz, velocity, base, side, speed) * lookahead_closing;
 	float pressure = clamp(closing + deflection * deflect_fade, 0.0, 1.0);
 
 	float fade_step = DELTA / max(fizzle_time, 0.001);
@@ -273,7 +288,7 @@ void process() {
 		CUSTOM.w -= fade_step;
 	}
 
-	if (CUSTOM.w <= -tail_hold / max(fizzle_time, 1e-3)) {
+	if (CUSTOM.w <= -tail_hold / max(fizzle_time, 0.001)) {
 		ACTIVE = false;
 	}
 

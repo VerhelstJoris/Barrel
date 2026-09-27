@@ -14,6 +14,7 @@ const PARAM_TAIL_HOLD : StringName = &"tail_hold"
 const PARAM_LOOKAHEAD_TIME : StringName = &"lookahead_time"
 const PARAM_SWAY_FREQUENCY : StringName = &"sway_frequency"
 const PARAM_LIFE_FADE_OUT : StringName = &"life_fade_out"
+const PARAM_UNROLL_TIME : StringName = &"unroll_time"
 const PARAM_USE_HEIGHT_CHANNEL : StringName = &"use_height_channel"
 
 # keys written by the sdf baker into the field's companion json
@@ -142,6 +143,8 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 
 	# a fizzled particle has to outlive its own trail history, and that history is exactly trail_lifetime long
 	material.set_shader_parameter(PARAM_TAIL_HOLD, trail_lifetime)
+
+	material.set_shader_parameter(PARAM_UNROLL_TIME, trail_lifetime)
 
 	_push_wind_base_params(EnvironmentManager.current_gust_speed_m_s, EnvironmentManager.current_wind_direction)
 	_push_wind_tuning_params()
