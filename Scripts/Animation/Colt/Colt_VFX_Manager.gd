@@ -34,6 +34,7 @@ var smoke_renderer : LineRenderer
 
 @export var min_muzzle_smoke_move_speed : Vector3 = Vector3(-0.1, 0.2, -0.1)
 @export var max_muzzle_smoke_move_speed : Vector3 = Vector3(0.1, 0.5, 0.1)
+@export var wind_move_speed_mult : float = 0.1
 @export var muzzle_smoke_averaging_speed : float = 15
 
 @export_subgroup("length subdiv")
@@ -160,7 +161,7 @@ func _add_muzzle_smoke_point() -> void:
 	
 func _process_muzzle_smoke_points(_delta : float) -> void:
 	if muzzle_smoke_active:
-		_update_existing_muzzle_points(_delta)
+		_update_existing_muzzle_points(_delta, EnvironmentManager.current_wind_speed_m_s, EnvironmentManager.current_wind_direction)
 
 		_smoke_add_point_timer += _delta
 		if(_smoke_add_point_timer > _smoke_point_tracking_time / _point_amount):
@@ -171,15 +172,17 @@ func _process_muzzle_smoke_points(_delta : float) -> void:
 			smoke_renderer.points = muzzle_positions
 			smoke_renderer.pre_computed_thickness_arr = muzzle_smoke_width_arr
 	
-func _update_existing_muzzle_points(_delta : float) -> void:
+func _update_existing_muzzle_points(_delta : float, _wind_speed : float, _wind_dir : Vector2) -> void:
 	_match_age_array_size()
 
 	var added : Vector3= Vector3(randf_range(min_muzzle_smoke_move_speed.x, max_muzzle_smoke_move_speed.x) ,
 		randf_range(min_muzzle_smoke_move_speed.y, max_muzzle_smoke_move_speed.y),
 		randf_range(min_muzzle_smoke_move_speed.z, max_muzzle_smoke_move_speed.z)) * _delta
 
+	var added_wind : Vector3 = Vector3(_wind_dir.x * _wind_speed * wind_move_speed_mult * _delta,0,_wind_dir.y * _wind_speed * wind_move_speed_mult* _delta)
+
 	for id in muzzle_positions.size():
-		muzzle_positions[id] +=  added
+		muzzle_positions[id] +=  (added + added_wind)
 		muzzle_ages[id] += _delta
 		muzzle_smoke_width_arr[id] = _width_for_age(muzzle_ages[id])
 		
