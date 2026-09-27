@@ -42,10 +42,18 @@ uniform float spawn_upwind_bias = 0.0;
 uniform float spawn_upwind_weight = 0.0;
 // half extents of the old spawn box, used instead of the ring when either axis is above zero
 uniform vec2 spawn_extent = vec2(0.0);
+
+group_uniforms Height;
+// read the ride surface from the field's green channel instead of sitting flat at the emitter's height
+uniform bool use_height_channel = false;
 // how far above the ground a streak rides
 uniform float height_offset = 0.75;
-// read terrain height from the field's green channel instead of sitting flat at the emitter's height
-uniform bool use_height_channel = false;
+// radius the ground is averaged over, so a streak follows the shape of the land rather than every bump in it
+uniform float height_smooth_radius = 0.0;
+// samples the ground this far along the direction of travel, so a streak starts climbing before it reaches a rise, negative trails instead
+uniform float height_lead_distance = 0.0;
+// distance a streak takes to catch up to the ground beneath it, 0 sticks to it exactly
+uniform float height_follow_distance = 0.0;
 
 group_uniforms Stalling;
 // time constant of the lagging anchor, which sets the distance the progress check measures against
@@ -214,14 +222,41 @@ vec2 push_out(vec2 xz) {
 	return xz + sdf_normal(xz) * (-d + skin);
 }
 
-float ground_height(vec2 xz, float emitter_height) {
-	if (use_height_channel) {
-		return textureLod(sdf_map, clamp(world_to_uv(xz), 0.0, 1.0), 0.0).g + height_offset;
-	}
-	return emitter_height + height_offset;
+float height_at(vec2 xz) {
+	return textureLod(sdf_map, clamp(world_to_uv(xz), 0.0, 1.0), 0.0).g;
 }
 
-// trail meshes are built along local Y, so Y has to follow the travel direction or the ribbon collapses edge on
+// air rides the shape of the land rather than every bump in it, so the ground is averaged over a footprint instead of point sampled
+float smoothed_height(vec2 xz) {
+	if (height_smooth_radius <= 0.0) {
+		return height_at(xz);
+	}
+
+	vec2 step_x = vec2(height_smooth_radius, 0.0);
+	vec2 step_y = vec2(0.0, height_smooth_radius);
+	return (height_at(xz)
+		+ height_at(xz + step_x) + height_at(xz - step_x)
+		+ height_at(xz + step_y) + height_at(xz - step_y)) * 0.2;
+}
+
+// leading the sample along the heading makes a streak start climbing before it reaches a rise, which is what stops it hugging every slope face
+float ground_height(vec2 xz, vec2 heading, float emitter_height) {
+	if (!use_height_channel) {
+		return emitter_height + height_offset;
+	}
+
+	return smoothed_height(xz + heading * height_lead_distance) + height_offset;
+}
+
+// easing toward the ground rather than snapping to it gives the vertical motion the same inertia the heading already has
+float settled_height(float current_y, float target_y, float speed, float delta) {
+	if (!use_height_channel || height_follow_distance <= 0.0) {
+		return target_y;
+	}
+
+	return mix(current_y, target_y, 1.0 - exp(-(speed / height_follow_distance) * delta));
+}
+
 // a ring rather than a box, because the emitter is usually the camera and view distance is a radius, not a square
 // the upwind weight skews where on the ring a streak lands, the bias slides the whole ring, and the two compose
 vec2 spawn_offset(uint seed, vec2 wind_dir) {
@@ -244,6 +279,7 @@ vec2 spawn_offset(uint seed, vec2 wind_dir) {
 	return vec2(cos(angle), sin(angle)) * radius - wind_dir * spawn_radius * spawn_upwind_bias;
 }
 
+// trail meshes are built along local Y, so Y has to follow the travel direction or the ribbon collapses edge on
 mat3 trail_basis(vec2 velocity) {
 	vec2 flat_dir = length(velocity) > 0.0001 ? velocity : wind_direction;
 	vec3 forward = normalize(vec3(flat_dir.x, 0.0, flat_dir.y));
@@ -260,7 +296,7 @@ void start() {
 		mat3 basis = trail_basis(wind);
 		// born at zero width so the life envelope grows it in rather than it popping into view
 		TRANSFORM = mat4(vec4(0.0), vec4(basis[1], 0.0), vec4(0.0),
-			vec4(xz.x, ground_height(xz, EMISSION_TRANSFORM[3].y), xz.y, 1.0));
+			vec4(xz.x, ground_height(xz, normalize(wind_direction), EMISSION_TRANSFORM[3].y), xz.y, 1.0));
 	}
 
 	if (RESTART_VELOCITY) {
@@ -336,7 +372,8 @@ void process() {
 	TRANSFORM[0].xyz = basis[0] * width;
 	TRANSFORM[1].xyz = basis[1];
 	TRANSFORM[2].xyz = basis[2] * width;
-	TRANSFORM[3].xyz = vec3(xz.x, ground_height(xz, EMISSION_TRANSFORM[3].y), xz.y);
+	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y);
+	TRANSFORM[3].xyz = vec3(xz.x, settled_height(TRANSFORM[3].y, target_y, speed, DELTA), xz.y);
 	VELOCITY = vec3(velocity.x, 0.0, velocity.y);
 
 	if (debug_color) {
