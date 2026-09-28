@@ -109,8 +109,10 @@ uniform sampler2D width_over_life : hint_default_white, filter_linear, repeat_di
 uniform float width_variation = 0.35;
 // fraction of life spent growing in from nothing, so nothing pops into view at birth
 uniform float life_fade_in = 0.1;
-// fraction of life spent shrinking away, which must cover trail_lifetime or the tail pops at death
+// fraction of life the shrink itself takes, which now sits ahead of the trail rather than overlapping it
 uniform float life_fade_out = 0.2;
+// match this to the emitter's lifetime randomness, since a randomised particle can die before LIFETIME says it should
+uniform float life_early_death = 0.0;
 
 group_uniforms Debug;
 // tint streaks by state, orange near a surface, cyan closing on one, purple stalled
@@ -204,10 +206,18 @@ float sway_height(float age, uint seed_base) {
 	return amplitude * sway_wave(age, seed_base, uint(71), sway_vertical_frequency, sway_vertical_frequency_variation, sway_vertical_noise_amount, sway_vertical_noise_octaves);
 }
 
-// growing in from nothing and shrinking back out stops either end of a life popping, and the fade out has to span the trail so the tail is gone before it dies
+// growing in from nothing stops a streak popping into view at birth
+// the fade has to finish a whole trail_lifetime before death rather than at it, or the oldest section of history is still full width when the particle vanishes
+// lifetime randomness means the engine may kill a particle earlier than LIFETIME reports, so the fade is pulled in by that fraction too
 float life_envelope(float age, float lifetime) {
-	float t = clamp(age / max(lifetime, 0.001), 0.0, 1.0);
-	return smoothstep(0.0, max(life_fade_in, 0.001), t) * (1.0 - smoothstep(1.0 - max(life_fade_out, 0.001), 1.0, t));
+	float safe_lifetime = max(lifetime, 0.001);
+	float t = clamp(age / safe_lifetime, 0.0, 1.0);
+
+	float trail_fraction = clamp(tail_hold / safe_lifetime, 0.0, 0.9);
+	float gone_by = clamp(1.0 - trail_fraction - clamp(life_early_death, 0.0, 0.9), 0.05, 1.0);
+	float fade_start = max(gone_by - max(life_fade_out, 0.001), 0.0);
+
+	return smoothstep(0.0, max(life_fade_in, 0.001), t) * (1.0 - smoothstep(fade_start, gone_by, t));
 }
 
 float life_shape(float age, float lifetime, uint seed_base) {

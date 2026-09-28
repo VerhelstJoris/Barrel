@@ -15,6 +15,7 @@ const PARAM_LOOKAHEAD_TIME : StringName = &"lookahead_time"
 const PARAM_SWAY_FREQUENCY : StringName = &"sway_frequency"
 const PARAM_SWAY_VERTICAL_FREQUENCY : StringName = &"sway_vertical_frequency"
 const PARAM_LIFE_FADE_OUT : StringName = &"life_fade_out"
+const PARAM_LIFE_EARLY_DEATH : StringName = &"life_early_death"
 const PARAM_UNROLL_TIME : StringName = &"unroll_time"
 const PARAM_USE_HEIGHT_CHANNEL : StringName = &"use_height_channel"
 
@@ -150,7 +151,11 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 	# a fizzled particle has to outlive its own trail history, and that history is exactly trail_lifetime long
 	material.set_shader_parameter(PARAM_TAIL_HOLD, trail_lifetime)
 
-	material.set_shader_parameter(PARAM_LIFE_FADE_OUT, maxf(fade_out_floor, trail_lifetime / maxf(lifetime, 0.001)))
+	# the shrink no longer has to cover the trail, the envelope holds that back itself, so this is just how long the shrink takes
+	material.set_shader_parameter(PARAM_LIFE_FADE_OUT, fade_out_floor)
+
+	# LIFETIME reports the base, so a randomised particle can die this fraction early and the envelope has to finish sooner to match
+	material.set_shader_parameter(PARAM_LIFE_EARLY_DEATH, randomness)
 	material.set_shader_parameter(PARAM_UNROLL_TIME, trail_lifetime)
 
 	_push_wind_base_params(EnvironmentManager.current_gust_speed_m_s, EnvironmentManager.current_wind_direction)
@@ -226,11 +231,16 @@ func _warn_about_trails(material : ShaderMaterial) -> void:
 		push_warning("WindStreak: trail_enabled is off, particles will render as points rather than ribbons")
 		return
 
-	# a streak has to reach zero width before it expires or its trail history pops, and that is not visible from either value alone
+	# the envelope reserves a trail plus the randomness margin at the end of a life, so there has to be room left for the shrink itself
+	var reserved : float = trail_lifetime + randomness * lifetime
+	var available : float = lifetime - reserved
 	var fade_out : Variant = material.get_shader_parameter(PARAM_LIFE_FADE_OUT)
 	var fade_out_seconds : float = (LIFE_FADE_OUT_DEFAULT if fade_out == null else float(fade_out)) * lifetime
-	if(fade_out_seconds < trail_lifetime):
-		push_warning("WindStreak: life_fade_out covers %.2fs but trail_lifetime is %.2fs, so trails will pop when particles expire" % [fade_out_seconds, trail_lifetime])
+
+	if(available <= 0.0):
+		push_warning("WindStreak: trail_lifetime %.2fs plus %.0f%% randomness leaves no room in a %.2fs lifetime, so streaks will pop at death" % [trail_lifetime, randomness * 100.0, lifetime])
+	elif(fade_out_seconds > available):
+		push_warning("WindStreak: life_fade_out wants %.2fs but only %.2fs is left before the trail and randomness margin, so the shrink will be cut short" % [fade_out_seconds, available])
 
 func _refresh_metadata() -> void:
 	var file : FileAccess = FileAccess.open(field_json, FileAccess.READ)
