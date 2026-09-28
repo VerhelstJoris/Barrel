@@ -50,6 +50,10 @@ group_uniforms Height;
 uniform bool use_height_channel = false;
 // how far above the ground a streak rides
 uniform float height_offset = 0.75;
+// spread of that height between streaks in metres, so some skim the ground while others ride well above it
+uniform float height_offset_variation = 0.0;
+// multiplier on ride height across a streak's life, unassigned reads as a flat 1.0 so nothing changes
+uniform sampler2D height_offset_over_life : hint_default_white, filter_linear, repeat_disable;
 // radius the ground is averaged over, so a streak follows the shape of the land rather than every bump in it
 uniform float height_smooth_radius = 0.0;
 // samples the ground this far along the direction of travel, so a streak starts climbing before it reaches a rise, negative trails instead
@@ -316,9 +320,17 @@ float smoothed_height(vec2 xz) {
 }
 
 // leading the sample along the heading makes a streak start climbing before it reaches a rise, which is what stops it hugging every slope face
-float ground_height(vec2 xz, vec2 heading, float emitter_height, float current_y) {
+// one ride height per particle, spread apart at birth and free to climb or settle as it ages
+float ride_offset(float age, float lifetime, uint seed_base) {
+	float varied = height_offset + (particle_random(seed_base, uint(97)) * 2.0 - 1.0) * height_offset_variation;
+	float t = clamp(age / max(lifetime, 0.001), 0.0, 1.0);
+
+	return max(varied, 0.0) * textureLod(height_offset_over_life, vec2(t, 0.5), 0.0).r;
+}
+
+float ground_height(vec2 xz, vec2 heading, float emitter_height, float current_y, float offset) {
 	if (!use_height_channel) {
-		return emitter_height + height_offset;
+		return emitter_height + offset;
 	}
 
 	// past the edge of the bake there is no ground to read, so a streak holds the height it left with instead of snapping onto a clamped edge texel
@@ -326,7 +338,7 @@ float ground_height(vec2 xz, vec2 heading, float emitter_height, float current_y
 		return current_y;
 	}
 
-	return smoothed_height(xz + heading * height_lead_distance) + height_offset;
+	return smoothed_height(xz + heading * height_lead_distance) + offset;
 }
 
 // easing toward the ground rather than snapping to it gives the vertical motion the same inertia the heading already has
@@ -369,15 +381,18 @@ mat3 trail_basis(vec2 velocity) {
 }
 
 void start() {
-	uint seed = hash_uint(NUMBER + RANDOM_SEED);
+	uint seed_base = NUMBER + RANDOM_SEED;
+	uint seed = hash_uint(seed_base);
 	vec2 wind = normalize(wind_direction) * wind_speed * unroll_speed_scale;
 
 	if (RESTART_POSITION) {
+		float offset = ride_offset(0.0, LIFETIME, seed_base);
 		vec2 xz = push_out(EMISSION_TRANSFORM[3].xz + spawn_offset(seed, normalize(wind_direction)));
 		mat3 basis = trail_basis(wind);
 		// born at zero width so the life envelope grows it in rather than it popping into view
 		TRANSFORM = mat4(vec4(0.0), vec4(basis[1], 0.0), vec4(0.0),
-			vec4(xz.x, ground_height(xz, normalize(wind_direction), EMISSION_TRANSFORM[3].y, EMISSION_TRANSFORM[3].y + height_offset), xz.y, 1.0));
+			vec4(xz.x, ground_height(xz, normalize(wind_direction), EMISSION_TRANSFORM[3].y,
+				EMISSION_TRANSFORM[3].y + offset, offset), xz.y, 1.0));
 	}
 
 	if (RESTART_VELOCITY) {
@@ -460,7 +475,7 @@ void process() {
 	// the stored y already carries last frame's sway, so it is removed before easing and reapplied after, or the two would fight each other
 	float previous_sway = sway_height(max(age - DELTA, 0.0), seed_base);
 	float grounded_y = TRANSFORM[3].y - previous_sway;
-	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, grounded_y);
+	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, grounded_y, ride_offset(age, LIFETIME, seed_base));
 	float settled_y = settled_height(grounded_y, target_y, speed, DELTA);
 	TRANSFORM[3].xyz = vec3(xz.x, settled_y + sway_height(age, seed_base), xz.y);
 	VELOCITY = vec3(velocity.x, 0.0, velocity.y);
