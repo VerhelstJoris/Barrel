@@ -1,6 +1,7 @@
 class_name AtmosphereManager extends Node
 
 @export var sky : Sky3D
+@export var wind_speed_mult : float = 1.0
 
 func _ready() -> void:
 	_initialize_wind_data()
@@ -22,4 +23,4 @@ func _on_wind_direction_changed(new_dir : Vector2, new_speed : float) -> void:
 	
 	#map the 2D vector into a single angle	
 	sky.wind_direction = deg_to_rad(angle)
-	sky.wind_speed = new_speed
+	sky.wind_speed = new_speed * wind_speed_mult
