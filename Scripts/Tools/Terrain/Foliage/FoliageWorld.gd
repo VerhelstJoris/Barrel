@@ -19,6 +19,8 @@ const foliage_shader_placement_mask : String = "foliage_placement_mask"
 const foliage_shader_world_origin_xz : String = "foliage_world_origin_xz"
 const foliage_shader_world_size_m : String = "foliage_world_size_m"
 const foliage_shader_frontier_radius : String = "foliage_frontier_radius_m"
+const foliage_shader_clump_max_dist : String = "foliage_clump_max_distance"
+const foliage_shader_clump_min_dist : String = "foliage_clump_min_distance"
 const foliage_shader_wind_dir : String = "wind_direction"
 const foliage_shader_wind_speed : String = "wind_strength"
 
@@ -34,6 +36,7 @@ const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 @export var foliage_param_name : String = "foliage_"
 @export var exempt_param_names : PackedStringArray = [
 	"foliage_frontier_radius_m",
+	"foliage_clump_max_distance",
 	"foliage_placement_mask",
 	"foliage_world_origin_xz",
 	"foliage_world_size_m",
@@ -55,6 +58,8 @@ const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 @export var wind_speed_remap_curve_normalized : Curve
 @export var max_wind_speed : float = 10
 @export var max_gust_speed : float = 40
+# Metres of fully converged, full size blades to leave before the frontier fade begins.
+@export var clump_complete_margin_m : float = 30.0
 
 @export_group("Bake Output")
 @export_global_file("*.res") var height_map_save_path : String = "res://foliage_height_map.res"
@@ -134,6 +139,9 @@ var segments_filled : int = 0
 var high_segments_drawn : int = 0
 var low_segments_drawn : int = 0
 var frontier_radius_m : float = 0.0
+
+
+var pushed_clump_max_distance : float = -1.0
 
 var DEBUG_reported_idle : bool = false
 
@@ -314,6 +322,7 @@ func _process(delta : float) -> void:
 	var budget : int = settings_DA.total_segment_budget()
 	segments_filled = fill_grid._build(view, budget)
 	frontier_radius_m = fill_grid._frontier_radius_m()
+	_update_clump_convergence_distance()
 
 	var bytes : PackedByteArray = fill_grid._out_slice(segments_filled)
 
@@ -425,6 +434,36 @@ func _update_bender_window(view : FoliageViewSnapshot) -> void:
 		# the window moves every frame, and the frontier moves with the fill
 		_set_terrain_param(foliage_shader_bend_origin_texel, current_bender_origin_texel)
 		_set_terrain_param(foliage_shader_frontier_radius, frontier_radius_m)
+
+
+func _clump_min_distance() -> float:
+	if chunk_material_high_LOD_inst:
+		var authored_min : Variant = chunk_material_high_LOD_inst.get(shader_param_prefix + foliage_shader_clump_min_dist)
+		if authored_min != null:
+			return float(authored_min)
+	return 0.0
+
+
+# Convergence has to FINISH before the frontier fade starts, or blades are still turning into ground while they dissolve, which is the visible line.
+func _update_clump_convergence_distance() -> void:
+	if not settings_DA:
+		return
+
+	var earliest_allowed : float = _clump_min_distance() + 1.0
+	var clump_max_distance : float = maxf(
+		frontier_radius_m - settings_DA.frontier_fade_m - clump_complete_margin_m,
+		earliest_allowed)
+
+	if is_equal_approx(clump_max_distance, pushed_clump_max_distance):
+		return
+	pushed_clump_max_distance = clump_max_distance
+
+	if chunk_material_high_LOD_inst:
+		chunk_material_high_LOD_inst.set(shader_param_prefix + foliage_shader_clump_max_dist, clump_max_distance)
+	if chunk_material_low_LOD_inst:
+		chunk_material_low_LOD_inst.set(shader_param_prefix + foliage_shader_clump_max_dist, clump_max_distance)
+	if terrain_material_linked:
+		_set_terrain_param(foliage_shader_clump_max_dist, clump_max_distance)
 
 
 func _encode_player_data(view : FoliageViewSnapshot) -> void:
@@ -1143,6 +1182,8 @@ func _DEBUG_print_validation() -> void:
 	print("low grid             : " + _segment_grid_report(
 		settings_DA.target_density_sq_m_low_LOD, settings_DA.instances_per_segment_low(cell_size), cell_size))
 	print("fine window radius   : %.1f m" % window_radius)
+	print("clump converge ends  : %.1f m (frontier %.1f - fade %.1f - margin %.1f)"
+		% [pushed_clump_max_distance, frontier_radius_m, settings_DA.frontier_fade_m, clump_complete_margin_m])
 	print("bend window          : %.1f m at %d px (%.1f texels/m)"
 		% [settings_DA.bend_window_size_m, settings_DA.bend_mask_res, settings_DA.bend_texels_per_m()])
 	if problems.is_empty():

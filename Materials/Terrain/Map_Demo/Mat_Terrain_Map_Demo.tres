@@ -15,6 +15,27 @@ noise = SubResource("FastNoiseLite_lmwga")
 seamless = true
 normalize = false
 
+[sub_resource type="Gradient" id="Gradient_t6xj2"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gjusm"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_056u0"]
+noise = SubResource("FastNoiseLite_gjusm")
+color_ramp = SubResource("Gradient_t6xj2")
+seamless = true
+
 [resource]
 _shader_parameters = {
 &"": null,
@@ -28,7 +49,7 @@ _shader_parameters = {
 &"enable_macro_variation": true,
 &"enable_projection": true,
 &"flat_terrain_normals": false,
-&"foliage_ao_far_flatten": 0.6,
+&"foliage_ao_far_flatten": 1.0,
 &"foliage_appearance": null,
 &"foliage_backlight": Color(0, 0, 0, 1),
 &"foliage_base_AO": 0.5,
@@ -44,11 +65,11 @@ _shader_parameters = {
 &"foliage_blade_normal_strength": 0.3,
 &"foliage_clump_max_distance": 25.0,
 &"foliage_clump_min_distance": 20.0,
-&"foliage_color_large": Color(0.9019608, 0.6666667, 0.19607843, 1),
-&"foliage_color_small": Color(0.7764706, 0.39607844, 0.12941177, 1),
+&"foliage_color_large": Color(0.9, 0.6, 0, 1),
+&"foliage_color_small": Color(0.54, 0.27855003, 0.09180001, 1),
 &"foliage_coverage_settings": null,
 &"foliage_distant_uniformity": null,
-&"foliage_frontier_fade_m": 30.0,
+&"foliage_frontier_fade_m": 90.0,
 &"foliage_frontier_radius_m": 250.0,
 &"foliage_gust": null,
 &"foliage_gust_asymmetry": 0.5,
@@ -102,7 +123,7 @@ _shader_parameters = {
 &"noise1_offset": Vector2(0.5, 0.5),
 &"noise1_scale": 0.04,
 &"noise2_scale": 0.076,
-&"noise_texture": null,
+&"noise_texture": SubResource("NoiseTexture2D_056u0"),
 &"projection_threshold": 0.8
 }
 world_background = 0
