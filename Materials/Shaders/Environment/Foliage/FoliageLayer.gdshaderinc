@@ -109,10 +109,6 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 
 	float clump = foliage_clump_factor(cam_dist_xz);
 
-	// How much everything coarsens with distance; shared by patches and gusts so
-	// a displacement stays the same fraction of a feature at any range.
-	float coarsen = foliage_coarsen(clump);
-
 	// Gusts coarsen too. A 10 m cell is a fraction of a pixel at 250 m and
 	// averages away, so no amount of amplitude would make it visible.
 	float wind_scale = foliage_wind_noise_scale * mix(1.0, foliage_wind_scale_far_mult, clump);
@@ -184,12 +180,10 @@ void apply_foliage_layer(vec3 world_pos, float cam_dist_xz, float coverage,
 
 	vec3 layer_normal = normalize(world_normal + vec3(nx, 0.0, nz) * variance + gust_tilt + blade_tilt);
 
-	// AO lifts toward 1.0 with distance, matching the blades' ao_far_flatten.
-	// The bend term fades with it, or a trail stays fully dark against ground
-	// that has flattened out all around it.
+	// AO stays at the shared base level; lifting it to 1.0 made the far field read as a flat fully lit plane.
 	float ao_flatten = clump * foliage_ao_far_flatten;
-	float flattened_base_ao = mix(foliage_base_AO, 1.0, ao_flatten);
-	float layer_ao = clamp(flattened_base_ao
+	// The bend term still fades with distance, or a trail stays fully dark against ground that has flattened around it.
+	float layer_ao = clamp(foliage_base_AO
 			- bend_mask * foliage_bend_AO_effect_mult * (1.0 - ao_flatten), 0.0, 1.0);
 	float layer_rough = clamp(mix(foliage_roughness + nx * foliage_roughness_variance_strength,
 			1.0, clump * foliage_roughness_far_flatten), 0.0, 1.0);

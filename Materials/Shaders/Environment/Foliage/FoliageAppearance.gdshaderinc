@@ -36,6 +36,8 @@ uniform float foliage_specular_far_flatten = 1.0f;
 uniform float foliage_roughness_far_flatten = 0.5f;
 // Pulls the patch value toward the middle at full distance; 0 keeps full contrast, 1 makes the far field one colour.
 uniform float foliage_patch_contrast_far : hint_range(0.0, 1.0) = 0.0f;
+// What AO flattens TOWARD; a blade averages about 0.5, so 1.0 removes the darkening entirely.
+uniform float foliage_ao_far_target : hint_range(0.0, 1.0) = 0.5f;
 group_uniforms;
 
 

@@ -221,7 +221,7 @@ void fragment() {
 	
 	float base_ao = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
 	float bend_ao = bending_mask_strength * bend_AO_efect_mult;
-	float flattened_base_ao = mix(base_ao, 1.0, clump_factor_v * foliage_ao_far_flatten);
+	float flattened_base_ao = mix(base_ao, foliage_ao_far_target, clump_factor_v * foliage_ao_far_flatten);
 	AO = clamp(flattened_base_ao - bend_ao, 0.0, 1.0);
 	AO_LIGHT_AFFECT = 1.0;
 
