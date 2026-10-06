@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://blpuh0l33i5k5" path="res://Data/Foliage/Foliage_Patch_noise.res" id="1_os7dx"]
 [ext_resource type="Texture2D" uid="uid://d24en2f8ruqie" path="res://Data/Foliage/Foliage_Blade_Distance_noise.res" id="2_gjusm"]
 [ext_resource type="Shader" uid="uid://bk1p1ovaljm1h" path="res://Materials/Shaders/Environment/Foliage/Terrain_Foliage.gdshader" id="2_t6xj2"]
+[ext_resource type="Texture2D" uid="uid://j5bc8oc0vshu" path="res://Data/Foliage/Foliage_Wind_noise.res" id="3_gjusm"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_lmwga"]
 frequency = 0.0032
@@ -108,8 +109,8 @@ _shader_parameters = {
 &"foliage_under_blades": 0.0,
 &"foliage_wind": null,
 &"foliage_wind_direction": Vector2(1, 0),
-&"foliage_wind_highlight_strength": 0.0,
-&"foliage_wind_noise": null,
+&"foliage_wind_highlight_strength": 0.11,
+&"foliage_wind_noise": ExtResource("3_gjusm"),
 &"foliage_wind_noise_scale": 10.0,
 &"foliage_wind_scale_far_mult": 4.0,
 &"foliage_wind_strength": 0.1,
