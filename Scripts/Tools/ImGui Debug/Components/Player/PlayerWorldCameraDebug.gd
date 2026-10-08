@@ -58,4 +58,3 @@ func _draw_render_mode_options() -> void:
 			get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
 		else:
 			get_viewport().debug_draw = Viewport.DEBUG_DRAW_DISABLED
-

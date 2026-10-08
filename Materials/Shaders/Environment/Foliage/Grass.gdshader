@@ -31,6 +31,22 @@ uniform float wind_ao_affect = 0.1f;
 uniform float gust_bend_strength = 0.35f;
 group_uniforms;
 
+group_uniforms wind_flutter;
+// Sideways travel at the tip, in the same units as the macro bend.
+uniform float flutter_strength = 0.08f;
+// Oscillations per second; past roughly 10 it aliases into a buzz at 60 fps.
+uniform float flutter_speed = 6.0f;
+// Spread of per blade rates around flutter_speed, so the field does not beat as one.
+uniform float flutter_speed_variation : hint_range(0.0, 0.9) = 0.25f;
+// Higher confines the motion to the tip; 1 makes the whole blade shimmy.
+uniform float flutter_tip_falloff = 3.0f;
+// How much flutter rides the macro bend; 0 leaves it fully independent of the wind.
+uniform float flutter_wind_coupling : hint_range(0.0, 1.0) = 0.5f;
+// Its own distance ramp, deliberately not the clump band, which runs much further out.
+uniform float flutter_fade_start = 10.0f;
+uniform float flutter_fade_end = 25.0f;
+group_uniforms;
+
 // LOD related
 group_uniforms LOD_division;
 uniform bool enable_LOD_divide = true;
@@ -51,12 +67,9 @@ uniform float bending_mask_strength_horizontal = 2.0f;
 uniform float bending_mask_strength_vertical = 2.0f;
 uniform float bend_AO_efect_mult = 1.0f;
 varying float bending_mask_strength;
-// The blade's own Y scale, read straight off the model matrix. The compute
-// shader fades this toward 0 at the fill frontier, and a flattened blade is
-// where the backlight term turns into a dark fringe.
+// The blade's own Y scale from the model matrix; the compute shader fades it toward 0 at the fill frontier.
 varying float blade_height_scale;
-// Height scale below which backlight is faded out. Only affects blades already
-// collapsing into the ground layer.
+// Height scale below which backlight is faded out, so flattened blades lose their dark fringe.
 uniform float backlight_min_height_scale = 0.35f;
 group_uniforms;
 
@@ -97,8 +110,8 @@ uint hash_uint(uint x)
 
 float hash_cell(vec2 cell)
 {
-	ivec2 c = ivec2(floor(cell));
-	return float(hash_uint(uint(c.x) ^ hash_uint(uint(c.y)))) * (1.0 / 4294967296.0);
+	ivec2 cell_index = ivec2(floor(cell));
+	return float(hash_uint(uint(cell_index.x) ^ hash_uint(uint(cell_index.y)))) * (1.0 / 4294967296.0);
 }
 
 
@@ -142,7 +155,7 @@ void vertex()
 		VERTEX.y = mix(VERTEX.y, 0.5, lerp_alpha);
 		UV.y = mix(UV.y, 0.5, lerp_alpha);
 	}
-	
+
 	uv_bottom_to_top = 1.0 - UV.y;
 
 	if(enable_blade_shaping)
@@ -153,57 +166,72 @@ void vertex()
 	}
 
 	//turn blade towards camera based on overall world position of the entire blade
-	float bb_alpha = smoothstep(billboard_min_distance, billboard_max_distance, dist);
+	float billboard_alpha = smoothstep(billboard_min_distance, billboard_max_distance, dist);
 
-	vec2 fwd = MODEL_MATRIX[2].xz;
-	vec2 tgt = (world_camera - blade_origin).xz;
-	float fl = length(fwd);
-	float tl = length(tgt);
-	if (fl > 0.0001 && tl > 0.0001)
+	vec2 blade_facing = MODEL_MATRIX[2].xz;
+	vec2 camera_facing = (world_camera - blade_origin).xz;
+	float blade_facing_len = length(blade_facing);
+	float camera_facing_len = length(camera_facing);
+	if (blade_facing_len > 0.0001 && camera_facing_len > 0.0001)
 	{
-		fwd /= fl;
-		tgt /= tl;
-		float sd = fwd.x * tgt.y - fwd.y * tgt.x;
-		float cd = dot(fwd, tgt);
+		blade_facing /= blade_facing_len;
+		camera_facing /= camera_facing_len;
+		float yaw_sine = blade_facing.x * camera_facing.y - blade_facing.y * camera_facing.x;
+		float yaw_cosine = dot(blade_facing, camera_facing);
 
-		float bb = -billboard_amount * bb_alpha * sd * cd;
-		float bb_c = cos(bb);
-		float bb_s = sin(bb);
-		VERTEX.xz = vec2(bb_c * VERTEX.x + bb_s * VERTEX.z, -bb_s * VERTEX.x + bb_c * VERTEX.z);
+		// Double angle respects the two sided quad, so it cannot flip at the antipode.
+		float turn_angle = -billboard_amount * billboard_alpha * yaw_sine * yaw_cosine;
+		float turn_cosine = cos(turn_angle);
+		float turn_sine = sin(turn_angle);
+		VERTEX.xz = vec2(turn_cosine * VERTEX.x + turn_sine * VERTEX.z,
+				-turn_sine * VERTEX.x + turn_cosine * VERTEX.z);
 	}
 
+	// ---- tier 1: macro bend ---------------------------------------------------
+	// Noise crawling across the world, clump snapped so neighbouring blades lean together.
 	vec2 wind_sample_pos = mix(blade_origin.xz, clump_pos_xz, clump_factor);
 	vec2 wind_position = wind_sample_pos / max(wind_noise_scale, 0.001);
-  	wind_position -= TIME * wind_direction * wind_speed;
+	wind_position -= TIME * wind_direction * wind_speed;
 
-  	current_wind_bend = texture(wind_noise, wind_position).x * 2.0 - 1.0;
+	float macro_bend = texture(wind_noise, wind_position).x * 2.0 - 1.0;
+	macro_bend *= wind_strength;
+	// Gust read at the TRUE blade position; it is coherent over hundreds of metres, so clump snapping would only step a smooth crest.
+	macro_bend += foliage_gust(blade_origin.xz) * gust_bend_strength;
 
-	current_wind_bend *= wind_strength;
-	// Added before the height scaling, so the gust leans the blade exactly as the
-	// base wind does and feeds the wind AO term further down for free.
-	// Sampled at the true blade position, NOT wind_sample_pos. That one is
-	// snapped to the clump grid so neighbouring blades sway together in the
-	// continuous wind -- but the gust is already coherent over hundreds of
-	// metres, so quantising it only turns a smooth crest into clump-sized steps.
-	current_wind_bend += foliage_gust(blade_origin.xz) * gust_bend_strength;
-	current_wind_bend *= uv_bottom_to_top * 2.0;
+	// Only the macro tier feeds the varying, so the fragment AO never sees flutter flicker.
+	current_wind_bend = macro_bend * uv_bottom_to_top * 2.0;
+
+	// ---- tier 2: per blade flutter --------------------------------------------
+	// Phase and rate come from the blade's own world position, so no two neighbours move together.
+	float flutter_phase = hash_cell(blade_origin.xz * 97.0) * 6.2831853;
+	float flutter_rate = flutter_speed * mix(1.0 - flutter_speed_variation, 1.0 + flutter_speed_variation,
+			hash_cell(blade_origin.xz * 131.0 + 17.0));
+	// Optionally rides the macro bend so blades settle in a lull; 0 keeps it running regardless.
+	float flutter_envelope = mix(1.0, abs(macro_bend), flutter_wind_coupling);
+	// Gone before blades go sub pixel, where per blade motion is only noise.
+	flutter_envelope *= 1.0 - smoothstep(flutter_fade_start, flutter_fade_end, dist);
+	float flutter_offset = sin(TIME * flutter_rate + flutter_phase) * flutter_envelope
+			* flutter_strength * pow(uv_bottom_to_top, max(flutter_tip_falloff, 0.001));
 
 	mat4 inv_model = inverse(MODEL_MATRIX);
   	vec2 local_direction = (inv_model * vec4(wind_direction.x, 0.0, wind_direction.y, 0.0)).xz;
+	// Across the wind, so flutter reads as blades twisting past each other rather than the lean jittering.
+	vec2 local_across_wind = vec2(-local_direction.y, local_direction.x);
 
 	float uv_strength = pow(uv_bottom_to_top, 2.0);
 
 	// grass bender from the world-anchored accumulator. Sampled at the blade ROOT rather than per vertex, so the whole blade leans as one -- same as
 	float raw_bend_mask = sample_bend(blade_origin.xz);
 	bending_mask_strength = raw_bend_mask * uv_strength;
-	
+
 	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
 	VERTEX.xz += object_forward.xz * bending_mask_strength * bending_mask_strength_horizontal;
 	VERTEX.y -= bending_mask_strength * bending_mask_strength_vertical;
 
-  	VERTEX.xz += (current_wind_bend * local_direction) * (1.0- raw_bend_mask);
+	// Both tiers suppressed by the bend mask: a flattened blade neither leans nor flutters.
+  	VERTEX.xz += (current_wind_bend * local_direction + flutter_offset * local_across_wind) * (1.0- raw_bend_mask);
 	VERTEX.xz += blade_bend_mult * uv_strength * (1.0- raw_bend_mask);	// bend the blade in the direction this is positioned in
-	
+
 	VERTEX *= blade_size;
 
 	// push the whole blade toward the up-facing tip normal as distance grows,
@@ -218,7 +246,7 @@ void fragment() {
 	{
 		NORMAL = -NORMAL;
 	}
-	
+
 	float base_ao = uv_bottom_to_top - (current_wind_bend * wind_ao_affect);
 	float bend_ao = bending_mask_strength * bend_AO_efect_mult;
 	float flattened_base_ao = mix(base_ao, foliage_ao_far_target, clump_factor_v * foliage_ao_far_flatten);
@@ -226,7 +254,7 @@ void fragment() {
 	AO_LIGHT_AFFECT = 1.0;
 
 	ALBEDO = mix(foliage_color_small, foliage_color_large, patch_factor);
-	
+
 	BACKLIGHT = foliage_backlight * smoothstep(0.0, backlight_min_height_scale, blade_height_scale);
 
 	ROUGHNESS = mix(foliage_roughness, 1.0, clump_factor_v * foliage_roughness_far_flatten);
