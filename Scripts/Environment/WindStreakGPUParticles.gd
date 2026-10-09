@@ -42,8 +42,13 @@ const AABB_HEIGHT : float = 1000.0
 @export var load_in_background : bool = true
 @export var report_timing : bool = false
 
-@export var wind_speed_mult : float = 5.0
 @export var fade_out_floor : float = 1.0
+
+@export_group("Wind Scaling")
+@export var wind_speed_mult : float = 5.0
+@export var amount_speed_curve_mult : Curve
+
+var base_amount : int = 1 
 
 # authored in metres so the look holds at any speed, since every one of these is a time or a rate in the shader
 @export_group("Tuning Distances")
@@ -81,6 +86,8 @@ func _ready() -> void:
 	if(Engine.is_editor_hint()):
 		return
 
+	base_amount = amount
+
 	if(load_in_background):
 		apply_field_async()
 	else:
@@ -90,7 +97,7 @@ func _ready() -> void:
 	_on_wind_direction_changed(EnvironmentManager.current_wind_direction, EnvironmentManager.current_wind_speed_m_s)
 
 func _on_wind_direction_changed(new_dir : Vector2, new_speed : float):
-	_push_wind_base_params(new_speed * wind_speed_mult, new_dir)
+	_push_wind_base_params(new_speed, new_dir)
 	_push_wind_tuning_params()
 
 ## Blocking apply, used by the editor button. Also refreshes the cached metadata from the json.
@@ -158,7 +165,7 @@ func _finish_apply(material : ShaderMaterial, image : Image, json_usec : int, lo
 	material.set_shader_parameter(PARAM_LIFE_EARLY_DEATH, randomness)
 	material.set_shader_parameter(PARAM_UNROLL_TIME, trail_lifetime)
 
-	_push_wind_base_params(EnvironmentManager.current_gust_speed_m_s, EnvironmentManager.current_wind_direction)
+	_push_wind_base_params(EnvironmentManager.current_wind_speed_m_s, EnvironmentManager.current_wind_direction)
 	_push_wind_tuning_params()
 	_apply_world_settings()
 	_warn_about_trails(material)
@@ -174,8 +181,10 @@ func _push_wind_base_params(new_speed : float, new_dir : Vector2) -> void:
 		return
 
 	material.set_shader_parameter(PARAM_WIND_DIRECTION, new_dir)
-	material.set_shader_parameter(PARAM_WIND_SPEED, new_speed)
-
+	material.set_shader_parameter(PARAM_WIND_SPEED, new_speed * wind_speed_mult)
+	if(amount_speed_curve_mult):
+		amount = (int)(base_amount * amount_speed_curve_mult.sample(new_speed))
+		
 # a time in the shader is a distance divided by speed and a rate is a speed divided by a distance, so holding the distances fixed keeps the behaviour identical as speed changes
 func _push_wind_tuning_params() -> void:
 	if(!scale_tuning_with_speed):
