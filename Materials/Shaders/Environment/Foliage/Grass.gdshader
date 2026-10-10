@@ -15,7 +15,7 @@ group_uniforms patchiness;
 varying float patch_factor;
 group_uniforms;
 
-//wind related
+// Tier 1: noise crawling across the world, shared between neighbouring blades.
 group_uniforms wind_movement;
 uniform sampler2D wind_noise;
 uniform float blade_bend_mult = 0.5f;
@@ -24,11 +24,17 @@ uniform float wind_strength = 0.3f;
 uniform float wind_speed = 0.6f;
 // Metres per noise tile; was hardcoded at 10.0.
 uniform float wind_noise_scale = 10.0f;
+// Constant lean downwind, so near-zero noise still leaves the blade bent rather than upright.
+uniform float wind_bias = 0.0f;
+// How far the noise may swing UPWIND; 1 is the old symmetric sway, 0 means it can only ever add to the lean.
+uniform float wind_sway_symmetry : hint_range(0.0, 1.0) = 1.0f;
 uniform vec2 wind_direction = vec2(1.0, 0.0);
 varying float current_wind_bend;
 uniform float wind_ao_affect = 0.1f;
 // How hard the travelling gust bends a blade, on top of the continuous wind.
 uniform float gust_bend_strength = 0.35f;
+// Drop applied as a vertex swings sideways; 1 keeps the blade's length exactly, 0 lets it stretch as it used to.
+uniform float wind_bend_shorten : hint_range(0.0, 1.5) = 1.0f;
 group_uniforms;
 
 group_uniforms wind_flutter;
@@ -193,9 +199,13 @@ void vertex()
 	vec2 wind_position = wind_sample_pos / max(wind_noise_scale, 0.001);
 	wind_position -= TIME * wind_direction * wind_speed;
 
-	float macro_bend = texture(wind_noise, wind_position).x * 2.0 - 1.0;
-	macro_bend *= wind_strength;
-	// Gust read at the TRUE blade position; it is coherent over hundreds of metres, so clump snapping would only step a smooth crest.
+	float wind_noise_value = texture(wind_noise, wind_position).x;
+	// Remaps the output range instead of clamping it, so no band of blades collapses onto one shared lean.
+	float wind_noise_shaped = mix(-wind_sway_symmetry, 1.0, wind_noise_value);
+	// Noise swings around the bias rather than around upright, so the guaranteed minimum lean is bias - symmetry * strength.
+	float macro_bend = wind_bias + wind_noise_shaped * wind_strength;
+	// Gust added AFTER the bias so its rebound lobe can still pull a blade back past the resting lean.
+	// Read at the TRUE blade position; it is coherent over hundreds of metres, so clump snapping would only step a smooth crest.
 	macro_bend += foliage_gust(blade_origin.xz) * gust_bend_strength;
 
 	// Only the macro tier feeds the varying, so the fragment AO never sees flutter flicker.
@@ -224,13 +234,22 @@ void vertex()
 	float raw_bend_mask = sample_bend(blade_origin.xz);
 	bending_mask_strength = raw_bend_mask * uv_strength;
 
+	// Swing radius for the arc drop below, read before anything displaces this vertex.
+	float vertex_rest_height = max(VERTEX.y, 0.0);
+
 	vec3 object_forward = normalize((MODEL_MATRIX * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
 	VERTEX.xz += object_forward.xz * bending_mask_strength * bending_mask_strength_horizontal;
 	VERTEX.y -= bending_mask_strength * bending_mask_strength_vertical;
 
 	// Both tiers suppressed by the bend mask: a flattened blade neither leans nor flutters.
-  	VERTEX.xz += (current_wind_bend * local_direction + flutter_offset * local_across_wind) * (1.0- raw_bend_mask);
-	VERTEX.xz += blade_bend_mult * uv_strength * (1.0- raw_bend_mask);	// bend the blade in the direction this is positioned in
+	vec2 wind_push = (current_wind_bend * local_direction + flutter_offset * local_across_wind) * (1.0- raw_bend_mask);
+	wind_push += vec2(blade_bend_mult * uv_strength * (1.0- raw_bend_mask));	// bend the blade in the direction this is positioned in
+  	VERTEX.xz += wind_push;
+
+	// A blade cannot stretch, so swinging a vertex sideways has to drop it; without this the silhouette grows with the wind.
+	float wind_push_distance = length(wind_push);
+	float swung_height = sqrt(max(vertex_rest_height * vertex_rest_height - wind_push_distance * wind_push_distance, 0.0));
+	VERTEX.y -= (vertex_rest_height - swung_height) * wind_bend_shorten;
 
 	VERTEX *= blade_size;
 
