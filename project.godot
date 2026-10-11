@@ -191,3 +191,66 @@ interact={
 [rendering]
 
 anti_aliasing/quality/msaa_3d=2
+
+[shader_globals]
+
+wind_drift_offset={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+foliage_gust_direction={
+"type": "vec2",
+"value": Vector2(0.664929, 0.746907)
+}
+foliage_gust_wavelength_m={
+"type": "float",
+"value": 400.0
+}
+foliage_gust_width={
+"type": "float",
+"value": 0.15
+}
+foliage_gust_strength={
+"type": "float",
+"value": 1.75
+}
+foliage_gust_sharpness={
+"type": "float",
+"value": 2.0
+}
+foliage_gust_asymmetry={
+"type": "float",
+"value": 0.5
+}
+foliage_gust_rebound={
+"type": "float",
+"value": 0.15
+}
+foliage_gust_patchiness={
+"type": "float",
+"value": 0.35
+}
+foliage_gust_wobble_noise={
+"type": "sampler2D",
+"value": ""
+}
+foliage_gust_wobble_m={
+"type": "float",
+"value": 15.0
+}
+foliage_gust_wobble_scale_m={
+"type": "float",
+"value": 400.0
+}
+foliage_gust_wobble_detail={
+"type": "float",
+"value": 0.1
+}
+foliage_gust_travel_m={
+"type": "float",
+"value": 0.0
+}
+foliage_gust_wobble_phase={
+"type": "float",
+"value": 0.0
+}

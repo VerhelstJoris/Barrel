@@ -1,41 +1,37 @@
 // A single large wave that sweeps across the whole world every so often, on top
 // of the continuous per-blade wind.
 //
-// Included by BOTH Grass.gdshader and FoliageLayer.gdshaderinc, because the
-// wave has to be in phase across the frontier -- two copies of this maths would
-// drift and the wave would visibly break where the blades stop.
+// Every value here is a GLOBAL shader parameter written by GlobalEnvironmentManagerSingleton,
 // The editor will flag errors opening this alone -- it is a fragment, not a shader.
 
-group_uniforms foliage_gust;
-// Travel direction; keep matched to the per-blade wind direction.
-uniform vec2 foliage_gust_direction = vec2(1.0, 0.0);
-// Distance between crests, so seconds between waves is this over the speed.
-uniform float foliage_gust_wavelength_m = 300.0f;
-// Metres per second the crest travels.
-uniform float foliage_gust_speed = 20.0f;
+// Travel direction; the manager keeps this equal to the wind direction.
+global uniform vec2 foliage_gust_direction;
+// Distance between crests, so seconds between waves is this over the gust speed.
+global uniform float foliage_gust_wavelength_m;
+// Metres the crest has travelled, wrapped to one wavelength; replaces the old TIME * speed term.
+global uniform float foliage_gust_travel_m;
 // Fraction of the cycle the wave occupies; small is a sharp gust, large is a swell.
-uniform float foliage_gust_width = 0.25f;
+global uniform float foliage_gust_width;
 // Master multiplier; scales every consumer at once without retuning each.
-uniform float foliage_gust_strength = 1.0f;
+global uniform float foliage_gust_strength;
 // Concentrates the wave toward its crest; 1 is a soft swell, 3 is a snap.
-uniform float foliage_gust_sharpness = 1.5f;
+global uniform float foliage_gust_sharpness;
 // Steepens the arriving edge and lengthens the recovery; 0 is symmetric.
-uniform float foliage_gust_asymmetry = 0.5f;
+global uniform float foliage_gust_asymmetry;
 // Backswing behind the crest, so grass overshoots instead of easing to rest.
-uniform float foliage_gust_rebound = 0.15f;
+global uniform float foliage_gust_rebound;
 // Varies amplitude along the crest so the wave is not a uniform band.
-uniform float foliage_gust_patchiness = 0.35f;
-// Noise that bends the crest and varies its strength; 0 wobble disables the bend.
-uniform sampler2D foliage_gust_wobble_noise : hint_default_white;
+global uniform float foliage_gust_patchiness;
+// Noise that bends the crest and varies its strength; MUST have repeat enabled or the phase wrap seams.
+global uniform sampler2D foliage_gust_wobble_noise;
 // Metres the crest snakes forward and back along its length.
-uniform float foliage_gust_wobble_m = 30.0f;
+global uniform float foliage_gust_wobble_m;
 // Length of one undulation along the crest; smaller is a busier edge.
-uniform float foliage_gust_wobble_scale_m = 200.0f;
-// How fast the crest shape evolves, so no two passes look the same.
-uniform float foliage_gust_wobble_speed = 0.02f;
+global uniform float foliage_gust_wobble_scale_m;
+// Wobble scroll, wrapped at 10.0 so the 1.0x, 2.3x and 0.7x samples below all wrap together.
+global uniform float foliage_gust_wobble_phase;
 // Second, finer octave of wobble; 0 is one smooth bend, 1 is ragged.
-uniform float foliage_gust_wobble_detail = 0.4f;
-group_uniforms;
+global uniform float foliage_gust_wobble_detail;
 
 
 // Rises to foliage_gust_strength at the crest and returns to 0, dipping
@@ -43,7 +39,8 @@ group_uniforms;
 // negative value as a backswing, not clamp it away.
 float foliage_gust(vec2 world_xz)
 {
-	vec2 dir = normalize(foliage_gust_direction);
+	float direction_length = length(foliage_gust_direction);
+	vec2 dir = direction_length > 0.0001 ? foliage_gust_direction / direction_length : vec2(1.0, 0.0);
 	float along = dot(world_xz, dir);
 	// Position ALONG the crest, which is what the wobble and patchiness vary
 	// over -- sampling those in plain world space varies them through the wave
@@ -52,18 +49,18 @@ float foliage_gust(vec2 world_xz)
 
 	if (foliage_gust_wobble_m > 0.0)
 	{
-		// The second axis is TIME, so the crest reshapes as it travels rather
-		// than carrying a distortion baked into fixed world positions.
+		// The second axis is the pushed wobble phase, so the crest reshapes as it
+		// travels rather than carrying a distortion baked into fixed world positions.
 		float w0 = texture(foliage_gust_wobble_noise,
 				vec2(across / foliage_gust_wobble_scale_m,
-					TIME * foliage_gust_wobble_speed)).r - 0.5;
+					foliage_gust_wobble_phase)).r - 0.5;
 		float w1 = texture(foliage_gust_wobble_noise,
 				vec2(across / (foliage_gust_wobble_scale_m * 0.27) + 0.37,
-					TIME * foliage_gust_wobble_speed * 2.3 + 0.61)).r - 0.5;
+					foliage_gust_wobble_phase * 2.3 + 0.61)).r - 0.5;
 		along += (w0 + w1 * foliage_gust_wobble_detail) * 2.0 * foliage_gust_wobble_m;
 	}
 
-	float phase = fract((along - TIME * foliage_gust_speed) / foliage_gust_wavelength_m);
+	float phase = fract((along - foliage_gust_travel_m) / foliage_gust_wavelength_m);
 
 	// Signed distance from the crest. The wave travels along +direction, so a
 	// point meets the phase > 0.5 side first: that is the leading edge.
@@ -88,12 +85,12 @@ float foliage_gust(vec2 world_xz)
 	}
 
 	// Amplitude varies along the crest, so some stretches gust harder than
-	// others. Also keyed to `across` and TIME, so it stays with the wave.
+	// others. Also keyed to `across` and the wobble phase, so it stays with the wave.
 	if (foliage_gust_patchiness > 0.0)
 	{
 		float amp = texture(foliage_gust_wobble_noise,
 				vec2(across / (foliage_gust_wobble_scale_m * 0.5) + 0.13,
-					TIME * foliage_gust_wobble_speed * 0.7 + 0.29)).r;
+					foliage_gust_wobble_phase * 0.7 + 0.29)).r;
 		wave *= mix(1.0, amp, foliage_gust_patchiness);
 	}
 
