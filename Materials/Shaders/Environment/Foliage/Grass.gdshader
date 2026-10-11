@@ -241,9 +241,11 @@ void vertex()
 	VERTEX.xz += object_forward.xz * bending_mask_strength * bending_mask_strength_horizontal;
 	VERTEX.y -= bending_mask_strength * bending_mask_strength_vertical;
 
-	// Both tiers suppressed by the bend mask: a flattened blade neither leans nor flutters.
-	vec2 wind_push = (current_wind_bend * local_direction + flutter_offset * local_across_wind) * (1.0- raw_bend_mask);
-	wind_push += vec2(blade_bend_mult * uv_strength * (1.0- raw_bend_mask));	// bend the blade in the direction this is positioned in
+	float inv_bend_mask = 1.0 - raw_bend_mask;
+ 	vec2 macro_push = current_wind_bend * local_direction * inv_bend_mask;
+ 	vec2 flutter_push = flutter_offset * local_across_wind * inv_bend_mask;
+	vec2 blade_lean_push = local_direction * blade_bend_mult * uv_strength * inv_bend_mask;
+ 	vec2 wind_push = macro_push + flutter_push + blade_lean_push;
   	VERTEX.xz += wind_push;
 
 	// A blade cannot stretch, so swinging a vertex sideways has to drop it; without this the silhouette grows with the wind.
