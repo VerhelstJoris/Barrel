@@ -27,6 +27,11 @@ const foliage_shader_wind_speed : String = "wind_strength"
 const foliage_shader_gust_dir : String =  "foliage_gust_direction"
 const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 
+# Gust globals, owned by GlobalEnvironmentManagerSingleton at runtime and driven here only for the editor preview.
+const foliage_global_gust_travel : String = "foliage_gust_travel_m"
+const foliage_global_gust_wobble_phase : String = "foliage_gust_wobble_phase"
+const foliage_global_gust_wavelength : String = "foliage_gust_wavelength_m"
+
 @export_tool_button("Bake Global Height Map", "Callable") var bake_height_action : Callable = _generate_height_data
 @export_tool_button("Validate Setup", "Callable") var validate_action : Callable = _DEBUG_print_validation
 
@@ -60,6 +65,18 @@ const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 @export var max_gust_speed : float = 40
 # Metres of fully converged, full size blades to leave before the frontier fade begins.
 @export var clump_complete_margin_m : float = 30.0
+
+@export_group("Editor Preview")
+## Drives the gust and shows the terrain foliage layer in the editor viewport, with no compute pipeline running.
+@export var preview_in_editor : bool = false:
+	set(value):
+		preview_in_editor = value
+		_refresh_editor_preview()
+## Metres per second the previewed gust travels; at runtime the manager's gust speed is used instead.
+@export var preview_gust_speed_m_s : float = 40.0
+## Wobble scroll rate for the preview, matching GustSettings.wobble_speed.
+@export var preview_gust_wobble_speed : float = 0.02
+@export_tool_button("Refresh Editor Preview", "Callable") var refresh_preview_action : Callable = _refresh_editor_preview
 
 @export_group("Bake Output")
 @export_global_file("*.res") var height_map_save_path : String = "res://foliage_height_map.res"
@@ -143,6 +160,10 @@ var frontier_radius_m : float = 0.0
 
 var pushed_clump_max_distance : float = -1.0
 
+# Editor only; the running game drives these two globals from the environment manager.
+var preview_gust_travel_m : float = 0.0
+var preview_gust_wobble_phase : float = 0.0
+
 var DEBUG_reported_idle : bool = false
 
 var terrain_material_linked : bool = false
@@ -152,6 +173,10 @@ var terrain_material_linked : bool = false
 # ==========================================================================
 
 func _ready() -> void:
+	if not settings_DA:
+		push_error("FoliageWorld: settings_DA is unassigned; nothing can be set up.")
+		return
+
 	# Run after gameplay and camera scripts, so the snapshot is this frame's
 	# camera rather than last frame's. Higher priority means later in Godot.
 	process_priority = settings_DA.process_priority
@@ -160,6 +185,11 @@ func _ready() -> void:
 	_initialize_bender_data()
 
 	if Engine.is_editor_hint():
+		# The ground card needs the world mapping even with no compute pipeline. Without it the
+		# terrain keeps the shader's own default origin, which only overlaps a quarter of the world.
+		_link_terrain_material()
+		_refresh_editor_preview()
+		set_process(true)
 		return
 
 	if not height_map or not height_map.is_valid():
@@ -294,6 +324,10 @@ func _initialize_wind_data() -> void:
 # ==========================================================================
 
 func _process(delta : float) -> void:
+	if Engine.is_editor_hint():
+		_process_editor_preview(delta)
+		return
+
 	if not initialized or not settings_DA or not visible:
 		# say why, once, rather than going quiet
 		if not DEBUG_reported_idle:
@@ -521,6 +555,55 @@ func _on_gust_changed(new_speed : float):
 
 	if(terrain_material_linked && terrain_node != null):
 		_set_terrain_param(foliage_shader_gust_speed, remapped)
+
+#region editor_preview
+
+# No fill and no compute pipeline exist in the editor, so this only drives what the
+# materials need to show a live gust over the terrain's foliage layer.
+func _process_editor_preview(delta : float) -> void:
+	if not preview_in_editor or not settings_DA:
+		return
+	_advance_preview_gust_phase(delta)
+
+
+# Mirrors GlobalEnvironmentManagerSingleton._advance_gust_phase so the editor and the
+# running game move the crest the same way; only the speed comes from a different place.
+func _advance_preview_gust_phase(delta : float) -> void:
+	var wavelength : float = maxf(_global_shader_float(foliage_global_gust_wavelength, 400.0), 0.001)
+
+	preview_gust_travel_m = fposmod(preview_gust_travel_m + preview_gust_speed_m_s * delta, wavelength)
+	preview_gust_wobble_phase = fposmod(preview_gust_wobble_phase + preview_gust_wobble_speed * delta,
+		GlobalEnvironmentManagerSingleton.GUST_WOBBLE_PHASE_WRAP)
+
+	RenderingServer.global_shader_parameter_set(foliage_global_gust_travel, preview_gust_travel_m)
+	RenderingServer.global_shader_parameter_set(foliage_global_gust_wobble_phase, preview_gust_wobble_phase)
+
+
+# Returns the fallback when the global is not declared in Project Settings yet.
+func _global_shader_float(param_name : String, fallback : float) -> float:
+	var value : Variant = RenderingServer.global_shader_parameter_get(param_name)
+	if value == null:
+		return fallback
+	return float(value)
+
+
+# Re-pushes everything the terrain needs. Safe to call any time; the tool button exists
+# because Terrain3D rebuilding its material in the editor drops whatever was set on it.
+func _refresh_editor_preview() -> void:
+	if not Engine.is_editor_hint() or not settings_DA or not is_inside_tree():
+		return
+
+	_push_static_terrain_params()
+	if not terrain_material_linked:
+		return
+
+	# Nothing is filling a frontier in the editor, so a zero radius makes the layer cover the
+	# whole world rather than ramping in beyond a radius no blades are growing inside.
+	_set_terrain_param(foliage_shader_frontier_radius,
+		0.0 if preview_in_editor else settings_DA.world_size_m)
+	_set_terrain_param(foliage_shader_clump_max_dist, settings_DA.world_size_m)
+
+#endregion
 
 #region render_setup
 
