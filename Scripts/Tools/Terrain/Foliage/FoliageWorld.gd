@@ -165,6 +165,7 @@ var pushed_clump_max_distance : float = -1.0
 # Editor only; the running game drives these two globals from the environment manager.
 var preview_gust_travel_m : float = 0.0
 var preview_gust_wobble_phase : float = 0.0
+var preview_interval_drift_phase : float = 0.0
 
 var DEBUG_reported_idle : bool = false
 
@@ -567,24 +568,24 @@ func _process_editor_preview(delta : float) -> void:
 		return
 	_advance_preview_gust_phase(delta)
 
-
-# Mirrors GlobalEnvironmentManagerSingleton._advance_gust_phase so the editor and the running
-# game move the crest the same way; only the multiplier makes the preview run faster.
 func _advance_preview_gust_phase(delta : float) -> void:
 	var gust_settings : WindGustSettings = _preview_gust_settings()
 	if not gust_settings:
 		return
 
-	var travel_speed : float = preview_environment_settings.current_gust_speed_m_s * preview_speed_multiplier
-	preview_gust_travel_m = fposmod(preview_gust_travel_m + travel_speed * delta,
-		maxf(gust_settings.wavelength_m, 0.001))
+	var wavelength : float = maxf(gust_settings.wavelength_m, 0.001)
+	var base_speed : float = preview_environment_settings.current_gust_speed_m_s * preview_speed_multiplier
+	var nominal_interval : float = wavelength / maxf(absf(base_speed), 0.001)
+	preview_interval_drift_phase += (delta / nominal_interval) * gust_settings.interval_variation_rate * TAU
+
+	var travel_speed : float = base_speed * gust_settings._interval_speed_scale(preview_interval_drift_phase)
+	preview_gust_travel_m = fposmod(preview_gust_travel_m + travel_speed * delta, wavelength)
 	preview_gust_wobble_phase = fposmod(
 		preview_gust_wobble_phase + gust_settings.wobble_speed * preview_speed_multiplier * delta,
 		GlobalEnvironmentManagerSingleton.GUST_WOBBLE_PHASE_WRAP)
 
 	RenderingServer.global_shader_parameter_set(foliage_global_gust_travel, preview_gust_travel_m)
 	RenderingServer.global_shader_parameter_set(foliage_global_gust_wobble_phase, preview_gust_wobble_phase)
-
 
 func _preview_gust_settings() -> WindGustSettings:
 	if not preview_environment_settings:

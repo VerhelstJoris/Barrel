@@ -12,6 +12,19 @@ class_name WindGustSettings extends Resource
 		wavelength_m = maxf(value, 0.001)
 		_apply_change()
 
+@export_group("Interval")
+## How much the gap between gusts varies; 0 is a fixed interval.
+@export_range(0.0, 1.0) var interval_variation : float = 0.0:
+	set(value):
+		interval_variation = value
+		_apply_change()
+
+## Drift oscillations per nominal interval; lower groups gusts into slow and fast spells, higher averages the variation away.
+@export var interval_variation_rate : float = 0.3:
+	set(value):
+		interval_variation_rate = value
+		_apply_change()
+
 @export_group("Profile")
 ## Fraction of the cycle the wave occupies; small is a sharp gust, large is a swell.
 @export var width : float = 0.15:
@@ -84,6 +97,15 @@ class_name WindGustSettings extends Resource
 # One place for every property change, so dirty flagging or deferred pushes only ever need adding here.
 func _apply_change() -> void:
 	emit_changed()
+
+# Travel speed multiplier for the crest, wandering so gaps land in a range rather than on a fixed period.
+func _interval_speed_scale(drift_phase : float) -> float:
+	if interval_variation <= 0.0:
+		return 1.0
+	var drift : float = sin(drift_phase) * 0.6 \
+		+ sin(drift_phase * 2.37 + 1.7) * 0.3 \
+		+ sin(drift_phase * 4.11 + 3.9) * 0.1
+	return 1.0 + drift * interval_variation
 
 
 # The single mapping from this resource onto the shader globals, so the environment manager and

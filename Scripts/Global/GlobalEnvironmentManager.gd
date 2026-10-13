@@ -19,6 +19,8 @@ var current_drift_offset := Vector3.ZERO
 var gust_travel_m : float = 0.0
 # Wobble noise scroll, wrapped at GUST_WOBBLE_PHASE_WRAP.
 var gust_wobble_phase : float = 0.0
+var gust_interval_drift_phase : float = 0.0
+
 
 signal on_wind_changed(direction ,speed)
 signal on_gust_changed(speed)
@@ -124,12 +126,15 @@ func _gust_duration_seconds() -> float:
 		return 0.0
 	return (current_gust_settings.wavelength_m * current_gust_settings.width) / maxf(absf(current_gust_speed_m_s), 0.001)
 
-# Both phases stay small forever, which keeps fract() precise and removes the old TIME rollover snap.
 func _advance_gust_phase(delta : float) -> void:
 	if not current_gust_settings:
 		return
 
-	gust_travel_m = fposmod(gust_travel_m + current_gust_speed_m_s * delta, current_gust_settings.wavelength_m)
+	var nominal_interval : float = maxf(_gust_period_seconds(), 0.001)
+	gust_interval_drift_phase += (delta / nominal_interval) * current_gust_settings.interval_variation_rate * TAU
+	var travel_speed : float = current_gust_speed_m_s * current_gust_settings._interval_speed_scale(gust_interval_drift_phase)
+
+	gust_travel_m = fposmod(gust_travel_m + travel_speed * delta, current_gust_settings.wavelength_m)
 	gust_wobble_phase = fposmod(gust_wobble_phase + current_gust_settings.wobble_speed * delta, GUST_WOBBLE_PHASE_WRAP)
 
 	RenderingServer.global_shader_parameter_set("foliage_gust_travel_m", gust_travel_m)
