@@ -84,3 +84,21 @@ class_name WindGustSettings extends Resource
 # One place for every property change, so dirty flagging or deferred pushes only ever need adding here.
 func _apply_change() -> void:
 	emit_changed()
+
+
+# The single mapping from this resource onto the shader globals, so the environment manager and
+# FoliageWorld's editor preview cannot push different subsets. Travel direction comes from the
+# caller because it belongs to the wind, not to the shape of the wave.
+func _push_to_globals(travel_direction : Vector2) -> void:
+	RenderingServer.global_shader_parameter_set("foliage_gust_direction", travel_direction)
+	RenderingServer.global_shader_parameter_set("foliage_gust_wavelength_m", wavelength_m)
+	RenderingServer.global_shader_parameter_set("foliage_gust_width", width)
+	RenderingServer.global_shader_parameter_set("foliage_gust_strength", strength)
+	RenderingServer.global_shader_parameter_set("foliage_gust_sharpness", sharpness)
+	RenderingServer.global_shader_parameter_set("foliage_gust_asymmetry", asymmetry)
+	RenderingServer.global_shader_parameter_set("foliage_gust_rebound", rebound)
+	RenderingServer.global_shader_parameter_set("foliage_gust_patchiness", patchiness)
+	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_noise", wobble_noise)
+	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_m", wobble_m)
+	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_scale_m", wobble_scale_m)
+	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_detail", wobble_detail)

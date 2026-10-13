@@ -27,10 +27,9 @@ const foliage_shader_wind_speed : String = "wind_strength"
 const foliage_shader_gust_dir : String =  "foliage_gust_direction"
 const foliage_shader_gust_speed : String =  "foliage_gust_speed"
 
-# Gust globals, owned by GlobalEnvironmentManagerSingleton at runtime and driven here only for the editor preview.
+# Gust phase globals, owned by GlobalEnvironmentManagerSingleton at runtime and driven here only for the editor preview.
 const foliage_global_gust_travel : String = "foliage_gust_travel_m"
 const foliage_global_gust_wobble_phase : String = "foliage_gust_wobble_phase"
-const foliage_global_gust_wavelength : String = "foliage_gust_wavelength_m"
 
 @export_tool_button("Bake Global Height Map", "Callable") var bake_height_action : Callable = _generate_height_data
 @export_tool_button("Validate Setup", "Callable") var validate_action : Callable = _DEBUG_print_validation
@@ -72,10 +71,13 @@ const foliage_global_gust_wavelength : String = "foliage_gust_wavelength_m"
 	set(value):
 		preview_in_editor = value
 		_refresh_editor_preview()
-## Metres per second the previewed gust travels; at runtime the manager's gust speed is used instead.
-@export var preview_gust_speed_m_s : float = 40.0
-## Wobble scroll rate for the preview, matching GustSettings.wobble_speed.
-@export var preview_gust_wobble_speed : float = 0.02
+## The same resource the game runs on; the manager only reads it from _initalize, which never runs in the editor.
+@export var preview_environment_settings : EnvironmentSettings:
+	set(value):
+		preview_environment_settings = value
+		_refresh_editor_preview()
+## Fast-forwards the previewed gust so a pass can be watched without waiting a full period; 1.0 matches the game.
+@export var preview_speed_multiplier : float = 1.0
 @export_tool_button("Refresh Editor Preview", "Callable") var refresh_preview_action : Callable = _refresh_editor_preview
 
 @export_group("Bake Output")
@@ -566,34 +568,50 @@ func _process_editor_preview(delta : float) -> void:
 	_advance_preview_gust_phase(delta)
 
 
-# Mirrors GlobalEnvironmentManagerSingleton._advance_gust_phase so the editor and the
-# running game move the crest the same way; only the speed comes from a different place.
+# Mirrors GlobalEnvironmentManagerSingleton._advance_gust_phase so the editor and the running
+# game move the crest the same way; only the multiplier makes the preview run faster.
 func _advance_preview_gust_phase(delta : float) -> void:
-	var wavelength : float = maxf(_global_shader_float(foliage_global_gust_wavelength, 400.0), 0.001)
+	var gust_settings : WindGustSettings = _preview_gust_settings()
+	if not gust_settings:
+		return
 
-	preview_gust_travel_m = fposmod(preview_gust_travel_m + preview_gust_speed_m_s * delta, wavelength)
-	preview_gust_wobble_phase = fposmod(preview_gust_wobble_phase + preview_gust_wobble_speed * delta,
+	var travel_speed : float = preview_environment_settings.current_gust_speed_m_s * preview_speed_multiplier
+	preview_gust_travel_m = fposmod(preview_gust_travel_m + travel_speed * delta,
+		maxf(gust_settings.wavelength_m, 0.001))
+	preview_gust_wobble_phase = fposmod(
+		preview_gust_wobble_phase + gust_settings.wobble_speed * preview_speed_multiplier * delta,
 		GlobalEnvironmentManagerSingleton.GUST_WOBBLE_PHASE_WRAP)
 
 	RenderingServer.global_shader_parameter_set(foliage_global_gust_travel, preview_gust_travel_m)
 	RenderingServer.global_shader_parameter_set(foliage_global_gust_wobble_phase, preview_gust_wobble_phase)
 
 
-# Returns the fallback when the global is not declared in Project Settings yet.
-func _global_shader_float(param_name : String, fallback : float) -> float:
-	var value : Variant = RenderingServer.global_shader_parameter_get(param_name)
-	if value == null:
-		return fallback
-	return float(value)
+func _preview_gust_settings() -> WindGustSettings:
+	if not preview_environment_settings:
+		return null
+	return preview_environment_settings.current_gust_settings
 
 
-# Re-pushes everything the terrain needs. Safe to call any time; the tool button exists
-# because Terrain3D rebuilding its material in the editor drops whatever was set on it.
+# The manager pushes these from _initalize, which needs a Player and so never runs in the editor.
+# Without this the globals sit at their Project Settings defaults and the preview is not what ships.
+func _push_preview_gust_settings() -> void:
+	var gust_settings : WindGustSettings = _preview_gust_settings()
+	if not gust_settings:
+		return
+
+	var heading : Vector2 = preview_environment_settings.current_wind_direction
+	gust_settings._push_to_globals(
+		heading.normalized() if heading.length() > 0.0001 else Vector2(1.0, 0.0))
+
+
+# Re-pushes everything the terrain and the gust need. Safe to call any time; the tool button
+# exists because Terrain3D rebuilding its material in the editor drops whatever was set on it.
 func _refresh_editor_preview() -> void:
 	if not Engine.is_editor_hint() or not settings_DA or not is_inside_tree():
 		return
 
 	_push_static_terrain_params()
+	_push_preview_gust_settings()
 	if not terrain_material_linked:
 		return
 

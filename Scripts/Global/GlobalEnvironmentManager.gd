@@ -56,7 +56,7 @@ func _initalize(settings : EnvironmentSettings) -> void:
 	current_gust_settings = settings.current_gust_settings
 	if current_gust_settings and not current_gust_settings.changed.is_connected(_push_gust_settings):
 		current_gust_settings.changed.connect(_push_gust_settings)
-		_push_gust_settings()
+	_push_gust_settings()
 
 func _set_wind_direction(new_dir : Vector2) -> Vector2:
 	var temp := new_dir.normalized()
@@ -141,19 +141,7 @@ func _push_gust_direction() -> void:
 func _push_gust_settings() -> void:
 	if not current_gust_settings:
 		return
-
-	_push_gust_direction()
-	RenderingServer.global_shader_parameter_set("foliage_gust_wavelength_m", current_gust_settings.wavelength_m)
-	RenderingServer.global_shader_parameter_set("foliage_gust_width", current_gust_settings.width)
-	RenderingServer.global_shader_parameter_set("foliage_gust_strength", current_gust_settings.strength)
-	RenderingServer.global_shader_parameter_set("foliage_gust_sharpness", current_gust_settings.sharpness)
-	RenderingServer.global_shader_parameter_set("foliage_gust_asymmetry", current_gust_settings.asymmetry)
-	RenderingServer.global_shader_parameter_set("foliage_gust_rebound", current_gust_settings.rebound)
-	RenderingServer.global_shader_parameter_set("foliage_gust_patchiness", current_gust_settings.patchiness)
-	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_noise", current_gust_settings.wobble_noise)
-	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_m", current_gust_settings.wobble_m)
-	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_scale_m", current_gust_settings.wobble_scale_m)
-	RenderingServer.global_shader_parameter_set("foliage_gust_wobble_detail", current_gust_settings.wobble_detail)
+	current_gust_settings._push_to_globals(_gust_travel_direction())
 
 
 func _validate_gust() -> PackedStringArray:
