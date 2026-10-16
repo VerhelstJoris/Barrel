@@ -2,7 +2,6 @@
 // Copyright (c) 2021 J. Cuellar
 
 shader_type sky;
-render_mode use_debanding;
 
 group_uniforms general;
 uniform bool sky_visible = true;
@@ -95,14 +94,24 @@ uniform bool cumulus_visible = true;
 uniform float cumulus_intensity = 0.6;
 uniform float cumulus_coverage = 0.55;
 uniform float cumulus_thickness = 0.0243;
+uniform float cumulus_detail_amount : hint_range(0.0, 1.0) = 0.4;
 uniform float cumulus_absorption = 2.0;
 uniform float cumulus_noise_freq = 2.7;
 uniform float cumulus_sky_tint_fade = 0.0;
 uniform float cumulus_size = 0.5;
 uniform vec2 cumulus_position = vec2(0.0);
-uniform sampler2D cumulus_texture;
+uniform sampler2D cumulus_texture : filter_linear, repeat_enable;
 uniform vec3 cumulus_partial_mie_phase = vec3(0.95756, 1.04244, 0.412);
 uniform float cumulus_mie_intensity = 1.0;
+
+uniform vec2 cloud_direction = vec2(0.0, -1.0);
+uniform float cumulus_evolution_speed = 0.005;
+uniform float cumulus_detail_evolution = 1.6;
+uniform float cumulus_coverage_variation = 0.15;
+uniform float cumulus_wind_stretch : hint_range(1.0, 4.0) = 1.5;
+uniform float cumulus_warp_strength = 0.3;
+uniform float cumulus_warp_follow : hint_range(0.0, 1.0) = 0.6;
+
 
 group_uniforms overlays;
 uniform bool show_azimuthal_grid = false;
@@ -221,7 +230,7 @@ vec3 calc_atmospheric_scatter(float sr, float sm, vec2 mu, vec3 mult, float hori
 
 // Clouds
 //------------------------------------------------------------------------------
-const int CUMULUS_STEP = 8;
+const int CUMULUS_STEP = 6;
 
 float sample_cirrus_noise(vec2 coords) {
 	float a = textureLod(cirrus_texture, coords.xy * cirrus_uv + cirrus_position1, 0.0).r;
@@ -229,28 +238,46 @@ float sample_cirrus_noise(vec2 coords) {
 	return ((a + b) * 0.5);
 }
 
+// filters in float precision since hardware bilinear weights are only 8-bit and step visibly under heavy magnification
+float _sample_cumulus_smooth(vec2 sample_uv, vec2 texture_res) {
+	vec2 texel_pos = sample_uv * texture_res - 0.5;
+	vec2 base_texel = floor(texel_pos);
+	vec2 texel_fract = texel_pos - base_texel;
+	texel_fract = texel_fract * texel_fract * (3.0 - 2.0 * texel_fract);
+	vec4 texel_quad = textureGather(cumulus_texture, (base_texel + 1.0) / texture_res);
+	float row_low = mix(texel_quad.w, texel_quad.z, texel_fract.x);
+	float row_high = mix(texel_quad.x, texel_quad.y, texel_fract.x);
+	return mix(row_low, row_high, texel_fract.y);
+}
+
 float sample_cumulus_noise(vec3 p) {
 	vec3 pos = vec3(p * 0.01);
 	pos.z *= 512.0;
 	vec2 offset = vec2(0.317, 0.123);
-	vec4 uv = vec4(0.0);
-	uv.xy = pos.xy + offset * floor(pos.z);
-	uv.zw = uv.xy + offset;
-	float x1 = textureLod(cumulus_texture, uv.xy, 0.0).r;
-	float x2 = textureLod(cumulus_texture, uv.zw, 0.0).r;
-	return mix(x1, x2, fract(pos.z));
+	vec2 texture_res = vec2(textureSize(cumulus_texture, 0));
+	float slice_index = floor(pos.z);
+	// wrap the per-slice offsets into 0-1 so uvs stay small and keep their precision as cumulus_position grows
+	float x1 = _sample_cumulus_smooth(pos.xy + fract(offset * slice_index), texture_res);
+	float x2 = _sample_cumulus_smooth(pos.xy + fract(offset * (slice_index + 1.0)), texture_res);
+	return mix(x1, x2, smoothstep(0.0, 1.0, fract(pos.z)));
 }
 
-float calc_cumulus_fbm(vec3 p, float l) {
-	float ret;
-	ret = 0.51749673 * sample_cumulus_noise(p);
-	p *= l;
-	ret += 0.25584929 * sample_cumulus_noise(p);
-	p *= l;
-	ret += 0.12527603 * sample_cumulus_noise(p);
-	p *= l;
-	ret += 0.06255931 * sample_cumulus_noise(p);
-	return ret;
+// each octave scrolls through the vertical noise axis so shapes morph, finer octaves faster
+float _calc_cumulus_fbm_evolving(vec3 noise_pos, float lacunarity, float evolve_amount) {
+	vec3 octave_pos = noise_pos;
+	vec3 octave_evolve = vec3(0.0, evolve_amount, 0.0);
+	float base_density = 0.51749673 * sample_cumulus_noise(octave_pos + octave_evolve);
+	octave_pos *= lacunarity;
+	octave_evolve *= cumulus_detail_evolution;
+	float detail_density = 0.25584929 * sample_cumulus_noise(octave_pos + octave_evolve);
+	octave_pos *= lacunarity;
+	octave_evolve *= cumulus_detail_evolution;
+	detail_density += 0.12527603 * sample_cumulus_noise(octave_pos + octave_evolve);
+	octave_pos *= lacunarity;
+	octave_evolve *= cumulus_detail_evolution;
+	detail_density += 0.06255931 * sample_cumulus_noise(octave_pos + octave_evolve);
+	// fade the detail octaves and rescale so overall density and coverage stay comparable
+	return (base_density + detail_density * cumulus_detail_amount) * 0.96118136 / (0.51749673 + 0.44368463 * cumulus_detail_amount);
 }
 
 float calc_cirrus_density(vec2 p) {
@@ -260,16 +287,19 @@ float calc_cirrus_density(vec2 p) {
 	return clamp_to_unit(d);
 }
 
-float calc_cumulus_density(vec3 p, vec3 offset, float t) {
+float _sample_cumulus_shape(vec3 p, vec3 offset, vec3 travel_axis) {
 	vec3 pos = p * 0.0212242 - offset;
-	float dens = calc_cumulus_fbm(pos, cumulus_noise_freq);
-	dens += dens;
+	// compress the along-travel axis so shapes elongate in the travel direction
+	pos -= travel_axis * (dot(pos, travel_axis) * (1.0 - 1.0 / cumulus_wind_stretch));
+	float dens = _calc_cumulus_fbm_evolving(pos, cumulus_noise_freq, TIME * cumulus_evolution_speed);
+	return dens + dens;
+}
 
-	float cov = 1.0 - cumulus_coverage;
-	cov = smoothstep(0.00, (cov * 3.5) + t, dens);
-	dens *= cov;
+float calc_cumulus_density(float shape_noise, float t, float local_coverage) {
+	float cov = 1.0 - local_coverage;
+	cov = smoothstep(0.00, (cov * 3.5) + t, shape_noise);
+	float dens = shape_noise * cov;
 	dens = map_range(dens, 1.0 - cov, 1.0, 0.0, 1.0);
-
 	return clamp_to_unit(dens);
 }
 
@@ -292,18 +322,22 @@ vec4 render_cirrus_clouds(vec3 pos) {
 	
 	return vec4(col, a);
 }
-
 vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_pos) {
 	vec4 ret = vec4(0.);
 	vec3 wind = -vec3(cumulus_position.x, 0.0, cumulus_position.y);
+	vec3 travel_axis = -vec3(cloud_direction.x, 0.0, cloud_direction.y);
 	float a = 0.0;
 
 	// n and tt doesnt need to be initialized since it would be set by ray_sphere_intersect
 	vec3 n; float tt;
 	if (ray_sphere_intersect(500., ro, rd, tt, n)) {
 		float march_step = float(CUMULUS_STEP) * cumulus_thickness;
-		vec3 dir_step = rd / rd.y * march_step;
 		vec3 pos = n * cumulus_size;
+
+		// slow field the clouds drift through, deforming them and shifting coverage as they pass
+		float drift_field = sample_cumulus_noise((pos * 0.0212242 - wind * cumulus_warp_follow) * 0.35) - 0.5;
+		vec3 drift_offset = wind - travel_axis * (drift_field * cumulus_warp_strength);
+		float local_coverage = clamp_to_unit(cumulus_coverage + drift_field * cumulus_coverage_variation);
 
 		vec2 mu = vec2(dot(sun_pos, rd), dot(moon_pos, rd));
 		vec3 mph = ((calc_mie_phase(mu.x, cumulus_partial_mie_phase) * atm_sun_mie_tint.rgb) +
@@ -312,14 +346,15 @@ vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_p
 		vec4 t = vec4(1.0);
 		t.rgb += (mph.rgb * cumulus_mie_intensity);
 
+		// one noise sample per pixel since separate per-layer samples showed up as offset copies along the edges
+		float shape_noise = _sample_cumulus_shape(pos, drift_offset, travel_axis);
 		for(int i = 0; i < CUMULUS_STEP; i++) {
-			float h = float(i) * 0.1; // / float(kCLOUDS_STEP);
-			float density = calc_cumulus_density(pos, wind, h);
+			float h = float(i) * 0.1;
+			float density = calc_cumulus_density(shape_noise, h, local_coverage);
 			float sh = clamp_to_unit(exp(-cumulus_absorption * density * march_step));
 			t *= sh;
 			ret += (t * (exp(h) * 0.571428571) * density * march_step);
 			a += (1.0 - sh) * (1.0 - a);
-			pos += dir_step;
 		}
 
 		
@@ -332,8 +367,9 @@ vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_p
 // Main
 //------------------------------------------------------------------------------
 
-vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, float p_time) {
+vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, float p_time, out float cloud_coverage) {
 	vec3 col = vec3(0.0);
+	cloud_coverage = 0.0;
 
 	vec4 angle_mult;
 	angle_mult.x = clamp_to_unit(1.0 - sun_pos.y);
@@ -414,18 +450,20 @@ vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, fl
 		cloud_tint = mix(cloud_tint, clouds_night_color.rgb, angle_mult.w);
 		cirrus_clouds.rgb *= cloud_tint * cirrus_intensity;
 		cirrus_clouds.a = mix(0.0, cirrus_clouds.a, horizonBlend);
+		cloud_coverage = cirrus_clouds.a;
 		col.rgb = mix(col.rgb, cirrus_clouds.rgb + mix(vec3(0.0), scatter, cirrus_sky_tint_fade), cirrus_clouds.a);
 	}
 
 	if (cumulus_visible) {
 		vec4 cumulus_clouds = render_cumulus_clouds(vec3(0.0), clouds_pos, angle_mult.z, sun_pos, moon_pos);
-		cumulus_clouds.a = smoothstep(0.25,0.4,cumulus_clouds.a);	// make the clouds have harder edges
+  		cumulus_clouds.a = smoothstep(0.1, 0.45, cumulus_clouds.a);		
 		
 		vec3 cloud_tint = sun_light_color.rgb;
 		cloud_tint = mix(cloud_tint, clouds_night_color.rgb, angle_mult.w);
 		
 		cumulus_clouds.rgb *= cloud_tint * cumulus_intensity;
 		cumulus_clouds.a = mix(0.0, cumulus_clouds.a, horizonBlend);
+		cloud_coverage = 1.0 - (1.0 - cloud_coverage) * (1.0 - clamp_to_unit(cumulus_clouds.a));
 		col.rgb = mix(col.rgb, cumulus_clouds.rgb + mix(vec3(0.0), scatter, cumulus_sky_tint_fade), cumulus_clouds.a);
 	}
 
@@ -518,13 +556,16 @@ void sky() {
 	vec3 moon_pos = LIGHT1_DIRECTION; // Redefined from now-deprecated _moon_direction.
 
 	if (sky_visible) {
-		col = render_sky(world_pos, clouds_pos, sun_pos, moon_pos, current_time);
-		col.rgb = dither_interleaved(col.rgb, 1276, FRAGCOORD);
-		
+		float cloud_coverage;
+		col = render_sky(world_pos, clouds_pos, sun_pos, moon_pos, current_time, cloud_coverage);
+		vec3 dithered_col = dither_interleaved(col.rgb, 1276, FRAGCOORD);
+
 		vec2 rand = random(FRAGCOORD.xy * TIME);
 		float noise = (fract(sin( dot(FRAGCOORD.xy, vec2(35.9898 * (sin(TIME) + 0.5), 15.002 * (cos(TIME) + 0.5)))) * 43758.5453) - 0.5) * 2.0;
+		dithered_col += (noise * sky_noise_amount * sky_noise_size);
 
-		col.rgb += (noise * sky_noise_amount * sky_noise_size);
+		// skip dither and grain where clouds cover the sky
+		col.rgb = mix(dithered_col, col.rgb, step(0.2,cloud_coverage));
 		col.rgb = clamp(col.rgb, 0.0, 1.0);
 	}
 

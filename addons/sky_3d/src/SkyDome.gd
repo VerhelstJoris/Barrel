@@ -880,6 +880,8 @@ enum { PHYSICS_PROCESS, PROCESS, MANUAL }
 func _check_cloud_processing() -> void:
 	var enable: bool = (cirrus_visible or cumulus_visible) and wind_speed != 0.0
 	_cloud_velocity = _cloud_direction * _cloud_speed
+	if is_scene_built:
+		sky_material.set_shader_parameter("cloud_direction", _cloud_direction)
 	match process_method:
 		PHYSICS_PROCESS:
 			set_physics_process(enable)
