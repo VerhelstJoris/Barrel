@@ -485,7 +485,7 @@ void process() {
 	// the stored y already carries last frame's sway, so it is removed before easing and reapplied after, or the two would fight each other
 	float previous_sway = sway_height(max(age - DELTA, 0.0), seed_base);
 	float grounded_y = TRANSFORM[3].y - previous_sway;
-	float target_y = ground_height(xz, normalize(velocity), EMISSION_TRANSFORM[3].y, grounded_y, ride_offset(age, LIFETIME, seed_base));
+	float target_y = ground_height(xz, normalize(velocity), grounded_y, grounded_y, ride_offset(age, LIFETIME, seed_base));
 	float settled_y = settled_height(grounded_y, target_y, speed, DELTA);
 	TRANSFORM[3].xyz = vec3(xz.x, settled_y + sway_height(age, seed_base), xz.y);
 	VELOCITY = vec3(velocity.x, 0.0, velocity.y);
