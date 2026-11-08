@@ -55,17 +55,6 @@ var sky_material: ShaderMaterial
 		sky_enabled = value
 		if sky and sky_material:
 			sky_material.set_shader_parameter("sky_visible", value)
-			sky.cumulus_visible = clouds_enabled and value
-			sky.cirrus_visible = clouds_enabled and value
-
-
-## Enables both 2D and cumulus cloud layers.
-@export var clouds_enabled: bool = true :
-	set(value):
-		clouds_enabled = value
-		if sky:
-			sky.cumulus_visible = value
-			sky.cirrus_visible = value
 
 
 ## Enables the Sun and Moon [DirectionalLight3D]s.
@@ -90,7 +79,6 @@ func hide_sky() -> void:
 	sky_enabled = false
 	lights_enabled = false
 	fog_enabled = false
-	clouds_enabled = false
 
 
 ## Enables rendering of sky, fog, and lights.
@@ -98,7 +86,6 @@ func show_sky() -> void:
 	sky_enabled = true
 	lights_enabled = true
 	fog_enabled = true
-	clouds_enabled = true
 
 
 #####################
@@ -254,15 +241,6 @@ func _start_sky_contrib_tween(daytime: bool = is_day()) -> void:
 		return sky.exposure if sky else skydome_energy
 
 
-## Brightness of and light energy coming from the clouds. Alias for [member SkyDome.cumulus_intensity].
-@export_range(0, 16, 0.005) var cloud_intensity: float = 0.6 :
-	set(value):
-		if sky:
-			sky.cumulus_intensity = value
-	get:
-		return sky.cumulus_intensity if sky else cloud_intensity
-
-
 ## Maximum brightness of the Sun DirectionalLight, visible during the day.
 ## Alias for [member SkyDome.sun_light_energy].
 @export_range(0, 16, 0.005) var sun_energy: float = 1.0 :
@@ -398,30 +376,6 @@ func _start_sky_contrib_tween(daytime: bool = is_day()) -> void:
 			camera_attributes.auto_exposure_speed = value
 	get:
 		return camera_attributes.auto_exposure_speed if camera_attributes else auto_exposure_speed
-
-
-#####################
-## Weather
-#####################
-
-@export_group("Weather")
-
-## Sets the wind speed. Alias for [member SkyDome.wind_speed].
-@export_custom(PROPERTY_HINT_RANGE, "0,120,0.1,or_greater,or_less,suffix:m/s") var wind_speed: float = 1.0 :
-	set(value):
-		if sky:
-			sky.wind_speed = value
-	get:
-		return sky.wind_speed if sky else wind_speed
-
-## Sets the wind direction. Zero means the wind is coming from the north, 90 from the east,
-## 180 from the south and 270 (or -90) from the west. Alias for [member SkyDome.wind_direction].
-@export_custom(PROPERTY_HINT_RANGE, "-180,180,0.1,radians_as_degrees") var wind_direction: float = 0.0 :
-	set(value):
-		if sky:
-			sky.wind_direction = value
-	get:
-		return sky.wind_direction if sky else wind_direction
 
 
 #####################
