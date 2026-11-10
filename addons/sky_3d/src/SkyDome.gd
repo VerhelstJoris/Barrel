@@ -16,15 +16,12 @@ const MOON_TEXTURE: Texture2D = preload("res://addons/sky_3d/assets/thirdparty/t
 const STARMAP_TEXTURE: Texture2D = preload("res://addons/sky_3d/assets/thirdparty/textures/milkyway/Milkyway.jpg")
 const STARFIELD_TEXTURE: Texture2D = preload("res://addons/sky_3d/assets/thirdparty/textures/milkyway/StarField.jpg")
 const STARFIELD_NOISE: Texture2D = preload("res://addons/sky_3d/assets/textures/noise.jpg")
-const CIRRUS_TEXTURE: Texture2D = preload("res://addons/sky_3d/assets/resources/SNoise.tres")
-const CUMULUS_TEXTURE: Texture2D = preload("res://addons/sky_3d/assets/textures/noiseClouds.png")
 const SUN_MOON_CURVE: Curve = preload("res://addons/sky_3d/assets/resources/SunMoonLightFade.tres")
 const DAY_NIGHT_TRANSITION_ANGLE: float = deg_to_rad(90)  # Horizon
 
 var is_scene_built: bool = false
 var fog_mesh: MeshInstance3D
 var sky_material: ShaderMaterial
-var cumulus_material: Material
 var fog_material: Material
 
 
@@ -50,10 +47,7 @@ func _update_ambient_color() -> void:
 
 
 func _ready() -> void:
-	set_process(false)
-	set_physics_process(false)
 	_build_scene()
-	_check_cloud_processing()
 
 
 func _build_scene() -> void:
@@ -64,10 +58,6 @@ func _build_scene() -> void:
 	# Necessary for now until we can pull everything off the SkyDome node.
 	sky_material = environment.sky.sky_material
 	sky_material.set_shader_parameter("noise_tex", STARFIELD_NOISE)
-	
-	# Set cumulus cloud global to point to the sky material.
-	# Necessary for now until we can pull everything off the SkyDome node.
-	cumulus_material = sky_material
 	
 	fog_mesh = MeshInstance3D.new()
 	fog_mesh.name = "_FogMeshI"
@@ -93,36 +83,6 @@ func _build_scene() -> void:
 		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE and prop.usage & PROPERTY_USAGE_EDITOR:
 			var prop_name: String = prop.name
 			set(prop_name, get(prop_name))  # Triggers setter with current value
-
-
-#####################
-## Processing 
-#####################
-
-
-func _physics_process(delta: float) -> void:
-	process_tick(delta)
-
-
-func _process(delta: float) -> void:
-	process_tick(delta)
-
-
-## If [method process_method] is set to manual, this function can be called with the number of 
-## seconds passed to update the position of the clouds.
-func process_tick(delta: float) -> void:
-	if not (cirrus_visible or cumulus_visible):
-		return
-	var position_delta: Vector2 = _cloud_velocity * delta
-	if cumulus_visible:
-		_cumulus_position += position_delta
-		sky_material.set_shader_parameter("cumulus_position", _cumulus_position)
-	if cirrus_visible:
-		position_delta *= cirrus_speed_reduction
-		_cirrus_position1 += position_delta
-		_cirrus_position2 += position_delta
-		sky_material.set_shader_parameter("cirrus_position1", _cirrus_position1)
-		sky_material.set_shader_parameter("cirrus_position2", _cirrus_position2)
 
 
 #####################
@@ -801,269 +761,7 @@ func _update_beta_mie() -> void:
 	set(value):
 		clouds_night_color = value
 		if is_scene_built:
-			cumulus_material.set_shader_parameter("clouds_night_color", clouds_night_color)
 			sky_material.set_shader_parameter("clouds_night_color", clouds_night_color)
-
-
-#####################
-## Wind
-#####################
-
-@export_subgroup("Wind")
-
-var _cloud_speed: float = 0.01
-var _cloud_direction := Vector2(0.25, 0.25)
-var _cloud_velocity := Vector2.ZERO
-var _cirrus_position1 := Vector2.ZERO
-var _cirrus_position2 := Vector2.ZERO
-var _cumulus_position := Vector2.ZERO
-
-@export_subgroup("Wind")
-
-
-# Converts the wind speed from m/s to "shader units" to get clouds moving at a "realistic" speed.
-# Note that "realistic" is an estimate as there is no such thing as an altitude for these clouds.
-const WIND_SPEED_FACTOR: float = 0.01
-## Sets the wind speed.
-@export_custom(PROPERTY_HINT_RANGE, "0,120,0.1,or_greater,or_less,suffix:m/s") var wind_speed: float = 1.0 :
-	set(value):
-		_cloud_speed = value * WIND_SPEED_FACTOR
-		_check_cloud_processing()
-	get:
-		return _cloud_speed / WIND_SPEED_FACTOR
-
-
-# Zero degrees means the wind is coming from the north, but the shader uses the +X axis as zero, so
-# we need to convert between the two with this offset.
-const WIND_DIRECTION_OFFSET: float = deg_to_rad(-90)
-## Sets the wind direction. Zero means the wind is coming from the north, 90 from the east,
-## 180 from the south and 270 (or -90) from the west.
-@export_custom(PROPERTY_HINT_RANGE, "-180,180,0.1,radians_as_degrees") var wind_direction: float = 0.0 :
-	set(value):
-		wind_direction = value
-		_cloud_direction = Vector2.from_angle(value + WIND_DIRECTION_OFFSET)
-		# We set this value here explicitly to prevent it from "wrapping around" at the edges.
-		# That would otherwise happen with a non-zero WIND_DIRECTION_OFFSET on either end of the
-		# slider (depending on the sign of that offset). We hold on to it here make sure the
-		# slider stays at the same edge. See also the 'get' function below.
-		_check_cloud_processing()
-	get:
-		# We fetch the real wind direction by taking the angle from the clouds direction
-		# vector and correcting it for the offset again.
-		var real_wind_direction = _cloud_direction.angle() - WIND_DIRECTION_OFFSET
-		# What we do here is see if the wind direction we've stored in the property, as
-		# explained in 'set' above, is approximately equal to the direction we've just
-		# retrieved from the sky dome. This will be the case if we were the last to set it
-		# but it won't be if someone else directly changed it in the sky dome, so only
-		# use the value from the sky dome if it's different.
-		return wind_direction if is_zero_approx(wrapf(wind_direction - real_wind_direction, 0, TAU)) else real_wind_direction
-
-
-## * Set [0, <1] to make the cirrus clouds appear higher than the cummulus clouds via a parallax effect.[br]
-## * Set >= 1 to make them appear at the same level or lower.[br]
-## * Set negative to make the cirrus clouds move backwards, which is a real phenomenon called wind shear.[br]
-## Finally, you can adjust [member cirrus_size] and [member cumulus_size] to adjust the scale of the 
-## cloud noise map UVs, which has the effect of changing apparent height and speed. 
-@export_range(0.,1.,.01, "or_greater","or_less") var cirrus_speed_reduction: float = 0.2
-
-
-enum { PHYSICS_PROCESS, PROCESS, MANUAL }
-## Sky3D is updated in two parts. The sky, sun, moon, and stars are updated by the
-## [member TimeOfDay.update_interval] timer. Cloud movement is updated by this method: your choice of
-## _physics_process(), _process(), or by manually calling [method process_tick].
-@export_enum("Physics Process", "Process", "Manual") var process_method: int = PHYSICS_PROCESS :
-	set(value):
-		process_method = value
-		_check_cloud_processing()
-
-
-func _check_cloud_processing() -> void:
-	var enable: bool = (cirrus_visible or cumulus_visible) and wind_speed != 0.0
-	_cloud_velocity = _cloud_direction * _cloud_speed
-	if is_scene_built:
-		sky_material.set_shader_parameter("cloud_direction", _cloud_direction)
-	match process_method:
-		PHYSICS_PROCESS:
-			set_physics_process(enable)
-			set_process(!enable)
-		PROCESS:
-			set_physics_process(!enable)
-			set_process(enable)
-		MANUAL, _:
-			set_physics_process(false)
-			set_process(false)
-
-
-#####################
-## Cirrus Clouds
-#####################
-
-@export_subgroup("Cirrus")
-
-
-## Toggles visibility of high-altitude cirrus clouds.
-@export var cirrus_visible: bool = true :
-	set(value):
-		cirrus_visible = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_visible", value)
-			_check_cloud_processing()
-
-## Adjusts the brightness of cirrus clouds. If covering the sky, this has a dramatic affect on lighting.
-@export_range(0.0, 16.0, 0.005) var cirrus_intensity: float = 2.0 :
-	set(value):
-		cirrus_intensity = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_intensity", cirrus_intensity)
-
-
-
-## Set density for cirrus clouds.
-@export var cirrus_thickness: float = 1.7 :
-	set(value):
-		cirrus_thickness = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_thickness", cirrus_thickness)
-
-
-## How much of the sky is covered by cirrus clouds.
-@export_range(0.0, 1.0, 0.001) var cirrus_coverage: float = 0.5 :
-	set(value):
-		cirrus_coverage = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_coverage", cirrus_coverage)
-
-
-## Higher values create more opaque clouds.
-@export var cirrus_absorption: float = 2.0 :
-	set(value):
-		cirrus_absorption = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_absorption", cirrus_absorption)
-
-
-## Blends the sky's atmospheric color into cirrus clouds.
-@export_range(0.0, 1.0, 0.001) var cirrus_sky_tint_fade: float = 0.5 :
-	set(value):
-		cirrus_sky_tint_fade = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_sky_tint_fade", cirrus_sky_tint_fade)
-
-
-## The noise texture used for generating cirrus cloud patterns.
-@export var cirrus_texture: Texture2D = CIRRUS_TEXTURE :
-	set(value):
-		cirrus_texture = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_texture", cirrus_texture)
-
-
-## Sets the aspect ratio of the cirrus texture used for the clouds.
-@export var cirrus_uv := Vector2(0.16, 0.11) :
-	set(value):
-		cirrus_uv = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_uv", cirrus_uv)
-
-
-## Adjusts the scale of the noise texture, which indirectly affects the apparent height and 
-## speed of the clouds. Use it with [member cirrus_speed_reduction] to refine cirrus speed and height.
-@export var cirrus_size: float = 1.0 :
-	set(value):
-		cirrus_size = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cirrus_size", cirrus_size)
-
-
-#####################
-## Cumulus Clouds
-#####################
-
-@export_subgroup("Cumulus")
-
-
-## Toggles visibility of the low-altitude cumulus clouds.
-@export var cumulus_visible: bool = true :
-	set(value):
-		cumulus_visible = value
-		if is_scene_built:
-			sky_material.set_shader_parameter("cumulus_visible", value)
-			_check_cloud_processing()
-
-
-## Adjusts the brightness of cumulus clouds. If covering the sky, this has a dramatic affect on lighting.
-@export_range(0, 16, 0.005) var cumulus_intensity: float = 0.6 :
-	set(value):
-		cumulus_intensity = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_intensity", cumulus_intensity)
-
-
-## Controls the vertical depth and layering thickness of the cumulus clouds.
-@export var cumulus_thickness: float = 0.0243 :
-	set(value):
-		cumulus_thickness = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_thickness", cumulus_thickness)
-
-
-## Sets how much of the sky is covered by the cumulus clouds.
-@export_range(0.0, 1.0, 0.001) var cumulus_coverage: float = 0.55 :
-	set(value):
-		cumulus_coverage = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_coverage", cumulus_coverage)
-
-
-## Adjusts light absorption inside the cumulus clouds, increasing opacity and internal shadows for denser, more realistic volumes.
-@export var cumulus_absorption: float = 2.0 :
-	set(value):
-		cumulus_absorption = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_absorption", cumulus_absorption)
-
-
-## Changes the frequency of noise in the cumulus cloud generation; higher values create clouds with more detail.
-@export_range(0.0, 3.0, 0.001) var cumulus_noise_freq: float = 2.7 :
-	set(value):
-		cumulus_noise_freq = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_noise_freq", cumulus_noise_freq)
-
-
-## Controls the strength of hazy light scattering around the cumulus clouds from the sun and moon, enhancing glow and diffusion near edges.
-@export var cumulus_mie_intensity: float = 1.0 :
-	set(value):
-		cumulus_mie_intensity = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_mie_intensity", cumulus_mie_intensity)
-
-
-## Sets the directionality of Mie scattering in cumulus clouds; low values spread light evenly (like fog),
-## while high values focus it forward (like sharp haze beams through gaps).
-@export_range(0.0, 0.9999999, 0.0000001) var cumulus_mie_anisotropy: float = 0.206 :
-	set(value):
-		cumulus_mie_anisotropy = value
-		if is_scene_built:
-			var partial: Vector3 = ScatterLib.get_partial_mie_phase(cumulus_mie_anisotropy)
-			cumulus_material.set_shader_parameter("cumulus_partial_mie_phase", partial)
-
-
-## The noise texture used for generating cumulus cloud patterns.
-@export var cumulus_texture: Texture2D = CUMULUS_TEXTURE :
-	set(value):
-		cumulus_texture = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_texture", cumulus_texture)
-
-
-## This parameter adjusts the scale of the noise texture, which indirectly affects the apparent height and 
-## speed of the clouds.
-@export var cumulus_size: float = 0.5 :
-	set(value):
-		cumulus_size = value
-		if is_scene_built:
-			cumulus_material.set_shader_parameter("cumulus_size", cumulus_size)
 
 
 #####################
