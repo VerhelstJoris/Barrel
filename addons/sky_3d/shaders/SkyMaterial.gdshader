@@ -9,6 +9,8 @@ const int CUMULUS_PUFF_COUNT = 7;
 const float CUMULUS_PLANET_RADIUS = 40.0; // in cloud base heights, sets how far away the horizon clouds sit
 const float CUMULUS_CELL_SIZE = 2.8; // spacing of possible clouds in cloud base heights at size 1
 const float CUMULUS_WIND_SCALE = 2.0; // cloud base heights travelled per unit of cumulus_position
+const float CIRRUS_PATTERN_SCALE = 0.145; // streak space units per cloud height at cirrus_size 1
+const int CIRRUS_MAX_EXTRA_LANES = 3; // furthest a streak may wander from its own lane before being cut off
 
 group_uniforms general;
 uniform bool sky_visible = true;
@@ -72,30 +74,43 @@ uniform vec2 cloud_direction = vec2(0.0, 1.0); // wind travel direction on the X
 
 group_uniforms cirrus_clouds;
 uniform bool cirrus_visible = true;
-uniform float cirrus_intensity = 2.0;
-uniform float cirrus_coverage = 0.5;
-uniform float cirrus_thickness = 10.0;
-uniform float cirrus_absorption = 2.0;
-uniform float cirrus_sky_tint_fade = 0.5;
-uniform float cirrus_size = 1.0;
-uniform vec2 cirrus_uv = vec2(0.16, 0.11);
-uniform vec2 cirrus_position1 = vec2(0.0); // accumulated wind offset, set by AtmosphereManager.gd
-uniform float cirrus_speed_scale = 1.0; // speed relative to the main cumulus layer, read by AtmosphereManager.gd; below 1 reads as higher up, negative gives wind shear
-uniform vec2 cirrus_position2 = vec2(0.0);
-uniform float cirrus_evolution_speed = 0.001;
-uniform float cirrus_coverage_variation = 0.1;
+uniform float cirrus_intensity = 2.345;
+uniform float cirrus_coverage : hint_range(0.0, 1.0) = 0.25;
+uniform float cirrus_coverage_variation : hint_range(0.0, 1.0) = 0.05; // slow patches of denser and sparser streaks
+uniform float cirrus_thickness = 0.6;
+uniform float cirrus_size = 0.9; // pattern scale, larger values pack the streaks tighter
+
+group_uniforms cirrus_clouds.colour;
+uniform float cirrus_absorption = 2.0; // darkens the densest parts of each streak
+uniform float cirrus_sky_tint_fade = 0.765; // how much sky colour is added into the streaks
+
+group_uniforms cirrus_clouds.shape;
 uniform float cirrus_streak_spacing = 0.05; // distance between streak lanes across the wind
-uniform float cirrus_streak_width : hint_range(0.05, 1.0) = 0.35; // share of each lane a streak fills
-uniform float cirrus_streak_width_variation : hint_range(0.0, 1.0) = 0.7; // skewed towards thin streaks with the odd wide one
-uniform float cirrus_streak_length = 0.4; // along-wind repeat of streak segments
-uniform float cirrus_streak_length_variation : hint_range(0.0, 1.0) = 0.5;
+uniform float cirrus_streak_width : hint_range(0.05, 1.0) = 0.2; // share of each lane a streak fills
+uniform float cirrus_streak_length = 0.99; // along-wind repeat of streak segments
 uniform float cirrus_streak_softness : hint_range(0.0, 1.0) = 0.4; // edge falloff across the streak
 uniform float cirrus_streak_taper : hint_range(0.0, 1.0) = 0.6; // share of each streak thinning out towards its upwind tail
-uniform float cirrus_streak_head_taper : hint_range(0.0, 1.0) = 0.15; // share of each streak rounding off at its downwind head
-uniform float cirrus_streak_waviness : hint_range(0.0, 0.45) = 0.2; // largest sideways bend in lane widths, each streak picks its own
-uniform float cirrus_streak_direction_variation : hint_range(0.0, 30.0) = 8.0; // largest angle in degrees a streak leans away from the wind
-uniform float cirrus_streak_direction_coherence : hint_range(0.0, 1.0) = 0.75; // how much neighbouring streaks share their lean instead of each picking its own
+uniform float cirrus_streak_head_taper : hint_range(0.0, 1.0) = 0.86; // share of each streak rounding off at its downwind head
 uniform float cirrus_streak_breakup : hint_range(0.0, 1.0) = 0.35; // brightness knots along each streak
+
+group_uniforms cirrus_clouds.variation;
+uniform float cirrus_streak_width_variation : hint_range(0.0, 1.0) = 0.095; // skewed towards thin streaks with the odd wide one
+uniform float cirrus_streak_length_variation : hint_range(0.0, 1.0) = 0.045;
+
+group_uniforms cirrus_clouds.direction;
+uniform float cirrus_streak_direction_variation : hint_range(0.0, 30.0) = 30.0; // largest angle in degrees a streak leans away from the wind
+uniform float cirrus_streak_direction_coherence : hint_range(0.0, 1.0) = 0.662; // how much neighbouring streaks share their lean instead of each picking its own
+uniform float cirrus_streak_waviness : hint_range(0.0, 0.45) = 0.025; // largest sideways bend in lane widths, each streak picks its own
+
+group_uniforms cirrus_clouds.kinks;
+uniform float cirrus_streak_jaggedness : hint_range(0.0, 1.0) = 0.084; // sideways jump at each lightning-like kink relative to the straight run between kinks, 0 keeps streaks smooth
+uniform float cirrus_streak_kink_count : hint_range(1.0, 16.0) = 4.913; // average number of sharp turns along each streak
+uniform float cirrus_streak_kink_sharpness : hint_range(0.0, 1.0) = 0.688; // 1 gives hard cracks, 0 rounds the turns off
+
+group_uniforms cirrus_clouds.motion;
+uniform vec2 cirrus_position = vec2(0.0); // accumulated wind offset, set by AtmosphereManager.gd
+uniform float cirrus_speed_scale = 0.001; // speed relative to the main cumulus layer, read by AtmosphereManager.gd; below 1 reads as higher up, negative gives wind shear
+uniform float cirrus_evolution_speed = 0.001; // how quickly individual streaks fade in and out
 
 group_uniforms cumulus_clouds;
 uniform bool cumulus_visible = true;
@@ -159,6 +174,17 @@ uniform mat3 moon_matrix; // set by SkyDome.gd, not used by this shader yet
 // Helpers
 //------------------------------------------------------------------------------
 
+uint _hash_uint(uint hash_input) {
+	uint hash_state = hash_input * 747796405u + 2891336453u;
+	uint hash_word = ((hash_state >> ((hash_state >> 28u) + 4u)) ^ hash_state) * 277803737u;
+	return (hash_word >> 22u) ^ hash_word;
+}
+
+// splits one hash into three 10-bit random values in 0-1
+vec3 _unpack_random(uint hash_value) {
+	return vec3(uvec3(hash_value, hash_value >> 10u, hash_value >> 20u) & uvec3(1023u)) / 1023.0;
+}
+
 mat3 _create_rotation_matrix(vec3 euler_angles) {
 	float cos_x = cos(euler_angles.x), sin_x = sin(euler_angles.x);
 	float cos_y = cos(euler_angles.y), sin_y = sin(euler_angles.y);
@@ -216,17 +242,6 @@ vec3 _calc_atmospheric_scatter(float rayleigh_depth, float mie_depth, vec2 light
 // Cirrus clouds
 //------------------------------------------------------------------------------
 
-uint _hash_uint(uint hash_input) {
-	uint hash_state = hash_input * 747796405u + 2891336453u;
-	uint hash_word = ((hash_state >> ((hash_state >> 28u) + 4u)) ^ hash_state) * 277803737u;
-	return (hash_word >> 22u) ^ hash_word;
-}
-
-// splits one hash into three 10-bit random values in 0-1
-vec3 _unpack_random(uint hash_value) {
-	return vec3(uvec3(hash_value, hash_value >> 10u, hash_value >> 20u) & uvec3(1023u)) / 1023.0;
-}
-
 float _cirrus_lattice_random(ivec2 lattice_id, uint noise_seed) {
 	return float(_hash_uint(uint(lattice_id.x) * 1597334677u ^ uint(lattice_id.y) * 3812015801u ^ noise_seed) & 1023u) / 1023.0;
 }
@@ -247,7 +262,19 @@ float _cirrus_value_noise_1d(float noise_pos, uint noise_seed) {
 	return mix(_cirrus_lattice_random(ivec2(lattice_id, 0), noise_seed), _cirrus_lattice_random(ivec2(lattice_id + 1, 0), noise_seed), blend_weight);
 }
 
-// one streak per lane segment, with its own width, bend and brightness knots that all travel with it
+// sideways path through a random offset at each kink, straight between kinks for hard cracks; returns offset and slope
+vec2 _cirrus_kink_path(float path_coord, uint path_seed) {
+	float kink_index = floor(path_coord);
+	float kink_frac = path_coord - kink_index;
+	float smooth_turn = kink_frac * kink_frac * (3.0 - 2.0 * kink_frac);
+	float turn_blend = mix(smooth_turn, kink_frac, cirrus_streak_kink_sharpness);
+	float turn_rate = mix(6.0 * kink_frac * (1.0 - kink_frac), 1.0, cirrus_streak_kink_sharpness);
+	float kink_start = _cirrus_lattice_random(ivec2(int(kink_index), 0), path_seed) * 2.0 - 1.0;
+	float kink_end = _cirrus_lattice_random(ivec2(int(kink_index) + 1, 0), path_seed) * 2.0 - 1.0;
+	return vec2(mix(kink_start, kink_end, turn_blend), (kink_end - kink_start) * turn_rate);
+}
+
+// one streak per lane segment, with its own width, bend, lean, kinks and brightness knots that all travel with it
 float _cirrus_lane_streak(float lane_id, float across_in_lane, float along_pos, float lane_spacing, float layer_coverage, uint layer_seed, float lane_pixel) {
 	uint lane_hash = _hash_uint(uint(int(lane_id)) * 1597334677u ^ layer_seed);
 	float lane_phase = float(lane_hash & 1023u) / 1023.0 * 17.0;
@@ -255,12 +282,9 @@ float _cirrus_lane_streak(float lane_id, float across_in_lane, float along_pos, 
 	float segment_index = floor(segment_coord);
 	uint segment_hash = _hash_uint(lane_hash ^ uint(int(segment_index)) * 3812015801u);
 	vec3 layout_random = _unpack_random(segment_hash);
-
-	float life_phase = float(_hash_uint(segment_hash ^ 1013904223u) & 1023u) / 1023.0;
 	float life_swing = min(layer_coverage * 0.3, 0.15); // sparse skies fade gently instead of switching streaks fully on and off
-	float life_wobble = sin(TIME * cirrus_evolution_speed * 60.0 + life_phase * 6.2831853) * life_swing;
-	float presence = smoothstep(0.0, 0.15, layer_coverage - layout_random.z + life_wobble);
-	if (presence <= 0.0) {
+	// rejects streaks that stay hidden even at the peak of their fade before paying for the fade itself
+	if (layout_random.z >= layer_coverage + life_swing) {
 		return 0.0;
 	}
 	float segment_length = 0.9 - layout_random.x * cirrus_streak_length_variation * 0.6;
@@ -269,60 +293,108 @@ float _cirrus_lane_streak(float lane_id, float across_in_lane, float along_pos, 
 	if (segment_progress <= 0.0 || segment_progress >= 1.0) {
 		return 0.0;
 	}
-
-	vec3 shape_random = _unpack_random(_hash_uint(segment_hash ^ 2246822519u));
-	vec3 wave_random = _unpack_random(_hash_uint(segment_hash ^ 3266489917u));
-	vec3 tone_random = _unpack_random(_hash_uint(segment_hash ^ 668265263u));
+	// fade timing remixes the segment hash, staying independent of the presence threshold without another hash
+	float life_phase = float((segment_hash * 2654435761u) >> 22u) / 1023.0;
+	float life_wobble = sin(TIME * cirrus_evolution_speed * 60.0 + life_phase * TAU) * life_swing;
+	float presence = smoothstep(0.0, 0.15, layer_coverage - layout_random.z + life_wobble);
+	if (presence <= 0.0) {
+		return 0.0;
+	}
 
 	// pointed tail upwind, rounded head downwind
 	float tail_shape = smoothstep(0.0, max(cirrus_streak_taper, 1e-3), segment_progress);
 	float head_shape = 1.0 - smoothstep(1.0 - max(cirrus_streak_head_taper, 1e-3), 1.0, segment_progress);
 	float width_profile = tail_shape * sqrt(head_shape);
+	float lanes_per_progress = max(segment_length * cirrus_streak_length / lane_spacing, 1e-3);
+
+	vec3 tone_random = _unpack_random(_hash_uint(segment_hash ^ 668265263u));
+
+	// leans the streak around its middle, sampling a shared field at that middle so nearby streaks fan out together
+	float lean_slope = 0.0;
+	if (cirrus_streak_direction_variation > 0.0) {
+		vec2 streak_middle = vec2(lane_id * lane_spacing, (segment_index - lane_phase + segment_start + segment_length * 0.5) * cirrus_streak_length);
+		float shared_lean = clamp((_cirrus_value_noise(streak_middle / max(cirrus_streak_length * 1.5, 1e-3), 3u) - 0.5) * 2.5, -1.0, 1.0);
+		float lean_amount = mix(tone_random.y * 2.0 - 1.0, shared_lean, cirrus_streak_direction_coherence);
+		lean_slope = tan(radians(lean_amount * cirrus_streak_direction_variation));
+	}
+	float lean_offset = lean_slope * (segment_progress - 0.5) * lanes_per_progress;
+
+	// skips the remaining shape work when this streak, even at its widest and most kinked, cannot reach this pixel
+	float max_side_offset = 0.25 + cirrus_streak_waviness + 1.4 * cirrus_streak_jaggedness * lanes_per_progress / max(cirrus_streak_kink_count * 0.6, 1.0);
+	float max_center_slope = cirrus_streak_waviness * 2.0 * TAU / lanes_per_progress + 5.76 * cirrus_streak_jaggedness + abs(lean_slope);
+	float max_half_width = 0.5 * cirrus_streak_width * (1.0 + 0.6 * cirrus_streak_width_variation) * width_profile;
+	if (abs(across_in_lane - 0.5 - lean_offset) > max_side_offset + (max_half_width + lane_pixel) * sqrt(1.0 + max_center_slope * max_center_slope)) {
+		return 0.0;
+	}
+
+	vec3 shape_random = _unpack_random(_hash_uint(segment_hash ^ 2246822519u));
+	vec3 wave_random = _unpack_random(_hash_uint(segment_hash ^ 3266489917u));
 	float width_scale = mix(1.0, mix(0.15, 1.6, pow(shape_random.x, 1.5)), cirrus_streak_width_variation);
 	float half_width = 0.5 * cirrus_streak_width * width_scale * width_profile;
 
 	float wave_amplitude = cirrus_streak_waviness * mix(0.2, 1.0, wave_random.x);
 	float wave_cycles = mix(0.5, 2.0, wave_random.y);
-	float wave_offset = wave_amplitude * sin((segment_progress * wave_cycles + wave_random.z) * 6.2831853);
-	// leans the streak around its middle, sampling a shared field at that middle so nearby streaks fan out together
-	vec2 streak_middle = vec2(lane_id * lane_spacing, (segment_index - lane_phase + segment_start + segment_length * 0.5) * cirrus_streak_length);
-	float shared_lean = clamp((_cirrus_value_noise(streak_middle / max(cirrus_streak_length * 1.5, 1e-3), 3u) - 0.5) * 2.5, -1.0, 1.0);
-	float lean_amount = mix(tone_random.y * 2.0 - 1.0, shared_lean, cirrus_streak_direction_coherence);
-	float lean_slope = tan(radians(lean_amount * cirrus_streak_direction_variation));
-	float lean_offset = lean_slope * (segment_progress - 0.5) * segment_length * cirrus_streak_length / lane_spacing;
-	float streak_center = mix(0.25, 0.75, shape_random.y) + wave_offset + lean_offset;
+	float wave_phase = (segment_progress * wave_cycles + wave_random.z) * TAU;
+	float wave_offset = wave_amplitude * sin(wave_phase);
+	float wave_rate = wave_amplitude * cos(wave_phase) * wave_cycles * TAU;
 
-	float across_dist = abs(across_in_lane - streak_center);
+	// lightning-like kinks, a coarse zigzag with a finer one on top
+	float kink_offset = 0.0;
+	float kink_rate = 0.0;
+	if (cirrus_streak_jaggedness > 0.0) {
+		vec3 kink_random = _unpack_random(_hash_uint(segment_hash ^ 2654435769u));
+		float kink_count = max(cirrus_streak_kink_count * mix(0.6, 1.4, kink_random.x), 1.0);
+		float kink_amplitude = cirrus_streak_jaggedness * mix(0.3, 1.0, kink_random.y) * lanes_per_progress / kink_count;
+		uint kink_seed = segment_hash ^ 1640531527u;
+		vec2 coarse_kinks = _cirrus_kink_path(segment_progress * kink_count, kink_seed);
+		vec2 fine_kinks = _cirrus_kink_path(segment_progress * kink_count * 2.3, kink_seed ^ 2891336453u);
+		kink_offset = (coarse_kinks.x + 0.4 * fine_kinks.x) * kink_amplitude;
+		kink_rate = (coarse_kinks.y + 0.4 * 2.3 * fine_kinks.y) * kink_count * kink_amplitude;
+	}
+
+	float streak_center = mix(0.25, 0.75, shape_random.y) + wave_offset + lean_offset + kink_offset;
+
+	// measures width perpendicular to the streak so steep cracks keep their thickness
+	float center_slope = (wave_rate + kink_rate) / lanes_per_progress + lean_slope;
+	float across_dist = abs(across_in_lane - streak_center) * inversesqrt(1.0 + center_slope * center_slope);
 	float across_mask = 1.0 - smoothstep(half_width * (1.0 - cirrus_streak_softness) - lane_pixel, half_width + lane_pixel, across_dist);
 	float knot_noise = _cirrus_value_noise_1d(segment_progress * mix(3.0, 8.0, shape_random.z) * segment_length, segment_hash);
 	float brightness = mix(0.6, 1.0, tone_random.x) * mix(1.0, mix(0.35, 1.0, knot_noise), cirrus_streak_breakup);
 	return across_mask * sqrt(width_profile) * presence * brightness;
 }
 
-// checks neighbouring lanes too so wide, bent or leaning streaks can cross their lane edge without clipping
+// checks neighbouring lanes too so wide, bent, leaning or kinked streaks can cross their lane edge without clipping
 float _cirrus_streak_layer(vec2 streak_pos, vec2 travel_dir, float lane_spacing, float layer_coverage, uint layer_seed) {
 	vec2 cross_dir = vec2(-travel_dir.y, travel_dir.x);
 	float along_pos = dot(streak_pos, travel_dir);
 	float lane_coord = dot(streak_pos, cross_dir) / lane_spacing;
 	float lane_pixel = fwidth(lane_coord);
+	// fades lanes that shrink below a pixel near the horizon instead of letting them shimmer
+	float horizon_fade = 1.0 - smoothstep(0.3, 0.8, lane_pixel);
+	if (horizon_fade <= 0.0) {
+		return 0.0;
+	}
 	float lane_id = floor(lane_coord);
 	float lane_frac = lane_coord - lane_id;
-	float max_lean_lanes = tan(radians(cirrus_streak_direction_variation)) * 0.45 * cirrus_streak_length / lane_spacing;
-	int lane_reach = 1 + min(int(ceil(max_lean_lanes)), 3);
+	float longest_streak_lanes = 0.9 * cirrus_streak_length / lane_spacing;
+	float max_extra_lanes = tan(radians(cirrus_streak_direction_variation)) * 0.5 * longest_streak_lanes + cirrus_streak_jaggedness * 1.4 * longest_streak_lanes / max(cirrus_streak_kink_count * 0.6, 1.0);
+	int lane_reach = 1 + min(int(ceil(max_extra_lanes)), CIRRUS_MAX_EXTRA_LANES);
 	float layer_density = 0.0;
 	for (int lane_step = -lane_reach; lane_step <= lane_reach; lane_step++) {
 		float lane_density = _cirrus_lane_streak(lane_id + float(lane_step), lane_frac - float(lane_step), along_pos, lane_spacing, layer_coverage, layer_seed, lane_pixel);
 		layer_density = max(layer_density, lane_density);
 	}
-	// fades lanes that shrink below a pixel near the horizon instead of letting them shimmer
-	return layer_density * (1.0 - smoothstep(0.3, 0.8, lane_pixel));
+	return layer_density * horizon_fade;
 }
 
 vec4 _render_cirrus_clouds(vec3 view_dir) {
 	vec2 sky_coords = view_dir.xz / view_dir.y * cirrus_size;
-	vec2 streak_pos = sky_coords * ((cirrus_uv.x + cirrus_uv.y) * 0.5) - cirrus_position1;
+	vec2 streak_pos = sky_coords * CIRRUS_PATTERN_SCALE - cirrus_position;
 	vec2 travel_dir = cloud_direction / max(length(cloud_direction), 1e-4);
-	float coverage_noise = _cirrus_value_noise(streak_pos * 1.5, 0u) * 0.65 + _cirrus_value_noise(streak_pos * 3.7, 1u) * 0.35 - 0.5;
+	float coverage_noise = 0.0;
+	if (cirrus_coverage_variation > 0.0) {
+		coverage_noise = _cirrus_value_noise(streak_pos * 1.5, 0u) * 0.65 + _cirrus_value_noise(streak_pos * 3.7, 1u) * 0.35 - 0.5;
+	}
 	float local_coverage = clamp_to_unit(cirrus_coverage + coverage_noise * cirrus_coverage_variation);
 
 	float main_streaks = _cirrus_streak_layer(streak_pos, travel_dir, cirrus_streak_spacing, local_coverage, 0u);
@@ -428,6 +500,7 @@ void _trace_cumulus_cloud(ivec2 cell_id, vec3 view_dir, vec3 wind_axis, vec2 win
 	vec2 wind_flat = wind_axis.xz;
 	vec2 golden_step = vec2(cos(2.39996), sin(2.39996));
 	vec2 puff_heading = vec2(cos(cloud_random.y * TAU), sin(cloud_random.y * TAU));
+	float puff_size_spread = 0.15 + 0.35 * cumulus_shape_variation;
 	for (int puff_index = 0; puff_index < CUMULUS_PUFF_COUNT; puff_index++) {
 		if (puff_index >= active_puffs) {
 			break;
@@ -447,7 +520,6 @@ void _trace_cumulus_cloud(ivec2 cell_id, vec3 view_dir, vec3 wind_axis, vec2 win
 		puff_offset += aspect_axis * (dot(puff_offset, aspect_axis) * (aspect_stretch - 1.0));
 		// slowly drifts and swells each puff so the cloud keeps reshaping
 		puff_offset += vec2(sin(wobble_time + puff_random.x * TAU), sin(wobble_time * 0.83 + puff_random.y * TAU)) * puff_spread * 0.25 * cumulus_deform_amount;
-		float puff_size_spread = 0.15 + 0.35 * cumulus_shape_variation;
 		float puff_radius = core_radius * mix(1.0, mix(0.55, 0.8, local_roundness), ring_fraction) * mix(1.0 - puff_size_spread, 1.0 + puff_size_spread, puff_random.y);
 		puff_radius *= 1.0 + 0.15 * cumulus_deform_amount * sin(wobble_time * 1.27 + puff_random.z * TAU);
 		// makes one side of the cloud heavier so its mass is lopsided rather than centred
@@ -493,7 +565,7 @@ void _trace_cumulus_layer(vec3 view_dir, vec3 wind_axis, vec2 wind_shift, float 
 	}
 }
 
-vec4 _render_cumulus_clouds(vec3 view_dir, vec3 sun_dir, vec3 scatter, vec3 cloud_tint) {
+vec4 _render_cumulus_clouds(vec3 view_dir, vec3 sun_dir, vec3 scatter, vec3 cloud_tint, bool skip_small_clouds) {
 	float cloud_scale = max(cumulus_size, 0.05);
 	vec2 travel_dir = cloud_direction / max(length(cloud_direction), 1e-4);
 	vec3 wind_axis = vec3(travel_dir.x, 0.0, travel_dir.y);
@@ -501,9 +573,11 @@ vec4 _render_cumulus_clouds(vec3 view_dir, vec3 sun_dir, vec3 scatter, vec3 clou
 	vec2 wind_shift = -cumulus_position * CUMULUS_WIND_SCALE;
 
 	float cloud_field = -1e3;
-	_trace_cumulus_layer(view_dir, wind_axis, wind_shift, cloud_scale, 0u, cumulus_coverage, cloud_field);
+	if (cumulus_coverage > 0.0) {
+		_trace_cumulus_layer(view_dir, wind_axis, wind_shift, cloud_scale, 0u, cumulus_coverage, cloud_field);
+	}
 	float smallest_scale = cloud_scale;
-	if (cumulus_small_cloud_coverage > 0.0) {
+	if (cumulus_small_cloud_coverage > 0.0 && !skip_small_clouds) {
 		smallest_scale = cloud_scale * cumulus_small_cloud_scale;
 		_trace_cumulus_layer(view_dir, wind_axis, -cumulus_small_cloud_position * CUMULUS_WIND_SCALE, smallest_scale, 2654435761u, cumulus_small_cloud_coverage, cloud_field);
 	}
@@ -536,7 +610,7 @@ vec4 _render_cumulus_clouds(vec3 view_dir, vec3 sun_dir, vec3 scatter, vec3 clou
 // Sky
 //------------------------------------------------------------------------------
 
-vec3 _render_sky(vec3 view_dir, vec3 sun_dir, vec3 moon_dir, out float cloud_coverage) {
+vec3 _render_sky(vec3 view_dir, vec3 sun_dir, vec3 moon_dir, bool is_cubemap_pass, out float cloud_coverage) {
 	cloud_coverage = 0.0;
 	vec4 angle_mult = vec4(
 		clamp_to_unit(1.0 - sun_dir.y),
@@ -581,7 +655,8 @@ vec3 _render_sky(vec3 view_dir, vec3 sun_dir, vec3 moon_dir, out float cloud_cov
 
 	vec3 cloud_tint = mix(sun_light_color.rgb, clouds_night_color.rgb, angle_mult.w);
 	if (horizon_blend > 0.0) {
-		if (cirrus_visible) {
+		// the cubemap pass only feeds lighting and reflections, where thin streaks and small clouds are not worth their cost
+		if (cirrus_visible && !is_cubemap_pass) {
 			vec4 cirrus_clouds = _render_cirrus_clouds(view_dir);
 			float cirrus_alpha = clamp_to_unit(cirrus_clouds.a) * horizon_blend;
 			vec3 cirrus_color = cirrus_clouds.rgb * cloud_tint * cirrus_intensity + scatter * cirrus_sky_tint_fade;
@@ -589,7 +664,7 @@ vec3 _render_sky(vec3 view_dir, vec3 sun_dir, vec3 moon_dir, out float cloud_cov
 			cloud_coverage = cirrus_alpha;
 		}
 		if (cumulus_visible) {
-			vec4 cumulus_clouds = _render_cumulus_clouds(view_dir, sun_dir, scatter, cloud_tint);
+			vec4 cumulus_clouds = _render_cumulus_clouds(view_dir, sun_dir, scatter, cloud_tint, is_cubemap_pass);
 			float cumulus_alpha = cumulus_clouds.a * horizon_blend;
 			vec3 cumulus_color = cumulus_clouds.rgb + scatter * cumulus_sky_tint_fade;
 			sky_color = mix(sky_color, cumulus_color, cumulus_alpha);
@@ -666,7 +741,7 @@ void sky() {
 	vec3 sky_color = vec3(0.0);
 	if (sky_visible) {
 		float cloud_coverage;
-		sky_color = _render_sky(EYEDIR, LIGHT0_DIRECTION, LIGHT1_DIRECTION, cloud_coverage);
+		sky_color = _render_sky(EYEDIR, LIGHT0_DIRECTION, LIGHT1_DIRECTION, AT_CUBEMAP_PASS, cloud_coverage);
 		float dither_offset = (_interleaved_gradient_noise(FRAGCOORD.xy) - 0.5) / (DITHER_LEVELS - 1.0);
 		vec3 dithered_color = sky_color + dither_offset + _sky_grain(FRAGCOORD.xy) * SKY_GRAIN_STRENGTH;
 		// skips dither and grain where clouds cover the sky
