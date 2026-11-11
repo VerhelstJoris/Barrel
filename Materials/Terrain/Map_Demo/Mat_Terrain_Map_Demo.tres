@@ -5,6 +5,7 @@
 [ext_resource type="Shader" uid="uid://bk1p1ovaljm1h" path="res://Materials/Shaders/Environment/Foliage/Terrain_Foliage.gdshader" id="2_t6xj2"]
 [ext_resource type="Texture2D" uid="uid://55dvmk1vwoti" path="res://Data/Foliage/T_MapDemoMask.res" id="3_056u0"]
 [ext_resource type="Texture2D" uid="uid://j5bc8oc0vshu" path="res://Data/Foliage/Foliage_Wind_noise.res" id="3_gjusm"]
+[ext_resource type="Texture2D" uid="uid://djpfuyxkryegn" path="res://addons/sky_3d/assets/textures/noise.jpg" id="5_nw00e"]
 
 [sub_resource type="Gradient" id="Gradient_t6xj2"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -54,7 +55,7 @@ _shader_parameters = {
 &"foliage_blade_detail_falloff": 2.0,
 &"foliage_blade_noise": ExtResource("2_gjusm"),
 &"foliage_blade_noise_scale": 0.3,
-&"foliage_blade_normal_strength": 0.3,
+&"foliage_blade_normal_strength": 0.4,
 &"foliage_clump_max_distance": 2048.0,
 &"foliage_clump_min_distance": 20.0,
 &"foliage_color_large": Color(0.9, 0.64500004, 0, 1),
@@ -66,7 +67,7 @@ _shader_parameters = {
 &"foliage_gust_normal_tilt": 0.35,
 &"foliage_gust_warp_m": 1.5,
 &"foliage_normal_flatten_far": 1.0,
-&"foliage_normal_noise": null,
+&"foliage_normal_noise": ExtResource("5_nw00e"),
 &"foliage_normal_noise_scale": 0.15,
 &"foliage_normal_variance": null,
 &"foliage_normal_variance_strength": 0.5,
